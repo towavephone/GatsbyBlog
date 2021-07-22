@@ -59,7 +59,9 @@ touch-action: manipulation;
 其中：
 
 - auto 是默认值，表示手势操作什么的完全由浏览器自己决定（如`<meta>`元素的 viewport 设置）。
+
 - manipulation 表示浏览器只允许进行滚动和持续缩放操作，类似双击缩放这种非标准操作就不可以。想当初，click 事件在移动端有个 300ms 延时，就是因为避免和手机双击行为发生冲突。然而，当我们设置了 touch-action:manipulation 干掉了双击行为，则显然，300ms 延时就不复存在，因此，下面的 CSS 声明可以用来避免浏览器 300ms 延时问题。
+
   ```css
   html {
     touch-action: manipulation;
