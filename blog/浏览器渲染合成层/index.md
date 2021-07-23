@@ -17,7 +17,7 @@ path: /browser-render-composite-layers/
 - 服务器响应
 - 客户端渲染
 
-这里主要将客户端渲染展开梳理一下，从浏览器器内核拿到内容（渲染线程接收请求，加载网页并渲染网页），渲染大概可以划分成以下几个步骤：
+这里主要将客户端渲染展开梳理一下，从浏览器内核拿到内容（渲染线程接收请求，加载网页并渲染网页），渲染大概可以划分成以下几个步骤：
 
 - 解析 html 建立 dom 树
 - 解析 css 构建 render 树（将 CSS 代码解析成树形的数据结构，然后结合 DOM 合并成 render 树）
@@ -36,7 +36,7 @@ path: /browser-render-composite-layers/
 - Render Tree: DOM 和 CSSOM 合并后生成 Render Tree。
 - layout: 有了 Render Tree，浏览器已经能知道网页中有哪些节点、各个节点的 CSS 定义以及他们的从属关系，从而去计算出每个节点在屏幕中的位置。
 - painting: 按照算出来的规则，通过显卡，把内容画到屏幕上。
-- reflow（回流）：当浏览器发现某个部分发生了点变化影响了布局，需要倒回去重新渲染，内行称这个回退的过程叫 reflow。reflow 会从 `<html>` 这个 root frame 开始递归往下，依次计算所有的结点几何尺寸和位置。reflow 几乎是无法避免的。现在界面上流行的一些效果，比如树状目录的折叠、展开（实质上是元素的显 示与隐藏）等，都将引起浏览器的 reflow。鼠标滑过、点击……只要这些行为引起了页面上某些元素的占位面积、定位方式、边距等属性的变化，都会引起它内部、周围甚至整个页面的重新渲 染。通常我们都无法预估浏览器到底会 reflow 哪一部分的代码，它们都彼此相互影响着。
+- reflow（回流）：当浏览器发现某个部分发生了点变化影响了布局，需要倒回去重新渲染，内行称这个回退的过程叫 reflow。reflow 会从 `<html>` 这个 root frame 开始递归往下，依次计算所有的结点几何尺寸和位置。reflow 几乎是无法避免的。现在界面上流行的一些效果，比如树状目录的折叠、展开（实质上是元素的显示与隐藏）等，都将引起浏览器的 reflow。鼠标滑过、点击……只要这些行为引起了页面上某些元素的占位面积、定位方式、边距等属性的变化，都会引起它内部、周围甚至整个页面的重新渲 染。通常我们都无法预估浏览器到底会 reflow 哪一部分的代码，它们都彼此相互影响着。
 - repaint（重绘）：改变某个元素的背景色、文字颜色、边框颜色等等不影响它周围或内部布局的属性时，屏幕的一部分要重画，但是元素的几何尺寸没有变。
 
 注意：
@@ -74,7 +74,7 @@ path: /browser-render-composite-layers/
 - RenderLayers 渲染层，这是负责对应 DOM 子树
 - GraphicsLayers 图形层，这是负责对应 RenderLayers 子树。
 
-在浏览器渲染流程中提到了 composite 概念，在 DOM 树中每个节点都会对应一个 LayoutObject，当他们的 LayoutObject 处于相同的坐标空间时，就会形成一个 RenderLayers ，也就是渲染层。RenderLayers 来保证页面元素以正确的顺序合成，这时候就会出现层合成（composite），从而正确处理透明元素和重叠元素的显示。
+在浏览器渲染流程中提到了 composite 概念，在 DOM 树中每个节点都会对应一个 LayoutObject，当他们的 LayoutObject 处于相同的坐标空间时，就会形成一个 RenderLayers，也就是渲染层。RenderLayers 来保证页面元素以正确的顺序合成，这时候就会出现层合成（composite），从而正确处理透明元素和重叠元素的显示。
 
 某些特殊的渲染层会被认为是合成层（Compositing Layers），合成层拥有单独的 GraphicsLayer，而其他不是合成层的渲染层，则和其第一个拥有 GraphicsLayer 父层公用一个。
 
@@ -85,8 +85,8 @@ path: /browser-render-composite-layers/
 什么情况下能使元素获得自己的层？虽然 Chrome 的启发式方法(heuristic)随着时间在不断发展进步，但是从目前来说，满足以下任意情况便会创建层：
 
 - 3D 或透视变换(perspective transform) CSS 属性
-- 使用加速视频解码的 `<video>` 元素 拥有 3D
-- (WebGL) 上下文或加速的 2D 上下文的 `<canvas>` 元素
+- 使用加速视频解码的 `<video>` 元素
+- 拥有 3D(WebGL) 上下文或加速的 2D 上下文的 `<canvas>` 元素
 - 混合插件(如 Flash)
 - 对自己的 opacity 做 CSS 动画或使用一个动画变换的元素
 - 拥有加速 CSS 过滤器的元素
@@ -95,7 +95,7 @@ path: /browser-render-composite-layers/
 
 # 合成层的优点
 
-一旦 renderLayer 提升为了合成层就会有自己的绘图上下文，并且会开启硬件加速，有利于性能提升,里面列举了一些特点
+一旦 renderLayer 提升为了合成层就会有自己的绘图上下文，并且会开启硬件加速，有利于性能提升，里面列举了一些特点
 
 - 合成层的位图，会交由 GPU 合成，比 CPU 处理要快
 - 当需要 repaint 时，只需要 repaint 本身，不会影响到其他的层
@@ -105,7 +105,7 @@ path: /browser-render-composite-layers/
 
 1. 提升到合成层后合成层的位图会交 GPU 处理，但请注意，仅仅只是合成的处理（把绘图上下文的位图输出进行组合）需要用到 GPU，生成合成层的位图处理（绘图上下文的工作）是需要 CPU。
 2. 当需要 repaint 的时候可以只 repaint 本身，不影响其他层，但是 paint 之前还有 style， layout,那就意味着即使合成层只是 repaint 了自己，但 style 和 layout 本身就很占用时间。
-3. 仅仅是 transform 和 opacity 不会引发 layout 和 paint，那么其他的属性不确定。
+3. 仅仅是 transform 和 opacity 不会引发 layout 和 paint，其他的属性不确定。
 
 总结合成层的优势：一般一个元素开启硬件加速后会变成合成层，可以独立于普通文档流中，改动后可以避免整个页面重绘，提升性能。
 
