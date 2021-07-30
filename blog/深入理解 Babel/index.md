@@ -832,7 +832,7 @@ nosenseApple(" is Good") // Apple is Good
 
 首先，Sweet.js 使用 syntax 关键字来定义一个宏，其语法类似于 const 或者 let。
 
-本质上一个宏就是一个函数, 只不过在编译阶段被执行. 这个函数接收一个 TransformerContext 对象，你也通过这个对象获取宏应用传入的语法对象(Syntax Object)数组，最终这个宏也要返回语法对象数组。
+本质上一个宏就是一个函数，只不过在编译阶段被执行。这个函数接收一个 TransformerContext 对象，你也通过这个对象获取宏应用传入的语法对象（Syntax Object）数组，最终这个宏也要返回语法对象数组。
 
 什么是语法对象？语法对象是 Sweet.js 关于语法的内部表示，你可以类比上文 Lisp 的 quoted 数据。在复杂语法的语言中，没办法使用 quoted 这么简单的序列来表示语法，而使用 AST 则更复杂，开发者更难以驾驭。所以大部分宏实现会参考 Lisp 的 S-表达式，取折中方案，将传入的程序转换为 Tokens，再组装成类似 quoted 的数据结构。
 
@@ -852,13 +852,13 @@ TransformerContext 实现了迭代器方法，所以我们通过调用它的 `ne
 
 ```js
 macro define {
-    rule { $x } => {
-        var $x
-    }
+  rule { $x } => {
+    var $x
+  }
 
-    rule { $x = $expr } => {
-        var $x = $expr
-    }
+  rule { $x = $expr } => {
+    var $x = $expr
+  }
 }
 
 define y;
@@ -938,7 +938,7 @@ class Droid {
 }
 ```
 
-相对 Babel(编译器)来说，Sweet.js 的宏是模块化/显式的。Babel 你需要在配置文件中配置各种插件和选项，尤其是团队项目构建有统一规范和环境时，项目构建脚本修改可能有限制。而模块化的宏是源代码的一部分，而不是构建脚本的一部分，这使得它们可以被灵活地使用、重构以及废弃。
+相对 Babel（编译器）来说，Sweet.js 的宏是模块化/显式的。Babel 需要在配置文件中配置各种插件和选项，尤其是团队项目构建有统一规范和环境时，项目构建脚本修改可能有限制。而模块化的宏是源代码的一部分，而不是构建脚本的一部分，这使得它们可以被灵活地使用、重构以及废弃。
 
 下文介绍的 babel-plugin-macros 最大的优势就在这里，通常我们希望构建环境是统一的、稳定的、开发人员应该专注于代码的开发，而不是如何去构建程序，正是因为代码多变性，才催生出了这些方案。
 
@@ -956,11 +956,11 @@ syntax m = ctx => {
 
 Sweet.js 和其他语言的宏一样，有了它你可以:
 
-- 新增语法糖(和 Sweet.js 一样甜)，实现复合自己口味的语法或者某些实验性的语言特性
+- 新增语法糖(和 Sweet.js 一样甜)，实现自己的语法或者某些实验性的语言特性
 - 自定义[操作符](https://www.sweetjs.org/doc/tutorial#sweet-operators)，很强大
 - 消灭重复的代码，提升语言的表达能力。
 
-很遗憾！Sweet.js 基本死了。所以现在当个玩具玩玩尚可，切勿用于生产环境。即使没有死，Sweet.js 这种非标准的语法, 和现有的 Javascript 工具链生态格格不入，开发和调试都会比较麻烦(比如 Typescript)
+很遗憾！Sweet.js 基本死了。所以现在当个玩具玩玩尚可，切勿用于生产环境。即使没有死，Sweet.js 这种非标准的语法，和现有的 Javascript 工具链生态格格不入，开发和调试都会比较麻烦(比如 Typescript)
 
 归根到底，Sweet.js 的失败，是社区抛弃了它。Javascript 语言表达能力越来越强，版本迭代快速，加上有了 Babel 和 Typescript 这些解决方案，实在拿不出什么理由来使用 Sweet.js
 
@@ -968,7 +968,7 @@ Sweet.js 和其他语言的宏一样，有了它你可以:
 
 这一节扯得有点多，将宏的历史和分类讲了个遍。最后的总结是 Elixir 官方教程里面的一句话：显式好于隐式，清晰的代码优于简洁的代码(Clear code is better than concise code)
 
-能力越大、责任越大。宏强大，比正常程序要更难以驾驭，你可能需要一定的成本去学习和理解它，所以能不用宏就不用宏，宏是应该最后的法宝
+能力越大、责任越大。宏强大，比正常程序要更难以驾驭，你可能需要一定的成本去学习和理解它，所以能不用宏就不用宏，宏应该是最后的法宝
 
 # 既生 Plugin 何生 Macro
 
@@ -976,7 +976,7 @@ Sweet.js 和其他语言的宏一样，有了它你可以:
 
 > 如果你尚不了解 Babel Macro，可以先读一下官方文档，另外 Creact-React-APP 已经内置
 
-这个得从 Create-React-App(CRA) 说起，CRA 将所有的项目构建逻辑都封装在 react-scripts 服务中。这样的好处是，开发者不需要再关心构建的细节，另外构建工具的升级也变得非常方便，直接升级 react-scripts 即可。
+这个得从 Create-React-App（CRA） 说起，CRA 将所有的项目构建逻辑都封装在 react-scripts 服务中。这样的好处是，开发者不需要再关心构建的细节，另外构建工具的升级也变得非常方便，直接升级 react-scripts 即可。
 
 如果自己维护构建脚本的话，升一次级你需要升级一大堆的依赖，如果你要维护跨项目的构建脚本，那就更蛋疼了。
 
@@ -992,7 +992,7 @@ Babel 在现代的前端开发中扮演着一个很重要的角色，越来越�
 - babel-plugin-import：实现按需导入
 - babel-react-optimize：静态分析 React 代码，利用一定的措施优化运行效率。比如将静态的 props 或组件抽离为常量
 - root-import：将基于根目录的导入路径重写为相对路径
-- styled-components：典型的 CSS-in-js 方案，利用 Babel 插件来支持服务端渲染、预编译模板、样式压缩、清除死代码、提升调试体验。
+- styled-components：典型的 CSS-in-js 方案，利用 Babel 插件来支持服务端渲染、预编译模板、样式压缩、清除死代码、提升调试体验
 - preval：在编译时预执行代码
 - babel-plugin-graphql-tag：预编译 GraphQL 查询
 
@@ -1032,10 +1032,10 @@ const greeting = preval`
 
 这两者达到的效果是一样的，但意义却不太一样。有哪些区别？
 
-1. 很显然，Macro 不需要配置 `.babelrc`(当然 babel-plugin-macros 这个基座需要装好)，这个对于 CRA 这种不推荐配置构建脚本的工具来说很有帮助
+1. 很显然，Macro 不需要配置 `.babelrc`（当然 babel-plugin-macros 这个基座需要装好），这个对于 CRA 这种不推荐配置构建脚本的工具来说很有帮助
 2. 由隐式转换为了显式。上一节就说了显式好于隐式。你必须在源代码中通过导入语句声明你使用了 Macro；而基于插件的方式，你可能不知道 preval 这个标识符哪里来的? 如何被应用？何时被应用？而且通常你还需要和其他工具链的配合，例如 ESlint、Typescript 声明等
 
-   Macro 由代码显式地应用，我们更明确它被应用的目的和时机，对源代码的侵入性最小。因为中间多了 `babel-plugin-macro` 这一层，我们降低了对构建环境的耦合，让我们的代码更方便被迁移。
+   Macro 由代码显式地引用，我们更明确它被应用的目的和时机，对源代码的侵入性最小。因为中间多了 `babel-plugin-macro` 这一层，我们降低了对构建环境的耦合，让我们的代码更方便被迁移
 
 3. Macro 相比 Plugin 更容易被实现。因为它专注于具体的 AST 节点，见下文
 4. 另外，当配置出错时，Macro 可以得到更好的错误提示
@@ -1045,7 +1045,7 @@ const greeting = preval`
 那么 Babel Macro 也是宏？相对于 Sweet.js 这些正统的宏机制有哪些不足？
 
 - 首先 Babel Macro 必须是合法的 Javascript 语法。不支持自定义语法，也要分两面讨论，合法的 Javascript 语法不至于打破现有的工具协作链，如果允许用户毫无限制地创建新的语法，将来指不定会和标准的语法发生歧义。反过来不能自定义语法的宏，是否显得不太地道，不够强大?
-- 因为必须是合法的 Javascript 语法，Babel Macro 实现 DSL(Domain-specific languages)能力就弱化了
+- 因为必须是合法的 Javascript 语法，Babel Macro 实现 DSL（Domain-specific languages）能力就弱化了
 - 再者，Babel Macro 和 Babel Plugin 没有本质的区别，相比 Sweet.js 提供了显式定义和应用宏的语法，Babel Macro 直接操作 AST 则要复杂得多，你还是需要了解一些编译原理，这把一般的开发者挡在了门外。
 
 > Babel 可以实现自定义语法，只不过你需要 Fork `@babel/parser`，对它进行改造(可以看这篇文章[用 Babel 创造自定义 JS 语法](https://juejin.im/post/5d9be731f265da5bbc3e879b))。这个有点折腾，不太推荐
@@ -1058,7 +1058,7 @@ const greeting = preval`
 
 # 如何写一个 Babel Macro
 
-所以，Babel Macro 是如何运作的呢？ babel-plugin-macros 要求开发者必须显式地导入 Macro，它会遍历匹配所有导入语句，如果导入源匹配 `/[./]macro(\.js)?$/` 正则，就会认为你在启用 Macro。例如下面这些导入语句都匹配正则：
+所以 Babel Macro 是如何运作的呢？ babel-plugin-macros 要求开发者必须显式地导入 Macro，它会遍历匹配所有导入语句，如果导入源匹配 `/[./]macro(\.js)?$/` 正则，就会认为你在启用 Macro。例如下面这些导入语句都匹配正则：
 
 ```js
 import foo from 'my.macro';
@@ -1079,10 +1079,10 @@ module.exports = createMacro(({ references, state, babel }) => {
 });
 ```
 
-macro 文件必须默认导出一个由 ceateMacro 创建的实例, 在其回调中可以获取到一些关键对象：
+macro 文件必须默认导出一个由 createMacro 创建的实例，在其回调中可以获取到一些关键对象
 
 - babel 和普通的 Babel 插件一样，Macro 可以获取到一个 babel-core 对象
-- state 这个我们也比较熟悉，Babel 插件的 visitor 方法的第二个参数就是它, 我们可以通过它获取一些配置信息以及保存一些自定义状态
+- state 这个我们也比较熟悉，Babel 插件的 visitor 方法的第二个参数就是它，我们可以通过它获取一些配置信息以及保存一些自定义状态
 - references 获取 Macro 导出标识符的所有引用
 
 假设用户这样子使用你的 Macro
@@ -1113,7 +1113,7 @@ bar`by tagged Template`;
 
 ## 实战
 
-这一次我们模范 preval 创建一个 `eval.macro Macro`, 利用它在编译阶段执行(eval)一些代码，例如
+这一次我们模范 preval 创建一个 `eval.macro`, 利用它在编译阶段执行（eval）一些代码，例如
 
 ```js
 import evalm from 'eval.macro';
@@ -1167,11 +1167,11 @@ hello world ${foo} + ${bar + baz}
 `;
 ```
 
-其 AST 结构如下:
+其 AST 结构如下
 
 ![](res/2021-07-29-10-02-19.png)
 
-我们需要将 TaggedTemplateExpression 节点转换为字符串。手动去拼接会很麻烦，好在每个 AST 节点的 Path 对象都有一个 evaluate 方法，这个方法可以对节点进行静态求值：
+我们需要将 TaggedTemplateExpression 节点转换为字符串。手动去拼接会很麻烦，好在每个 AST 节点的 Path 对象都有一个 evaluate 方法，这个方法可以对节点进行静态求值
 
 ```js
 t.evaluate(parse('5 + 5')); // { confident: true, value: 10 }
@@ -1187,7 +1187,7 @@ evalm`1 + ${foo}`; // 包含变量
 evalm`1 + ${bar(1)}`; // 包含函数调
 ```
 
-这个和 Typescript 的 enum， 还有一些编译语言的常量是一样的，它们在编译阶段被求值，只有一些原始值以及一些原始值的表达式才支持在编译阶段被求值
+这个和 Typescript 的 enum，还有一些编译语言的常量是一样的，它们在编译阶段被求值，只有一些原始值以及一些原始值的表达式才支持在编译阶段被求值
 
 So，上面的代码还不够健壮，我们再优化一下，在求值失败时给用户更好的提示:
 
