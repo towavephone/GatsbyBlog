@@ -7,7 +7,7 @@ path: /code-restructure/
 date: 2018-04-04 13:11:28
 ---
 
-# 一、第一个案例
+# 第一个案例
 
 如果你发现自己需要为程序添加一个特性，而代码结构使你无法很方便地达成目的，那就先重构这个程序。
 
@@ -69,7 +69,7 @@ double getTotalCharge() {
 
 ![](2c8a7a87-1bf1-4d66-9ba9-225a1add0a51.png)
 
-# 二、重构原则
+# 重构原则
 
 ## 定义
 
@@ -125,13 +125,13 @@ double getTotalCharge() {
 
 应当只关注关键代码的性能，因为只有一小部分的代码是关键代码。
 
-# 三、代码的坏味道
+# 代码的坏味道
 
 本章主要介绍一些不好的代码，也就是说这些代码应该被重构。
 
 文中提到的具体重构原则可以先忽略。
 
-## 1. 重复代码
+## 重复代码
 
 > Duplicated Code
 
@@ -143,7 +143,7 @@ double getTotalCharge() {
 
 如果两个毫不相关的类出现重复代码，则使用 Extract Class 方法将重复代码提取到一个独立类中。
 
-## 2. 过长函数
+## 过长函数
 
 > Long Method
 
@@ -155,7 +155,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 条件和循环语句往往也需要提取到新的函数中。
 
-## 3. 过大的类
+## 过大的类
 
 > Large Class
 
@@ -163,7 +163,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 先确定客户端如何使用该类，然后运用 Extract Interface 为每一种使用方式提取出一个接口。
 
-## 4. 过长的参数列表
+## 过长的参数列表
 
 > Long Parameter List
 
@@ -171,7 +171,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 面向对象程序中，函数所需要的数据通常内在宿主类中找到。
 
-## 5. 发散式变化
+## 发散式变化
 
 > Divergent Change
 
@@ -179,7 +179,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 针对某种原因的变化，使用 Extract Class 将它提炼到一个类中。
 
-## 6. 散弹式修改
+## 散弹式修改
 
 > Shotgun Surgery
 
@@ -187,7 +187,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 使用 Move Method 和 Move Field 把所有需要修改的代码放到同一个类中。
 
-## 7. 依恋情结
+## 依恋情结
 
 > Feature Envy
 
@@ -195,7 +195,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 使用 Move Method 将它移到该去的地方，如果对多个类都有 Feature Envy，先用 Extract Method 提取出多个函数。
 
-## 8. 数据泥团
+## 数据泥团
 
 > Data Clumps
 
@@ -203,19 +203,19 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 使用 Extract Class 将它们放在一起。
 
-## 9. 基本类型偏执
+## 基本类型偏执
 
 > Primitive Obsession
 
 使用类往往比使用基本类型更好，使用 Replace Data Value with Object 将数据值替换为对象。
 
-## 10. switch 惊悚现身
+## switch 惊悚现身
 
 > Switch Statements
 
 具体参见第一章的案例。
 
-## 11. 平行继承体系
+## 平行继承体系
 
 > Parallel Inheritance Hierarchies
 
@@ -223,19 +223,19 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 这种结果会带来一些重复性，消除重复性的一般策略：让一个继承体系的实例引用另一个继承体系的实例。
 
-## 12. 冗余类
+## 冗余类
 
 > Lazy Class
 
 如果一个类没有做足够多的工作，就应该消失。
 
-## 13. 夸夸其谈未来性
+## 夸夸其谈未来性
 
 > Speculative Generality
 
 有些内容是用来处理未来可能发生的变化，但是往往会造成系统难以理解和维护，并且预测未来可能发生的改变很可能和最开始的设想相反。因此，如果不是必要，就不要这么做。
 
-## 14. 令人迷惑的暂时字段
+## 令人迷惑的暂时字段
 
 > Temporary Field
 
@@ -243,7 +243,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 把这种字段和特定情况的处理操作使用 Extract Class 提炼到一个独立类中。
 
-## 15. 过度耦合的消息链
+## 过度耦合的消息链
 
 > Message Chains
 
@@ -251,19 +251,19 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 改用函数链，用函数委托另一个对象来处理。
 
-## 16. 中间人
+## 中间人
 
 > Middle Man
 
 中间人负责处理委托给它的操作，如果一个类中有过多的函数都委托给其它类，那就是过度运用委托，应当 Remove Middle Man，直接与负责的对象打交道。
 
-## 17. 狎昵关系
+## 狎昵关系
 
 > Inappropriate Intimacy
 
 两个类多于亲密，花费太多时间去探讨彼此的 private 成分。
 
-## 18. 异曲同工的类
+## 异曲同工的类
 
 > Alernative Classes with Different Interfaces
 
@@ -271,13 +271,13 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 使用 Rename Method 根据它们的用途重新命名。
 
-## 19. 不完美的类库
+## 不完美的类库
 
 > Incomplete Library Class
 
 类库的设计者不可能设计出完美的类库，当我们需要对类库进行一些修改时，可以使用以下两种方法：如果只是修改一两个函数，使用 Introduce Foreign Method；如果要添加一大堆额外行为，使用 Introduce Local Extension。
 
-## 20. 幼稚的数据类
+## 幼稚的数据类
 
 > Data Class
 
@@ -285,7 +285,7 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 找出字段使用的地方，然后把相应的操作移到 Data Class 中。
 
-## 21. 被拒绝的馈赠
+## 被拒绝的馈赠
 
 > Refused Bequest
 
@@ -293,13 +293,13 @@ Extract Method 会把很多参数和临时变量都当做参数，可以用 Repl
 
 为子类新建一个兄弟类，不需要的函数或数据使用 Push Down Method 和 Push Down Field 下推给那个兄弟。
 
-## 22. 过多的注释
+## 过多的注释
 
 > Comments
 
 使用 Extract Method 提炼出需要注释的部分，然后用函数名来解释函数的行为。
 
-# 四、构筑测试体系
+# 构筑测试体系
 
 Java 可以使用 Junit 进行单元测试。
 
@@ -311,15 +311,15 @@ Java 可以使用 Junit 进行单元测试。
 
 应当集中测试可能出错的边界条件。
 
-# 五、重新组织函数
+# 重新组织函数
 
-## 1. 提炼函数
+## 提炼函数
 
 > Extract Method
 
 将这段代码放进一个独立函数中，并让函数名称解释该函数的用途。
 
-## 2. 内联函数
+## 内联函数
 
 > Inline Method
 
@@ -327,7 +327,7 @@ Java 可以使用 Junit 进行单元测试。
 
 在函数调用点插入函数本体，然后移除该函数。
 
-## 3. 内联临时变量
+## 内联临时变量
 
 > Inline Temp
 
@@ -344,7 +344,7 @@ return basePrice > 1000;
 return anOrder.basePrice() > 1000;
 ```
 
-## 4. 以查询取代临时变量
+## 以查询取代临时变量
 
 > Replace Temp with Query
 
@@ -370,7 +370,7 @@ double basePrice(){
 }
 ```
 
-## 5. 引起解释变量
+## 引起解释变量
 
 > Introduce Explaining Variable
 
@@ -394,7 +394,7 @@ if(isMacOS && isIEBrower && wasInitialized() && wasResized) {
 }
 ```
 
-## 6. 分解临时变量
+## 分解临时变量
 
 > Split Temporary Variable
 
@@ -402,7 +402,7 @@ if(isMacOS && isIEBrower && wasInitialized() && wasResized) {
 
 针对每次赋值，创造一个独立、对应的临时变量，每个临时变量只承担一个责任。
 
-## 7. 移除对参数的赋值
+## 移除对参数的赋值
 
 > Remove Assigments to Parameters
 
@@ -419,7 +419,7 @@ int discount (int inputVal, int quentity, int yearToDate){
     if (inputVal > 50) result -= 2;
 ```
 
-## 8. 以函数对象取代函数
+## 以函数对象取代函数
 
 > Replace Method with Method Object
 
@@ -427,13 +427,13 @@ int discount (int inputVal, int quentity, int yearToDate){
 
 将这个函数放进一个单独对象中，如此一来局部变量就成了对象内的字段。然后可以在同一个对象中将这个大型函数分解为多个小型函数。
 
-## 9. 替换算法
+## 替换算法
 
 > Subsititute Algorithn
 
-# 六、在对象之间搬移特性
+# 在对象之间搬移特性
 
-## 1. 搬移函数
+## 搬移函数
 
 > Move Method
 
@@ -441,13 +441,13 @@ int discount (int inputVal, int quentity, int yearToDate){
 
 将这个函数搬移到另一个类中。
 
-## 2. 搬移字段
+## 搬移字段
 
 > Move Field
 
 类中的某个字段被另一个类更多地用到，这里的用到是指调用取值设值函数，应当把该字段移到另一个类中。
 
-## 3. 提炼类
+## 提炼类
 
 > Extract Class
 
@@ -455,13 +455,13 @@ int discount (int inputVal, int quentity, int yearToDate){
 
 应当建立一个新类，将相关的字段和函数从旧类搬移到新类。
 
-## 4. 将类内联化
+## 将类内联化
 
 > Inline Class
 
 与 Extract Class 相反。
 
-## 5. 隐藏委托关系
+## 隐藏委托关系
 
 > Hide Delegate
 
@@ -499,7 +499,7 @@ public Person getManager(){
 }
 ```
 
-## 6. 移除中间人
+## 移除中间人
 
 > Remove Middle Man
 
@@ -507,7 +507,7 @@ public Person getManager(){
 
 Hide Delegate 有很大好处，但是它的代价是：每当客户要使用受托类的新特性时，就必须在服务器端添加一个简单的委托函数。随着受委托的特性越来越多，服务器类完全变成了一个“中间人”。
 
-## 7. 引入外加函数
+## 引入外加函数
 
 > Introduce Foreign Method
 
@@ -515,33 +515,33 @@ Hide Delegate 有很大好处，但是它的代价是：每当客户要使用受
 
 可以在客户类中建立一个函数，并以第一参数形式传入一个服务类的实例，让客户类组合服务器实例。
 
-## 8. 引入本地扩展
+## 引入本地扩展
 
 > Introduce Local Extension
 
 和 Introduce Foreign Method 目的一样，但是 Introduce Local Extension 通过建立新的类来实现。有两种方式：子类或者包装类，子类就是通过继承实现，包装类就是通过组合实现。
 
-# 七、重新组织数据
+# 重新组织数据
 
-## 1. 自封装字段
+## 自封装字段
 
 > Self Encapsulate Field
 
 为字段建立取值/设值函数，并用这些函数来访问字段。只有当子类想访问超类的一个字段，又想在子类中将对这个字段访问改为一个计算后的值，才使用这种方式，否则直接访问字段的方式简洁明了。
 
-## 2. 以对象取代数据值
+## 以对象取代数据值
 
 > Replace Data Value with Object
 
 在开发初期，往往会用简单的数据项表示简单的情况，但是随着开发的进行，一些简单数据项会具有一些特殊行为。比如一开始会把电话号码存成字符串，但是随后发现电话号码需要“格式化”、“抽取区号”之类的特殊行为。
 
-## 3. 将值对象改成引用对象
+## 将值对象改成引用对象
 
 > Change Value to Reference
 
 将彼此相等的实例替换为同一个对象。这就要用一个工厂来创建这种唯一对象，工厂类中需要保留一份已经创建对象的列表，当要创建一个对象时，先查找这份列表中是否已经存在该对象，如果存在，则返回列表中的这个对象；否则，新建一个对象，添加到列表中，并返回该对象。
 
-## 4. 将引用对象改为值对象
+## 将引用对象改为值对象
 
 > Change Reference to value
 
@@ -549,7 +549,7 @@ Hide Delegate 有很大好处，但是它的代价是：每当客户要使用受
 
 需要为值对象实现 equals() 和 hashCode() 方法
 
-## 5. 以对象取代数组
+## 以对象取代数组
 
 > Replace Array with Object
 
@@ -557,7 +557,7 @@ Hide Delegate 有很大好处，但是它的代价是：每当客户要使用受
 
 以对象替换数组，对于数组中的每个元素，以一个字段来表示，这样方便操作，也更容易理解。
 
-## 6. 赋值被监视数据
+## 赋值被监视数据
 
 > Duplicate Observed Data
 
@@ -565,9 +565,7 @@ Hide Delegate 有很大好处，但是它的代价是：每当客户要使用受
 
 将该数据赋值到一个领域对象中，建立一个 Oberver 模式，用以同步领域对象和 GUI 对象内的重复数据。
 
-![](e024bd7e-fb4e-4239-9451-9a6227f50b00.jpg)
-
-## 7. 将单向关联改为双向关联
+## 将单向关联改为双向关联
 
 > Change Unidirectional Association to Bidirectional
 
@@ -601,7 +599,7 @@ class Curstomer{
 
 注意到，这里让 Curstomer 类来控制关联关系。有以下原则来决定哪个类来控制关联关系：如果某个对象是组成另一个对象的部件，那么由后者负责控制关联关系；如果是一对多关系，则由单一引用那一方来控制关联关系。
 
-## 8. 将双向关联改为单向关联
+## 将双向关联改为单向关联
 
 > Change Bidirectional Association to Unidirectional
 
@@ -609,45 +607,41 @@ class Curstomer{
 
 双向关联维护成本高，并且也不易于理解。大量的双向连接很容易造成“僵尸对象”：某个对象本身已经死亡了，却保留在系统中，因为它的引用还没有全部完全清除。
 
-## 9. 以字面常量取代魔法数
+## 以字面常量取代魔法数
 
 > Replace Magic Number with Symbolic Constant
 
 创建一个常量，根据其意义为它命名，并将字面常量换位这个常量。
 
-## 10. 封装字段
+## 封装字段
 
 > Encapsulate Field
 
 public 字段应当改为 private，并提供相应的访问函数。
 
-## 11. 封装集合
+## 封装集合
 
 > Encapsulate Collection
 
 函数返回集合的一个只读副本，并在这个类中提供添加/移除集合元素的函数。如果函数返回集合自身，会让用户得以修改集合内容而集合拥有者却一无所知。
 
-## 12. 以数据类取代记录
+## 以数据类取代记录
 
 > Replace Record with Data Class
 
-## 13. 以类取代类型码
+## 以类取代类型码
 
 > Replace Type Code with Class
 
 类中有一个数值类型码，但它并不影响类的行为，就用一个新类替换该数值类型码。如果类型码出现在 switch 语句中，需要使用 Replace Conditional with Polymorphism 去掉 switch，首先必须运用 Replace Type Code with Subcalss 或 Replace Type Code with State/Strategy 去掉类型码。
 
-![](27c2e0b3-8f95-453d-bedc-6398a8566ce9.jpg)
-
-## 14. 以子类取代类型码
+## 以子类取代类型码
 
 > Replace Type Code with Subcalsses
 
 有一个不可变的类型码，它会影响类的行为，以子类取代这个类型码。
 
-![](c41d3977-e0e7-4ee4-93e1-d84f1ae3e20e.jpg)
-
-## 15. 以 State/Strategy 取代类型码
+## 以 State/Strategy 取代类型码
 
 > Replace Type Code with State/Strategy
 
@@ -655,19 +649,15 @@ public 字段应当改为 private，并提供相应的访问函数。
 
 和 Replace Type Code with Subcalsses 的区别是 Replace Type Code with State/Strategy 的类型码是动态可变的，前者通过继承的方式来实现，后者通过组合的方式来实现。因为类型码可变，如果通过继承的方式，一旦一个对象的类型码改变，那么就要改变用新的对象来取代旧对象，而客户端难以改变新的对象。但是通过组合的方式，改变引用的状态类是很容易的。
 
-![](81fd1d6f-a3b2-4160-9a0a-1f7cb50ba440.jpg)
-
-## 16. 以字段取代子类
+## 以字段取代子类
 
 > Replace Subclass with Fields
 
 各个子类的唯一差别只在“返回常量数据”的函数上。
 
-![](f2e0cee9-ecdc-4a96-853f-d9f6a1ad6ad1.jpg)
+# 简化条件表达式
 
-# 八、简化条件表达式
-
-## 1. 分解条件表达式
+## 分解条件表达式
 
 > Decompose Conditional
 
@@ -685,7 +675,7 @@ if(notSummer(date))
 else charge = summerCharge(quantity);
 ```
 
-## 2. 合并条件表达式
+## 合并条件表达式
 
 > Consolidate Conditional Expression
 
@@ -696,7 +686,7 @@ else charge = summerCharge(quantity);
 ```java
 double disabilityAmount(){
     if (seniority < 2) return 0;
-    if (monthsDisabled > 12 ) return 0;
+    if (monthsDisabled > 12) return 0;
     if (isPartTime) return 0;
     // ...
 }
@@ -709,7 +699,7 @@ double disabilityAmount(){
 }
 ```
 
-## 3. 合并重复的条件片段
+## 合并重复的条件片段
 
 > Consolidate Duplicate Conditional Fragments
 
@@ -736,7 +726,7 @@ if (isSpecialDeal()) {
 send();
 ```
 
-## 4. 移除控制标记
+## 移除控制标记
 
 > Remove Control Flag
 
@@ -744,7 +734,7 @@ send();
 
 用 break 语 句或 return 语句来取代控制标记。
 
-## 5. 以卫语句取代嵌套条件表达式
+## 以卫语句取代嵌套条件表达式
 
 > Replace Nested Conditional with Guard Clauses
 
@@ -776,7 +766,7 @@ double getPayAmount() {
 };
 ```
 
-## 6. 以多态取代条件表达式
+## 以多态取代条件表达式
 
 > Replace Conditional with Polymorphism
 
@@ -796,9 +786,7 @@ double getSpeed() {
 }
 ```
 
-![](1c8432c8-2552-457f-b117-1da36c697221.jpg)
-
-## 7. 引入 Null 对象
+## 引入 Null 对象
 
 > Introduce Null Object
 
@@ -809,7 +797,7 @@ if (customer == null) plan = BillingPlan.basic();
 else plan = customer.getPlan();
 ```
 
-## 8. 引入断言
+## 引入断言
 
 > Introduce Assertion
 
@@ -829,27 +817,27 @@ double getExpenseLimit() {
 }
 ```
 
-# 九、简化函数调用
+# 简化函数调用
 
-## 1. 函数改名
+## 函数改名
 
 > Rename Method
 
 使函数名能解释函数的用途。
 
-## 2. 添加参数
+## 添加参数
 
 > Add Parameter
 
 使函数不需要通过调用获得某个信息。
 
-## 3. 移除参数
+## 移除参数
 
 > Remove Parameter
 
 与 Add Parameter 相反，改用调用的方式来获得某个信息。
 
-## 4. 将查询函数和修改函数分离
+## 将查询函数和修改函数分离
 
 > Separate Query from Modifier
 
@@ -866,7 +854,7 @@ getTotalOutstanding();
 setReadyForSummaries();
 ```
 
-## 5. 令函数携带参数
+## 令函数携带参数
 
 > Parameterize Method
 
@@ -883,7 +871,7 @@ tenPercentRaise();
 raise(percentage);
 ```
 
-## 6. 以明确函数取代参数
+## 以明确函数取代参数
 
 > Replace Parameter with Explicit Methods
 
@@ -914,7 +902,7 @@ void setWidth(int arg){
 }
 ```
 
-## 7. 保持对象完整
+## 保持对象完整
 
 > Preserve Whole Object
 
@@ -932,7 +920,7 @@ withinPlan = plan.withinRange(low,high);
 withinPlan = plan.withinRange(daysTempRange());
 ```
 
-## 8. 以函数取代参数
+## 以函数取代参数
 
 > Replace Parameter with Methods
 
@@ -951,7 +939,7 @@ int basePrice = _quantity * _itemPrice;
 double finalPrice = discountedPrice (basePrice);
 ```
 
-## 9. 引入参数对象
+## 引入参数对象
 
 > Introduce Parameter Object
 
@@ -959,9 +947,7 @@ double finalPrice = discountedPrice (basePrice);
 
 以一个对象取代这些参数。
 
-![](08738dd0-ae8e-404a-ba78-a6b1b7d225b3.jpg)
-
-## 10. 移除设值函数
+## 移除设值函数
 
 > Remove Setting Method
 
@@ -969,7 +955,7 @@ double finalPrice = discountedPrice (basePrice);
 
 去掉该字段的所有设值函数，并将该字段设为 final。
 
-## 11. 隐藏函数
+## 隐藏函数
 
 > Hide Method
 
@@ -977,7 +963,7 @@ double finalPrice = discountedPrice (basePrice);
 
 将这个函数修改为 private。
 
-## 12. 以工厂函数取代构造函数
+## 以工厂函数取代构造函数
 
 > Replace Constructor with Factory Method
 
@@ -985,7 +971,7 @@ double finalPrice = discountedPrice (basePrice);
 
 将构造函数替换为工厂函数。
 
-## 13. 封装向下转型
+## 封装向下转型
 
 > Encapsulate Downcast
 
@@ -1005,7 +991,7 @@ Reading lastReading(){
 }
 ```
 
-## 14. 以异常取代错误码
+## 以异常取代错误码
 
 > Replace Error Code with Exception
 
@@ -1013,7 +999,7 @@ Reading lastReading(){
 
 改用异常，异常将普通程序和错误处理分开，使代码更容易理解。
 
-## 15. 以测试取代异常
+## 以测试取代异常
 
 > Replace Exception with Test
 
@@ -1037,9 +1023,9 @@ double getValueForPeriod(int periodNumber) {
     return values[periodNumber];
 ```
 
-# 十、处理概括关系
+# 处理概括关系
 
-## 1. 字段上移
+## 字段上移
 
 > Pull Up Field
 
@@ -1047,7 +1033,7 @@ double getValueForPeriod(int periodNumber) {
 
 将该字段移至超类。
 
-## 2. 函数上移
+## 函数上移
 
 > Pull Up Method
 
@@ -1055,7 +1041,7 @@ double getValueForPeriod(int periodNumber) {
 
 将该函数移至超类。
 
-## 3. 构造函数本体上移
+## 构造函数本体上移
 
 > Pull Up Constructor Body
 
@@ -1080,7 +1066,7 @@ public Manager(String name, String id, int grade) {
 }
 ```
 
-## 4. 函数下移
+## 函数下移
 
 > Push Down Method
 
@@ -1088,7 +1074,7 @@ public Manager(String name, String id, int grade) {
 
 将这个函数移到相关的那些子类去。
 
-## 5. 字段下移
+## 字段下移
 
 > Push Down Field
 
@@ -1096,7 +1082,7 @@ public Manager(String name, String id, int grade) {
 
 将这个字段移到需要它的那些子类去。
 
-## 6. 提炼子类
+## 提炼子类
 
 > Extract Subclass
 
@@ -1104,7 +1090,7 @@ public Manager(String name, String id, int grade) {
 
 新建一个子类，将上面所说的那一部分特性移到子类中。
 
-## 7. 提炼超类
+## 提炼超类
 
 > Extract Superclass
 
@@ -1112,7 +1098,7 @@ public Manager(String name, String id, int grade) {
 
 为这两个类建立一个超类，将相同特性移至超类。
 
-## 8. 提炼接口
+## 提炼接口
 
 > Extract Interface
 
@@ -1120,7 +1106,7 @@ public Manager(String name, String id, int grade) {
 
 将相同的子集提炼到一个独立接口中。
 
-## 9. 折叠继承体系
+## 折叠继承体系
 
 > Collapse Hierarchy
 
@@ -1128,7 +1114,7 @@ public Manager(String name, String id, int grade) {
 
 将它们合为一体。
 
-## 10. 塑造模板函数
+## 塑造模板函数
 
 > Form Template Method
 
@@ -1136,7 +1122,7 @@ public Manager(String name, String id, int grade) {
 
 将这些操作分别放进独立函数中，并保持它们都有相同的签名，于是原函数也就变得相同了。然后将原函数上移至超类。(模板方法模式)
 
-## 11. 以委托取代继承
+## 以委托取代继承
 
 > Replace Inheritance with Delegation
 
@@ -1144,7 +1130,7 @@ public Manager(String name, String id, int grade) {
 
 在子类中新建一个字段用以保存超类，调整子类函数，令它改而委托超类，然后去掉两者之间的继承关系。
 
-## 12. 以继承取代委托
+## 以继承取代委托
 
 > Replace Delegation with Inheritance
 
