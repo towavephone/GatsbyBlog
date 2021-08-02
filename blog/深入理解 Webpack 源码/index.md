@@ -1064,7 +1064,7 @@ __webpack_require__.e = function requireEnsure(chunkId, callback) {
     installedChunks[chunkId].push(callback);
   } else {
     // start chunk loading
-    installedChunks[chunkId] = [callback]; //installedChunks[1]为数组，表明currently loading
+    installedChunks[chunkId] = [callback]; //installedChunks[1] 为数组，表明 currently loading
     var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
     script.type = 'text/javascript';
@@ -1093,7 +1093,7 @@ __webpack_require__.e = function requireEnsure(chunkId, callback) {
 
 ```js
 window['webpackJsonp'] = function webpackJsonpCallback(chunkIds, moreModules) {
-  // moreModules为 模块 a 的代码
+  // moreModules 为模块 a 的代码
   // add "moreModules" to the modules object,
   // then flag all "chunkIds" as loaded and fire callback
   var moduleId,
@@ -1103,9 +1103,9 @@ window['webpackJsonp'] = function webpackJsonpCallback(chunkIds, moreModules) {
   for (; i < chunkIds.length; i++) {
     chunkId = chunkIds[i];
     if (installedChunks[chunkId])
-      //installedChunks[0]==0,installedChunks[1] 为数组
-      callbacks.push.apply(callbacks, installedChunks[chunkId]); //callbacks 为模块 main 执行代码，不为数组
-    installedChunks[chunkId] = 0; //installedChunks[1] 不为数组，表明已经加载
+      // installedChunks[0]==0,installedChunks[1] 为数组
+      callbacks.push.apply(callbacks, installedChunks[chunkId]); // callbacks 为模块 main 执行代码，不为数组
+    installedChunks[chunkId] = 0; // installedChunks[1] 不为数组，表明已经加载
   }
   for (moduleId in moreModules) {
     modules[moduleId] = moreModules[moduleId];
@@ -1282,3 +1282,355 @@ let c = require('c');
 1. 尚未支持 require('a' + 'b')这种情况。
 2. 如何实现自动 watch 的功能？
 3. 其 loader 或者插件机制又是怎样的？
+
+# code-splitting
+
+我们今天来看看如何实现 webpack 的代码切割（code-splitting）功能，最后实现的代码版本请参考[这里](https://github.com/towavephone/fake-webpack/tree/d6589263f90752ef8222749208694df654b631e3)。
+
+## 目标
+
+一般说来，code-splitting 有两种含义：
+
+1. 将第三方类库单独打包成 vendor.js ，以提高缓存命中率（这一点我们不作考虑）
+2. 将项目本身的代码分成多个 js 文件，分别进行加载（我们只研究这一点）
+
+换句话说，我们的目标是：将原先集中到一个 output.js 中的代码，切割成若干个 js 文件，然后分别进行加载。也就是说：原先只加载 output.js，现在把代码分割到 3 个文件中，先加载 output.js，然后 output.js 又会自动加载 1.output.js 和 2.output.js。
+
+## 切割点的选择
+
+既然要将一份代码切割成若干份代码，总得有个切割点的标志吧，从哪儿开始切呢？
+
+webpack 使用 require.ensure 作为切割点。
+
+然而，我用 nodeJS 也挺长时间了，怎么不知道还有 require.ensure 这种用法？而事实上 nodeJS 也是不支持的，这个问题我在 CommonJS 的标准中找到了答案：虽然 CommonJS 通俗地讲是一个同步模块加载规范，但是其中是包含异步加载相关内容的。只不过这条内容只停留在 PROPOSAL（建议）阶段，并未最终进入标准，所以 nodeJS 没有实现它也就不奇怪了。只不过 webpack 恰好利用了这个作为代码的切割点。
+
+ok，现在我们已经明白了为什么要选择 require.ensure 作为切割点了。接下来的问题是：如何根据切割点对代码进行切割？ 下面举个例子。
+
+## 例子
+
+```js
+// example.js
+var a = require('a');
+var b = require('b');
+a();
+require.ensure(['c'], function(require) {
+  require('b')();
+  var d = require('d');
+  var c = require('c');
+  c();
+  d();
+});
+
+require.ensure(['e'], function(require) {
+  require('f')();
+});
+```
+
+假设这个 example.js 就是项目的主入口文件，模块 a ~ f 是简简单单的模块（既没有进一步的依赖，也不包含 require.ensure）。那么，这里一共有 2 个切割点，这份代码将被切割为 3 部分。也就说，到时候会产生 3 个文件：output.js，1.output.js，2.output.js
+
+## 识别与处理切割点
+
+程序如何识别 require.ensure 呢？答案自然是继续使用强大的 esprima。关键代码如下：
+
+```js
+// parse.js
+if (
+  expression.callee &&
+  expression.callee.type === 'MemberExpression' &&
+  expression.callee.object.type === 'Identifier' &&
+  expression.callee.object.name === 'require' &&
+  expression.callee.property.type === 'Identifier' &&
+  expression.callee.property.name === 'ensure' &&
+  expression.arguments &&
+  expression.arguments.length >= 1
+) {
+  // 处理 require.ensure 的依赖参数部分
+  let param = parseStringArray(expression.arguments[0]);
+  let newModule = {
+    requires: [],
+    namesRange: expression.arguments[0].range
+  };
+  param.forEach((module) => {
+    newModule.requires.push({
+      name: module
+    });
+  });
+
+  module.asyncs = module.asyncs || [];
+  module.asyncs.push(newModule);
+
+  module = newModule;
+
+  // 处理 require.ensure 的函数体部分
+  if (expression.arguments.length > 1) {
+    walkExpression(module, expression.arguments[1]);
+  }
+}
+```
+
+观察上面的代码可以看出，识别出 require.ensure 之后，会将其存储到 asyncs 数组中，且继续遍历其中所包含的其他依赖。举个例子，example.js 模块最终解析出来的数据结构如下图所示：
+
+![](res/2021-08-03-01-22-45.png)
+
+## module 与 chunk
+
+我在刚刚使用 webpack 的时候，是分不清这两个概念的。现在我可以说：“在上面的例子中，有 3 个 chunk，分别对应 output.js、1.output.js 、2.output.js；有 7 个 module，分别是 example 和 a ~ f。
+
+所以，module 和 chunk 之间的关系是：1 个 chunk 可以包含若干个 module。
+
+观察上面的例子，得出以下结论：
+
+- chunk0（也就是主 chunk，也就是 output.js）应该包含 example 本身和 a、b 三个模块。
+- chunk1（1.output.js）是从 chunk0 中切割出来的，所以 chunk0 是 chunk1 的 parent。
+- 本来 chunk1 应该是包含模块 c、b 和 d 的，但是由于 b 已经被其 parent-chunk（也就是 chunk1）包含，所以，必须将 b 从 chunk1 中移除，这样方能避免代码的冗余。
+- chunk2（2.output.js）是从 chunk0 中切割出来的，所以 chunk0 也是 chunk2 的 parent。
+- chunk2 包含 e 和 f 两个模块。
+
+好了，下面进入重头戏。
+
+## 构建 chunks
+
+在对各个模块进行解析之后，我们能大概得到以下这样结构的 depTree。
+
+![](res/2021-08-03-01-24-12.png)
+
+下面我们要做的就是：如何从 8 个 module 中构建出 3 个 chunk 出来。 这里的代码较长，我就不贴出来了，想看的到这里的 [buildDep.js](https://github.com/towavephone/fake-webpack/commit/d6589263f90752ef8222749208694df654b631e3#diff-92c5d90abece48343aa1cdb71978f37b)。
+
+其中要重点注意是：前文说到，为了避免代码的冗余，需要将模块 b 从 chunk1 中移除，具体发挥作用的就是函数 removeParentsModules，本质上无非就是改变一下标志位。最终生成的 chunks 的结构如下：
+
+![](res/2021-08-03-01-25-11.png)
+
+## 拼接 output.js
+
+经历重重难关，我们终于来到了最后一步：如何根据构建出来的 chunks 拼接出若干个 output.js 呢？
+
+此处的拼接与上一篇最后提到的拼接大同小异，主要不同点有以下 2 个：
+
+1. 模板的不同。原先是一个 output.js 的时候，用的模板是 templateSingle 。现在是多个 chunks 了，所以要使用模板 templateAsync。其中不同点主要是 templateAsync 会发起 jsonp 的请求，以加载后续的 x.output.js，此处就不加多阐述了。仔细 debug 生成的 output.js 应该就能看懂这一点。
+2. 模块名字替换为模块 id 的算法有所改进。原先我直接使用正则进行匹配替换，但是如果存在重复的模块名的话，比如此例子中 example.js 出现了 2 次模块 b，那么简单的匹配就会出现错乱。因为 repalces 是从后往前匹配，而正则本身是从前往后匹配的。webpack 原作者提供了一种非常巧妙的方式，具体的代码可以参考[这里](https://github.com/towavephone/fake-webpack/commit/d6589263f90752ef8222749208694df654b631e3#diff-62f46802ba4c21e21b2dfedcce5fa86dR60)。
+
+## 后话
+
+其实关于 webpack 的代码切割还有很多值得研究的地方。比如本文我们实现的例子仅仅是将 1 个文件切割成 3 个，并未就其加载时机进行控制。比如说，如何支持在单页面应用切换 router 的时候再加载特定的 x.output.js？
+
+# loader
+
+## 前言
+
+我们来探索 loader 机制，最终实现的代码版本参考[这里](https://github.com/towavephone/fake-webpack/tree/96eae479379ca83dc7121f4afaef0b3453668081)（参考的 webpack 版本是[这个](https://github.com/webpack/webpack/tree/356ab65ea0c097fdb2d3d70f9ba8593f325dc92e)）
+
+## 问题
+
+以加载 less 为例
+
+```js
+// example.js
+require('./style.less');
+```
+
+```less
+// style.less
+@color: #000fff;
+.content {
+  width: 50px;
+  height: 50px;
+  background-color: @color;
+}
+```
+
+按照官方文档，想要加载 less 文件，我们需要配置三个 loader：`style-loader!css-loader!less-loader`。
+
+该从什么地方着手研究呢？仔细观察最终生成的 output.js，如下图所示。
+
+![](res/2021-08-03-01-31-30.png)
+
+由此我们进行以下思考：
+
+1. 既然最终 css 代码会被插入到 head 标签中，那么一定是模块 2 在起作用。但是，项目中并不包含这部分代码，经过排查，发现源自于 node-modules/style-loader/addStyle.js ，也就是说，是由 style-loader 引入的。（后面我们再考察是如何引入的）
+2. 观察模块 3，那应该是 less 代码经过 less-loader 的转换之后，再包装一层 module.exports，成为一个 JS module。
+3. style-loader 和 less-loader 的作用已经明了，但是，css-loader 发挥什么作用呢？虽然我一直按照官方文档配置三个 loader，但我从未真正理解为什么需要 css-loader。后来我在 css-loader 的文档中找到了答案。
+
+   > @import and url() are interpreted like import and will be resolved by the css-loader
+
+   既然如此，为了降低实现的难度，我们暂时不予考虑 import 和 url 的情况，也就无需实现 css-loader 了。
+
+4. 观察模块 1，`require(2)(require(3))`，很显然：”模块 3 的导出作为模块 2 的输入参数，执行模块 2“，也就是说：“将模块 3 中的 css 代码插入到 head 标签中“。理解这个逻辑不难，难点在于：webpack 如何知道应该拼接成 `require(2)(require(3))`，而不是别的什么。也就说，如何控制拼接出 `require(2)(require(3))`？
+
+## 思路
+
+思路进行到这儿，似乎走不下去了。看来只分析 output.js 还不足以理清，那么，让我们更进一步，观察 depTree，如下图所示。（图片较大，请点击放大查看）
+
+![](res/2021-08-03-01-33-55.png)
+
+问题在于：为什么凭空多出来 2 个模块？到底是哪里起了作用呢？我在 style-loader 的源码中找到了答案。
+
+## style-loader 的再 require
+
+```js
+// style-loader/index.js
+const path = require('path');
+module.exports = function(content) {
+  // content 的值为：/Users/youngwind/www/fake-webpack/node_modules/style-loader-fake/index.js!/Users/youngwind/www/fake-webpack/node_modules/less-loader-fake/index.js!/Users/youngwind/www/fake-webpack/examples/loader/style.less
+  let loaderSign = this.request.indexOf('!');
+  let rawCss = this.request.substr(loaderSign);
+  // rawCss 的值为：/Users/youngwind/www/fake-webpack/node_modules/less-loader-fake/index.js!/Users/youngwind/www/fake-webpack/examples/loader/style.less
+  return (
+    'require(' + JSON.stringify(path.join(__dirname, 'addStyle')) + ')' + '(require(' + JSON.stringify(rawCss) + '))'
+  );
+};
+```
+
+观察源码，我们发现：style-loader 返回的字符串里面又包含了 2 个 require，分别 require 了 addStyle 和 less-loader!style.less，由此，我们终于找到了突破口。loader 本质上是一个函数，输入参数是一个字符串，输出参数也是一个字符串。当然，输出的参数会被当成是 JS 代码，从而被 esprima 解析成 AST，触发进一步的依赖解析。这就是多引入 2 个模块的原因。
+
+## loaders 的拆解与运行
+
+loaders 就像首尾相接的管道那样，从右到左地被依次运行。对应的代码如下：
+
+```js
+// buildDep.js
+/**
+ * 运算文件类型对应的 loaders，比如: less 文件对应 style-loader 和 less-loader
+ * 这些 loaders 本质上是一些处理字符串的函数，输入是一个字符串，输出是另一个字符串，从右到左串行执行
+ * @param {string} request 相当于 filenamesWithLoader，比如 /Users/youngwind/www/fake-webpack/node_modules/fake-style-loader/index.js!/Users/youngwind/www/fake-webpack/node_modules/fake-less-loader/index.js!/Users/youngwind/www/fake-webpack/examples/loader/style.less
+ * @param {array} loaders 此类型文件对应的 loaders
+ * @param {string} content 文件内容
+ * @param {object} options 选项
+ * @returns {Promise}
+ */
+function execLoaders(request, loaders, content, options) {
+  return new Promise((resolve, reject) => {
+    // 当所有 loader 都执行完了，输出最终的字符串
+    if (!loaders.length) {
+      resolve(content);
+      return;
+    }
+
+    let loaderFunctions = [];
+    loaders.forEach((loaderName) => {
+      let loader = require(loaderName);
+      // 每个 loader 本质上是一个函数
+      loaderFunctions.push(loader);
+    });
+
+    nextLoader(content);
+
+    /***
+     * 调用下一个 loader
+     * @param {string} content 上一个 loader 的输出字符串
+     */
+    function nextLoader(content) {
+      if (!loaderFunctions.length) {
+        resolve(content);
+        return;
+      }
+      // 请注意: loader 有同步和异步两种类型。对于异步 loader，如 less-loader
+      // 需要执行 async() 和 callback()，以修改标志位和回传字符串
+      let async = false;
+      let context = {
+        request,
+        async: () => {
+          async = true;
+        },
+        callback: (content) => {
+          nextLoader(content);
+        }
+      };
+
+      // 就是在这儿逐个调用 loader
+      let ret = loaderFunctions.pop().call(context, content);
+      if (!async) {
+        // 递归调用下一个 loader
+        nextLoader(ret);
+      }
+    }
+  });
+}
+```
+
+请注意：loader 也是分为同步和异步两种的，比如 style-loader 是同步的（看源码就知道，直接 return）；而 less-loader 却是异步的，为什么呢？
+
+## 异步的 less-loader
+
+```js
+// less-loader
+const less = require('less');
+
+module.exports = function(source) {
+  // 声明此 loader 是异步的
+  this.async();
+  let resultCb = this.callback;
+  less.render(source, (e, output) => {
+    if (e) {
+      throw `less解析出现错误: ${e}, ${e.stack}`;
+    }
+    resultCb('module.exports = ' + JSON.stringify(output.css));
+  });
+};
+```
+
+由代码我们可以看出：less-loader 本质上只是调用了 less 本身的 render 方法，由于 less.render 是异步的，less-loader 肯定也得异步，所以需要通过回调函数来获取其解析之后的 css 代码。
+
+## node-modules 的逐级查找
+
+还差最后一点，我们就能完成 loader 机制了。试想以下情景：webpack 检测到当前为 less 文件，需要找到 style-loader 和 less-loader 运行。但是，webpack 怎么知道这两个 loader 藏在哪个目录下面呢？他们可能藏在 example.js 所在目录的任意上层文件夹的 node-modules 中。说到底，我们还是得实现之前提到过的 node-modules 的逐级查找功能。核心代码如下：
+
+```js
+// resolve.js
+/**
+ * 根据 loaders / 模块名,生成待查找的路径集合
+ * @param {string} context 入口文件所在目录
+ * @param {array} identifiers 可能是 loader 的集合,也可能是模块名
+ * @returns {Array}
+ */
+function generateDirs(context, identifiers) {
+  let dirs = [];
+  for (let identifier of identifiers) {
+    if (path.isAbsolute(identifier)) {
+      // 绝对路径
+      if (!path.extname(identifier)) {
+        identifier += '.js';
+      }
+      dirs.push(identifier);
+    } else if (identifier.startsWith('./') || identifier.startsWith('../')) {
+      // 相对路径
+      dirs.push(path.resolve(context, identifier));
+    } else {
+      // 模块名，需要逐级生成目录
+      let ext = path.extname(identifier);
+      if (!ext) {
+        ext = '.js';
+      }
+      let paths = context.split(path.sep);
+      let tempPaths = paths.slice();
+      for (let folder of tempPaths) {
+        let newContext = paths.join(path.sep);
+        dirs.push(path.resolve(newContext, './node_modules', `./${identifier}-loader-fake`, `index${ext}`));
+        paths.pop();
+      }
+    }
+  }
+  return dirs;
+}
+```
+
+举个例子，对于 style-loader 来说，生成的查找路径集合如下：
+
+```js
+[
+  '/Users/youngwind/www/fake-webpack/examples/loader/node_modules/style-loader-fake/index.js',
+  '/Users/youngwind/www/fake-webpack/examples/node_modules/style-loader-fake/index.js',
+  '/Users/youngwind/www/fake-webpack/node_modules/style-loader-fake/index.js',
+  '/Users/youngwind/www/node_modules/style-loader-fake/index.js',
+  '/Users/youngwind/node_modules/style-loader-fake/index.js',
+  '/Users/node_modules/style-loader-fake/index.js'
+];
+```
+
+程序按照这个顺序依次查找，直到找到为止或者最终找不到抛出错误。
+
+## 后话
+
+至此，我们就完成了一个非常简单的 loader 机制，可以通过 style-loader 和 less-loader 处理加载 less 文件。当然，还有很多可以完善的地方，比如：
+
+- css-loader，以处理 import 和 url 的情况
+- 给 loader 传递选项参数，以控制是否压缩代码等等特性
