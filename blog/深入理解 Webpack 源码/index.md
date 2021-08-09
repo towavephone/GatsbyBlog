@@ -1140,19 +1140,19 @@ window['webpackJsonp'] = function webpackJsonpCallback(chunkIds, moreModules) {
 1. 不管有多少个模块，头部那一块都是一样的，所以可以写成一个模板，也就是 templateSingle.js。
 2. 需要分析出各个模块间的依赖关系。也就是说，需要知道 example 依赖于 a、b 和 c。
 3. c 模块位于 node_modules 文件夹当中，但是我们调用的时候却可以直接 require('c')，这里肯定是存在某种自动查找的功能。
-4. 在生成的 output.js 中，每个模块的唯一标识是模块的 ID，所以在拼接 output.js 的时候，需要将每个模块的名字替换成模块的 ID。也就是说
+4. 在生成的 output.js 中，每个模块的唯一标识是模块的 ID，所以在拼接 output.js 的时候，需要将每个模块的名字替换成模块的 ID。
 
-```js
-// 转换前
-let a = require('a');
-let b = require('b');
-let c = require('c');
+   ```js
+   // 转换前
+   let a = require('a');
+   let b = require('b');
+   let c = require('c');
 
-// 转换后
-let a = require(/* a */ 1);
-let b = require(/* b */ 2);
-let c = require(/* c */ 3);
-```
+   // 转换后
+   let a = require(/* a */ 1);
+   let b = require(/* b */ 2);
+   let c = require(/* c */ 3);
+   ```
 
 ok，下面我们来逐一看看这些问题
 
