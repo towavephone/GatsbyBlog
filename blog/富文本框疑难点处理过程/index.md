@@ -19,7 +19,7 @@ path: /rich-input-question/
 
 ## placeholder 提示语
 
-input 和 textarea 能轻松实现 placeholder 提示语的效果，但作用于 contenteditable 的元素，placeholder 不起作用，可以通过 css 的:empty 解决：
+input 和 textarea 能轻松实现 placeholder 提示语的效果，但作用于 contenteditable 的元素，placeholder 不起作用，可以通过 css 的 :empty 解决
 
 ```css
 [contenteditable='true']:empty::before {
@@ -158,7 +158,7 @@ this.setState(innerHTML, () => {
 
 接着又遇到一个坑，因为想实现的是整体删除 span，所以设置了 contenteditable 属性为 false，在删除光标遇到带有 span 标签的字符时，光标也会跳到不正确的位置
 
-经过一步步的调试，发现取出函数 getCurrentCursorPosition 的光标位置是不对的，它取出的是在 span 内部光标的位置，比如说`3233<span> 我是 </span>`，此时取出的光标位置值为 2，而不是 6，考虑到修改 getCurrentCursorPosition 会影响之前的 bug，所以只能在删除遇到标签时做下特殊处理，在遇到 span 标签删除后，光标强制移到文本最后
+经过一步步的调试，发现取出函数 getCurrentCursorPosition 的光标位置是不对的，它取出的是在 span 内部光标的位置，比如说 `3233<span> 我是 </span>`，此时取出的光标位置值为 2，而不是 6，考虑到修改 getCurrentCursorPosition 会影响之前的 bug，所以只能在删除遇到标签时做下特殊处理，在遇到 span 标签删除后，光标强制移到文本最后
 
 ```js
 function selectAllText(elem) {
@@ -172,7 +172,7 @@ function selectAllText(elem) {
     const range = document.selection.createTextRange();
     range.moveToElementText(elem);
     range.collapse(false);
-    range.select(); /* 避免产生空格*/
+    range.select(); /* 避免产生空格 */
   }
 }
 
@@ -237,7 +237,7 @@ if (selection.focusNode.id === this.id) {
 
 以上方法有很多未知的 bug，比较明显的问题就是光标会到处乱跑，自己解决起来有太多的坑，故采用业界比较成熟的 [draft-js-plugins](https://github.com/draft-js-plugins/draft-js-plugins)，底层采用 facebook 的开源库 [draft-js](https://github.com/facebook/draft-js)，期间也遇到不少问题，详见代码注释
 
-```jsx{12-13,23-29}
+```jsx{12-13,23-30}
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EditorState } from 'draft-js';
@@ -249,7 +249,7 @@ import 'draft-js-mention-plugin/lib/plugin.css';
 import utils from 'utils';
 
 import styles from './styles.css';
-// 为了解决ie9下parseFromString('', 'text/html')的报错
+// 为了解决 IE9 下 parseFromString('', 'text/html') 的报错
 import './DomParserPloyfill';
 
 class GraphHintTextArea extends React.PureComponent {
@@ -268,7 +268,7 @@ class GraphHintTextArea extends React.PureComponent {
         mentionSuggestions: styles.mentionSuggestions
       };
     }
-    // 设置mention标签的可变性、触发字符、样式
+    // 设置 mention 标签的可变性、触发字符、样式
     this.mentionPlugin = createMentionPlugin({
       entityMutability: 'IMMUTABLE',
       mentionTrigger: '$',
@@ -277,7 +277,7 @@ class GraphHintTextArea extends React.PureComponent {
 
     const { value } = this.props;
     const contentState = convertFromHTML({
-      // 遇到class带有mention的标签进行实体的不可变转化，此时mention即话术变量标签是一体的
+      // 遇到 class 带有 mention 的标签进行实体的不可变转化，此时 mention 即话术变量标签是一体的
       // 删除只能整个删除，添加也将转化为普通字符
       // eslint-disable-next-line consistent-return
       htmlToEntity: (nodeName, node, createEntity) => {
@@ -304,7 +304,7 @@ class GraphHintTextArea extends React.PureComponent {
   // }
 
   // https://github.com/facebook/draft-js/issues/1198
-  // 因为此处最开始打算使用componentWillReceiveProps，但在和onChange一起作用时，
+  // 因为此处最开始打算使用 componentWillReceiveProps，但在和 onChange 一起作用时，
   // 导致多次执行，光标跳到行首，只能采用非受控组件的方式手动调用
   setEditorContent(text) {
     const contentState = convertFromHTML({
@@ -322,7 +322,7 @@ class GraphHintTextArea extends React.PureComponent {
       }
     })(text);
     const { editorState } = this.state;
-    // 这里必须用push方法，不然会导致编辑器提示框不能弹出
+    // 这里必须用 push 方法，不然会导致编辑器提示框不能弹出
     // https://github.com/draft-js-plugins/draft-js-plugins/issues/210
     const newEditorState = EditorState.push(editorState, contentState);
     this.setState({
@@ -331,7 +331,7 @@ class GraphHintTextArea extends React.PureComponent {
   }
 
   // https://github.com/draft-js-plugins/draft-js-plugins/issues/800
-  // 不能直接调用focus，否则会造成draft-js-mention-plugin的失效
+  // 不能直接调用 focus，否则会造成 draft-js-mention-plugin 的失效
   // focus = () => {
   //   setTimeout(() => {
   //     this.editor.focus();
@@ -386,14 +386,14 @@ class GraphHintTextArea extends React.PureComponent {
   triggerChange = (contentState, pureText) => {
     const { onChange } = this.props;
     let html = convertToHTML({
-      // 将遇到的实体标签转化为${id}，以便后端进行处理
+      // 将遇到的实体标签转化为 ${id}，以便后端进行处理
       entityToHTML: (entity, originalText) => {
         if (entity.type === '$mention') {
           return `$\{${entity.data.mention._id}}`;
         }
         return originalText;
       },
-      // 语音合成需求要求，去除所有换行，即所有无用标签p，否则会读出标签p
+      // 语音合成需求要求，去除所有换行，即所有无用标签 p，否则会读出标签 p
       // https://github.com/HubSpot/draft-convert/issues/59
       // eslint-disable-next-line consistent-return
       blockToHTML: (data) => {
@@ -402,13 +402,13 @@ class GraphHintTextArea extends React.PureComponent {
           return {
             start: '',
             end: '',
-            // empty属性代表所有换行都去掉，而不是转为空格
+            // empty 属性代表所有换行都去掉，而不是转为空格
             empty: ''
           };
         }
       }
     })(contentState);
-    // 语音合成需求要求，去掉所有空白字符（包含空格、制表符、换页符）和html标签（包含<div class="test"></div>、<img />、<My-Tag></My-Tag>这几种）
+    // 语音合成需求要求，去掉所有空白字符（包含空格、制表符、换页符）和 html 标签（包含<div class="test"></div>、<img />、<My-Tag></My-Tag>这几种）
     html = html.replace(/<\/?.+?\/?>|\s+/g, '');
     if (typeof onChange === 'function') {
       onChange(html, pureText);

@@ -159,7 +159,7 @@ new LodashModuleReplacementPlugin({
 
 当 react-loadable 应用到组件为 function 类型，此时 withRef 方法会报错，因为 function 组件是没有 ref 的，此时要做下兼容处理
 
-```js{22-28,30}
+```js{21-32}
 import React from 'react';
 import Loadable from 'react-loadable';
 
@@ -208,7 +208,7 @@ export default function loadComponent(loader, options) {
 
 ### 页面级别
 
-```js{29-39}
+```js{29-40}
 /* eslint-disable no-param-reassign */
 import React from 'react';
 import Loadable from 'react-loadable';
@@ -267,7 +267,7 @@ export default function loadComponent(loader, options) {
 
 src\runtime\preventSetState.js
 
-```js
+```jsx
 import React from 'react';
 
 export default function preventSetState(WrappedComponent) {
@@ -318,7 +318,7 @@ export default preventSetState(Component);
 
 单个组件报错时不影响其他页面的加载
 
-```js{11-16}
+```jsx{11-16}
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 

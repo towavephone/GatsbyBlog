@@ -96,7 +96,7 @@ export default {
 - Plugin：扩展插件，在 Webpack 构建流程中的特定时机注入扩展逻辑来改变构建结果或做你想要的事情。
 - Output：输出结果，在 Webpack 经过一系列处理并得出最终想要的代码后输出结果。
 
-Webpack 启动后会从 Entry 里配置的 Module 开始递归解析 Entry 依赖的所有 Module。 每找到一个 Module， 就会根据配置的 Loader 去找出对应的转换规则，对 Module 进行转换后，再解析出当前 Module 依赖的 Module。 这些模块会以 Entry 为单位进行分组，一个 Entry 和其所有依赖的 Module 被分到一个组也就是一个 Chunk。最后 Webpack 会把所有 Chunk 转换成文件输出。 在整个流程中 Webpack 会在恰当的时机执行 Plugin 里定义的逻辑。
+Webpack 启动后会从 Entry 里配置的 Module 开始递归解析 Entry 依赖的所有 Module。每找到一个 Module，就会根据配置的 Loader 去找出对应的转换规则，对 Module 进行转换后，再解析出当前 Module 依赖的 Module。这些模块会以 Entry 为单位进行分组，一个 Entry 和其所有依赖的 Module 被分到一个组也就是一个 Chunk。最后 Webpack 会把所有 Chunk 转换成文件输出。在整个流程中 Webpack 会在恰当的时机执行 Plugin 里定义的逻辑。
 
 ## webpack.base.babel.js
 
@@ -166,7 +166,7 @@ module.exports = (options) => ({
           {
             loader: 'babel-loader',
             options: options.babelQuery
-            // enforce:'post' 的含义是把该 Loader 的执行顺序放到最后
+            // enforce: 'post' 的含义是把该 Loader 的执行顺序放到最后
             // enforce 的值还可以是 pre，代表把 Loader 的执行顺序放到最前面
           }
         ]
@@ -178,7 +178,7 @@ module.exports = (options) => ({
           {
             // 大概是把 CSS 内容用 JavaScript 里的字符串存储起来
             // 在网页执行 JavaScript 时通过 DOM 操作动态地往 HTML head 标签里插入 HTML style 标签。
-            // 也许你认为这样做会导致JavaScript 文件变大并导致加载网页时间变长，如果想让 Webpack 单独输出 CSS 文件
+            // 也许你认为这样做会导致 JavaScript 文件变大并导致加载网页时间变长，如果想让 Webpack 单独输出 CSS 文件
             // webpack4 用 mini-css-extract-plugin, 之前的版本用 extract-text-webpack-plugin
             loader: options.cssDebug ? 'style-loader' : MiniCssExtractPlugin.loader,
             options: {
@@ -409,7 +409,7 @@ module.exports = (options) => ({
     // new SimpleProgressWebpackPlugin(),
 
     new webpack.ProvidePlugin({
-      // make fetch available, 和 externals 一样的效果
+      // make fetch available 和 externals 一样的效果
       fetch: 'exports-loader?self.fetch!whatwg-fetch',
       $: 'jquery',
       jQuery: 'jquery'

@@ -24,7 +24,7 @@ date: 2019-5-11 14:47:57
 ### webpack.base.babel.js
 
 ```js{16-18}
-// const CopyWebpackPlugin = require('copy-webpack-plugin'); 去掉copy-webpack-plugin
+// const CopyWebpackPlugin = require('copy-webpack-plugin'); 去掉 copy-webpack-plugin
 
 {
   test: /\.(jpe?g|png|gif|svg)$/,
@@ -32,7 +32,7 @@ date: 2019-5-11 14:47:57
     {
       loader: 'url-loader',
       options: {
-        // Inline files smaller than 10 kB，尽可能将所有的图片内联到js
+        // Inline files smaller than 10 kB，尽可能将所有的图片内联到 js
         limit: 100 * 1024,
       },
     },
@@ -40,10 +40,10 @@ date: 2019-5-11 14:47:57
 },
 
 new webpack.optimize.MinChunkSizePlugin({
-  minChunkSize: Infinity, // Minimum number of characters，尽可能的打包js为一个文件
+  minChunkSize: Infinity, // Minimum number of characters，尽可能的打包 js 为一个文件
 }),
 
-// 屏蔽CopyWebpackPlugin，没用
+// 屏蔽 CopyWebpackPlugin 没用
 // new CopyWebpackPlugin([
 //   'app/favicon.ico',
 //   'app/manifest.json',
@@ -53,9 +53,9 @@ new webpack.optimize.MinChunkSizePlugin({
 ### webpack.prod.babel.js
 
 ```js
-// const LodashModuleReplacementPlugin = require('lodash-webpack-plugin'); 实测对打包成一个js时有影响，暂未找到原因
+// const LodashModuleReplacementPlugin = require('lodash-webpack-plugin'); 实测对打包成一个 js 时有影响，暂未找到原因
 
-cssDebug: true, // 打开cssDebug，以避免使用MiniCssExtractPlugin，会产生多余的css
+cssDebug: true, // 打开 cssDebug，以避免使用 MiniCssExtractPlugin，会产生多余的 css
 entry: './app/app.js', // 改变入口，不分包
 output: {
   filename: 'bundle.js', // 只输出一个 bundle.js 文件
@@ -64,8 +64,8 @@ output: {
 splitChunks: false,  // 关闭分包优化，下面同理
 runtimeChunk: false,
 
-// new LodashModuleReplacementPlugin(), // lodash优化，暂时屏蔽，理由同上
-// new webpack.HashedModuleIdsPlugin(), // 不需要固定chunkhash，因为只有一个文件
+// new LodashModuleReplacementPlugin(), // lodash 优化，暂时屏蔽，理由同上
+// new webpack.HashedModuleIdsPlugin(), // 不需要固定 chunkhash，因为只有一个文件
 ```
 
 以上就实现了将所有代码都打包到一个 bundle.js 文件
@@ -101,7 +101,7 @@ if (!global._babelPolyfill) {
 
 需要引入 ErrorBoundary 组件，即使报错也只有引入的 bundle.js 聊天窗口崩溃
 
-```js
+```jsx
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -154,21 +154,21 @@ CORS 把 HTTP 请求分成两类，不同类别按不同的策略进行跨域资
 
 1. 简单跨域请求
 
-当 HTTP 请求出现以下两种情况时，浏览器认为是简单跨域请求：
+   当 HTTP 请求出现以下两种情况时，浏览器认为是简单跨域请求：
 
-1. 请求方法是 GET、HEAD 或者 POST，并且当请求方法是 POST 时，Content-Type 必须是 application/x-www-form-urlencoded, multipart/form-data 或着 text/plain 中的一个值。
-2. 请求中没有自定义 HTTP 头部。
+   1. 请求方法是 GET、HEAD 或者 POST，并且当请求方法是 POST 时，Content-Type 必须是 application/x-www-form-urlencoded, multipart/form-data 或着 text/plain 中的一个值。
+   2. 请求中没有自定义 HTTP 头部。
 
-对于简单跨域请求，浏览器要做的就是在 HTTP 请求中添加 Origin Header，将 JavaScript 脚本所在域填充进去，向其他域的服务器请求资源。服务器端收到一个简单跨域请求后，根据资源权限配置，在响应头中添加 Access-Control-Allow-Origin Header。浏览器收到响应后，查看 Access-Control-Allow-Origin Header，如果当前域已经得到授权，则将结果返回给 JavaScript，否则浏览器忽略此次响应。
+   对于简单跨域请求，浏览器要做的就是在 HTTP 请求中添加 Origin Header，将 JavaScript 脚本所在域填充进去，向其他域的服务器请求资源。服务器端收到一个简单跨域请求后，根据资源权限配置，在响应头中添加 Access-Control-Allow-Origin Header。浏览器收到响应后，查看 Access-Control-Allow-Origin Header，如果当前域已经得到授权，则将结果返回给 JavaScript，否则浏览器忽略此次响应。
 
 2. 带预检 (Preflighted) 的跨域请求
 
-当 HTTP 请求出现以下两种情况时，浏览器认为是带预检 (Preflighted) 的跨域请求：
+   当 HTTP 请求出现以下两种情况时，浏览器认为是带预检 (Preflighted) 的跨域请求：
 
-1. 除 GET、HEAD 和 POST(only with application/x-www-form-urlencoded, multipart/form-data, text/plain Content-Type) 以外的其他 HTTP 方法。
-2. 请求中出现自定义 HTTP 头部。
+   1. 除 GET、HEAD 和 POST(only with application/x-www-form-urlencoded, multipart/form-data, text/plain Content-Type) 以外的其他 HTTP 方法。
+   2. 请求中出现自定义 HTTP 头部。
 
-带预检 (Preflighted) 的跨域请求需要浏览器在发送真实 HTTP 请求之前先发送一个 OPTIONS 的预检请求，检测服务器端是否支持真实请求进行跨域资源访问，真实请求的信息在 OPTIONS 请求中通过 Access-Control-Request-Method Header 和 Access-Control-Request-Headers Header 描述，此外与简单跨域请求一样，浏览器也会添加 Origin Header。服务器端接到预检请求后，根据资源权限配置，在响应头中放入 Access-Control-Allow-Origin Header、Access-Control-Allow-Methods 和 Access-Control-Allow-Headers Header，分别表示允许跨域资源请求的域、请求方法和请求头。此外，服务器端还可以加入 Access-Control-Max-Age Header，允许浏览器在指定时间内，无需再发送预检请求进行协商，直接用本次协商结果即可。浏览器根据 OPTIONS 请求返回的结果来决定是否继续发送真实的请求进行跨域资源访问，这个过程对真实请求的调用者来说是透明的。
+   带预检 (Preflighted) 的跨域请求需要浏览器在发送真实 HTTP 请求之前先发送一个 OPTIONS 的预检请求，检测服务器端是否支持真实请求进行跨域资源访问，真实请求的信息在 OPTIONS 请求中通过 Access-Control-Request-Method Header 和 Access-Control-Request-Headers Header 描述，此外与简单跨域请求一样，浏览器也会添加 Origin Header。服务器端接到预检请求后，根据资源权限配置，在响应头中放入 Access-Control-Allow-Origin Header、Access-Control-Allow-Methods 和 Access-Control-Allow-Headers Header，分别表示允许跨域资源请求的域、请求方法和请求头。此外，服务器端还可以加入 Access-Control-Max-Age Header，允许浏览器在指定时间内，无需再发送预检请求进行协商，直接用本次协商结果即可。浏览器根据 OPTIONS 请求返回的结果来决定是否继续发送真实的请求进行跨域资源访问，这个过程对真实请求的调用者来说是透明的。
 
 XMLHttpRequest 支持通过 withCredentials 属性实现在跨域请求携带身份信息 (Credential，例如 Cookie 或者 HTTP 认证信息)。浏览器将携带 Cookie Header 的请求发送到服务器端后，如果服务器没有响应 Access-Control-Allow-Credentials Header，那么浏览器会忽略掉这次响应。
 
@@ -196,7 +196,7 @@ location = /bundle.js {
 }
 # 反代设置跨域并允许设置 cookie
 location /service-tp-api/ {
-  add_header Access-Control-Allow-Credentials true;  # 是否允许发送Cookie
+  add_header Access-Control-Allow-Credentials true;  # 是否允许发送 Cookie
   add_header Access-Control-Allow-Origin $http_origin; # 这里 $http_origin 代表引用 bundle.js 的网站域名（真实域名），不能设置为 * ，否则不能成功设置 cookie
   add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS'; # 用到哪些 HTTP 方法
   add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Cookie,Set-Cookie,x-requested-with,content-type,pragma'; # 允许使用的 header 字段，可以查看自己的 request 来进行添加

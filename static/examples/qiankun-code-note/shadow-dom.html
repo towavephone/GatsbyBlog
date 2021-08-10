@@ -1,41 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-  <style>
-    html,
-    body {
-      background-color: white;
-      margin: 0;
-    }
-  </style>
-</head>
-<body>
-  <h5>样式隔离：</h5>
-  <span class="shadow-host">
-    <a href="https://twitter.com/ireaderinokun">
-      Follow @ireaderinokun
-    </a>
-  </span>
-  <script>
-    const shadowEl = document.querySelector(".shadow-host");
-    const shadow = shadowEl.attachShadow({ mode: 'open' });
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      html,
+      body {
+        background-color: white;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h5>样式隔离：</h5>
+    <span class="shadow-host">
+      <a href="https://twitter.com/ireaderinokun">
+        Follow @ireaderinokun
+      </a>
+    </span>
+    <script>
+      const shadowEl = document.querySelector('.shadow-host');
+      const shadow = shadowEl.attachShadow({ mode: 'open' });
 
-    const link = document.createElement("a");
-    link.href = shadowEl.querySelector("a").href;
-    link.innerHTML = `
+      const link = document.createElement('a');
+      link.href = shadowEl.querySelector('a').href;
+      link.innerHTML = `
       <span aria-label="Twitter icon"></span>
-      ${shadowEl.querySelector("a").textContent}
+      ${shadowEl.querySelector('a').textContent}
     `;
 
+      shadow.appendChild(link);
 
-    shadow.appendChild(link);
-
-    const styles = document.createElement("style");
-    styles.textContent = `
+      const styles = document.createElement('style');
+      styles.textContent = `
       a, span {
         vertical-align: top;
         display: inline-block;
@@ -70,7 +69,7 @@
       }
     `;
 
-    shadow.appendChild(styles);
-  </script>
-</body>
+      shadow.appendChild(styles);
+    </script>
+  </body>
 </html>

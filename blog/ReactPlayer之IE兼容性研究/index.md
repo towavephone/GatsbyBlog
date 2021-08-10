@@ -66,7 +66,7 @@ ReactPlayer 底层调用了 audio 标签来播放音频，video 标签来播放�
 > CurrentPosition 返回或设置剪辑的当前位置(双精度型)  
 > CursorType 返回或设置指针类型(长整型)  
 > DefaultFrame 返回或设置控件的默认目标 Http 帧(字符串)  
-> DisplayBackColor 返回或设置显示面板的背景色(OLE*COLOR 值)  
+> DisplayBackColor 返回或设置显示面板的背景色(OLE\*COLOR 值)  
 > DisplayForeColor 返回或设置显示面板的前景色(OLE_COLOR 值)  
 > DisplayMode 返回或设置显示面板是否用秒或帧的形式显示当前位置(MPDisplayModeConstants 值)  
 > DisplaySize 返回或设置图像显示窗口的大小(MPDisplaySizeConstant 值)  
@@ -125,7 +125,7 @@ ReactPlayer 底层调用了 audio 标签来播放音频，video 标签来播放�
 > StreamCount 返回媒体帧的数量(长整型)  
 > TransparentAtStart 返回或设置在开始播放之前和停止之后控件是否透明(逻辑型)  
 > VideoBorder3D 返回或设置视频边框是否显示为 3D 效果(逻辑型)  
-> VideoBorderColor 返回或设置视频边框的颜色(OLE*颜色)  
+> VideoBorderColor 返回或设置视频边框的颜色(OLE\*颜色)  
 > VideoBorderWidth 返回或设置视频边框的宽度(长整型)  
 > Volume 返回或设置音量(长整型)
 
@@ -139,7 +139,7 @@ import PropTypes from 'prop-types';
 
 function noop() {}
 
-// IE下的audio标签不能播放wav文件，改用embed标签播放，兼容版本：IE9~11
+// IE 下的 audio 标签不能播放 wav 文件，改用 embed 标签播放，兼容版本：IE9~11
 export class IEReactPlayer extends React.PureComponent {
   static propTypes = {
     url: PropTypes.string, // 播放路径
@@ -147,9 +147,9 @@ export class IEReactPlayer extends React.PureComponent {
     onProgress: PropTypes.func, // 进度更新回调，返回已播放百分比
     onDuration: PropTypes.func, // 录音长度回调，返回录音总时长，单位为秒
     onEnded: PropTypes.func, // 录音结束回调，无返回值
-    volume: PropTypes.number, // 音量属性，范围0~1，此属性调整音量不生效，待解决
-    autostart: PropTypes.string, // 是否自动播放，此属性为了兼容Audio组件点击按钮后才请求url，防止点击两次播放按钮才开始播放的情况出现
-    progressInterval: PropTypes.number // 进度刷新间隔，默认100
+    volume: PropTypes.number, // 音量属性，范围 0~1，此属性调整音量不生效，待解决
+    autostart: PropTypes.string, // 是否自动播放，此属性为了兼容 Audio 组件点击按钮后才请求 url，防止点击两次播放按钮才开始播放的情况出现
+    progressInterval: PropTypes.number // 进度刷新间隔，默认 100
   };
 
   static defaultProps = {
