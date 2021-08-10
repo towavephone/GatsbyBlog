@@ -163,7 +163,7 @@ if (pkg.version.indexOf('0.0.0') !== 0 && options.noUpdateNotifier !== true) {
 
 nodemon.json
 
-```json{12-17}
+```json{18-23}
 {
   "restartable": "rs",
   "ignore": [".git", "node_modules", "node_modules/**/node_modules"],

@@ -65,6 +65,9 @@
   @media (min-width: $screen-lg-min) {
     width: $container-lg;
   }
+  @media (min-width: 1720px) {
+    width: 1560px;
+  }
 }
 
 .container-fluid {

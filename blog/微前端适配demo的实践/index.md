@@ -37,7 +37,7 @@ path: /micro-front-end-demo-practice/
 
 src\platform\layout\index.js
 
-```js
+```jsx
 import { AppRouter, AppRoute } from '@ice/stark';
 <AppRouter
   NotFoundComponent={<div>未找到</div>}
@@ -53,7 +53,7 @@ import { AppRouter, AppRoute } from '@ice/stark';
 
 当然对应的子应用就不需要路径别名的配置了，这样实现的缺点是 onRouteChange 这个函数不再起作用，而且不能控制子应用的缓存，这些不同域名的缓存全部交给对应的 nginx 来做了
 
-```js
+```jsx
 import { AppRouter, AppRoute } from '@ice/stark';
 <AppRouter
   NotFoundComponent={<div>未找到</div>}
@@ -78,7 +78,7 @@ import { AppRouter, AppRoute } from '@ice/stark';
 
 app\app.js
 
-```js{1-3,5-7,11,16-38}
+```jsx{1-3,5-7,11,16-38}
 import { applyRouterMiddleware, Router, browserHistory, useRouterHistory } from 'react-router';
 import { createHistory } from 'history';
 import { isInIcestark, getMountNode, registerAppEnter, registerAppLeave, getBasename } from '@ice/stark-app';
@@ -108,7 +108,7 @@ const router = () => (
     </Provider>
   </ConfigProvider>
 );
-
+// 判断是否是开发环境 
 if (isInIcestark()) {
   registerAppEnter(() => {
     ReactDOM.render(router(), getMountNode());
@@ -162,7 +162,7 @@ output: Object.assign({ // Compile into js/build.js
 
 server\index.js
 
-```js{2-5,13-20,27}
+```js{2-5,13-23}
 // 设置允许资源文件跨域访问该服务
 app.all('*', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
