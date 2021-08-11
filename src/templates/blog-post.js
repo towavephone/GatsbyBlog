@@ -157,7 +157,7 @@ export default class Template extends Component {
   // 处理目录，获取一些数据信息
   dealWithCategory = (cb) => {
     const scrollTop = domQuery.scrollTop(window);
-    const anchorList = this.$category.querySelectorAll('a');
+    const anchorList = this.$category ? this.$category.querySelectorAll('a') : [];
     const anchors = [];
 
     for (let i = 0, len = anchorList.length; i < len; i++) {

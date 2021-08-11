@@ -11,27 +11,27 @@ path: /deep-learn-babel/
 
 ![](res/2021-07-26-23-11-37.png)
 
-首先从源码解析(Parsing)开始，解析包含了两个步骤:
+首先从源码解析(Parsing)开始，解析包含了两个步骤
 
 ## 词法解析(Lexical Analysis)
 
-词法解析器(Tokenizer)在这个阶段将字符串形式的代码转换为 Tokens(令牌). Tokens 可以视作是一些语法片段组成的数组. 例如 `for (const item of items) {}` 词法解析后的结果如下:
+词法解析器(Tokenizer)在这个阶段将字符串形式的代码转换为 Tokens(令牌)。Tokens 可以视作是一些语法片段组成的数组。例如 `for (const item of items) {}` 词法解析后的结果如下:
 
 ![](res/2021-07-26-23-14-34.png)
 
-从上图可以看，每个 Token 中包含了语法片段、位置信息、以及一些类型信息. 这些信息有助于后续的语法分析。
+从上图可以看，每个 Token 中包含了语法片段、位置信息、以及一些类型信息，这些信息有助于后续的语法分析。
 
 ## 语法解析(Syntactic Analysis)
 
 这个阶段语法解析器(Parser)会把 Tokens 转换为抽象语法树(Abstract Syntax Tree，AST)
 
-AST 就是一棵’对象树’，用来表示代码的语法结构，例如 `console.log('hello world')` 会解析成为:
+AST 就是一棵对象树，用来表示代码的语法结构，例如 `console.log('hello world')` 会解析成为
 
 ![](res/2021-07-26-23-16-37.png)
 
 Program、CallExpression、Identifier 这些都是节点的类型，每个节点都是一个有意义的语法单元。这些节点类型定义了一些属性来描述节点的信息。
 
-JavaScript 的语法越来越复杂，而且 Babel 除了支持最新的 JavaScript 规范语法, 还支持 JSX、Flow、现在还有 Typescript。想象一下 AST 的节点类型有多少，其实我们不需要去记住这么多类型、也记不住. 插件开发者会利用 ASTExplorer 来审查解析后的 AST 树, 非常强大。
+JavaScript 的语法越来越复杂，而且 Babel 除了支持最新的 JavaScript 规范语法，还支持 JSX、Flow、现在还有 Typescript。想象一下 AST 的节点类型有多少，其实我们不需要去记住这么多类型、也记不住。插件开发者会利用 ASTExplorer 来审查解析后的 AST 树，非常强大。
 
 AST 是 Babel 转译的核心数据结构，后续的操作都依赖于 AST。
 
@@ -45,7 +45,7 @@ Javascript In Javascript Out，最后阶段还是要把 AST 转换回字符串�
 
 Babel 和 Webpack 为了适应复杂的定制需求和频繁的功能变化，都使用了[微内核](https://juejin.im/post/5d7ffad551882545ff173083#heading-10)的架构风格。也就是说它们的核心非常小，大部分功能都是通过插件扩展实现的。
 
-所以简单地了解一下 Babel 的架构和一些基本概念，对后续文章内容的理解, 以及 Babel 的使用还是有帮助的。
+所以简单地了解一下 Babel 的架构和一些基本概念，对后续文章内容的理解，以及 Babel 的使用还是有帮助的。
 
 ![](res/2021-07-26-23-23-10.png)
 
@@ -53,23 +53,23 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 ## 核心
 
-@babel/core 这也是上面说的‘微内核’架构中的‘内核’。对于 Babel 来说，这个内核主要干这些事情：
+@babel/core 这也是上面说的微内核架构中的内核。对于 Babel 来说，这个内核主要干这些事情
 
 - 加载和处理配置(config)
 - 加载插件
 - 调用 Parser 进行语法解析，生成 AST
-- 调用 Traverser 遍历 AST，并使用访问者模式应用’插件’对 AST 进行转换
+- 调用 Traverser 遍历 AST，并使用访问者模式应用插件对 AST 进行转换
 - 生成代码，包括 SourceMap 转换和源代码生成
 
 ## 核心周边支撑
 
 ### Parser(@babel/parser)
 
-将源代码解析为 AST 就靠它了。 它已经内置支持很多语法. 例如 JSX、Typescript、Flow、以及最新的 ECMAScript 规范。目前为了执行效率，parser 是不支持扩展的，由官方进行维护。如果你要支持自定义语法，可以 fork 它，不过这种场景非常少。
+将源代码解析为 AST 就靠它了。 它已经内置支持很多语法，例如 JSX、Typescript、Flow 以及最新的 ECMAScript 规范。目前为了执行效率，parser 是不支持扩展的，由官方进行维护。如果你要支持自定义语法，可以 fork 它，不过这种场景非常少。
 
 ### Traverser(@babel/traverse)
 
-实现了访问者模式，对 AST 进行遍历，转换插件会通过它获取感兴趣的 AST 节点，对节点继续操作, 下文会详细介绍访问器模式。
+实现了访问者模式，对 AST 进行遍历，转换插件会通过它获取感兴趣的 AST 节点，对节点继续操作，下文会详细介绍访问器模式。
 
 ### Generator(@babel/generator)
 
@@ -77,41 +77,41 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 ## 插件
 
-打开 Babel 的源代码，会发现有好几种类型的‘插件’。
+打开 Babel 的源代码，会发现有好几种类型的插件
 
 ### 语法插件(@babel/plugin-syntax-\*)
 
-上面说了 @babel/parser 已经支持了很多 JavaScript 语法特性，Parser 也不支持扩展. 因此 plugin-syntax-\*实际上只是用于开启或者配置 Parser 的某个功能特性。
+上面说了 @babel/parser 已经支持了很多 JavaScript 语法特性，Parser 也不支持扩展。因此 plugin-syntax-\* 实际上只是用于开启或者配置 Parser 的某个功能特性。
 
-一般用户不需要关心这个，Transform 插件里面已经包含了相关的 plugin-syntax-\*插件了。用户也可以通过 parserOpts 配置项来直接配置 Parser
+一般用户不需要关心这个，Transform 插件里面已经包含了相关的 plugin-syntax-\* 插件了，用户也可以通过 parserOpts 配置项来直接配置 Parser
 
 ### 转换插件
 
-用于对 AST 进行转换, 实现转换为 ES5 代码、压缩、功能增强等目的. Babel 仓库将转换插件划分为两种(只是命名上的区别)：
+用于对 AST 进行转换，实现转换为 ES5 代码、压缩、功能增强等目的。Babel 仓库将转换插件划分为两种（只是命名上的区别）
 
 - @babel/plugin-transform-\*：普通的转换插件
-- @babel/plugin-proposal-\*：还在’提议阶段’(非正式)的语言特性, 目前有[这些](https://babeljs.io/docs/en/next/plugins#experimental)
+- @babel/plugin-proposal-\*：还在提议阶段（非正式）的语言特性, 目前有[这些](https://babeljs.io/docs/en/next/plugins#experimental)
 
 ### 预定义集合(@babel/presets-\*)
 
-插件集合或者分组，主要方便用户对插件进行管理和使用。比如 preset-env 含括所有的标准的最新特性; 再比如 preset-react 含括所有 react 相关的插件.
+插件集合或者分组，主要方便用户对插件进行管理和使用。比如 preset-env 含括所有的标准的最新特性，再比如 preset-react 含括所有 react 相关的插件
 
 ## 插件开发辅助
 
-- @babel/template：某些场景直接操作 AST 太麻烦，就比如我们直接操作 DOM 一样，所以 Babel 实现了这么一个简单的模板引擎，可以将字符串代码转换为 AST。比如在生成一些辅助代码(helper)时会用到这个库
-- @babel/types：AST 节点构造器和断言. 插件开发时使用很频繁
-- @babel/helper-\*： 一些辅助器，用于辅助插件开发，例如简化 AST 操作
-- @babel/helper：辅助代码，单纯的语法转换可能无法让代码运行起来，比如低版本浏览器无法识别 class 关键字，这时候需要添加辅助代码，对 class 进行模拟。
+- @babel/template：某些场景直接操作 AST 太麻烦，就比如我们直接操作 DOM 一样，所以 Babel 实现了这么一个简单的模板引擎，可以将字符串代码转换为 AST，比如在生成一些辅助代码（helper）时会用到这个库
+- @babel/types：AST 节点构造器和断言，插件开发时使用很频繁
+- @babel/helper-\*：一些辅助器，用于辅助插件开发，例如简化 AST 操作
+- @babel/helper：辅助代码，单纯的语法转换可能无法让代码运行起来，比如低版本浏览器无法识别 class 关键字，这时候需要添加辅助代码，对 class 进行模拟
 
 ## 工具
 
-- @babel/node：Node.js CLI, 通过它直接运行需要 Babel 处理的 JavaScript 文件
+- @babel/node：Node.js CLI，通过它直接运行需要 Babel 处理的 JavaScript 文件
 - @babel/register：Patch NodeJs 的 require 方法，支持导入需要 Babel 处理的 JavaScript 模块
 - @babel/cli：CLI 工具
 
 # 访问者模式
 
-转换器会遍历 AST 树，找出自己感兴趣的节点类型, 再进行转换操作. 这个过程和我们操作 DOM 树差不多，只不过目的不太一样。AST 遍历和转换一般会使用访问者模式。
+转换器会遍历 AST 树，找出自己感兴趣的节点类型，再进行转换操作。这个过程和我们操作 DOM 树差不多，只不过目的不太一样。AST 遍历和转换一般会使用访问者模式。
 
 想象一下，Babel 有那么多插件，如果每个插件自己去遍历 AST，对不同的节点进行不同的操作，维护自己的状态。这样子不仅低效，它们的逻辑分散在各处，会让整个系统变得难以理解和调试，最后插件之间关系就纠缠不清，乱成一锅粥。
 
@@ -119,7 +119,7 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 1. 进行统一的遍历操作
 2. 提供节点的操作方法
-3. 响应式维护节点之间的关系；而插件(设计模式中称为‘具体访问者’)只需要定义自己感兴趣的节点类型，当访问者访问到对应节点时，就调用插件的访问(visit)方法。
+3. 响应式维护节点之间的关系，而插件(设计模式中称为具体访问者)只需要定义自己感兴趣的节点类型，当访问者访问到对应节点时，就调用插件的访问(visit)方法。
 
 ## 节点的遍历
 
@@ -152,11 +152,11 @@ File
               StringLiteral (right)  #'!'
 ```
 
-访问者会以深度优先的顺序, 或者说递归地对 AST 进行遍历，其调用顺序如下图所示:
+访问者会以深度优先的顺序，或者说递归地对 AST 进行遍历，其调用顺序如下图所示:
 
 ![](res/2021-07-26-23-41-21.png)
 
-上图中绿线表示进入该节点，红线表示离开该节点。下面写一个超简单的’具体访问者’来还原上面的遍历过程:
+上图中绿线表示进入该节点，红线表示离开该节点。下面写一个超简单的具体访问者来还原上面的遍历过程:
 
 ```js
 const babel = require('@babel/core');
@@ -212,7 +212,7 @@ enter Program(program)
 exit Program(program)
 ```
 
-当访问者进入一个节点时就会调用 enter(进入) 方法，反之离开该节点时会调用 exit(离开) 方法。 一般情况下，插件不会直接使用 enter 方法，只会关注少数几个节点类型，所以具体访问者也可以这样声明访问方法:
+当访问者进入一个节点时就会调用 enter（进入）方法，反之离开该节点时会调用 exit（离开）方法。一般情况下，插件不会直接使用 enter 方法，只会关注少数几个节点类型，所以具体访问者也可以这样声明访问方法:
 
 ```js
 traverse(ast, {
@@ -252,13 +252,13 @@ Babel 会按照插件定义的顺序来应用访问方法，比如你注册了�
 ```js
 {
   "plugins": [
-    "@babel/plugin-proposal-decorators",     // 必须在plugin-proposal-class-properties之前
+    "@babel/plugin-proposal-decorators",     // 必须在 plugin-proposal-class-properties 之前
     "@babel/plugin-proposal-class-properties"
   ]
 }
 ```
 
-所有插件定义的顺序，按照惯例，应该是新的或者说实验性的插件在前面，老的插件定义在后面。因为可能需要新的插件将 AST 转换后，老的插件才能识别语法（向后兼容）。下面是官方配置例子, 为了确保先后兼容，stage-\*阶段的插件先执行:
+所有插件定义的顺序，按照惯例，应该是新的或者说实验性的插件在前面，老的插件定义在后面。因为可能需要新的插件将 AST 转换后，老的插件才能识别语法（向后兼容）。下面是官方配置例子, 为了确保先后兼容，stage-\* 阶段的插件先执行:
 
 ```js
 {
@@ -272,14 +272,14 @@ Babel 会按照插件定义的顺序来应用访问方法，比如你注册了�
 
 访问者在访问一个节点时, 会无差别地调用 enter 方法，我们怎么知道这个节点在什么位置以及和其他节点的关联关系呢？
 
-通过上面的代码，读者应该可以猜出几分，每个 visit 方法都接收一个 Path 对象, 你可以将它当做一个‘上下文’对象，类似于 JQuery 的 `JQuery(const $el = $('.el'))` 对象，这里面包含了很多信息：
+通过上面的代码，读者应该可以猜出几分，每个 visit 方法都接收一个 Path 对象, 你可以将它当做一个上下文对象，类似于 JQuery 的 `JQuery(const $el = $('.el'))` 对象，这里面包含了很多信息：
 
 - 当前节点信息
 - 节点的关联信息。父节点、子节点、兄弟节点等等
 - 作用域信息
 - 上下文信息
 - 节点操作方法。节点增删查改
-- 断言方法。isXXX, assertXXX
+- 断言方法。isXXX，assertXXX
 
 下面是它的主要结构:
 
@@ -311,27 +311,27 @@ export class NodePath<T = Node> {
 }
 ```
 
-你可以通过这个手册来学习怎么通过 Path 来转换 AST. 后面也会有代码示例，这里就不展开细节了
+你可以通过这个手册来学习怎么通过 Path 来转换 AST，后面也会有代码示例，这里就不展开细节了
 
 ## 副作用的处理
 
-实际上访问者的工作比我们想象的要复杂的多，上面示范的是静态 AST 的遍历过程。而 AST 转换本身是有副作用的，比如插件将旧的节点替换了，那么访问者就没有必要再向下访问旧节点了，而是继续访问新的节点, 代码如下。
+实际上访问者的工作比我们想象的要复杂的多，上面示范的是静态 AST 的遍历过程。而 AST 转换本身是有副作用的，比如插件将旧的节点替换了，那么访问者就没有必要再向下访问旧节点了，而是继续访问新的节点，代码如下。
 
 ```js
 traverse(ast, {
   ExpressionStatement(path) {
-    // 将 `console.log('hello' + v + '!')` 替换为 `return ‘hello’ + v`
+    // 将 console.log('hello' + v + '!') 替换为 return 'hello' + v
     const rtn = t.returnStatement(t.binaryExpression('+', t.stringLiteral('hello'), t.identifier('v')))
     path.replaceWith(rtn)
   },
 }
 ```
 
-上面的代码, 将 `console.log('hello' + v + '!')` 语句替换为`return "hello" + v`, 下图是遍历的过程：
+上面的代码, 将 `console.log('hello' + v + '!')` 语句替换为`return 'hello' + v`, 下图是遍历的过程：
 
 ![](res/2021-07-26-23-54-26.png)
 
-我们可以对 AST 进行任意的操作，比如删除父节点的兄弟节点、删除第一个子节点、新增兄弟节点，当这些操作’污染’了 AST 树后，访问者需要记录这些状态，响应式(Reactive)更新 Path 对象的关联关系, 保证正确的遍历顺序，从而获得正确的转译结果。
+我们可以对 AST 进行任意的操作，比如删除父节点的兄弟节点、删除第一个子节点、新增兄弟节点，当这些操作污染了 AST 树后，访问者需要记录这些状态，响应式(Reactive)更新 Path 对象的关联关系，保证正确的遍历顺序，从而获得正确的转译结果。
 
 ## 作用域的处理
 
@@ -346,7 +346,7 @@ function add(foo, bar) {
 }
 ```
 
-比如你要将 add 函数的第一个参数 foo 标识符修改为 a, 你就需要递归遍历子树，查出 foo 标识符的所有引用, 然后替换它:
+比如你要将 add 函数的第一个参数 foo 标识符修改为 a，你就需要递归遍历子树，查出 foo 标识符的所有引用，然后替换它
 
 ```js
 traverse(ast, {
@@ -376,17 +376,17 @@ console.log(generate(ast).code);
 // }
 ```
 
-替换成 a 之后, `console.log(a, b)` 的行为就被破坏了。所以这里不能用 a，得换个标识符, 譬如 c.
+替换成 a 之后, `console.log(a, b)` 的行为就被破坏了。所以这里不能用 a，得换个标识符，譬如 c
 
 这就是转换器需要考虑的作用域问题，AST 转换的前提是保证程序的正确性。我们在添加和修改引用时，需要确保与现有的所有引用不冲突。Babel 本身不能检测这类异常，只能依靠插件开发者谨慎处理。
 
-Javascript 采用的是词法作用域, 也就是根据源代码的词法结构来确定作用域：
+Javascript 采用的是词法作用域，也就是根据源代码的词法结构来确定作用域：
 
 ![](res/2021-07-27-00-00-26.png)
 
-在词法区块(block)中，由于新建变量、函数、类、函数参数等创建的标识符，都属于这个区块作用域. 这些标识符也称为绑定(Binding)，而对这些绑定的使用称为引用(Reference)
+在词法区块(block)中，由于新建变量、函数、类、函数参数等创建的标识符，都属于这个区块作用域。这些标识符也称为绑定(Binding)，而对这些绑定的使用称为引用(Reference)
 
-在 Babel 中，使用 Scope 对象来表示作用域。 我们可以通过 Path 对象的 scope 字段来获取当前节点的 Scope 对象。它的结构如下:
+在 Babel 中，使用 Scope 对象来表示作用域。我们可以通过 Path 对象的 scope 字段来获取当前节点的 Scope 对象。它的结构如下:
 
 ```js
 {
@@ -398,7 +398,7 @@ Javascript 采用的是词法作用域, 也就是根据源代码的词法结构�
 }
 ```
 
-Scope 对象和 Path 对象差不多，它包含了作用域之间的关联关系(通过 parent 指向父作用域)，收集了作用域下面的所有绑定(bindings), 另外还提供了丰富的方法来操作作用域。
+Scope 对象和 Path 对象差不多，它包含了作用域之间的关联关系(通过 parent 指向父作用域)，收集了作用域下面的所有绑定(bindings)，另外还提供了丰富的方法来操作作用域。
 
 我们可以通过 bindings 属性获取当前作用域下的所有绑定(即标识符)，每个绑定由 Binding 类来表示：
 
@@ -418,7 +418,7 @@ export class Binding {
 
 通过 Binding 对象我们可以确定标识符被引用的情况。
 
-Ok，有了 Scope 和 Binding, 现在有能力实现安全的变量重命名转换了。为了更好地展示作用域交互，在上面代码的基础上，我们再增加一下难度：
+Ok，有了 Scope 和 Binding，现在有能力实现安全的变量重命名转换了。为了更好地展示作用域交互，在上面代码的基础上，我们再增加一下难度：
 
 ```js
 const a = 1;
@@ -577,17 +577,17 @@ generateUid(name: string = "temp") {
 }
 ```
 
-作用域操作最典型的场景是代码压缩，代码压缩会对变量名、函数名等进行压缩… 然而实际上很少的插件场景需要跟作用域进行复杂的交互，所以关于作用域这一块就先讲到这里。
+作用域操作最典型的场景是代码压缩，代码压缩会对变量名、函数名等进行压缩，然而实际上很少的插件场景需要跟作用域进行复杂的交互，所以关于作用域这一块就先讲到这里。
 
 # 写一个插件
 
-现在打算模仿 babel-plugin-import, 写一个极简版插件，来实现模块的按需导入. 在这个插件中，我们会将类似这样的导入语句:
+现在打算模仿 babel-plugin-import，写一个极简版插件，来实现模块的按需导入。在这个插件中，我们会将类似这样的导入语句
 
 ```js
 import { A, B, C as D } from 'foo';
 ```
 
-转换为:
+转换为
 
 ```js
 import A from 'foo/A';
@@ -602,7 +602,7 @@ import 'foo/C/style.css';
 
 ![](res/2021-07-27-00-15-44.png)
 
-通过上面展示的结果，我们需要处理 ImportDeclaration 节点类型，将它的 specifiers 拿出来遍历处理一下。另外如果用户使用了默认导入语句，我们将抛出错误，提醒用户不能使用默认导入.
+通过上面展示的结果，我们需要处理 ImportDeclaration 节点类型，将它的 specifiers 拿出来遍历处理一下。另外如果用户使用了默认导入语句，我们将抛出错误，提醒用户不能使用默认导入
 
 基本实现如下:
 
@@ -646,7 +646,7 @@ traverse(ast, {
 
 逻辑还算简单，babel-plugin-import 可比这复杂得多。
 
-接下来，我们将它封装成标准的 Babel 插件。按照规范，我们需要创建一个 babel-plugin-\*前缀的包名：
+接下来，我们将它封装成标准的 Babel 插件。按照规范，我们需要创建一个 babel-plugin-\* 前缀的包名：
 
 ```bash
 mkdir babel-plugin-toy-import

@@ -330,17 +330,24 @@ exports.chunk2 = chunk2;
 
 ## 入口参数为数组
 
+chunk1.js
+
+```js
+var chunk1 = 1;
+exports.chunk1 = chunk1;
+```
+
 main.js
 
 ```js
-var chunk2 = require('./chunk2');
+var chunk1 = require('./chunk1');
 console.log(chunk1);
 ```
 
 main1.js
 
 ```js
-var chunk2 = require('./chunk2');
+var chunk1 = require('./chunk1');
 ```
 
 webpack.config.js
@@ -359,31 +366,38 @@ module.exports = {
 
 ```js
 [
-  /* 0 */
+  /* 0：运行模块 main，main1 */
   function(module, exports, __webpack_require__) {
     __webpack_require__(1);
     module.exports = __webpack_require__(3);
   },
-  /* 1 */
+  /* 1：main 模块 */
   function(module, exports, __webpack_require__) {
     var chunk1 = __webpack_require__(2);
     console.log(chunk1);
   },
-  /* 2 */
+  /* 2：chunk1 模块 */
   function(module, exports) {
     var chunk1 = 1;
     exports.chunk1 = chunk1;
   },
-  /* 3 */
+  /* 3：main1 模块 */
   function(module, exports, __webpack_require__) {
     var chunk1 = __webpack_require__(2);
   }
 ];
 ```
 
-这里只截取自执行匿名函数的参数，因为其他代码与之前一样。可以看到 1 就是 main 模块，2 就是 chunk1 模块，3 就是 main1 模块，0 的作用就是运行模块 main,main1,然后将 main1 模块导出（main1 中没有导出项，所以到导出{}），总结一下：入口参数是字符串不管是多入口还是单入口，最后都会将入口模块的导出项导出，没有导出项就导出{}，而入口参数是数组，就会将最后一个模块导出（webpack 官网有说明）
+这里只截取自执行匿名函数的参数，因为其他代码与之前一样。可以看到 1 就是 main 模块，2 就是 chunk1 模块，3 就是 main1 模块，0 的作用就是运行模块 main、main1，然后将 main1 模块导出（main1 中没有导出项，所以到导出 `{}`），总结一下：入口参数是字符串不管是多入口还是单入口，最后都会将入口模块的导出项导出，没有导出项就导出 `{}`，而入口参数是数组，就会将最后一个模块导出（webpack 官网有说明）
 
 ## 使用 CommonsChunkPlugin 插件
+
+chunk1.js
+
+```js
+var chunk1 = 1;
+exports.chunk1 = chunk1;
+```
 
 main.js
 
@@ -422,7 +436,7 @@ module.exports = {
 
 main、main1 都 require 了 chunk1，所以 chunk1 会被打包到 common。
 
-打包后，common.js
+common.js
 
 ```js
 (function(modules) {
@@ -540,7 +554,7 @@ webpackJsonp(
 );
 ```
 
-与之前相比，多了 webpackJsonp 函数，立即执行的匿名函数没有立即调用`__webpack_require__(0)`。看一下 webpackJsonp
+与之前相比，多了 webpackJsonp 函数，立即执行的匿名函数没有立即调用`__webpack_require__(0)`，看一下 webpackJsonp
 
 ```js
 var parentJsonpFunction = window['webpackJsonp'];
@@ -645,13 +659,13 @@ module.exports = {
 };
 ```
 
-main,main1 都分别 require chunk1,chunk2，然后将 chunk1 打包到公共模块（minChunks:3，chunk2 不会被打包到公共模块），自运行匿名函数最后多了
+main、main1 都分别 require chunk1、chunk2，然后将 chunk1 打包到公共模块（minChunks:3，chunk2 不会被打包到公共模块），自运行匿名函数最后多了
 
 ```js
 return __webpack_require__(0);
 ```
 
-则 `installedModules[0]` 为已经 loaded,看 common.js，`installedModules[1]` 也会 loaded。
+则 `installedModules[0]` 为已经 loaded，看 common.js，`installedModules[1]` 也会 loaded。
 
 main.js
 
@@ -734,7 +748,7 @@ var moduleId,
   callbacks = [];
 for (; i < chunkIds.length; i++) {
   chunkId = chunkIds[i]; // 1
-  //false, 赋值为 0 后还是 false
+  // false, 赋值为 0 后还是 false
   if (installedChunks[chunkId]) callbacks.push.apply(callbacks, installedChunks[chunkId]);
   installedChunks[chunkId] = 0;
 }
@@ -809,12 +823,12 @@ if (parentJsonpFunction) parentJsonpFunction(chunkIds, moreModules);
 while (callbacks.length) callbacks.shift().call(null, __webpack_require__);
 if (moreModules[0]) {
   installedModules[0] = 0;
-  // moreModules[0] 即 modules[0] 依赖 modules[1]、即 modules[2](没有被覆盖很关键)
+  // moreModules[0] 即 modules[0] 依赖 modules[1]、即 modules[2]（没有被覆盖很关键）
   return __webpack_require__(0);
 }
 ```
 
-还有这种打包情况：common.js 不包含公共模块，即自执行函数参数为[]。
+还有这种打包情况：common.js 不包含公共模块，即自执行函数参数为 `[]`。
 
 main.js
 
@@ -1056,7 +1070,7 @@ function(module, exports, __webpack_require__) {
 // This file contains only the entry chunk.
 // The chunk loading function for additional chunks
 __webpack_require__.e = function requireEnsure(chunkId, callback) {
-  //installedChunks[1]为undefined
+  // installedChunks[1] 为 undefined
   // "0" is the signal for "already loaded"
   if (installedChunks[chunkId] === 0) return callback.call(null, __webpack_require__); // an array means "currently loading".
 
@@ -1064,7 +1078,7 @@ __webpack_require__.e = function requireEnsure(chunkId, callback) {
     installedChunks[chunkId].push(callback);
   } else {
     // start chunk loading
-    installedChunks[chunkId] = [callback]; //installedChunks[1] 为数组，表明 currently loading
+    installedChunks[chunkId] = [callback]; // installedChunks[1] 为数组，表明 currently loading
     var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
     script.type = 'text/javascript';
@@ -1103,7 +1117,7 @@ window['webpackJsonp'] = function webpackJsonpCallback(chunkIds, moreModules) {
   for (; i < chunkIds.length; i++) {
     chunkId = chunkIds[i];
     if (installedChunks[chunkId])
-      // installedChunks[0]==0,installedChunks[1] 为数组
+      // installedChunks[0]==0，installedChunks[1] 为数组
       callbacks.push.apply(callbacks, installedChunks[chunkId]); // callbacks 为模块 main 执行代码，不为数组
     installedChunks[chunkId] = 0; // installedChunks[1] 不为数组，表明已经加载
   }
@@ -1139,7 +1153,7 @@ window['webpackJsonp'] = function webpackJsonpCallback(chunkIds, moreModules) {
 
 1. 不管有多少个模块，头部那一块都是一样的，所以可以写成一个模板，也就是 templateSingle.js。
 2. 需要分析出各个模块间的依赖关系。也就是说，需要知道 example 依赖于 a、b 和 c。
-3. c 模块位于 node_modules 文件夹当中，但是我们调用的时候却可以直接 require('c')，这里肯定是存在某种自动查找的功能。
+3. c 模块位于 node_modules 文件夹当中，但是我们调用的时候却可以直接 `require('c')`，这里肯定是存在某种自动查找的功能。
 4. 在生成的 output.js 中，每个模块的唯一标识是模块的 ID，所以在拼接 output.js 的时候，需要将每个模块的名字替换成模块的 ID。
 
    ```js
@@ -1161,7 +1175,7 @@ ok，下面我们来逐一看看这些问题
 CommonJS 不同于 AMD，是不会在一开始声明所有依赖的。CommonJS 最显著的特征就是用到的时候再 require，所以我们得在整个文件的范围内查找到底有多少个 require。怎么办呢？最先蹦入脑海的思路是正则。然而，用正则来匹配 require，有以下两个缺点：
 
 1. 如果 require 是写在注释中，也会匹配到。
-2. 如果后期要支持 require 的参数是表达式的情况，如 require('a'+'b')，正则很难处理。
+2. 如果后期要支持 require 的参数是表达式的情况，如 `require('a'+'b')`，正则很难处理。
 
 因此，正则行不通。
 
@@ -1279,7 +1293,7 @@ let c = require('c');
 
 ## 遗留问题
 
-1. 尚未支持 require('a' + 'b')这种情况。
+1. 尚未支持 `require('a' + 'b')` 这种情况。
 2. 如何实现自动 watch 的功能？
 3. 其 loader 或者插件机制又是怎样的？
 
