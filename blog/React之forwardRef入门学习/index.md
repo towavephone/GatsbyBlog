@@ -11,11 +11,11 @@ path: /react-forwardRef-practice-learn/
 
 在 `React.createRef` 中已经介绍过，有三种方式可以使用 React 元素的 ref
 
-ref 是为了获取某个节点的实例，但是 函数式组件（PureComponent） 是没有实例的，不存在 this 的，这种时候是拿不到函数式组件的 ref 的。
+ref 是为了获取某个节点的实例，但是函数式组件（PureComponent）是没有实例的，不存在 this 的，这种时候是拿不到函数式组件的 ref 的。
 
-为了解决这个问题，由此引入 `React.forwardRef`， **`React.forwardRef` 允许某些组件接收 ref，并将其向下传递给 子组件**
+为了解决这个问题，由此引入 `React.forwardRef`， `React.forwardRef` 允许某些组件接收 ref，并将其向下传递给子组件
 
-```js
+```jsx
 const ForwardInput = React.forwardRef((props, ref) => (
   <input ref={ref} />
 ));
@@ -42,9 +42,9 @@ class TestComponent extends React.Component {
 
 - **函数组件 和 class 组件均不接收 `ref` 参数** ，即 props 中不存在 `ref`，**ref 必须独立 props** 出来，否则会被 React 特殊处理掉。
 
-- **通常在 高阶组件（HOC） 中使用 `React.forwardRef`**
+- **通常在高阶组件（HOC）中使用 `React.forwardRef`**
 
-  ```js
+  ```jsx
   function enhance(WrappedComponent) {
     class Enhance extends React.Component {
       componentWillReceiveProps(nextProps) {
@@ -79,7 +79,7 @@ class TestComponent extends React.Component {
   const ref = React.createRef();
 
   // 我们导入的 EnhancedComponent 组件是高阶组件（HOC）Enhance。
-  // 通过React.forwardRef 将 ref 将指向了 Enhance 内部的 MyComponent 组件
+  // 通过 React.forwardRef 将 ref 将指向了 Enhance 内部的 MyComponent 组件
   // 这意味着我们可以直接调用 ref.current.focus() 方法
   <EnhancedComponent label='Click Me' handleClick={handleClick} ref={ref} />;
   ```
@@ -88,7 +88,7 @@ class TestComponent extends React.Component {
 
 `useImperativeHandle` 可以让你在使用 `ref` 时自定义暴露给父组件的实例值。在大多数情况下，应当避免使用 ref 这样的命令式代码。`useImperativeHandle` 应当与 `forwardRef`一起使用：
 
-```js
+```jsx
 function FancyInput(props, ref) {
   const inputRef = useRef();
   useImperativeHandle(ref, () => ({
@@ -96,7 +96,7 @@ function FancyInput(props, ref) {
       inputRef.current.focus();
     }
   }));
-  return <input ref={inputRef} ... />;
+  return <input ref={inputRef} />;
 }
 FancyInput = forwardRef(FancyInput);
 ```
@@ -143,9 +143,9 @@ export default function forwardRef<Props, ElementType: React$ElementType>(
 
   /**
    * REACT_FORWARD_REF_TYPE 并不是 React.forwardRef 创建的实例的 $$typeof
-   * React.forwardRef 返回的是一个对象，而 ref 是通过实例的参数形式传递进去的，
+   * React.forwardRef 返回的是一个对象，而 ref 是通过实例的参数形式传递进去的
    * 实际上，React.forwardRef 返回的是一个 ReactElement，它的 $$typeof 也就是 REACT_ELEMENT_TYPE
-   * 而 返回的对象 是作为 ReactElement 的 type 存在
+   * 而返回的对象是作为 ReactElement 的 type 存在
    */
   return {
     // 返回一个对象

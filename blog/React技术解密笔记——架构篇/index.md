@@ -16,14 +16,14 @@ render 阶段开始于 performSyncWorkOnRoot 或 performConcurrentWorkOnRoot 方
 我们现在还不需要学习这两个方法，只需要知道在这两个方法中会调用如下两个方法：
 
 ```js
-// performSyncWorkOnRoot会调用该方法
+// performSyncWorkOnRoot 会调用该方法
 function workLoopSync() {
   while (workInProgress !== null) {
     performUnitOfWork(workInProgress);
   }
 }
 
-// performConcurrentWorkOnRoot会调用该方法
+// performConcurrentWorkOnRoot 会调用该方法
 function workLoopConcurrent() {
   while (workInProgress !== null && !shouldYield()) {
     performUnitOfWork(workInProgress);
@@ -239,10 +239,10 @@ switch (workInProgress.tag) {
 ```js
 export function reconcileChildren(current: Fiber | null, workInProgress: Fiber, nextChildren: any, renderLanes: Lanes) {
   if (current === null) {
-    // 对于mount的组件
+    // 对于 mount 的组件
     workInProgress.child = mountChildFibers(workInProgress, null, nextChildren, renderLanes);
   } else {
-    // 对于update的组件
+    // 对于 update 的组件
     workInProgress.child = reconcileChildFibers(workInProgress, current.child, nextChildren, renderLanes);
   }
 }
@@ -361,10 +361,10 @@ case HostComponent: {
   const type = workInProgress.type;
 
   if (current !== null && workInProgress.stateNode != null) {
-    // update的情况
+    // update 的情况
     // ...省略
   } else {
-    // mount的情况
+    // mount 的情况
     // ...省略
   }
   return null;
@@ -377,14 +377,14 @@ case HostComponent: {
 
 - onClick、onChange 等回调函数的注册
 - 处理 style prop
-- 处理 DANGEROUSLY_SET_INNER_HTML prop
+- 处理 `DANGEROUSLY_SET_INNER_HTML` prop
 - 处理 children prop
 
 我们去掉一些当前不需要关注的功能（比如 ref），可以看到最主要的逻辑是调用 updateHostComponent 方法。
 
 ```js
 if (current !== null && workInProgress.stateNode != null) {
-  // update的情况
+  // update 的情况
   updateHostComponent(current, workInProgress, type, newProps, rootContainerInstance);
 }
 ```
@@ -966,7 +966,7 @@ commitMutationEffects 会遍历 effectList，对每个 Fiber 节点执行如下�
 
 ```jsx
 function Item() {
-  return <li><li>;
+  return <li></li>;
 }
 
 function App() {
@@ -983,11 +983,11 @@ ReactDOM.render(<App/>, document.getElementById('root'));
 对应的 Fiber 树和 DOM 树 结构为：
 
 ```
-// Fiber树
+// Fiber 树
           child      child      child       child
 rootFiber -----> App -----> div -----> Item -----> li
 
-// DOM树
+// DOM 树
 #root ---> div ---> li
 ```
 
@@ -1007,12 +1007,12 @@ function App() {
 对应的 Fiber 树和 DOM 树结构为：
 
 ```
-// Fiber树
+// Fiber 树
           child      child      child
 rootFiber -----> App -----> div -----> p
                                        | sibling       child
                                        | -------> Item -----> li
-// DOM树
+// DOM 树
 #root ---> div ---> p
              |
                ---> li

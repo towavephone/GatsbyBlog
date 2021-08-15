@@ -11,9 +11,9 @@ path: /react-component-practice-learn/
 
 ## 纯组件
 
-`React.PureComponent` ，和 `React.Component` 类似，都是定义一个组件类。不同是 `React.Component` 没有实现 `shouldComponentUpdate()`，而 `React.PureComponent` 通过 `props` 和 `state` 的**浅比较**实现了。
+`React.PureComponent` 和 `React.Component` 类似，都是定义一个组件类。不同是 `React.Component` 没有实现 `shouldComponentUpdate()`，而 `React.PureComponent` 通过 `props` 和 `state` 的浅比较实现了。
 
-```js
+```jsx
 // React.PureComponent 纯组件
 class Counter extends React.PureComponent {
   constructor(props) {
@@ -32,9 +32,9 @@ class Counter extends React.PureComponent {
 
 ## 函数组件
 
-定义 React 组件的**最简单**方式就是定义一个函数组件，它接受单一的 props 并返回一个 React 元素。
+定义 React 组件的最简单方式就是定义一个函数组件，它接受单一的 props 并返回一个 React 元素。
 
-```js
+```jsx
 // 函数组件
 function Counter(props) {
   return <div>Counter: {props.count}</div>;
@@ -47,20 +47,20 @@ class Counter extends React.Component {
 }
 ```
 
-- 在 函数组件 中，它的输入输出全部由 props 决定，且不会产生任何副作用，这说明 **函数组件 也是 无状态组件**。
-- 在函数组件中，无法修改 props，无法使用 state 及组件的生命周期，说明 **函数组件 也是 展示组件**。
-- 函数组件 的功能只是接收 props，渲染页面，它不执行与 UI 无关的逻辑处理，它只是一个**纯函数**。
-- 函数组件，相对于类组件来说，更加简洁。无论是复用性还是性能，都**优于类组件**。
+- 在函数组件中，它的输入输出全部由 props 决定，且不会产生任何副作用，这说明函数组件也是无状态组件。
+- 在函数组件中，无法修改 props，无法使用 state 及组件的生命周期，说明函数组件也是展示组件。
+- 函数组件的功能只是接收 props，渲染页面，它不执行与 UI 无关的逻辑处理，它只是一个纯函数。
+- 函数组件，相对于类组件来说，更加简洁。无论是复用性还是性能，都优于类组件。
 
 ## 受控组件与非受控组件
 
-**受控和非受控主要是取决于组件是否受父级传入的 props 控制**
+受控和非受控主要是取决于组件是否受父级传入的 props 控制
 
-用 props 传入数据的话，组件可以被认为是**受控**（因为组件被父级传入的 props 控制）。
+用 props 传入数据的话，组件可以被认为是受控（因为组件被父级传入的 props 控制）。
 
-数据只保存在组件内部的 state 的话，是**非受控**组件（因为外部没办法直接控制 state）。
+数据只保存在组件内部的 state 的话，是非受控组件（因为外部没办法直接控制 state）。
 
-```js
+```jsx
 export default class AnForm extends React.Component {
   state = {
     name: ''
@@ -95,9 +95,9 @@ export default class AnForm extends React.Component {
 
 ### 受控组件
 
-与 html 不同的是，在 React 中，`<input>`或`<select>`、`<textarea>`等这类组件，不会主动维持自身状态，并根据用户输入进行更新。它们都要绑定一个`onChange`事件；每当状态发生变化时，都要写入组件的 state 中，在 React 中被称为**受控组件**。
+与 html 不同的是，在 React 中，`<input>`或`<select>`、`<textarea>`等这类组件，不会主动维持自身状态，并根据用户输入进行更新。它们都要绑定一个`onChange`事件；每当状态发生变化时，都要写入组件的 state 中，在 React 中被称为受控组件。
 
-```js
+```jsx
 export default class AnForm extends React.Component {
   constructor(props) {
     super(props);
@@ -113,11 +113,11 @@ export default class AnForm extends React.Component {
 }
 ```
 
-- **onChange & value 模式**（单选按钮和复选按钮对应的是 checked props）
+- onChange & value 模式（单选按钮和复选按钮对应的是 checked props）
 
-- react 通过这种方式**消除了组件的局部状态，**使得应用的整个**状态可控**。
+- react 通过这种方式消除了组件的局部状态，使得应用的整个状态可控。
 
-- 注意 `<input type="file" />`，它是一个**非受控组件**。
+- 注意 `<input type="file" />`，它是一个非受控组件。
 
 - 可以使用计算属性名将多个相似的操作组合成一个。
 
@@ -131,7 +131,7 @@ export default class AnForm extends React.Component {
 
 非受控组件不再将数据保存在 state，而使用 refs，将真实数据保存在 DOM 中。
 
-```js
+```jsx
 export default class AnForm extends Component {
   handleSubmitClick = () => {
     const name = this._name.value;
@@ -148,21 +148,21 @@ export default class AnForm extends Component {
 }
 ```
 
-- **非受控组件是最简单快速**的实现方式，项目中出现极简的表单时，使用它，但**受控组件才是是最权威的**。
-- 通常指定一个 **defaultValue/defaultChecked** 默认值来控制初始状态，不使用 value。
+- 非受控组件是最简单快速的实现方式，项目中出现极简的表单时使用它，但受控组件才是最权威的。
+- 通常指定一个 defaultValue/defaultChecked 默认值来控制初始状态，不使用 value。
 - 非受控组件相比于受控组件，更容易同时集成 React 和非 React 代码。
 
-- 使用场景
+### 使用场景
 
-  | 特征 | 非受控组件 | 受控组件 |
-  | --- | --- | --- |
-  | one-time value retrieval (e.g. on submit) | ✅ | ✅ |
-  | [validating on submit](https://goshakkk.name/submit-time-validation-react/) | ✅ | ✅ |
-  | [instant field validation](https://goshakkk.name/instant-form-fields-validation-react/) | ❌ | ✅ |
-  | [conditionally disabling submit button](https://goshakkk.name/form-recipe-disable-submit-button-react/) | ❌ | ✅ |
-  | enforcing input format | ❌ | ✅ |
-  | several inputs for one piece of data | ❌ | ✅ |
-  | [dynamic inputs](https://goshakkk.name/array-form-inputs/) | ❌ | ✅ |
+| 特征 | 非受控组件 | 受控组件 |
+| :---: | :---: | :---: |
+| one-time value retrieval (e.g. on submit) | ✅ | ✅ |
+| [validating on submit](https://goshakkk.name/submit-time-validation-react/) | ✅ | ✅ |
+| [instant field validation](https://goshakkk.name/instant-form-fields-validation-react/) | ❌ | ✅ |
+| [conditionally disabling submit button](https://goshakkk.name/form-recipe-disable-submit-button-react/) | ❌ | ✅ |
+| enforcing input format | ❌ | ✅ |
+| several inputs for one piece of data | ❌ | ✅ |
+| [dynamic inputs](https://goshakkk.name/array-form-inputs/) | ❌ | ✅ |
 
 ## 有状态组件与无状态组件
 
@@ -170,7 +170,7 @@ export default class AnForm extends Component {
 
 通过 state 管理状态
 
-```js
+```jsx
 export default class Counter extends React.Component {
   constructor(props) {
     super(props);
@@ -190,12 +190,12 @@ export default class Counter extends React.Component {
 
 输入输出数据完全由 props 决定，而且不会产生任何副作用。
 
-```js
+```jsx
 const Button = (props) => <button onClick={props.onClick}>{props.text}</button>;
 ```
 
 - 无状态组件一般会搭配高阶组件（简称：HOC）一起使用，高阶组件用来托管 state，Redux 框架就是通过 store 管理数据源和所有状态，其中所有负责展示的组件都使用无状态函数式的写法。
-- 一个简单的 无状态(stateless) 按钮组件，仅依赖于 props(属性) ，这也称为**函数式组件**。
+- 一个简单的无状态(stateless) 按钮组件，仅依赖于 props（属性），这也称为函数式组件。
 
 ## 展示组件与容器组件
 
@@ -203,7 +203,7 @@ const Button = (props) => <button onClick={props.onClick}>{props.text}</button>;
 
 展示组件指不关心数据是怎么加载和变动的，只关注于页面展示效果的组件。
 
-```js
+```jsx
 class TodoList extends React.Component {
   constructor(props) {
     super(props);
@@ -234,8 +234,8 @@ class TodoList extends React.Component {
 
 容器组件只关心数据是怎么加载和变动的，而不关注于页面展示效果。
 
-```js
-//容器组件
+```jsx
+// 容器组件
 class TodoListContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -283,7 +283,7 @@ class TodoListContainer extends React.Component {
 - **属性代理（props proxy）**，高阶组件通过被包裹的 React 组件来操作 props。
 - **反向继承（inheritance inversion）**，高阶组件继承于被包裹的 React 组件。
 
-```js
+```jsx
 // 属性代理
 export default function withHeader(WrappedComponent) {
   return class HOC extends React.Component { // 继承与 React.component
@@ -291,7 +291,7 @@ export default function withHeader(WrappedComponent) {
       const newProps = {
         test:'hoc'
       }
-      // 透传props，并且传递新的newProps
+      // 透传 props，并且传递新的 newProps
       return <div>
         <WrappedComponent {...this.props} {...newProps}/>
       </div>
@@ -303,7 +303,7 @@ export default function withHeader(WrappedComponent) {
 export default function (WrappedComponent) {
   return class Inheritance extends WrappedComponent { // 继承于被包裹的 React 组件
     componentDidMount() {
-      // 可以方便地得到state，做一些更深入的修改。
+      // 可以方便地得到 state，做一些更深入的修改。
       console.log(this.state);
     }
     render() {
@@ -327,7 +327,7 @@ Hook 是 React 16.8 的新增特性。它可以让你在不编写 class 的情�
 
 但与 class 生命周期不同的是，Hook 更接近于实现状态同步，而不是响应生命周期事件。
 
-```js
+```jsx
 import React, { useState, useEffect } from 'react';
 
 function Example() {

@@ -80,7 +80,7 @@ JS 脚本执行 -----  样式布局 ----- 样式绘制
 接下来我们开启 Concurrent Mode（后续章节会讲到，当前你只需了解开启后会启用时间切片）：
 
 ```js
-// 通过使用ReactDOM.unstable_createRoot开启Concurrent Mode
+// 通过使用 ReactDOM.unstable_createRoot 开启 Concurrent Mode
 // ReactDOM.render(<App/>, rootEl);
 ReactDOM.unstable_createRoot(rootEl).render(<App />);
 ```
@@ -521,11 +521,11 @@ function FiberNode(tag: WorkTag, pendingProps: mixed, key: null | string, mode: 
 每个 Fiber 节点有个对应的 React element，多个 Fiber 节点是如何连接形成树呢？靠如下三个属性：
 
 ```js
-// 指向父级 Fiber 节点
+// 每个子节点指向父级 Fiber 节点
 this.return = null;
-// 指向子 Fiber 节点
+// 父节点指向第一个子 Fiber 节点
 this.child = null;
-// 指向右边第一个兄弟 Fiber 节点
+// 同层间是单向链表，指向右边第一个兄弟 Fiber 节点
 this.sibling = null;
 ```
 
@@ -579,7 +579,7 @@ this.dependencies = null;
 
 this.mode = mode;
 
-// 保存本次更新会造成的DOM操作
+// 保存本次更新会造成的 DOM 操作
 this.effectTag = NoEffect;
 this.nextEffect = null;
 
@@ -661,7 +661,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
    之所以要区分 fiberRootNode 与 rootFiber，是因为在应用中我们可以多次调用 ReactDOM.render 渲染不同的组件树，他们会拥有不同的 rootFiber。但是整个应用的根节点只有一个，那就是 fiberRootNode。
 
-   fiberRootNode 的 current 会指向当前页面上已渲染内容对应对 Fiber 树，被称为 current Fiber 树。
+   fiberRootNode 的 current 会指向当前页面上已渲染内容对应 Fiber 树，被称为 current Fiber 树。
 
    ![](res/2021-01-21-11-51-03.png)
 

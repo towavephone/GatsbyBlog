@@ -168,7 +168,7 @@ function reconcileSingleElement(returnFiber: Fiber, currentFirstChild: Fiber | n
     child = child.sibling;
   }
 
-  // 创建新Fiber，并返回 ...省略
+  // 创建新 Fiber，并返回...省略
 }
 ```
 
@@ -1225,7 +1225,7 @@ shared.pending: A1 --> B2 --> C1 --> D2
 ```js
 baseState: '';
 baseUpdate: null;
-render阶段使用的Update: [A1, C1];
+render 阶段使用的 Update: [A1, C1];
 memoizedState: 'AC';
 ```
 
@@ -1238,7 +1238,7 @@ memoizedState: 'AC';
 ```js
 baseState: 'A';
 baseUpdate: B2-- > C1-- > D2;
-render阶段使用的Update: [B2, C1, D2];
+render 阶段使用的 Update: [B2, C1, D2];
 memoizedState: 'ABCD';
 ```
 

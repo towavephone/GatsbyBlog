@@ -11,7 +11,7 @@ path: /react-purecomponent-practice-learn/
 
 `PureComponent` 最早在 React v15.3 版本中发布，主要是为了优化 React 应用而产生。
 
-```js
+```jsx
 class Counter extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -28,7 +28,7 @@ class Counter extends React.PureComponent {
 }
 ```
 
-在这段代码中， `React.PureComponent` 会浅比较 `props.color` 或 `state.count` 是否改变，来决定是否重新渲染组件。
+在这段代码中，`React.PureComponent` 会浅比较 `props.color` 或 `state.count` 是否改变，来决定是否重新渲染组件。
 
 - **实现**
 
@@ -43,7 +43,7 @@ class Counter extends React.PureComponent {
   当 props 或 state 为 **复杂的数据结构** （例如：嵌套对象和数组）时，因为 `React.PureComponent` 仅仅是 **浅比较** ，可能会渲染出 **错误的结果** 。这时有 **两种解决方案** ：
 
   - 当 **知道** 有深度数据结构更新时，可以直接调用 **forceUpdate** 强制更新
-  - 考虑使用 [immutable objects](https://facebook.github.io/immutable-js/) （不可突变的对象），实现快速的比较对象
+  - 考虑使用 [immutable objects](https://facebook.github.io/immutable-js/)（不可突变的对象），实现快速的比较对象
 
 - **注意**
 
@@ -51,7 +51,7 @@ class Counter extends React.PureComponent {
 
 # PureComponent 与 Stateless Functional Component
 
-对于 React 开发人员来说，知道何时在代码中使用 **Component**，**PureComponent ** 和 **Stateless Functional Component** 非常重要。
+对于 React 开发人员来说，知道何时在代码中使用 Component，PureComponent 和 Stateless Functional Component 非常重要。
 
 首先，让我们看一下无状态组件。
 
@@ -59,7 +59,7 @@ class Counter extends React.PureComponent {
 
 输入输出数据完全由 `props` 决定，而且不会产生任何副作用。
 
-```js
+```jsx
 const Button = (props) => <button onClick={props.onClick}>{props.text}</button>;
 ```
 
@@ -85,7 +85,7 @@ React 16.8 之后，React 引入 Hooks 。它可以让你在不编写 class 的�
 
 ## React.memo
 
-```js
+```jsx
 function MyComponent(props) {
   /* 使用 props 渲染 */
 }
@@ -104,10 +104,10 @@ function areEqual(prevProps, nextProps) {
 export default React.memo(MyComponent, areEqual);
 ```
 
-- `React.memo` 通过记忆组件渲染结果的方式实现 ，提高组件的性能
+- `React.memo` 通过记忆组件渲染结果的方式实现，提高组件的性能
 - 只会对 `props` 浅比较，如果相同，React 将跳过渲染组件的操作并直接复用最近一次渲染的结果。
 - 可以将自定义的比较函数作为第二个参数，实现自定义比较
-- 此方法仅作为**性能优化**的方式而存在。但请不要依赖它来“阻止”渲染，这会产生 bug。
+- 此方法仅作为性能优化的方式而存在。但请不要依赖它来“阻止”渲染，这会产生 bug。
 - 与 class 组件中 `shouldComponentUpdate()` 方法不同的是，如果 props 相等，`areEqual`会返回 `true`；如果 props 不相等，则返回 `false`。这与 `shouldComponentUpdate` 方法的返回值相反。
 
 # 使用 PureComponent 常见误区
@@ -118,7 +118,7 @@ export default React.memo(MyComponent, areEqual);
 
 例如：
 
-```js
+```jsx
 // FriendsItem 在父组件引用样式
 <FriendsItem key={friend.id} name={friend.name} id={friend.id} onDeleteClick={() => this.deleteFriends(friend.id)} />
 // 在父组件中绑定
@@ -127,7 +127,7 @@ export default React.memo(MyComponent, areEqual);
 
 其中，`FriendsItem` 为 `PureComponent`：
 
-```js
+```jsx
 // 其中 FriendsItem 为 PureComponent
 class FriendsItem extends React.PureComponent {
   render() {
@@ -154,14 +154,14 @@ class FriendsItem extends React.PureComponent {
 
 要解决这个问题，只需要将原本在父组件上的绑定放到子组件上即可。`FriendsItem` 将始终具有相同的 `props`，并且永远不会导致不必要的重新渲染。
 
-```js
+```jsx
 // FriendsItem 在父组件引用样式
 <FriendsItem key={friend.id} id={friend.id} name={friend.name} onClick={this.deleteFriends} />
 ```
 
 `FriendsItem`:
 
-```js
+```jsx
 class FriendsItem extends React.PureComponent {
   onDeleteClick = () => {
     this.props.onClick(this.props.id);
@@ -188,7 +188,7 @@ class FriendsItem extends React.PureComponent {
 
 考虑一个文章列表，您的个人资料组件将从中显示用户最喜欢的 10 个作品。
 
-```js
+```jsx
 render() {
   const { posts } = this.props
   // 在渲染函数中生成 topTen，并渲染
@@ -205,7 +205,7 @@ render() {
 
 例如，在组件的状态中设置派生 `state`，并仅在 `posts` 已更新时更新。
 
-```js
+```jsx
 componentWillMount() {
   this.setTopTenPosts(this.props.posts)
 }

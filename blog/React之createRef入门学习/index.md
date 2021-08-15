@@ -13,57 +13,63 @@ path: /react-createRef-practice-learn/
 
 # Refs
 
-React 的**核心思想**是每次对于界面 state 的改动，都会重新渲染整个 Virtual DOM，然后新老的两个 Virtual DOM 树进行 diff（**协调算法**），对比出变化的地方，然后通过 render 渲染到实际的 UI 界面，
+React 的核心思想是每次对于界面 state 的改动，都会重新渲染整个 Virtual DOM，然后新老的两个 Virtual DOM 树进行 diff（协调算法），对比出变化的地方，然后通过 render 渲染到实际的 UI 界面，
 
 使用 Refs 为我们提供了一种绕过状态更新和重新渲染时访问元素的方法；这在某些用例中很有用，但不应该作为 `props` 和 `state` 的替代方法。
 
-在项目开发中，如果我们可以使用 声明式 或 提升 state 所在的组件层级（状态提升） 的方法来更新组件，最好不要使用 refs。
+在项目开发中，如果我们可以使用声明式或提升 state 所在的组件层级（状态提升）的方法来更新组件，最好不要使用 refs。
 
 ## 使用场景
 
-- **管理焦点（如文本选择）或处理表单数据：** Refs 将管理文本框当前焦点选中，或文本框其它属性。
+### 管理焦点（如文本选择）或处理表单数据
 
-  在大多数情况下，我们推荐使用受控组件来处理表单数据。在一个受控组件中，表单数据是由 React 组件来管理的，每个状态更新都编写数据处理函数。另一种替代方案是使用非受控组件，这时表单数据将交由 DOM 节点来处理。要编写一个非受控组件，就需要使用 Refs 来从 DOM 节点中获取表单数据。
+Refs 将管理文本框当前焦点选中或文本框其它属性。
 
-  ```js
-  class NameForm extends React.Component {
-    constructor(props) {
-      super(props);
-      this.input = React.createRef();
-    }
+在大多数情况下，我们推荐使用受控组件来处理表单数据。在一个受控组件中，表单数据是由 React 组件来管理的，每个状态更新都编写数据处理函数。另一种替代方案是使用非受控组件，这时表单数据将交由 DOM 节点来处理。要编写一个非受控组件，就需要使用 Refs 来从 DOM 节点中获取表单数据。
 
-    handleSubmit = (e) => {
-      console.log('A name was submitted: ' + this.input.current.value);
-      e.preventDefault();
-    };
-
-    render() {
-      return (
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Name:
-            <input type='text' ref={this.input} />
-          </label>
-          <input type='submit' value='Submit' />
-        </form>
-      );
-    }
+```jsx
+class NameForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.input = React.createRef();
   }
-  ```
 
-  因为非受控组件将真实数据储存在 DOM 节点中，所以在使用非受控组件时，有时候反而更容易同时集成 React 和非 React 代码。如果你不介意代码美观性，并且希望快速编写代码，使用非受控组件往往可以减少你的代码量。否则，你应该使用受控组件。
+  handleSubmit = (e) => {
+    console.log('A name was submitted: ' + this.input.current.value);
+    e.preventDefault();
+  };
 
-- **媒体播放：**基于 React 的音乐或视频播放器可以利用 Refs 来管理其当前状态（播放/暂停），或管理播放进度等。这些更新不需要进行状态管理。
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <label>
+          Name:
+          <input type='text' ref={this.input} />
+        </label>
+        <input type='submit' value='Submit' />
+      </form>
+    );
+  }
+}
+```
 
-- **触发强制动画：**如果要在元素上触发过强制动画时，可以使用 Refs 来执行此操作。
+因为非受控组件将真实数据储存在 DOM 节点中，所以在使用非受控组件时，有时候反而更容易同时集成 React 和非 React 代码。如果你不介意代码美观性，并且希望快速编写代码，使用非受控组件往往可以减少你的代码量。否则，你应该使用受控组件。
 
-- **集成第三方 DOM 库**
+### 媒体播放
+
+基于 React 的音乐或视频播放器可以利用 Refs 来管理其当前状态（播放/暂停），或管理播放进度等。这些更新不需要进行状态管理。
+
+### 触发强制动画
+
+如果要在元素上触发过强制动画时，可以使用 Refs 来执行此操作。
+
+### 集成第三方 DOM 库
 
 ## 使用方式
 
 Refs 有 三种实现：
 
-### 方法一：通过 createRef 实现
+### 通过 createRef 实现
 
 `createRef` 是 **React v16.3** 新增的 API，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。
 
@@ -71,7 +77,7 @@ Refs 是使用 `React.createRef()` 创建的，并通过 `ref` 属性附加到 R
 
 Refs 通常在 React 组件的构造函数中定义，或者作为函数组件顶层的变量定义，然后附加到 `render()` 函数中的元素。
 
-```js
+```jsx
 export default class Hello extends React.Component {
   constructor(props) {
     super(props);
@@ -92,9 +98,9 @@ export default class Hello extends React.Component {
 
 使用 `React.createRef()` 给组件创建了 Refs 对象。在上面的示例中，ref 被命名 `textRef`，然后将其附加到 `<input>` DOM 元素。
 
-其中， `textRef` 的属性 `current` 指的是当前附加到 ref 的元素，并广泛用于访问和修改我们的附加元素。事实上，如果我们通过登录 `myRef` 控制台进一步扩展我们的示例，我们将看到该 `current` 属性确实是*唯一*可用的属性：
+其中，`textRef` 的属性 `current` 指的是当前附加到 ref 的元素，并广泛用于访问和修改我们的附加元素。事实上，如果我们通过登录 `myRef` 控制台进一步扩展我们的示例，我们将看到该 `current` 属性确实是唯一可用的属性：
 
-```js
+```jsx
 componentDidMount = () => {
   // myRef 仅仅有一个 current 属性
   console.log(this.textRef);
@@ -109,11 +115,11 @@ componentDidMount = () => {
 
 我们不能在 `componentWillMount` 中更新 Refs，因为此时，组件还没渲染完成， Refs 还为 `null`。
 
-### 方法二：回调 Refs
+### 回调 Refs
 
 不同于传递 `createRef()` 创建的 `ref` 属性，你会传递一个函数。这个函数中接受 React 组件实例或 HTML DOM 元素作为参数，以使它们能在其他地方被存储和访问。
 
-```js
+```jsx
 import React from 'react';
 export default class Hello extends React.Component {
   constructor(props) {
@@ -134,13 +140,13 @@ export default class Hello extends React.Component {
 
 React 将在组件挂载时将 DOM 元素传入`ref` 回调函数并调用，当卸载时传入 `null` 并调用它。在 `componentDidMount` 或 `componentDidUpdate` 触发前，React 会保证 refs 一定是最新的。
 
-像上例， `ref` 回调函数是以内联函数的方式定义的，在更新过程中它会被执行两次，第一次传入参数 `null`，然后第二次会传入参数 DOM 元素。
+像上例，`ref` 回调函数是以内联函数的方式定义的，在更新过程中它会被执行两次，第一次传入参数 `null`，然后第二次会传入参数 DOM 元素。
 
 这是因为在每次渲染时会创建一个新的函数实例，所以 React 清空旧的 ref 并且设置新的。我们可以通过将 ref 的回调函数定义成 class 的绑定函数的方式可以避免上述问题，但是大多数情况下它是无关紧要的。
 
-### 方法三：通过 stringRef 实现
+### 通过 stringRef 实现
 
-```js
+```jsx
 export default class Hello extends React.Component {
   constructor(props) {
     super(props);
@@ -173,7 +179,7 @@ export default class Hello extends React.Component {
 
 `useRef` 返回一个可变的 ref 对象，其 `.current` 属性被初始化为传入的值。返回的 ref 对象在组件的整个生命周期内保持不变。
 
-```js
+```jsx
 function Hello() {
   const textRef = useRef(null);
   const onButtonClick = () => {
@@ -193,7 +199,7 @@ function Hello() {
 
 `useRef()` 比 `ref` 属性更有用。`useRef()` Hook 不仅可以用于 DOM refs， `useRef()` 创建的 `ref` 对象是一个 `current` 属性可变且可以容纳任意值的通用容器，类似于一个 class 的实例属性。
 
-```js
+```jsx
 function Timer() {
   const intervalRef = useRef();
 
@@ -213,7 +219,7 @@ function Timer() {
 
 这是因为它创建的是一个普通 Javascript 对象。而 `useRef()` 和自建一个 `{current: ...}`对象的唯一区别是，`useRef` 会在每次渲染时返回同一个 ref 对象。
 
-请记住，当 ref 对象内容发生变化时，`useRef` 并*不会*通知你。变更 `.current` 属性不会引发组件重新渲染。如果想要在 React 绑定或解绑 DOM 节点的 ref 时运行某些代码，则需要使用回调 ref 来实现。
+请记住，当 ref 对象内容发生变化时，`useRef` 并不会通知你。变更 `.current` 属性不会引发组件重新渲染。如果想要在 React 绑定或解绑 DOM 节点的 ref 时运行某些代码，则需要使用回调 ref 来实现。
 
 # createRef 源码解析
 
