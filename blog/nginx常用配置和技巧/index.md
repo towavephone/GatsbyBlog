@@ -7,7 +7,7 @@ tags: 后端, nginx
 
 # 一个站点配置多个域名
 
-```bash
+```
 server {
     listen       80;
     server_name  ops-coffee.cn b.ops-coffee.cn;
@@ -18,7 +18,7 @@ server_name 后跟多个域名即可，多个域名之间用空格分隔
 
 # 一个服务配置多个站点
 
-```bash
+```
 server {
     listen       80;
     server_name  a.ops-coffee.cn;
@@ -60,7 +60,7 @@ server {
 
 # nginx 添加账号密码验证
 
-```bash
+```
 server {
     location / {
         auth_basic "please input user&passwd";
@@ -92,7 +92,7 @@ opf8BImqCAXww
 
 当你想让 nginx 作为文件下载服务器存在时，需要开启 nginx 列目录
 
-```bash
+```
 server {
     location download {
         autoindex on;
@@ -103,13 +103,13 @@ server {
 }
 ```
 
-autoindex_exact_size：为 on（默认）时显示文件的确切大小，单位是 byte；改为 off 显示文件大概大小，单位 KB 或 MB 或 GB
+`autoindex_exact_size`：为 on（默认）时显示文件的确切大小，单位是 byte；改为 off 显示文件大概大小，单位 KB 或 MB 或 GB
 
-autoindex_localtime：为 off（默认）时显示的文件时间为 GMT 时间；改为 on 后，显示的文件时间为服务器时间
+`autoindex_localtime`：为 off（默认）时显示的文件时间为 GMT 时间；改为 on 后，显示的文件时间为服务器时间
 
 默认当访问列出的 txt 等文件时会在浏览器上显示文件的内容，如果你想让浏览器直接下载，加上下边的配置
 
-```bash
+```
 if ($request_filename ~* ^.*?\.(txt|pdf|jpg|png)$) {
     add_header Content-Disposition 'attachment';
 }
@@ -117,7 +117,7 @@ if ($request_filename ~* ^.*?\.(txt|pdf|jpg|png)$) {
 
 # 配置默认站点
 
-```bash
+```
 server {
     listen 80 default;
 }
@@ -127,7 +127,7 @@ server {
 
 # 不允许通过 IP 访问
 
-```bash
+```
 server {
     listen       80 default;
     server_name  _;
@@ -140,7 +140,7 @@ server {
 
 上边这个方法比较粗暴，当然你也可以配置下所有未配置的地址访问时直接 301 重定向到你的网站去，也能为你的网站带来一定的流量
 
-```bash
+```
 server {
     rewrite ^/(.*)$ https://ops-coffee.cn/$1    permanent;
 }
@@ -148,7 +148,7 @@ server {
 
 # 直接返回验证文件
 
-```bash
+```
 location = /XDFyle6tNA.txt {
     default_type text/plain;
     return 200 'd6296a84657eb275c05c31b10924f6ea';
@@ -159,7 +159,7 @@ location = /XDFyle6tNA.txt {
 
 # nginx 配置 upstream 反向代理
 
-```bash
+```
 http {
     ...
     upstream tomcats {
@@ -181,13 +181,13 @@ http {
 }
 ```
 
-稍不注意可能会落入一个 proxy_pass 加杠不加杠的陷阱，这里详细说下 proxy_pass `http://tomcats` 与 proxy_pass `http://tomcats/` 的区别：
+稍不注意可能会落入一个 `proxy_pass` 加杠不加杠的陷阱，这里详细说下 `proxy_pass` `http://tomcats` 与 `proxy_pass` `http://tomcats/` 的区别：
 
 虽然只是一个 / 的区别但结果确千差万别。分为以下两种情况：
 
-1. 目标地址中不带 uri(proxy_pass `http://tomcats`)。此时新的目标 url 中，匹配的 uri 部分不做修改，原来是什么就是什么。
+1. 目标地址中不带 uri(`proxy_pass` `http://tomcats`)。此时新的目标 url 中，匹配的 uri 部分不做修改，原来是什么就是什么。
 
-   ```bash
+   ```
    location /ops-coffee/ {
        proxy_pass  http://192.168.106.135:8181;
    }
@@ -196,9 +196,9 @@ http {
    http://domain/ops-coffee/action/abc   -->     http://192.168.106.135:8181/ops-coffee/action/abc
    ```
 
-2. 目标地址中带 uri (proxy_pass `http://tomcats/`，/也是 uri) ,此时新的目标 url 中，匹配的 uri 部分将会被修改为该参数中的 uri。
+2. 目标地址中带 uri (`proxy_pass` `http://tomcats/`，/也是 uri) ,此时新的目标 url 中，匹配的 uri 部分将会被修改为该参数中的 uri。
 
-   ```bash
+   ```
    location /ops-coffee/ {
        proxy_pass  http://192.168.106.135:8181/;
    }
@@ -209,7 +209,7 @@ http {
 
 # nginx upstream 开启 keepalive
 
-```bash
+```
 upstream tomcat {
     server ops-coffee.cn:8080;
     keepalive 1024;
@@ -235,7 +235,7 @@ keepalive: 指定每个 nginxworker 可以保持的最大连接数量为 1024，
 
 # 404 自动跳转到首页
 
-```bash
+```
 server {
     location / {
        error_page 404 =  @ops-coffee;

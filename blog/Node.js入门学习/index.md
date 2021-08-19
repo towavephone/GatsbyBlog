@@ -11,7 +11,7 @@ tags: 后端, nodejs
 
 ### require
 
-require 函数用于在当前模块中加载和使用别的模块，传入一个模块名，返回一个模块导出对象。模块名可使用相对路径（以./开头），或者是绝对路径（以/或 C:之类的盘符开头）。另外，模块名中的.js 扩展名可以省略。以下是一个例子。
+require 函数用于在当前模块中加载和使用别的模块，传入一个模块名，返回一个模块导出对象。模块名可使用相对路径（以./开头），或者是绝对路径（以/或 C:之类的盘符开头）。另外，模块名中的 .js 扩展名可以省略。以下是一个例子。
 
 ```js
 var foo1 = require('./foo');
@@ -19,7 +19,7 @@ var foo2 = require('./foo.js');
 var foo3 = require('/home/user/foo');
 var foo4 = require('/home/user/foo.js');
 
-// foo1至foo4中保存的是同一个模块的导出对象。
+// foo1 至 foo4 中保存的是同一个模块的导出对象。
 ```
 
 另外，可以使用以下方式加载和使用一个 JSON 文件。
@@ -58,13 +58,13 @@ module.exports = function() {
 
 ## 二进制模块
 
-虽然一般我们使用 JS 编写模块，但 NodeJS 也支持使用 C/C++编写二进制模块。编译好的二进制模块除了文件扩展名是.node 外，和 JS 模块的使用方式相同。虽然二进制模块能使用操作系统提供的所有功能，拥有无限的潜能，但对于前端同学而言编写过于困难，并且难以跨平台使用。
+虽然一般我们使用 JS 编写模块，但 NodeJS 也支持使用 C/C++ 编写二进制模块。编译好的二进制模块除了文件扩展名是 .node 外，和 JS 模块的使用方式相同。虽然二进制模块能使用操作系统提供的所有功能，拥有无限的潜能，但对于前端同学而言编写过于困难，并且难以跨平台使用。
 
 # 代码的组织与部署
 
 ## 模块路径解析规则
 
-require 函数支持斜杠（/）或盘符（C:）开头的绝对路径，也支持./开头的相对路径。但这两种路径在模块之间建立了强耦合关系，一旦某个模块文件的存放位置需要变更，使用该模块的其它模块的代码也需要跟着调整，变得牵一发动全身。因此，require 函数支持第三种形式的路径，写法类似于 foo/bar，并依次按照以下规则解析路径，直到找到模块位置
+require 函数支持斜杠（/）或盘符（C:）开头的绝对路径，也支持 ./ 开头的相对路径。但这两种路径在模块之间建立了强耦合关系，一旦某个模块文件的存放位置需要变更，使用该模块的其它模块的代码也需要跟着调整，变得牵一发动全身。因此，require 函数支持第三种形式的路径，写法类似于 foo/bar，并依次按照以下规则解析路径，直到找到模块位置
 
 ### 内置模块
 
@@ -72,9 +72,9 @@ require 函数支持斜杠（/）或盘符（C:）开头的绝对路径，也支
 
 ### node_modules 目录
 
-NodeJS 定义了一个特殊的 node_modules 目录用于存放模块。例如某个模块的绝对路径是/home/user/hello.js，在该模块中使用 require('foo/bar')方式加载模块时，则 NodeJS 依次尝试使用以下路径。
+NodeJS 定义了一个特殊的 node_modules 目录用于存放模块。例如某个模块的绝对路径是 /home/user/hello.js，在该模块中使用 `require('foo/bar')` 方式加载模块时，则 NodeJS 依次尝试使用以下路径。
 
-```bash
+```
 /home/user/node_modules/foo/bar
 /home/node_modules/foo/bar
 /node_modules/foo/bar
@@ -82,15 +82,15 @@ NodeJS 定义了一个特殊的 node_modules 目录用于存放模块。例如�
 
 ### NODE_PATH 环境变量
 
-与 PATH 环境变量类似，NodeJS 允许通过 NODE_PATH 环境变量来指定额外的模块搜索路径。NODE_PATH 环境变量中包含一到多个目录路径，路径之间在 Linux 下使用:分隔，在 Windows 下使用;分隔。例如定义了以下 NODE_PATH 环境变量：
+与 PATH 环境变量类似，NodeJS 允许通过 `NODE_PATH` 环境变量来指定额外的模块搜索路径。`NODE_PATH` 环境变量中包含一到多个目录路径，路径之间在 Linux 下使用 : 分隔，在 Windows 下使用 ; 分隔。例如定义了以下 `NODE_PATH` 环境变量：
 
-```bash
+```
 NODE_PATH=/home/user/lib:/home/lib
 ```
 
 当使用 require('foo/bar')的方式加载模块时，则 NodeJS 依次尝试以下路径。
 
-```bash
+```
 /home/user/lib/foo/bar
 /home/lib/foo/bar
 ```
@@ -101,7 +101,7 @@ NODE_PATH=/home/user/lib:/home/lib
 
 在组成一个包的所有子模块中，需要有一个入口模块，入口模块的导出对象被作为包的导出对象。例如有以下目录结构。
 
-```bash
+```
 - /home/user/lib/
     - cat/
         head.js
@@ -124,7 +124,7 @@ exports.create = function(name) {
 };
 ```
 
-在其它模块里使用包的时候，需要加载包的入口模块。接着上例，使用 require('/home/user/lib/cat/main')能达到目的，但是入口模块名称出现在路径里看上去不是个好主意。因此我们需要做点额外的工作，让包使用起来更像是单个模块。
+在其它模块里使用包的时候，需要加载包的入口模块。接着上例，使用 `require('/home/user/lib/cat/main')` 能达到目的，但是入口模块名称出现在路径里看上去不是个好主意。因此我们需要做点额外的工作，让包使用起来更像是单个模块。
 
 ### index.js
 
@@ -141,7 +141,7 @@ var cat = require('/home/user/lib/cat/index');
 
 如果想自定义入口模块的文件名和存放位置，就需要在包目录下包含一个 package.json 文件，并在其中指定入口模块的路径。上例中的 cat 模块可以重构如下。
 
-```bash
+```
 - /home/user/lib/
     - cat/
         + doc/
@@ -162,13 +162,13 @@ var cat = require('/home/user/lib/cat/index');
 }
 ```
 
-如此一来，就同样可以使用 require('/home/user/lib/cat')的方式加载模块。NodeJS 会根据包目录下的 package.json 找到入口模块所在位置。
+如此一来，就同样可以使用 `require('/home/user/lib/cat')` 的方式加载模块。NodeJS 会根据包目录下的 package.json 找到入口模块所在位置。
 
 ## 命令行程序
 
 使用 NodeJS 编写的东西，要么是一个包，要么是一个命令行程序，而前者最终也会用于开发后者。因此我们在部署代码时需要一些技巧，让用户觉得自己是在使用一个命令行程序。
 
-例如我们用 NodeJS 写了个程序，可以把命令行参数原样打印出来。该程序很简单，在主模块内实现了所有功能。并且写好后，我们把该程序部署在/home/user/bin/node-echo.js 这个位置。为了在任何目录下都能运行该程序，我们需要使用以下终端命令。
+例如我们用 NodeJS 写了个程序，可以把命令行参数原样打印出来。该程序很简单，在主模块内实现了所有功能。并且写好后，我们把该程序部署在 `/home/user/bin/node-echo.js` 这个位置。为了在任何目录下都能运行该程序，我们需要使用以下终端命令。
 
 ```bash
 $ node /home/user/bin/node-echo.js Hello World
@@ -185,7 +185,7 @@ $ node-echo Hello World
 
 在 Linux 系统下，我们可以把 JS 文件当作 shell 脚本来运行，从而达到上述目的，具体步骤如下：
 
-1. 在 shell 脚本中，可以通过#!注释来指定当前脚本使用的解析器。所以我们首先在 node-echo.js 文件顶部增加以下一行注释，表明当前脚本使用 NodeJS 解析。
+1. 在 shell 脚本中，可以通过 #! 注释来指定当前脚本使用的解析器。所以我们首先在 node-echo.js 文件顶部增加下一行注释，表明当前脚本使用 NodeJS 解析。
    ```bash
    #! /usr/bin/env node
    ```
@@ -194,7 +194,7 @@ $ node-echo Hello World
    ```bash
    $ chmod +x /home/user/bin/node-echo.js
    ```
-3. 最后，我们在 PATH 环境变量中指定的某个目录下，例如在/usr/local/bin 下边创建一个软链文件，文件名与我们希望使用的终端命令同名，命令如下：
+3. 最后，我们在 PATH 环境变量中指定的某个目录下，例如在 `/usr/local/bin` 下边创建一个软链文件，文件名与我们希望使用的终端命令同名，命令如下：
    ```bash
    $ sudo ln -s /home/user/bin/node-echo.js /usr/local/bin/node-echo
    ```
@@ -203,9 +203,9 @@ $ node-echo Hello World
 
 ### Windows
 
-在 Windows 系统下的做法完全不同，我们得靠.cmd 文件来解决问题。假设 node-echo.js 存放在 C:\Users\user\bin 目录，并且该目录已经添加到 PATH 环境变量里了。接下来需要在该目录下新建一个名为 node-echo.cmd 的文件，文件内容如下：
+在 Windows 系统下的做法完全不同，我们得靠 .cmd 文件来解决问题。假设 node-echo.js 存放在 `C:\Users\user\bin` 目录，并且该目录已经添加到 PATH 环境变量里了。接下来需要在该目录下新建一个名为 node-echo.cmd 的文件，文件内容如下：
 
-```bash
+```
 @node "C:\User\user\bin\node-echo.js" %*
 ```
 
@@ -249,7 +249,7 @@ module.exports = function (message) {
 }
 ```
 
-以上例子中分类存放了不同类型的文件，并通过 node_moudles 目录直接使用三方包名加载模块。此外，定义了 package.json 之后，node-echo 目录也可被当作一个包来使用。
+以上例子中分类存放了不同类型的文件，并通过 node_modules 目录直接使用三方包名加载模块。此外，定义了 package.json 之后，node-echo 目录也可被当作一个包来使用。
 
 # 文件操作
 
@@ -279,11 +279,11 @@ main(process.argv.slice(2));
 
 以上程序使用 fs.readFileSync 从源路径读取文件内容，并使用 fs.writeFileSync 将文件内容写入目标路径。
 
-> process 是一个全局变量，可通过 process.argv 获得命令行参数。由于`argv[0]`固定等于 NodeJS 执行程序的绝对路径，`argv[1]`固定等于主模块的绝对路径，因此第一个命令行参数从`argv[2]`这个位置开始。
+> process 是一个全局变量，可通过 process.argv 获得命令行参数。由于 `argv[0]` 固定等于 NodeJS 执行程序的绝对路径，`argv[1]` 固定等于主模块的绝对路径，因此第一个命令行参数从 `argv[2]` 这个位置开始。
 
 ### 大文件拷贝
 
-上边的程序拷贝一些小文件没啥问题，但这种一次性把所有文件内容都读取到内存中后再一次性写入磁盘的方式不适合拷贝大文件，内存会爆仓。对于大文件，我们只能读一点写一点，直到完成拷贝。因此上边的程序需要改造如下。
+上边的程序拷贝一些小文件没啥问题，但这种一次性把所有文件内容都读取到内存中再一次性写入磁盘的方式不适合拷贝大文件，内存会爆仓。对于大文件，我们只能读一点写一点，直到完成拷贝。因此上边的程序需要改造如下。
 
 ```js
 var fs = require('fs');
@@ -311,7 +311,7 @@ JS 语言自身只有字符串数据类型，没有二进制数据类型，因�
 var bin = new Buffer([0x68, 0x65, 0x6c, 0x6c, 0x6f]);
 ```
 
-Buffer 与字符串类似，除了可以用.length 属性得到字节长度外，还可以用`[index]`方式读取指定位置的字节，例如：
+Buffer 与字符串类似，除了可以用 .length 属性得到字节长度外，还可以用 `[index]` 方式读取指定位置的字节，例如：
 
 ```js
 bin[0]; // => 0x68;
@@ -329,13 +329,13 @@ var str = bin.toString('utf-8'); // => "hello"
 var bin = new Buffer('hello', 'utf-8'); // => <Buffer 68 65 6c 6c 6f>
 ```
 
-Buffer 与字符串有一个重要区别。字符串是只读的，并且对字符串的任何修改得到的都是一个新字符串，原字符串保持不变。至于 Buffer，更像是可以做指针操作的 C 语言数组。例如，可以用`[index]`方式直接修改某个位置的字节。
+Buffer 与字符串有一个重要区别。字符串是只读的，并且对字符串的任何修改得到的都是一个新字符串，原字符串保持不变。至于 Buffer，更像是可以做指针操作的 C 语言数组。例如，可以用 `[index]` 方式直接修改某个位置的字节。
 
 ```js
 bin[0] = 0x48;
 ```
 
-而.slice 方法也不是返回一个新的 Buffer，而更像是返回了指向原 Buffer 中间的某个位置的指针，如下所示。
+而 .slice 方法也不是返回一个新的 Buffer，而更像是返回了指向原 Buffer 中间的某个位置的指针，如下所示。
 
 ```bash
 [ 0x68, 0x65, 0x6c, 0x6c, 0x6f ]
@@ -344,7 +344,7 @@ bin[0] = 0x48;
    bin     bin.slice(2)
 ```
 
-因此对.slice 方法返回的 Buffer 的修改会作用于原 Buffer，例如：
+因此对 .slice 方法返回的 Buffer 的修改会作用于原 Buffer，例如：
 
 ```js
 var bin = new Buffer([0x68, 0x65, 0x6c, 0x6c, 0x6f]);
@@ -354,7 +354,7 @@ sub[0] = 0x65;
 console.log(bin); // => <Buffer 68 65 65 6c 6f>
 ```
 
-也因此，如果想要拷贝一份 Buffer，得首先创建一个新的 Buffer，并通过.copy 方法把原 Buffer 中的数据复制过去。这个类似于申请一块新的内存，并把已有内存中的数据复制过去。以下是一个例子。
+也因此，如果想要拷贝一份 Buffer，得首先创建一个新的 Buffer，并通过 .copy 方法把原 Buffer 中的数据复制过去。这个类似于申请一块新的内存，并把已有内存中的数据复制过去。以下是一个例子。
 
 ```js
 var bin = new Buffer([0x68, 0x65, 0x6c, 0x6c, 0x6f]);
@@ -422,7 +422,7 @@ rs.on('end', function() {
 });
 ```
 
-我们把 doSomething 换成了往只写数据流里写入数据后，以上代码看起来就像是一个文件拷贝程序了。但是以上代码存在上边提到的问题，如果写入速度跟不上读取速度的话，只写数据流内部的缓存会爆仓。我们可以根据.write 方法的返回值来判断传入的数据是写入目标了，还是临时放在了缓存了，并根据 drain 事件来判断什么时候只写数据流已经将缓存中的数据写入目标，可以传入下一个待写数据了。因此代码可以改造如下：
+我们把 doSomething 换成了往只写数据流里写入数据后，以上代码看起来就像是一个文件拷贝程序了。但是以上代码存在上边提到的问题，如果写入速度跟不上读取速度的话，只写数据流内部的缓存会爆仓。我们可以根据 .write 方法的返回值来判断传入的数据是写入目标了，还是临时放在了缓存了，并根据 drain 事件来判断什么时候只写数据流已经将缓存中的数据写入目标，可以传入下一个待写数据了。因此代码可以改造如下：
 
 ```js
 var rs = fs.createReadStream(src);
@@ -444,7 +444,7 @@ ws.on('drain', function() {
 });
 ```
 
-以上代码实现了数据从只读数据流到只写数据流的搬运，并包括了防爆仓控制。因为这种使用场景很多，例如上边的大文件拷贝程序，NodeJS 直接提供了.pipe 方法来做这件事情，其内部实现方式与上边的代码类似。
+以上代码实现了数据从只读数据流到只写数据流的搬运，并包括了防爆仓控制。因为这种使用场景很多，例如上边的大文件拷贝程序，NodeJS 直接提供了 .pipe 方法来做这件事情，其内部实现方式与上边的代码类似。
 
 ### File System（文件系统）
 
@@ -503,7 +503,7 @@ fs 模块提供的 API 很多，这里不一一介绍，需要时请自行查阅
   console.log(cache); // => { "foo/bar": 2 }
   ```
 
-  > 标准化之后的路径里的斜杠在 Windows 系统下是\，而在 Linux 系统下是/。如果想保证任何系统下都使用/作为路径分隔符的话，需要用.replace(/\\/g, '/')再替换一下标准路径。
+  > 标准化之后的路径里的斜杠在 Windows 系统下是 \，而在 Linux 系统下是 /。如果想保证任何系统下都使用 / 作为路径分隔符的话，需要用 `.replace(/\\/g, '/')` 再替换一下标准路径。
 
 - path.join  
   将传入的多个路径拼接为标准路径。该方法可避免手工拼接路径字符串的繁琐，并且能在不同系统下正确使用相应的路径分隔符。以下是一个例子：
@@ -530,7 +530,7 @@ path 模块提供的其余方法也不多，稍微看一下官方文档就能全
 
 目录是一个树状结构，在遍历时一般使用深度优先+先序遍历算法。深度优先，意味着到达一个节点后，首先接着遍历子节点而不是邻居节点。先序遍历，意味着首次到达了某节点就算遍历完成，而不是最后一次返回某节点才算数。因此使用这种遍历方式时，下边这棵树的遍历顺序是 A > B > D > E > C > F。
 
-```bash
+```
       A
      / \
     B   C
@@ -557,7 +557,7 @@ function travel(dir, callback) {
 
 可以看到，该函数以某个目录作为遍历的起点。遇到一个子目录时，就先接着遍历子目录。遇到一个文件时，就把文件的绝对路径传给回调函数。回调函数拿到文件路径后，就可以做各种判断和处理。因此假设有以下目录：
 
-```bash
+```
 - /home/user/
     - foo/
         x.js
@@ -569,11 +569,12 @@ function travel(dir, callback) {
 使用以下代码遍历该目录时，得到的输入如下。
 
 ```js
-travel('/home/user', function (pathname) {
-    console.log(pathname);
+travel('/home/user', function(pathname) {
+  console.log(pathname);
 });
+```
 
-------------------------
+```
 /home/user/foo/x.js
 /home/user/bar/y.js
 /home/user/z.css
@@ -616,7 +617,7 @@ function travel(dir, callback, finish) {
 
 BOM 用于标记一个文本文件使用 Unicode 编码，其本身是一个 Unicode 字符（"\uFEFF"），位于文本文件头部。在不同的 Unicode 编码下，BOM 字符对应的二进制字节如下：
 
-```bash
+```
     Bytes      Encoding
 ----------------------------
     FE FF       UTF16BE
@@ -710,7 +711,7 @@ http
   .listen(8124);
 ```
 
-以上程序创建了一个 HTTP 服务器并监听 8124 端口，打开浏览器访问该端口http://127.0.0.1:8124/就能够看到效果。
+以上程序创建了一个 HTTP 服务器并监听 8124 端口，打开浏览器访问该端口 http://127.0.0.1:8124/ 就能够看到效果。
 
 > 在 Linux 系统下，监听 1024 以下端口需要 root 权限。因此，如果想监听 80 或 443 端口的话，需要使用 sudo 命令启动程序。
 
@@ -725,11 +726,11 @@ http 模块提供两种使用方式：
 1. 作为服务端使用时，创建一个 HTTP 服务器，监听 HTTP 客户端请求并返回响应。
 2. 作为客户端使用时，发起一个 HTTP 客户端请求，获取服务端响应。
 
-首先我们来看看服务端模式下如何工作。首先需要使用.createServer 方法创建一个服务器，然后调用.listen 方法监听端口。之后，每当来了一个客户端请求，创建服务器时传入的回调函数就被调用一次。可以看出，这是一种事件机制。
+首先我们来看看服务端模式下如何工作。首先需要使用 .createServer 方法创建一个服务器，然后调用 .listen 方法监听端口。之后，每当来了一个客户端请求，创建服务器时传入的回调函数就被调用一次。可以看出，这是一种事件机制。
 
 HTTP 请求本质上是一个数据流，由请求头（headers）和请求体（body）组成。例如以下是一个完整的 HTTP 请求数据内容。
 
-```bash
+```
 POST / HTTP/1.1
 User-Agent: curl/7.26.0
 Host: localhost
@@ -743,23 +744,26 @@ Hello World
 可以看到，空行之上是请求头，之下是请求体。HTTP 请求在发送给服务器时，可以认为是按照从头到尾的顺序一个字节一个字节地以数据流方式发送的。而 http 模块创建的 HTTP 服务器在接收到完整的请求头后，就会调用回调函数。在回调函数中，除了可以使用 request 对象访问请求头数据外，还能把 request 对象当作一个只读数据流来访问请求体数据。以下是一个例子。
 
 ```js
-http.createServer(function (request, response) {
+http
+  .createServer(function(request, response) {
     var body = [];
 
     console.log(request.method);
     console.log(request.headers);
 
-    request.on('data', function (chunk) {
-        body.push(chunk);
+    request.on('data', function(chunk) {
+      body.push(chunk);
     });
 
-    request.on('end', function () {
-        body = Buffer.concat(body);
-        console.log(body.toString());
+    request.on('end', function() {
+      body = Buffer.concat(body);
+      console.log(body.toString());
     });
-}).listen(80);
+  })
+  .listen(80);
+```
 
-------------------------------------
+```
 POST
 { 'user-agent': 'curl/7.26.0',
   host: 'localhost',
@@ -769,9 +773,9 @@ POST
 Hello World
 ```
 
-HTTP 响应本质上也是一个数据流，同样由响应头（headers）和响应体（body）组成。例如以下是一个完整的 HTTP 请求数据内容。
+HTTP 响应本质上也是一个数据流，同样由响应头（headers）和响应体（body）组成。例如以下是一个完整的 HTTP 响应数据内容。
 
-```bash
+```
 HTTP/1.1 200 OK
 Content-Type: text/plain
 Content-Length: 11
