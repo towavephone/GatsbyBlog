@@ -420,3 +420,89 @@ b 0
 b 1
 b 2
 ```
+
+## 三面
+
+### 比特币买卖
+
+现在有一个比特币的涨跌序列，只能买卖一次，求最大的收益是多少？
+
+Input:
+
+1. Positive integer n, means the days you can predict.
+2. n integers, means the bitcoin's changed in i-th day
+
+- you can buy one bitcoin
+- you can buy and sell one time
+
+Output:
+
+- the max profit you can earn.
+
+exmaple:
+
+Input:
+
+```
+5
+10 -20 30 -20 50
+```
+
+output:
+
+```
+60
+```
+
+#### 暴力法
+
+```js
+const prices = [10, -20, 30, -20, 50];
+function maxProfit(prices) {
+  let maxProfit = 0;
+  for (let i = 0; i < prices.length; i++) {
+    for (let j = i + 1; j < prices.length; j++) {
+      let profit = 0;
+      for (let m = i; m <= j; m++) {
+        profit += prices[m];
+      }
+      if (profit > maxProfit) {
+        maxProfit = profit;
+      }
+    }
+  }
+  return maxProfit;
+}
+console.log(maxProfit(prices));
+```
+
+#### 动态规划
+
+```js
+dp[i] = max(prices[i], dp[i - 1] + prices[i]);
+```
+
+```js
+const prices = [10, -20, 30, -20, 50];
+function maxProfit(prices) {
+  let maxProfit = 0;
+  const dp = [prices[0]];
+  for (let i = 1; i < prices.length; i++) {
+    dp[i] = prices[i] > dp[i - 1] + prices[i] ? prices[i] : dp[i - 1] + prices[i];
+    maxProfit = dp[i] > maxProfit ? dp[i] : maxProfit;
+  }
+  return maxProfit;
+}
+console.log(maxProfit(prices));
+
+// 或
+var maxSubArray = function(nums) {
+  let pre = 0,
+    maxAns = nums[0];
+  nums.forEach((x) => {
+    pre = Math.max(pre + x, x);
+    maxAns = Math.max(maxAns, pre);
+  });
+  return maxAns;
+};
+```

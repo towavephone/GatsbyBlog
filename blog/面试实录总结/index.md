@@ -1360,8 +1360,8 @@ fetch 有竞态、组件销毁、并行请求、防抖、节流，这里的格�
 ### IM 除了 websocket 的长连接外还有那些方式可以建立长连接？或者说 webSocket 如何兼容低版本浏览器？
 
 ```
-Adobe Flash Socket 
-ActiveX HTMLFile (IE) 
+Adobe Flash Socket
+ActiveX HTMLFile (IE)
 基于 multipart 编码发送 XHR
 基于长轮询的 XHR
 ```
@@ -1369,3 +1369,43 @@ ActiveX HTMLFile (IE)
 ### 怎么实现一个深拷贝？
 
 [深度优先拷贝](/tree-traversal-depth-copy/#深度优先拷贝)
+
+## 三面
+
+### qiankun 切换页面时怎么保存原来的状态？
+
+1. vuex，redux，sessionStorage 等可以本地存储的能力
+2. Vue 中 keep-alive，React 中 react-activation
+
+### 如何更简单的实现表单？表单间的联动怎么处理？
+
+1. XRender、react-jsonschema-form、vue-json-schema-form、form-generator
+2. 使用基于 JSON Schema 规范的方案处理联动
+
+   - JSON Schema anyOf 配置（适用于根据类型选择然后使用不同的数据结构或 ui 样式）
+   - object dependencies 实现联动（适用于根据需要根据值是否为空或 undefined 来做联动设置）
+   - 通过 if else 实现联动（适用于根据值等于一个常量时来做联动）
+
+3. 通过 UI 配置的方式：
+
+   - 通过 ui-schema 配置表达式（通过对 ui-schema ui:hidden 配置表达式）
+   - 自定义 ui:field 使用已有联级组件（适用于通过配置一个已有的自定义组件来渲染一些复杂的联动场景）
+   - ui-schema 动态样式（可以通过计算属性返回 ui-schema，配置 ui:widget:HiddenWidget、ui:field:null、ui:fieldStyle 等都可以实现样式联动）
+
+具体见[数据联动](https://vue-json-schema-form.lljj.me/zh/guide/data-linkage.html)
+
+### eggjs 如何实现网络响应？（select/epoll）
+
+### midway 如何实现注解？注解原理？
+
+### redis 有哪几种类型？
+
+### 表连接有哪几种？
+
+### left join 与 inner join 区别？
+
+### left join 的性能优化？
+
+### MySQL 有哪几种锁？
+
+### 数据库四种隔离级别？
