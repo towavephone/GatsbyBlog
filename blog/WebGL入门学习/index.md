@@ -159,8 +159,7 @@ gl.vertexAttribPointer(
   0, // stride 步长 数组中一行长度，0 表示数据是紧密的没有空隙，让 OpenGL 决定具体步长
   0 // offset 字节偏移量，必须是类型的字节长度的倍数。
 );
-gl.enableVertexAttribArray(position);
-// 开启 attribute 变量额，使顶点着色器能够访问缓冲区数据
+gl.enableVertexAttribArray(position); // 开启 attribute 变量，使顶点着色器能够访问缓冲区数据
 gl.clearColor(0, 1, 1, 1); // 设置清空颜色缓冲时的颜色值
 gl.clear(gl.COLOR_BUFFER_BIT); // 清空颜色缓冲区，也就是清空画布
 // 语法 gl.drawArrays(mode, first, count); mode - 指定绘制图元的方式 first - 指定从哪个点开始绘制 count - 指定绘制需要使用到多少个点

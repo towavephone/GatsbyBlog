@@ -46,7 +46,8 @@
 
       // 创建 camera 变量用于存储相机对象
       var camera;
-      // 初始化相机函数 Three.js 中相机的类型有好几种可以根据具体需要进行选择这里我们要创建的是一个旋转的立方体所以采用的是透视相机，而如果需要创建 3D 阴影效果的场景则需要使用正交相机
+      // 初始化相机函数，Three.js 中相机的类型有好几种可以根据具体需要进行选择
+      // 这里我们要创建的是一个旋转的立方体所以采用的是透视相机，而如果需要创建 3D 阴影效果的场景则需要使用正交相机
       function initCamera() {
         /*
           创建透视相机的实例语法 PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number )
