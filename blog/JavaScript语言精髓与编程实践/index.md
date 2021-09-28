@@ -75,3 +75,143 @@ JavaScript 是弱类型语言。但所谓弱类型语言，只表明该语言在
 - 在 JavaScript 中，函数的多重含义包括函数、方法、构造器、生成器、类以及函数对象等
 - 在 ES6 以前，因为不具备对象系统的全部特性，因此 JavaScript 通常被称为基于对象而非面向对象的语言。而在 ES6 中标准化了 class 和 super 等关键字以支持基于类继承的面向
 
+### 基本数据类型
+
+任何一个变量或值的类型都可以（而且应当首先）使用 typeof 运算得到。typeof 是 JavaScript 内部保留的一个关键字，它是一个运算符而不是一个函数。尽管它看起来可以像函数调用一样在后面跟上一对括号，例如
+
+![](res/2021-09-28-13-51-58.png)
+
+### 宿主定义的其他对象类型
+
+在具体宿主的实现上，ECMAScript 规范接受（但不推荐）typeof 返回上述 7 种类型之外的值。在这种情况下，该变量或值应该是一个宿主自定义的对象（是引用类型，而非其他值类型），并且不能实现对象的 `[[call]]` 内部方法。因为一旦实现该方法，那么该对象的行为就与函数类型一致了。
+
+在早期的 JavaScript 语言中，正则表达式对象是可执行的，因此兼容这一早期特性（而又不得不遵循 ECMAScript 规范）的 JavaScript 引擎就只能为正则表达式对象的 typeof 值返回为 `function`。
+
+### 值类型与引用类型
+
+![](res/2021-09-28-13-57-18.png)
+
+在 JavaScript 中，严格相等（===）运算符用来对值类型/引用类型的实际数据进行比较和检查。按照约定，在基于上述类型系统的运算中
+
+- 一般表达式运算的结果总是值
+- 函数/方法调用的结果可以返回值类型或者引用
+- 值与引用、值与值之间即使相等（==），也不一定严格相等（===）
+- 两个引用之间如果相等（==），则一定严格相等（===）
+
+同其他语言一样，在 JavaScript 中，值类型与引用类型也用于表明运算时使用数据的方式：参与运算的是其值还是其引用。因此，在下面的示例中，当两次调用函数 `func()` 时，各自传入的数据采用了不同的方式：
+
+![](res/2021-09-28-13-59-35.png)
+
+从语义上来说，由于在示例 1 中实际只传入了 str 的值，因此对它的 toString 属性的修改是无意义的；而在示例 2 中传入了 obj 的引用，因此对它的 toString 属性的修改将会影响到后来调用 obj.toString()的效果。因此两个示例返回的结果不同
+
+### 讨论：ECMAScript 的类型系统
+
+JavaScript 存在如下两套类型系统。
+
+- 类型系统 1: 7 种基本数据类型
+- 类型系统 2：值类型与引用类型
+
+然而 ECMAScript 规范又对类型系统做了另外的约定。
+
+- 类型系统 3：ECMAScript 语言类型（ECMAScript language types）
+- 类型系统 4：ECMAScript 规范类型（ECMAScript specification types）
+- 类型系统 5：对象类型（参见“3.4 JavaScript 的对象系统”）
+- 类型系统 6：原子对象类型系统（Atom objecttype）
+
+首先，ECMAScript 语言类型并不是“典型的” JavaScript 语言类型。试图使用 ECMAScript language types 来直接映射 JavaScript language types 是徒劳的，并且将会引入更多的混淆和不可解释的特例。
+
+ECMAScript 语言类型的存在，就是为了撰写 ECMAScript 规范本身，以明确叙述该语言的规范。这些数据类型与 JavaScript 对数据类型的约定有如下三点不同
+
+- ECMAScript 语言类型用首字符大写的单词作为类型名，例如 Undefined；而 JavaScript 语言类型使用字符串作为类型名，且首字符小写，例如"undefined"，并且叙述中通常在不混淆的情况下也可以省掉单/双引号来直接作为类型名，例如 undefined。
+- ECMAScript 语言类型中的 Null 是一个类型，并且有一个唯一值 null；而在 JavaScript 语言类型中没有 Null 类型，null 值是对象类型的一个特殊实例
+- ECMAScript 语言类型中没有函数类型，函数是对象类型的一个变体（Exotic Object），即对象类型的一种实现；而 JavaScript 语言类型中函数是第一类类型（First class type），即能用 typeof 关键字检查的、与 string、object 等同级别的基本类型
+
+ECMAScript 的这种类型定义极大地方便了它的规范制定。由于 Null 值是特殊的、在语言层面就被解释的（而不是作为对象类型的特例），因此它被广泛用于各种结构、定义和逻辑中的识别条件；反过来，由于 function 是对象的实例，因此大多数时候它就只需要按对象的特性来操作和处理。后者的典型表现，就是在 ECMAScript 中有一个专门的过程来判断“是/不是对象”，而无须用这一方式来判断“是/不是函数”
+
+```
+... Type(v) is Object
+```
+
+基于此，ECMAScript 约定它的类型也可以归纳成两类：对象（Object）和基础类型（即除开 Object 之外的其他 6 种类型）。这两种类型是可以转换的，这些内部过程称为抽象操作（Abstract Operations），包括 `ToPrimitive()` 和 `ToObject()` 等
+
+我们接下来讨论“类型系统 4”，即 ECMAScript 规范类型。
+
+在 ECMAScript 规范类型中没有与上述两种语言类型（ECMAScript 或 JavaScript 的语言类型）重合的任何类型或语义。准确地说，所谓 ECMAScript 规范类型，就是为了在规范的行文中实现 ECMAScript 语言类型而存在的。总共约定了 10 种规范类型，包括：
+
+- List、Record、Set、Relation，其中主要的是 List 和 Record 类型，是整个 ECMAScript 规范实现中采用最多的数据类型
+- Completion Record、Reference、PropertyDescriptor，主要用来作为运算的结果（Result）或中间结果，其中属性描述符（Property Descriptor）是实现 JavaScript 对象时使用的核心组件
+- Data Blocks，主要用在内存、共享数据等的描述中
+- Lexical Environment、Environment Record，主要用在词法和运行期环境等的描述中。
+
+最后，重点地、再次总结一下上述内容，即
+
+- ECMAScript 规范类型是为了实现 ECMAScript 语言类型而存在的。
+- ECMAScript 语言类型是为了叙述 JavaScript 语言的规范而存在的。
+
+因此后文中将尽量避免使用和讨论 ECMAScript 规范类型，并且在多数情况下不会对 ECMAScript 语言类型的特殊性再作说明。
+
+## 变量声明
+
+JavaScript 中的变量声明有两种方法：
+
+- 显式声明
+- 隐式声明（即用即声明）
+
+所谓显式声明，一般是指使用 var 等关键字进行的声明。一般语法为：
+
+```
+var variable1 [ = value1 ] [, variable2 [ = value2 ], ... ]
+let variable2 = ...
+```
+
+例如：
+
+```
+// 声明变量 str、num，以及 x、y
+var str = 'test'
+var x, y, num = 3 + 2 - 5;
+```
+
+也包括在一些语句中使用 var 等关键字进行声明，例如 for 语句：
+
+```js
+// 声明变量 n
+for (var n in Object) {
+  // ...
+}
+// 声明变量 i, j, k
+for (let i, j, k = 0; k < 100; k++) {
+  // ...
+}
+```
+
+还有两种情况是具名函数声明和异常捕获子句中声明的异常对象。例如：
+
+```js
+// 声明函数 foo
+function foo() {
+  str = 'test';
+}
+
+// 声明异常对象 e
+try {
+  // ...
+} catch (e) {
+  // ...
+}
+```
+
+而隐式声明则发生在一般的赋值语句中。例如
+
+```js
+// 当 aVar 未被声明时，以下语句将隐式声明它
+aVar = 100;
+```
+
+解释器总是将显式声明理解为“变量声明”，而对隐式声明则不一定，如图 2-1 所示。
+
+- 如果变量未被声明，则先声明该变量并立即给它赋值
+- 如果变量已经声明过，则该语句是赋值语句
+
+![](res/2021-09-28-16-51-45.png)
+
