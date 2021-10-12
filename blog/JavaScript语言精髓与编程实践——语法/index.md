@@ -100,9 +100,30 @@ JavaScript 是弱类型语言。但所谓弱类型语言，只表明该语言在
 
 同其他语言一样，在 JavaScript 中，值类型与引用类型也用于表明运算时使用数据的方式：参与运算的是其值还是其引用。因此，在下面的示例中，当两次调用函数 `func()` 时，各自传入的数据采用了不同的方式：
 
-![](res/2021-09-28-13-59-35.png)
+```js
+var str = 'abcde';
+var obj = new String(str);
 
-从语义上来说，由于在示例 1 中实际只传入了 str 的值，因此对它的 toString 属性的修改是无意义的；而在示例 2 中传入了 obj 的引用，因此对它的 toString 属性的修改将会影响到后来调用 obj.toString()的效果。因此两个示例返回的结果不同
+function newToString() {
+  return 'hello, world!';
+}
+
+function func(val) {
+  val.toString = newToString;
+}
+
+// 示例 1：传入值
+func(str);
+console.log(str); // 'abcde'
+
+// 示例 2：传入引用
+func(obj);
+console.log(String(obj)); // 'hello, world!'
+```
+
+从语义上来说，由于在示例 1 中实际只传入了 str 的值，因此对它的 toString 属性的修改是无意义的；而在示例 2 中传入了 obj 的引用，因此对它的 toString 属性的修改将会影响到后来调用 `obj.toString()` 的效果。因此两个示例返回的结果不同
+
+TODO 读到这里
 
 ### 讨论：ECMAScript 的类型系统
 
