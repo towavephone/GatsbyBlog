@@ -123,8 +123,6 @@ console.log(String(obj)); // 'hello, world!'
 
 从语义上来说，由于在示例 1 中实际只传入了 str 的值，因此对它的 toString 属性的修改是无意义的；而在示例 2 中传入了 obj 的引用，因此对它的 toString 属性的修改将会影响到后来调用 `obj.toString()` 的效果。因此两个示例返回的结果不同
 
-TODO 读到这里
-
 ### 讨论：ECMAScript 的类型系统
 
 JavaScript 存在如下两套类型系统。
@@ -143,7 +141,7 @@ JavaScript 存在如下两套类型系统。
 
 ECMAScript 语言类型的存在，就是为了撰写 ECMAScript 规范本身，以明确叙述该语言的规范。这些数据类型与 JavaScript 对数据类型的约定有如下三点不同
 
-- ECMAScript 语言类型用首字符大写的单词作为类型名，例如 Undefined；而 JavaScript 语言类型使用字符串作为类型名，且首字符小写，例如"undefined"，并且叙述中通常在不混淆的情况下也可以省掉单/双引号来直接作为类型名，例如 undefined。
+- ECMAScript 语言类型用首字符大写的单词作为类型名，例如 Undefined；而 JavaScript 语言类型使用字符串作为类型名，且首字符小写，例如 undefined，并且叙述中通常在不混淆的情况下也可以省掉单/双引号来直接作为类型名，例如 undefined。
 - ECMAScript 语言类型中的 Null 是一个类型，并且有一个唯一值 null；而在 JavaScript 语言类型中没有 Null 类型，null 值是对象类型的一个特殊实例
 - ECMAScript 语言类型中没有函数类型，函数是对象类型的一个变体（Exotic Object），即对象类型的一种实现；而 JavaScript 语言类型中函数是第一类类型（First class type），即能用 typeof 关键字检查的、与 string、object 等同级别的基本类型
 
@@ -180,17 +178,19 @@ JavaScript 中的变量声明有两种方法：
 
 所谓显式声明，一般是指使用 var 等关键字进行的声明。一般语法为：
 
-```
+```js
 var variable1 [ = value1 ] [, variable2 [ = value2 ], ... ]
 let variable2 = ...
 ```
 
 例如：
 
-```
+```js
 // 声明变量 str、num，以及 x、y
-var str = 'test'
-var x, y, num = 3 + 2 - 5;
+var str = 'test';
+var x,
+  y,
+  num = 3 + 2 - 5;
 ```
 
 也包括在一些语句中使用 var 等关键字进行声明，例如 for 语句：
@@ -250,7 +250,7 @@ aVar = 100;
 
 ```js
 var x = 100;
-var y = 200;
+let y = 200;
 console.log(Object.getOwnPropertyDescriptor(global, 'x').value); // 100
 console.log(Object.getOwnPropertyDescriptor(global, 'y')); // undefined
 ```
@@ -268,9 +268,9 @@ AssignmentPattern = expression
 当这个模板使用在 var 等变量声明中时，也可以成批地声明变量。例如：
 
 ```js
-// 使用数组解构赋值，声明变量 x,y
+// 使用数组解构赋值，声明变量 x, y
 var [x, y] = [1, 2];
-// 使用对象解构赋值，声明变量 height,width
+// 使用对象解构赋值，声明变量 height, width
 let { clientHeight: height, clientWidth: width } = window.document.body;
 ```
 
@@ -310,3 +310,19 @@ var str = 'test'; // 'test' 是字面量
 1. 将被转换为 Unicode 字符存储
 
 除了定义转义符之外，当反斜线字符“\”位于一行的末尾（其后立即是代码文本中的换行）时，也用于表示连续的字符串声明。这在声明大段文本块时很有用。例如：
+
+```js
+var aTextBlock =
+  '\
+abcde\
+ \
+123456789\
+ \
++-*/';
+```
+
+该示例第 4 行与第 6 行中各包括了一个空格，因此输出时第 3、5、7 行将用一个空格分开。显示为：
+
+```
+abcde 123456789 +-*/
+```
