@@ -21,10 +21,10 @@ tags: 前端, React, 高级前端
 
 一个 DOM 节点在某一时刻最多会有 4 个节点和他相关。
 
-1. current Fiber。如果该 DOM 节点已在页面中，current Fiber 代表该 DOM 节点对应的 Fiber 节点。
-2. workInProgress Fiber。如果该 DOM 节点将在本次更新中渲染到页面中，workInProgress Fiber 代表该 DOM 节点对应的 Fiber 节点。
-3. DOM 节点本身。
-4. JSX 对象。即 ClassComponent 的 render 方法的返回结果，或 FunctionComponent 的调用结果。JSX 对象中包含描述 DOM 节点的信息。
+1.  current Fiber。如果该 DOM 节点已在页面中，current Fiber 代表该 DOM 节点对应的 Fiber 节点。
+2.  workInProgress Fiber。如果该 DOM 节点将在本次更新中渲染到页面中，workInProgress Fiber 代表该 DOM 节点对应的 Fiber 节点。
+3.  DOM 节点本身。
+4.  JSX 对象。即 ClassComponent 的 render 方法的返回结果，或 FunctionComponent 的调用结果。JSX 对象中包含描述 DOM 节点的信息。
 
 Diff 算法的本质是对比 1 和 4，生成 2。
 
@@ -36,9 +36,9 @@ Diff 算法的本质是对比 1 和 4，生成 2。
 
 为了降低算法复杂度，React 的 diff 会预设三个限制：
 
-1. 只对同级元素进行 Diff。如果一个 DOM 节点在前后两次更新中跨越了层级，那么 React 不会尝试复用他。
-2. 两个不同类型的元素会产生出不同的树。如果元素由 div 变为 p，React 会销毁 div 及其子孙节点，并新建 p 及其子孙节点。
-3. 开发者可以通过 key prop 来暗示哪些子元素在不同的渲染下能保持稳定。考虑如下例子：
+1.  只对同级元素进行 Diff。如果一个 DOM 节点在前后两次更新中跨越了层级，那么 React 不会尝试复用他。
+2.  两个不同类型的元素会产生出不同的树。如果元素由 div 变为 p，React 会销毁 div 及其子孙节点，并新建 p 及其子孙节点。
+3.  开发者可以通过 key prop 来暗示哪些子元素在不同的渲染下能保持稳定。考虑如下例子：
 
 ```js
 // 更新前
@@ -100,8 +100,8 @@ function reconcileChildFibers(returnFiber: Fiber, currentFirstChild: Fiber | nul
 
 我们可以从同级的节点数量将 Diff 分为两类：
 
-1. 当 newChild 类型为 object、number、string，代表同级只有一个节点
-2. 当 newChild 类型为 Array，同级有多个节点
+1.  当 newChild 类型为 object、number、string，代表同级只有一个节点
+2.  当 newChild 类型为 Array，同级有多个节点
 
 在接下来两节我们会分别讨论这两类节点的 Diff。
 
@@ -178,8 +178,8 @@ function reconcileSingleElement(returnFiber: Fiber, currentFirstChild: Fiber | n
 
 这里有个细节需要关注下：
 
-- 当 child !== null 且 key 相同且 type 不同时执行 deleteRemainingChildren 将 child 及其兄弟 fiber 都标记删除。
-- 当 child !== null 且 key 不同时仅将 child 标记删除。
+-  当 child !== null 且 key 相同且 type 不同时执行 deleteRemainingChildren 将 child 及其兄弟 fiber 都标记删除。
+-  当 child !== null 且 key 不同时仅将 child 标记删除。
 
 考虑如下例子：
 
@@ -360,10 +360,10 @@ if (isArray(newChild)) {
 
 该如何设计算法呢？如果让我设计一个 Diff 算法，我首先想到的方案是：
 
-1. 判断当前节点的更新属于哪种情况
-2. 如果是新增，执行新增逻辑
-3. 如果是删除，执行删除逻辑
-4. 如果是更新，执行更新逻辑
+1.  判断当前节点的更新属于哪种情况
+2.  如果是新增，执行新增逻辑
+3.  如果是删除，执行删除逻辑
+4.  如果是更新，执行更新逻辑
 
 按这个方案，其实有个隐含的前提——不同操作的优先级是相同的
 
@@ -389,12 +389,12 @@ if (isArray(newChild)) {
 
 第一轮遍历步骤如下：
 
-1. let i = 0，遍历 newChildren，将 `newChildren[i]` 与 oldFiber 比较，判断 DOM 节点是否可复用。
-2. 如果可复用，i++，继续比较 `newChildren[i]` 与 oldFiber.sibling，可以复用则继续遍历。
-3. 如果不可复用，分两种情况：
-   1. key 不同导致不可复用，立即跳出整个遍历，第一轮遍历结束。
-   2. key 相同 type 不同导致不可复用，会将 oldFiber 标记为 DELETION，并继续遍历
-4. 如果 newChildren 遍历完（即 i === newChildren.length - 1）或者 oldFiber 遍历完（即 oldFiber.sibling === null），跳出遍历，第一轮遍历结束。
+1.  let i = 0，遍历 newChildren，将 `newChildren[i]` 与 oldFiber 比较，判断 DOM 节点是否可复用。
+2.  如果可复用，i++，继续比较 `newChildren[i]` 与 oldFiber.sibling，可以复用则继续遍历。
+3.  如果不可复用，分两种情况：
+1.  key 不同导致不可复用，立即跳出整个遍历，第一轮遍历结束。
+2.  key 相同 type 不同导致不可复用，会将 oldFiber 标记为 DELETION，并继续遍历
+4.  如果 newChildren 遍历完（即 i === newChildren.length - 1）或者 oldFiber 遍历完（即 oldFiber.sibling === null），跳出遍历，第一轮遍历结束。
 
 > 你可以从[这里](https://github.com/facebook/react/blob/1fb18e22ae66fdb1dc127347e169e73948778e5a/packages/react-reconciler/src/ReactChildFiber.new.js#L818)看到这轮遍历的源码
 
@@ -715,11 +715,11 @@ commit阶段（`commitRoot`）
 
 在 React 中，有如下方法可以触发状态更新（排除 SSR 相关）：
 
-- ReactDOM.render
-- this.setState
-- this.forceUpdate
-- useState
-- useReducer
+-  ReactDOM.render
+-  this.setState
+-  this.forceUpdate
+-  useState
+-  useReducer
 
 这些方法调用的场景各不相同，他们是如何接入同一套状态更新机制呢？
 
@@ -871,11 +871,11 @@ bug 修复上线后通过 git rebase 命令和开发分支连接上。开发分�
 
 首先，我们将可以触发更新的方法所隶属的组件分类：
 
-- ReactDOM.render —— HostRoot
-- this.setState —— ClassComponent
-- this.forceUpdate —— ClassComponent
-- useState —— FunctionComponent
-- useReducer —— FunctionComponent
+-  ReactDOM.render —— HostRoot
+-  this.setState —— ClassComponent
+-  this.forceUpdate —— ClassComponent
+-  useState —— FunctionComponent
+-  useReducer —— FunctionComponent
 
 可以看到，一共三种组件（HostRoot | ClassComponent | FunctionComponent）可以触发更新。
 
@@ -906,14 +906,16 @@ const update: Update<*> = {
 
 字段意义如下：
 
-- eventTime：任务时间，通过 performance.now() 获取的毫秒数。由于该字段在未来会重构，当前我们不需要理解他。
-- lane：优先级相关字段。当前还不需要掌握他，只需要知道不同 Update 优先级可能是不同的。
+-  eventTime：任务时间，通过 performance.now() 获取的毫秒数。由于该字段在未来会重构，当前我们不需要理解他。
+-  lane：优先级相关字段。当前还不需要掌握他，只需要知道不同 Update 优先级可能是不同的。
+
   > 你可以将 lane 类比心智模型中需求的紧急程度。
-- suspenseConfig：Suspense 相关，暂不关注。
-- tag：更新的类型，包括 UpdateState | ReplaceState | ForceUpdate | CaptureUpdate。
-- payload：更新挂载的数据，不同类型组件挂载的数据不同。对于 ClassComponent，payload 为 this.setState 的第一个传参。对于 HostRoot，payload 为 ReactDOM.render 的第一个传参。
-- callback：更新的回调函数。即在 commit 阶段的 layout 子阶段一节中提到的回调函数。
-- next：与其他 Update 连接形成链表。
+
+-  suspenseConfig：Suspense 相关，暂不关注。
+-  tag：更新的类型，包括 UpdateState | ReplaceState | ForceUpdate | CaptureUpdate。
+-  payload：更新挂载的数据，不同类型组件挂载的数据不同。对于 ClassComponent，payload 为 this.setState 的第一个传参。对于 HostRoot，payload 为 ReactDOM.render 的第一个传参。
+-  callback：更新的回调函数。即在 commit 阶段的 layout 子阶段一节中提到的回调函数。
+-  next：与其他 Update 连接形成链表。
 
 ### Update 与 Fiber 的联系
 
@@ -923,8 +925,8 @@ const update: Update<*> = {
 
 从双缓存机制一节我们知道，Fiber 节点组成 Fiber 树，页面中最多同时存在两棵 Fiber 树：
 
-- 代表当前页面状态的 current Fiber 树
-- 代表正在 render 阶段的 workInProgress Fiber 树
+-  代表当前页面状态的 current Fiber 树
+-  代表正在 render 阶段的 workInProgress Fiber 树
 
 类似 Fiber 节点组成 Fiber 树，Fiber 节点上的多个 Update 会组成链表并被包含在 fiber.updateQueue 中。
 
@@ -950,8 +952,8 @@ const update: Update<*> = {
 
 Fiber 节点最多同时存在两个 updateQueue：
 
-- current fiber 保存的 updateQueue 即 current updateQueue
-- workInProgress fiber 保存的 updateQueue 即 workInProgress updateQueue
+-  current fiber 保存的 updateQueue 即 current updateQueue
+-  workInProgress fiber 保存的 updateQueue 即 workInProgress updateQueue
 
 在 commit 阶段完成页面渲染后，workInProgress Fiber 树变为 current Fiber 树，workInProgress Fiber 树内 Fiber 节点的 updateQueue 就变成 current updateQueue。
 
@@ -979,19 +981,19 @@ const queue: UpdateQueue<State> = {
 
 字段说明如下：
 
-- baseState：本次更新前该 Fiber 节点的 state，Update 基于该 state 计算更新后的 state。
+-  baseState：本次更新前该 Fiber 节点的 state，Update 基于该 state 计算更新后的 state。
 
   > 你可以将 baseState 类比心智模型中的 master 分支。
 
-- firstBaseUpdate 与 lastBaseUpdate：本次更新前该 Fiber 节点已保存的 Update。以链表形式存在，链表头为 firstBaseUpdate，链表尾为 lastBaseUpdate。之所以在更新产生前该 Fiber 节点内就存在 Update，是由于某些 Update 优先级较低所以在上次 render 阶段由 Update 计算 state 时被跳过。
+-  firstBaseUpdate 与 lastBaseUpdate：本次更新前该 Fiber 节点已保存的 Update。以链表形式存在，链表头为 firstBaseUpdate，链表尾为 lastBaseUpdate。之所以在更新产生前该 Fiber 节点内就存在 Update，是由于某些 Update 优先级较低所以在上次 render 阶段由 Update 计算 state 时被跳过。
 
   > 你可以将 baseUpdate 类比心智模型中执行 git rebase 基于的 commit（节点 D）。
 
-- shared.pending：触发更新时，产生的 Update 会保存在 shared.pending 中形成单向环状链表。当由 Update 计算 state 时这个环会被剪开并连接在 lastBaseUpdate 后面。
+-  shared.pending：触发更新时，产生的 Update 会保存在 shared.pending 中形成单向环状链表。当由 Update 计算 state 时这个环会被剪开并连接在 lastBaseUpdate 后面。
 
   > 你可以将 shared.pending 类比心智模型中本次需要提交的 commit（节点 ABC）。
 
-- effects：数组。保存 update.callback !== null 的 Update。
+-  effects：数组。保存 update.callback !== null 的 Update。
 
 ### 例子
 
@@ -1069,10 +1071,10 @@ state 的变化在 render 阶段产生与上次更新不同的 JSX 对象，通�
 
 具体如下：
 
-- 生命周期方法：同步执行。
-- 受控的用户输入：比如输入框内输入文字，同步执行。
-- 交互事件：比如动画，高优先级执行。
-- 其他：比如数据请求，低优先级执行。
+-  生命周期方法：同步执行。
+-  受控的用户输入：比如输入框内输入文字，同步执行。
+-  交互事件：比如动画，高优先级执行。
+-  其他：比如数据请求，低优先级执行。
 
 ### 如何调度优先级
 
@@ -1190,8 +1192,8 @@ fiber.updateQueue = {
 
 现在我们基本掌握了 updateQueue 的工作流程。还有两个疑问：
 
-- render 阶段可能被中断。如何保证 updateQueue 中保存的 Update 不丢失？
-- 有时候当前状态需要依赖前一个状态。如何在支持跳过低优先级状态的同时保证状态依赖的连续性？
+-  render 阶段可能被中断。如何保证 updateQueue 中保存的 Update 不丢失？
+-  有时候当前状态需要依赖前一个状态。如何在支持跳过低优先级状态的同时保证状态依赖的连续性？
 
 我们分别讲解下。
 
@@ -1388,9 +1390,9 @@ commit 阶段（`commitRoot`）
 
 当前 React 共有三种模式：
 
-- legacy，这是当前 React 使用的方式。当前没有计划删除本模式，但是这个模式可能不支持一些新功能。
-- blocking，开启部分 concurrent 模式特性的中间模式。目前正在实验中。作为迁移到 concurrent 模式的第一个步骤。
-- concurrent，面向未来的开发模式。我们之前讲的任务中断/任务优先级都是针对 concurrent 模式。
+-  legacy，这是当前 React 使用的方式。当前没有计划删除本模式，但是这个模式可能不支持一些新功能。
+-  blocking，开启部分 concurrent 模式特性的中间模式。目前正在实验中。作为迁移到 concurrent 模式的第一个步骤。
+-  concurrent，面向未来的开发模式。我们之前讲的任务中断/任务优先级都是针对 concurrent 模式。
 
 你可以从下表看出各种模式对特性的支持：
 
@@ -1420,9 +1422,9 @@ commit 阶段（`commitRoot`）
 
 基于此原因，可以通过不同的入口函数开启不同模式：
 
-- legacy -- `ReactDOM.render(<App />, rootNode)`
-- blocking -- `ReactDOM.createBlockingRoot(rootNode).render(<App />)`
-- concurrent -- `ReactDOM.createRoot(rootNode).render(<App />)`
+-  legacy -- `ReactDOM.render(<App />, rootNode)`
+-  blocking -- `ReactDOM.createBlockingRoot(rootNode).render(<App />)`
+-  concurrent -- `ReactDOM.createRoot(rootNode).render(<App />)`
 
 > 你可以在[这里](https://zh-hans.reactjs.org/docs/concurrent-mode-adoption.html#why-so-many-modes)看到 React 团队解释为什么会有这么多模式
 
@@ -1527,8 +1529,8 @@ const shouldUpdate =
 
 > 你可以在[这里](https://github.com/facebook/react/blob/1fb18e22ae66fdb1dc127347e169e73948778e5a/packages/react-reconciler/src/ReactFiberClassComponent.old.js#L1137)看到这段代码
 
-- checkHasForceUpdateAfterProcessing：内部会判断本次更新的 Update 是否为 ForceUpdate。即如果本次更新的 Update 中存在 tag 为 ForceUpdate，则返回 true。
-- checkShouldComponentUpdate：内部会调用 shouldComponentUpdate 方法。以及当该 ClassComponent 为 PureComponent 时会浅比较 state 与 props。
+-  checkHasForceUpdateAfterProcessing：内部会判断本次更新的 Update 是否为 ForceUpdate。即如果本次更新的 Update 中存在 tag 为 ForceUpdate，则返回 true。
+-  checkShouldComponentUpdate：内部会调用 shouldComponentUpdate 方法。以及当该 ClassComponent 为 PureComponent 时会浅比较 state 与 props。
 
 > 你可以在[这里](https://github.com/facebook/react/blob/1fb18e22ae66fdb1dc127347e169e73948778e5a/packages/react-reconciler/src/ReactFiberClassComponent.old.js#L294)看到 checkShouldComponentUpdate 代码
 
@@ -1612,13 +1614,13 @@ function App() {
 
 可以将工作分为两部分：
 
-1. 通过一些途径产生更新，更新会造成组件 render。
-2. 组件 render 时 useState 返回的 num 为更新后的结果。
+1.  通过一些途径产生更新，更新会造成组件 render。
+2.  组件 render 时 useState 返回的 num 为更新后的结果。
 
 其中步骤 1 的更新可以分为 mount 和 update：
 
-1. 调用 ReactDOM.render 会产生 mount 的更新，更新内容为 useState 的 initialValue（即 0）。
-2. 点击 p 标签触发 updateNum 会产生一次 update 的更新，更新内容为 num => num + 1。
+1.  调用 ReactDOM.render 会产生 mount 的更新，更新内容为 useState 的 initialValue（即 0）。
+2.  点击 p 标签触发 updateNum 会产生一次 update 的更新，更新内容为 num => num + 1。
 
 接下来讲解这两个步骤如何实现。
 
@@ -1983,10 +1985,10 @@ function App() {
 
 我们用尽可能少的代码模拟了 Hooks 的运行，但是相比 React Hooks，他还有很多不足。以下是他与 React Hooks 的区别：
 
-1. React Hooks 没有使用 isMount 变量，而是在不同时机使用不同的 dispatcher。换言之，mount 时的 useState 与 update 时的 useState 不是同一个函数。
-2. React Hooks 有中途跳过更新的优化手段。
-3. React Hooks 有 batchedUpdates，当在 click 中触发三次 updateNum，精简 React 会触发三次更新，而 React 只会触发一次。
-4. React Hooks 的 update 有优先级概念，可以跳过不高优先的 update。
+1.  React Hooks 没有使用 isMount 变量，而是在不同时机使用不同的 dispatcher。换言之，mount 时的 useState 与 update 时的 useState 不是同一个函数。
+2.  React Hooks 有中途跳过更新的优化手段。
+3.  React Hooks 有 batchedUpdates，当在 click 中触发三次 updateNum，精简 React 会触发三次更新，而 React 只会触发一次。
+4.  React Hooks 的 update 有优先级概念，可以跳过不高优先的 update。
 
 更多的细节，我们会在本章后续小节讲解。
 
@@ -2103,16 +2105,16 @@ hook.memoizedState：Hooks 链表中保存的单一 hook 对应的数据。
 
 不同类型 hook 的 memoizedState 保存不同类型数据，具体如下：
 
-- useState：对于 `const [state, updateState] = useState(initialState)`，memoizedState 保存 state 的值
-- useReducer：对于 `const [state, dispatch] = useReducer(reducer, {});`，memoizedState 保存 state 的值
-- useEffect：memoizedState 保存包含 useEffect 回调函数、依赖项等的链表数据结构 effect，你可以在[这里](https://github.com/acdlite/react/blob/1fb18e22ae66fdb1dc127347e169e73948778e5a/packages/react-reconciler/src/ReactFiberHooks.new.js#L1181)看到 effect 的创建过程。effect 链表同时会保存在 fiber.updateQueue 中
-- useRef：对于 useRef(1)，memoizedState 保存 `{current: 1}`
-- useMemo：对于 `useMemo(callback, [depA])`，memoizedState 保存[ `[callback(), depA]`
-- useCallback：对于 `useCallback(callback, [depA])`，memoizedState 保存 `[callback, depA]`。与 useMemo 的区别是，useCallback 保存的是 callback 函数本身，而 useMemo 保存的是 callback 函数的执行结果
+-  useState：对于 `const [state, updateState] = useState(initialState)`，memoizedState 保存 state 的值
+-  useReducer：对于 `const [state, dispatch] = useReducer(reducer, {});`，memoizedState 保存 state 的值
+-  useEffect：memoizedState 保存包含 useEffect 回调函数、依赖项等的链表数据结构 effect，你可以在[这里](https://github.com/acdlite/react/blob/1fb18e22ae66fdb1dc127347e169e73948778e5a/packages/react-reconciler/src/ReactFiberHooks.new.js#L1181)看到 effect 的创建过程。effect 链表同时会保存在 fiber.updateQueue 中
+-  useRef：对于 useRef(1)，memoizedState 保存 `{current: 1}`
+-  useMemo：对于 `useMemo(callback, [depA])`，memoizedState 保存[ `[callback(), depA]`
+-  useCallback：对于 `useCallback(callback, [depA])`，memoizedState 保存 `[callback, depA]`。与 useMemo 的区别是，useCallback 保存的是 callback 函数本身，而 useMemo 保存的是 callback 函数的执行结果
 
 有些 hook 是没有 memoizedState 的，比如：
 
-- useContext
+-  useContext
 
 ## useState 与 useReducer
 
@@ -2272,5 +2274,5 @@ function updateReducer<S, I, A>(reducer: (S, A) => S, initialArg: I, init?: (I) 
 
 mount 时获取当前 hook 使用的是 mountWorkInProgressHook，而 update 时使用的是 updateWorkInProgressHook，这里的原因是：
 
-- mount 时可以确定是调用 ReactDOM.render 或相关初始化 API 产生的更新，只会执行一次。
-- update 可能是在事件回调或副作用中触发的更新或者是 render 阶段触发的更新，为了避免组件无限循环更新，后者需要区别对待。
+-  mount 时可以确定是调用 ReactDOM.render 或相关初始化 API 产生的更新，只会执行一次。
+-  update 可能是在事件回调或副作用中触发的更新或者是 render 阶段触发的更新，为了避免组件无限循环更新，后者需要区别对待。

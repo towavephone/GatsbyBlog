@@ -13,15 +13,15 @@ Pointer Lock API 可以让你的鼠标无限移动，脱离浏览器窗体的限
 
 # API
 
-- 3 个属性  
-  Document.pointerLockElement  
-  Document.onpointerlockchange  
+-  3 个属性
+  Document.pointerLockElement
+  Document.onpointerlockchange
   Document.onpointerlockerror
-- 2 个方法  
-  Element.requestPointerLock()  
+-  2 个方法
+  Element.requestPointerLock()
   Document.exitPointerLock()
-- 2 个事件  
-  pointerlockchange  
+-  2 个事件
+  pointerlockchange
   pointerlockerror
 
 其中，2 个事件和其中 2 个属性是一一对应的，因此，我们实际上需要了解的知识点是下面这些： Document.pointerLockElement，以及 Element.requestPointerLock()，Document.exitPointerLock()以及 pointerlockchange 和 pointerlockerror 事件。

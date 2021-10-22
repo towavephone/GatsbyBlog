@@ -11,39 +11,43 @@ tags: 前端, CSS, CSS世界
 
 浮动的本质就是为了实现文字环绕效果。
 
-- 包裹性；
-- 块状化并格式化上下文；
-- 破坏文档流；
-- 没有任何 margin 合并；
+-  包裹性；
+-  块状化并格式化上下文；
+-  破坏文档流；
+-  没有任何 margin 合并；
 
 所谓“包裹性”，由“包裹”和“自适应性”两部分组成。
 
-1. 包裹。假设浮动元素父元素宽度 200px，浮动元素子元素是一个 128px 宽度的图片，则此时浮动元素宽度表现为“包裹”，就是里面图片的宽度 128px，代码如下：
-   ```html
-   <style>
-     .father {
-       width: 200px;
-     }
-     .float {
-       float: left;
-     }
-     .float img {
-       width: 128px;
-     }
-   </style>
-   <div class="father">
-     <div class="float">
-       <img src="1.jpg" />
-     </div>
-   </div>
-   ```
-2. 自适应性。如果浮动元素的子元素不只是一张 128px 宽度的图片，还有一大波普通的文字，例如：
-   ```html
-   <div class="father">
-     <div class="float"><img src="1.jpg" />我是帅哥，好巧啊，我也是帅哥，原来看这本书的人都是帅哥~</div>
-   </div>
-   ```
-   则此时浮动元素宽度就自适应父元素的 200px 宽度，最终的宽度表现也是 200px。
+1.  包裹。假设浮动元素父元素宽度 200px，浮动元素子元素是一个 128px 宽度的图片，则此时浮动元素宽度表现为“包裹”，就是里面图片的宽度 128px，代码如下：
+
+    ```html
+    <style>
+        .father {
+            width: 200px;
+        }
+        .float {
+            float: left;
+        }
+        .float img {
+            width: 128px;
+        }
+    </style>
+    <div class="father">
+        <div class="float">
+            <img src="1.jpg" />
+        </div>
+    </div>
+    ```
+
+2.  自适应性。如果浮动元素的子元素不只是一张 128px 宽度的图片，还有一大波普通的文字，例如：
+
+    ```html
+    <div class="father">
+        <div class="float"><img src="1.jpg" />我是帅哥，好巧啊，我也是帅哥，原来看这本书的人都是帅哥~</div>
+    </div>
+    ```
+
+    则此时浮动元素宽度就自适应父元素的 200px 宽度，最终的宽度表现也是 200px。
 
 当然，要想最大宽度自适应父元素宽度，一定是在浮动元素的“首选最小宽度”比父元素的宽度要小的前提下，比方说上面示意的“我是帅哥”等文字全是一连串超长的英文字母，则浮动元素的宽度显然就不是 200px 了。
 
@@ -66,13 +70,13 @@ console.log('2. ' + window.getComputedStyle(span).display);
 
 ```css
 span {
-  display: block; /* 多余 */
-  float: left;
+    display: block; /* 多余 */
+    float: left;
 }
 
 span {
-  float: left;
-  vertical-align: middle; /* 多余 */
+    float: left;
+    vertical-align: middle; /* 多余 */
 }
 ```
 
@@ -102,7 +106,7 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 ```html
 <div class="father">
-  <img src="me.jpg" />
+    <img src="me.jpg" />
 </div>
 <p class="animal">小猫 1，小猫 2，...</p>
 ```
@@ -119,8 +123,8 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 ```css
 .animal:first-line {
-  background: red;
-  color: white;
+    background: red;
+    color: white;
 }
 ```
 
@@ -130,7 +134,7 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 ```css
 .animal {
-  margin-left: -100px;
+    margin-left: -100px;
 }
 ```
 
@@ -142,26 +146,26 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 ```html
 <style>
-  .father {
-    height: 64px;
-    border: 1px solid #444;
-  }
-  .float {
-    float: left;
-  }
-  .float img {
-    width: 60px;
-    height: 64px;
-  }
+    .father {
+        height: 64px;
+        border: 1px solid #444;
+    }
+    .float {
+        float: left;
+    }
+    .float img {
+        width: 60px;
+        height: 64px;
+    }
 </style>
 <div class="father">
-  <div class="float">
-    <img src="zxx.jpg" />
-  </div>
-  我是帅哥，好巧啊，我也是帅哥，原来看这本书的人都是帅哥~
+    <div class="float">
+        <img src="zxx.jpg" />
+    </div>
+    我是帅哥，好巧啊，我也是帅哥，原来看这本书的人都是帅哥~
 </div>
 <div>
-  虽然你很帅，但是我对你不感兴趣。
+    虽然你很帅，但是我对你不感兴趣。
 </div>
 ```
 
@@ -179,7 +183,7 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 ```html
 <h3>
-  标题
+    标题
 </h3>
 ```
 
@@ -187,10 +191,10 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 ```html
 <h3>
-  标题
-  <a href="#">
-    更多
-  </a>
+    标题
+    <a href="#">
+        更多
+    </a>
 </h3>
 ```
 
@@ -204,8 +208,8 @@ float 属性有个著名的特性表现，就是会让父元素的高度塌陷�
 
 为什么呢？首先，我们需要了解两个和 float 相关的术语，一是“浮动锚点”（float anchor），二是“浮动参考”（float reference）。
 
-- 浮动锚点是 float 元素所在的“流”中的一个点，这个点本身并不浮动，就表现而言更像一个没有 margin、border 和 padding 的空的内联元素。
-- 浮动参考指的是浮动元素对齐参考的实体。
+-  浮动锚点是 float 元素所在的“流”中的一个点，这个点本身并不浮动，就表现而言更像一个没有 margin、border 和 padding 的空的内联元素。
+-  浮动参考指的是浮动元素对齐参考的实体。
 
 在 CSS 世界中，float 元素的“浮动参考”是“行框盒子”，也就是 float 元素在当前“行框盒子”内定位。再强调一遍，是“行框盒子”，不是外面的包含块盒子之类的东西，因为 CSS 浮动设计的初衷仅仅是实现文字环绕效果。在 CSS 新世界中，float 被赋予了更多的作用和使命，“浮动参考”就不仅仅是“行框盒子”了，不过此非本书重点，就不展开了。
 
@@ -223,23 +227,23 @@ float 通过破坏正常 CSS 流实现 CSS 环绕，带来了烦人的“高度�
 
 ```html
 <style>
-  .father {
-    overflow: hidden;
-  }
-  .father > img {
-    width: 60px;
-    height: 64px;
-    float: left;
-  }
-  .animal {
-    margin-left: 70px;
-  }
+    .father {
+        overflow: hidden;
+    }
+    .father > img {
+        width: 60px;
+        height: 64px;
+        float: left;
+    }
+    .animal {
+        margin-left: 70px;
+    }
 </style>
 <div class="father">
-  <img src="me.jpg" />
-  <p class="animal">
-    小猫 1，小猫 2，...
-  </p>
+    <img src="me.jpg" />
+    <p class="animal">
+        小猫 1，小猫 2，...
+    </p>
 </div>
 ```
 
@@ -253,8 +257,8 @@ float 通过破坏正常 CSS 流实现 CSS 环绕，带来了烦人的“高度�
 
 ```css
 .animal {
-  width: 170px;
-  float: right;
+    width: 170px;
+    float: right;
 }
 ```
 
@@ -264,12 +268,12 @@ float 通过破坏正常 CSS 流实现 CSS 环绕，带来了烦人的“高度�
 
 ```css
 .left {
-  float: left;
-  width: 50%;
+    float: left;
+    width: 50%;
 }
 
 .right {
-  margin-left: 50%;
+    margin-left: 50%;
 }
 ```
 
@@ -281,15 +285,15 @@ float 通过破坏正常 CSS 流实现 CSS 环绕，带来了烦人的“高度�
 
 ```html
 <div class="box">
-  <a href class="prev">
-    &laquo; 上一章
-  </a>
-  <a href class="next">
-    下一章 &raquo;
-  </a>
-  <h3 class="title">
-    第 112 章 动物环绕
-  </h3>
+    <a href class="prev">
+        &laquo; 上一章
+    </a>
+    <a href class="next">
+        下一章 &raquo;
+    </a>
+    <h3 class="title">
+        第 112 章 动物环绕
+    </h3>
 </div>
 ```
 
@@ -297,16 +301,16 @@ float 通过破坏正常 CSS 流实现 CSS 环绕，带来了烦人的“高度�
 
 ```css
 .prev {
-  float: left;
+    float: left;
 }
 
 .next {
-  float: right;
+    float: right;
 }
 
 .title {
-  margin: 0 70px;
-  text-align: center;
+    margin: 0 70px;
+    text-align: center;
 }
 ```
 
@@ -326,10 +330,10 @@ clear: none | left | right | both
 
 官方对 clear 属性的解释是：“元素盒子的边不能和前面的浮动元素相邻。”虽然有些拗口，但是有一点是可以体会出来的，就是设置了 clear 属性的元素自身如何如何，而不是让 float 元素如何如何，有种“己所不欲勿施于人”的意味在里面。因此，我对 clear 属性值的理解是下面这样的。
 
-- none：默认值，左右浮动来就来。
-- left：左侧抗浮动。
-- right：右侧抗浮动。
-- both：两侧抗浮动。
+-  none：默认值，左右浮动来就来。
+-  left：左侧抗浮动。
+-  right：右侧抗浮动。
+-  both：两侧抗浮动。
 
 大家有没有发现，我们平时除了 clear:both 这个声明比较多以外，left 和 right 这两个属性值几乎无人问津，是因为 left 和 right 这两个值没有作用吗？
 
@@ -339,14 +343,14 @@ clear: none | left | right | both
 
 ```css
 li {
-  width: 20px;
-  height: 20px;
-  margin: 5px;
-  float: left;
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+    float: left;
 }
 
 li:nth-of-type(3) {
-  clear: both;
+    clear: both;
 }
 ```
 
@@ -362,10 +366,10 @@ clear 属性只有块级元素才有效的，而::after 等伪元素默认都是
 
 ```css
 .clear:after {
-  content: '';
-  /* 也可以是'block'，或者是'list-item' */
-  display: table;
-  clear: both;
+    content: '';
+    /* 也可以是'block'，或者是'list-item' */
+    display: table;
+    clear: both;
 }
 ```
 
@@ -379,12 +383,12 @@ clear 属性只有块级元素才有效的，而::after 等伪元素默认都是
 
 ```html
 <div class="father">
-  <img src="me.jpg" />
-  <div class="animal">
-    小猫 1，小猫 2，
-    <div class="clear"></div>
-    小猫 3，小猫 4，...
-  </div>
+    <img src="me.jpg" />
+    <div class="animal">
+        小猫 1，小猫 2，
+        <div class="clear"></div>
+        小猫 3，小猫 4，...
+    </div>
 </div>
 ```
 
@@ -394,33 +398,33 @@ clear 属性只有块级元素才有效的，而::after 等伪元素默认都是
 
 由于 clear:both 的作用本质是让自己不和 float 元素在一行显示，并不是真正意义上的清除浮动，因此 float 元素一些不好的特性依然存在，于是，会有类似下面的现象。
 
-1. 如果 clear:both 元素前面的元素就是 float 元素，则 margin-top 负值即使设成-9999px，也不见任何效果。
-2. clear:both 后面的元素依旧可能会发生文字环绕的现象。举个例子，如下 HTML 和 CSS：
+1.  如果 clear:both 元素前面的元素就是 float 元素，则 margin-top 负值即使设成-9999px，也不见任何效果。
+2.  clear:both 后面的元素依旧可能会发生文字环绕的现象。举个例子，如下 HTML 和 CSS：
 
-   ```html
-   <style>
-     .father:after {
-       content: '';
-       display: table;
-       clear: both;
-     }
-     .father img {
-       float: left;
-       width: 60px;
-       height: 64px;
-     }
-     .father + div {
-       margin-top: -2px;
-     }
-   </style>
-   <div class="father">
-     <img src="zxx.jpg" />
-     我是帅哥，好巧啊，我也是帅哥，原来看这本书的人都是帅哥~
-   </div>
-   <div>虽然你很帅，但是我对你不感兴趣。</div>
-   ```
+    ```html
+    <style>
+        .father:after {
+            content: '';
+            display: table;
+            clear: both;
+        }
+        .father img {
+            float: left;
+            width: 60px;
+            height: 64px;
+        }
+        .father + div {
+            margin-top: -2px;
+        }
+    </style>
+    <div class="father">
+        <img src="zxx.jpg" />
+        我是帅哥，好巧啊，我也是帅哥，原来看这本书的人都是帅哥~
+    </div>
+    <div>虽然你很帅，但是我对你不感兴趣。</div>
+    ```
 
-   虽然.father 父元素的最后设置了 clear:both 来阻止浮动对后面元素的影响，但是最后结果错位依然发生了，如图 6-17 所示。
+    虽然.father 父元素的最后设置了 clear:both 来阻止浮动对后面元素的影响，但是最后结果错位依然发生了，如图 6-17 所示。
 
 ![](2020-01-07-17-00-30.png)
 
@@ -438,11 +442,11 @@ BFC 全称为 block formatting context，中文为“块级格式化上下文”
 
 那什么时候会触发 BFC 呢？常见的情况如下：
 
-- `<html>`根元素；
-- float 的值不为 none；
-- overflow 的值为 auto、scroll 或 hidden；
-- display 的值为 table-cell、table-caption 和 inline-block 中的任何一个；
-- position 的值不为 relative 和 static。
+-  `<html>`根元素；
+-  float 的值不为 none；
+-  overflow 的值为 auto、scroll 或 hidden；
+-  display 的值为 table-cell、table-caption 和 inline-block 中的任何一个；
+-  position 的值不为 relative 和 static。
 
 换言之，只要元素符合上面任意一个条件，就无须使用 clear:both 属性去清除浮动的影响了。因此，不要见到一个`<div>`元素就加个类似.clearfix 的类名，否则只能暴露你孱弱的 CSS 基本功。
 
@@ -454,15 +458,15 @@ BFC 的结界特性最重要的用途其实不是去 margin 重叠或者是清�
 
 ```html
 <style>
-  img {
-    float: left;
-  }
+    img {
+        float: left;
+    }
 </style>
 <div class="father">
-  <img src="me.jpg" />
-  <p class="animal">
-    小猫 1，小猫 2，...
-  </p>
+    <img src="me.jpg" />
+    <p class="animal">
+        小猫 1，小猫 2，...
+    </p>
 </div>
 ```
 
@@ -470,7 +474,7 @@ BFC 的结界特性最重要的用途其实不是去 margin 重叠或者是清�
 
 ```css
 .animal {
-  overflow: hidden;
+    overflow: hidden;
 }
 ```
 
@@ -484,22 +488,22 @@ BFC 的结界特性最重要的用途其实不是去 margin 重叠或者是清�
 
 实际项目开发的时候，图片和文字不可能靠这么近，如果想要保持合适的间距，那也很简单，如果元素是左浮动，则浮动元素可以设置 margin-right 成透明 border-right 或 padding-right；又或者右侧 BFC 元素设置成透明 border-left 或者 padding-left，但不包括 margin-left，因为如果想要使用 margin-left，则其值必须是浮动元素的宽度加间隙的大小，就变成动态不可控的了，无法大规模复用。因此，套用上面例子的 HTML，假设我们希望间隙是 10px，则下面这几种写法都是可以的：
 
-- img { margin-right: 10px; }
-- img { border-right: 10px solid transparent; }
-- img { padding-right: 10px; }
-- .animal { border-left: 10px solid transparent; }
-- .animal { padding-right: 10px; }
+-  img { margin-right: 10px; }
+-  img { border-right: 10px solid transparent; }
+-  img { padding-right: 10px; }
+-  .animal { border-left: 10px solid transparent; }
+-  .animal { padding-right: 10px; }
 
 一般而言，我喜欢通过在浮动元素上设置 margin 来控制间距，也就是下面的 CSS 代码：
 
 ```css
 img {
-  float: left;
-  margin-right: 10px;
+    float: left;
+    margin-right: 10px;
 }
 
 .animal {
-  overflow: hidden;
+    overflow: hidden;
 }
 ```
 
@@ -509,28 +513,29 @@ img {
 
 和基于纯流体特性实现的两栏或多栏自适应布局相比，基于 BFC 特性的自适应布局有如下优点：
 
-1. 自适应内容由于封闭而更健壮，容错性更强。比方说，内部设置 clear:both 不会与 float 元素相互干扰而导致错位，也就不会发生类似于图 6-22 所示的问题。
-2. 自适应内容自动填满浮动以外区域，无须关心浮动元素宽度，可以整站大规模应用。比方说，抽象几个通用的布局类名，如：
-   ```css
-   .left {
-     float: left;
-   }
-   .right {
-     float: right;
-   }
-   .bfc {
-     overflow: hidden;
-   }
-   ```
+1.  自适应内容由于封闭而更健壮，容错性更强。比方说，内部设置 clear:both 不会与 float 元素相互干扰而导致错位，也就不会发生类似于图 6-22 所示的问题。
+2.  自适应内容自动填满浮动以外区域，无须关心浮动元素宽度，可以整站大规模应用。比方说，抽象几个通用的布局类名，如：
+
+    ```css
+    .left {
+        float: left;
+    }
+    .right {
+        float: right;
+    }
+    .bfc {
+        overflow: hidden;
+    }
+    ```
 
 于是，只要遇到两栏结构，直接使用上面的结构类名就可以完成基本的布局。HTML 示意如下：
 
 ```html
 <div class="bfc">
-  <img src="me.jpg" class="left" />
-  <p class="bfc">
-    小猫 1，小猫 2，...
-  </p>
+    <img src="me.jpg" class="left" />
+    <p class="bfc">
+        小猫 1，小猫 2，...
+    </p>
 </div>
 ```
 
@@ -540,7 +545,7 @@ img {
 
 ```css
 .animal {
-  margin-left: 70px;
+    margin-left: 70px;
 }
 ```
 
@@ -548,57 +553,66 @@ img {
 
 理论上，任何 BFC 元素和 float 元素相遇的时候，都可以实现自动填充的自适应布局。但是，由于绝大多数的触发 BFC 的属性自身有一些古怪的特性，所以，实际操作的时候，能兼顾流体特性和 BFC 特性来实现无敌自适应布局的属性并不多。下面我们一个一个来看，每个 CSS 属性选一个代表来进行说明。
 
-1. float:left。浮动元素本身 BFC 化，然而浮动元素有破坏性和包裹性，失去了元素本身的流体自适应性，因此，无法用来实现自动填满容器的自适应布局。不过，其因兼容性还算良好，与搭积木这种现实认知匹配，上手简单，因此在旧时代被大肆使用，也就是常说的“浮动布局”，也算阴差阳错地开创了自己的一套布局。
-2. position:absolute。这个脱离文档流有些严重，过于清高，和非定位元素很难玩到一块儿去，我就不说什么了。
-3. overflow:hidden。这个超棒！不像浮动和绝对定位，玩得有点儿过。其本身还是一个很普通的元素，因此，块状元素的流体特性保存得相当完好，附上 BFC 的独立区域特性，可谓如虎添翼、宇宙无敌！而且 overflow:hidden 的 BFC 特性从 IE7 浏览器开始就支持，兼容性也很不错。唯一的问题就是容器盒子外的元素可能会被隐藏掉，一定程度上限制了这种特性的大规模使用。不过，溢出隐藏的交互场景比例不算很高，所以它还是可以作为常用 BFC 布局属性使用的。
-4. display:inline-block。这是 CSS 世界最伟大的声明之一，但是用在这里，就有些捉襟见肘了。display:inline-block 会让元素尺寸包裹收缩，完全就不是我们想要的 block 水平的流动特性。只能是一声叹息舍弃掉！然而，峰回路转，世事难料。大家应该知道，IE6 和 IE7 浏览器下，block 水平的元素设置 display:inline-block 元素还是 block 水平，也就是还是会自适应容器的可用宽度显示。于是，对于 IE6 和 IE7 浏览器，我们会阴差阳错得到一个比 overflow:hidden 更强大的声明，既 BFC 特性加身，又流体特性保留
-   ```css
-   .float-left {
-     float: left;
-   }
-   .bfc-content {
-     display: inline-block;
-   }
-   ```
-   当然，\*zoom: 1 也是类似效果，不过只适用于低级的 IE 浏览器，如 IE7。
-5. display:table-cell。其让元素表现得像单元格一样，IE8 及以上版本浏览器才支持。跟 display:inline-block 一样，它会跟随内部元素的宽度显示，看样子也是不合适的命。但是，单元格有一个非常神奇的特性，就是宽度值设置得再大，实际宽度也不会超过表格容器的宽度。第 3 章单元格一柱擎天的例子利用的就是这种特性，如图 6-23 所示。 ![](2020-01-07-17-37-05.png) 因此，如果我们把 display:table-cell 这个 BFC 元素宽度设置得很大，比方说 3000px，那其实就跟 block 水平元素自动适应容器空间效果一模一样了，除非你的容器宽度超过 3000px。实际上，一般 Web 页面不会有 3000px 宽的模块，所以，要是实在不放心，设个 9999px 好了！
-   ```css
-   .float-left {
-     float: left;
-   }
-   .bfc-content {
-     display: table-cell;
-     width: 9999px;
-   }
-   ```
-   看上去好像还不错。但是，还是有两点制约，一是需要 IE8 及以上版本的浏览器；二是应付连续英文字符换行有些吃力。但是，总体来看，其适用的场景要比 overflow:hidden 更为广泛。
-6. display:table-row。对 width 无感，无法自适应剩余容器空间。
-7. display:table-caption。此属性一无是处。
+1.  float:left。浮动元素本身 BFC 化，然而浮动元素有破坏性和包裹性，失去了元素本身的流体自适应性，因此，无法用来实现自动填满容器的自适应布局。不过，其因兼容性还算良好，与搭积木这种现实认知匹配，上手简单，因此在旧时代被大肆使用，也就是常说的“浮动布局”，也算阴差阳错地开创了自己的一套布局。
+2.  position:absolute。这个脱离文档流有些严重，过于清高，和非定位元素很难玩到一块儿去，我就不说什么了。
+3.  overflow:hidden。这个超棒！不像浮动和绝对定位，玩得有点儿过。其本身还是一个很普通的元素，因此，块状元素的流体特性保存得相当完好，附上 BFC 的独立区域特性，可谓如虎添翼、宇宙无敌！而且 overflow:hidden 的 BFC 特性从 IE7 浏览器开始就支持，兼容性也很不错。唯一的问题就是容器盒子外的元素可能会被隐藏掉，一定程度上限制了这种特性的大规模使用。不过，溢出隐藏的交互场景比例不算很高，所以它还是可以作为常用 BFC 布局属性使用的。
+4.  display:inline-block。这是 CSS 世界最伟大的声明之一，但是用在这里，就有些捉襟见肘了。display:inline-block 会让元素尺寸包裹收缩，完全就不是我们想要的 block 水平的流动特性。只能是一声叹息舍弃掉！然而，峰回路转，世事难料。大家应该知道，IE6 和 IE7 浏览器下，block 水平的元素设置 display:inline-block 元素还是 block 水平，也就是还是会自适应容器的可用宽度显示。于是，对于 IE6 和 IE7 浏览器，我们会阴差阳错得到一个比 overflow:hidden 更强大的声明，既 BFC 特性加身，又流体特性保留
+
+    ```css
+    .float-left {
+        float: left;
+    }
+    .bfc-content {
+        display: inline-block;
+    }
+    ```
+
+    当然，\*zoom: 1 也是类似效果，不过只适用于低级的 IE 浏览器，如 IE7。
+
+5.  display:table-cell。其让元素表现得像单元格一样，IE8 及以上版本浏览器才支持。跟 display:inline-block 一样，它会跟随内部元素的宽度显示，看样子也是不合适的命。但是，单元格有一个非常神奇的特性，就是宽度值设置得再大，实际宽度也不会超过表格容器的宽度。第 3 章单元格一柱擎天的例子利用的就是这种特性，如图 6-23 所示。 ![](2020-01-07-17-37-05.png) 因此，如果我们把 display:table-cell 这个 BFC 元素宽度设置得很大，比方说 3000px，那其实就跟 block 水平元素自动适应容器空间效果一模一样了，除非你的容器宽度超过 3000px。实际上，一般 Web 页面不会有 3000px 宽的模块，所以，要是实在不放心，设个 9999px 好了！
+
+    ```css
+    .float-left {
+        float: left;
+    }
+    .bfc-content {
+        display: table-cell;
+        width: 9999px;
+    }
+    ```
+
+    看上去好像还不错。但是，还是有两点制约，一是需要 IE8 及以上版本的浏览器；二是应付连续英文字符换行有些吃力。但是，总体来看，其适用的场景要比 overflow:hidden 更为广泛。
+
+6.  display:table-row。对 width 无感，无法自适应剩余容器空间。
+7.  display:table-caption。此属性一无是处。
 
 总结一下，我们对 BFC 声明家族大致过了一遍，能担任自适应布局重任的也就是以下几个。
 
-- overflow:auto/hidden，适用于 IE7 及以上版本浏览器；
-- display:inline-block，适用于 IE6 和 IE7；
-- display:table-cell，适用于 IE8 及以上版本浏览器。
+-  overflow:auto/hidden，适用于 IE7 及以上版本浏览器；
+-  display:inline-block，适用于 IE6 和 IE7；
+-  display:table-cell，适用于 IE8 及以上版本浏览器。
 
 最后，我们可以提炼出两套 IE7 及以上版本浏览器适配的自适应解决方案。
 
-1. 借助 overflow 属性，如下：
-   ```css
-   .lbf-content {
-     overflow: hidden;
-   }
-   ```
-2. 融合 display:table-cell 和 display:inline-block，如下：
-   ```css
-   .lbf-content {
-     display: table-cell;
-     width: 9999px;
-     /* 如果不需要兼容 IE7，下面样式可以省略 */
-     *display: inline-block;
-     *width: auto;
-   }
-   ```
+1.  借助 overflow 属性，如下：
+
+    ```css
+    .lbf-content {
+        overflow: hidden;
+    }
+    ```
+
+2.  融合 display:table-cell 和 display:inline-block，如下：
+
+    ```css
+    .lbf-content {
+        display: table-cell;
+        width: 9999px;
+        /* 如果不需要兼容 IE7，下面样式可以省略 */
+        *display: inline-block;
+        *width: auto;
+    }
+    ```
 
 这两种基于 BFC 的自适应方案均支持无限嵌套，因此，多栏自适应可以通过嵌套方式实现。这两种方案均有一点不足，前者如果子元素要定位到父元素的外面可能会被隐藏，后者无法直接让连续英文字符换行。所以，大家可以根据实际的项目场景选择合适的技术方案。
 
@@ -606,10 +620,10 @@ img {
 
 ```css
 .word-break {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-  word-break: break-all;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    word-break: break-all;
 }
 ```
 
@@ -625,11 +639,11 @@ img {
 
 ```css
 .box {
-  width: 200px;
-  height: 80px;
-  padding: 10px;
-  border: 10px solid;
-  overflow: hidden;
+    width: 200px;
+    height: 80px;
+    padding: 10px;
+    border: 10px solid;
+    overflow: hidden;
 }
 ```
 
@@ -651,10 +665,10 @@ img {
 
 支持的属性值和 overflow 属性一模一样。
 
-- visible：默认值。
-- hidden：剪裁。
-- scroll：滚动条区域一直在。
-- auto：不足以滚动时没有滚动条，可以滚动时滚动条出现。
+-  visible：默认值。
+-  hidden：剪裁。
+-  scroll：滚动条区域一直在。
+-  auto：不足以滚动时没有滚动条，可以滚动时滚动条出现。
 
 这种相似性很容易让大家产生一个误区，认为只要 overflow-x 和 overflow-y 设置了上面的属性值，就一定会是这样的表现，实际上 overflow-x 和 overflow-y 的表现规则要比看上去复杂些：如果 overflow-x 和 overflow-y 属性中的一个值设置为 visible 而另外一个设置为 scroll、auto 或 hidden，则 visible 的样式表现会如同 auto。也就是说，除非 overflow-x 和 overflow-y 的属性值都是 visible，否则 visible 会当成 auto 来解析。换句话说，永远不可能实现一个方向溢出剪裁或滚动，另一方向内容溢出显示的效果。
 
@@ -662,8 +676,8 @@ img {
 
 ```css
 html {
-  overflow-x: hidden;
-  overflow-y: auto; /* 多余 */
+    overflow-x: hidden;
+    overflow-y: auto; /* 多余 */
 }
 ```
 
@@ -675,48 +689,48 @@ HTML 中有两个标签是默认可以产生滚动条的，一个是根元素`<h
 
 关于浏览器的滚动条，有以下几个小而美的结论。
 
-1. 在 PC 端，无论是什么浏览器，默认滚动条均来自`<html>`，而不是`<body>`标签。验证很简单，新建一个空白页面，此时`<body>`标签的默认 margin 值是.5em，如果滚动条是由`<body>`标签产生的，那么效果应该如图 6-27 所示这般边缘留有间隙。但是最后实现结果却是图 6-28 所示的这样没有间隙。
+1.  在 PC 端，无论是什么浏览器，默认滚动条均来自`<html>`，而不是`<body>`标签。验证很简单，新建一个空白页面，此时`<body>`标签的默认 margin 值是.5em，如果滚动条是由`<body>`标签产生的，那么效果应该如图 6-27 所示这般边缘留有间隙。但是最后实现结果却是图 6-28 所示的这样没有间隙。
 
-   ![](2020-01-07-19-45-09.png)
+    ![](2020-01-07-19-45-09.png)
 
-   所以，如果我们想要去除页面默认滚动条，只需要：
+    所以，如果我们想要去除页面默认滚动条，只需要：
 
-   ```css
-   html {
-     overflow: hidden;
-   }
-   ```
+    ```css
+    html {
+        overflow: hidden;
+    }
+    ```
 
-   而没必要把`<body>`也拉下水：
+    而没必要把`<body>`也拉下水：
 
-   注意，上述规则只对 PC 端有效，对于移动端并不一定适用。例如，在 PC 端，对`<html>`标签设置 overflow:hidden 可以隐藏滚动条禁止滚动，但是在移动端基本上无效。在 PC 端，窗体滚动高度可以使用 document.documentElement.scrollTop 获取，但是在移动端，可能就要使用 document.body.scrollTop 获取。
+    注意，上述规则只对 PC 端有效，对于移动端并不一定适用。例如，在 PC 端，对`<html>`标签设置 overflow:hidden 可以隐藏滚动条禁止滚动，但是在移动端基本上无效。在 PC 端，窗体滚动高度可以使用 document.documentElement.scrollTop 获取，但是在移动端，可能就要使用 document.body.scrollTop 获取。
 
-2. 滚动条会占用容器的可用宽度或高度。假设一个元素的宽度是 400px，CSS 代码如下：
+2.  滚动条会占用容器的可用宽度或高度。假设一个元素的宽度是 400px，CSS 代码如下：
 
-   ```css
-   .box {
-     width: 400px;
-     height: 100px;
-     overflow: auto;
-   }
-   ```
+    ```css
+    .box {
+        width: 400px;
+        height: 100px;
+        overflow: auto;
+    }
+    ```
 
-   当子元素高度超过 100px 出现滚动条的时候，子元素可用的实际宽度实际上要小于 400px，因为滚动条（准确地说应该是滚动栏）占据了一定的宽度。当然这还要看操作系统，比方说在移动端就不会有这样的问题，因为移动端的屏幕尺寸本身就有限，滚动条一般都是悬浮模式，不会占据可用宽度，但是在 PC 端，尤其 Windows 操作系统下，几乎所有浏览器的滚动栏都会占据宽度，而且这个宽度大小是固定的。我通过在 Windows 7 系统下的测试和对比发现，IE7 及以上版本 IE、Chrome、Firefox 浏览器滚动栏所占据的宽度均是 17px，注意，很精准的是 17px，我不知道网上那些误人子弟的 20px、14px 是从哪里来的。当然，随着以后操作系统的升级，滚动栏的宽度发生变化也是有可能的。
+    当子元素高度超过 100px 出现滚动条的时候，子元素可用的实际宽度实际上要小于 400px，因为滚动条（准确地说应该是滚动栏）占据了一定的宽度。当然这还要看操作系统，比方说在移动端就不会有这样的问题，因为移动端的屏幕尺寸本身就有限，滚动条一般都是悬浮模式，不会占据可用宽度，但是在 PC 端，尤其 Windows 操作系统下，几乎所有浏览器的滚动栏都会占据宽度，而且这个宽度大小是固定的。我通过在 Windows 7 系统下的测试和对比发现，IE7 及以上版本 IE、Chrome、Firefox 浏览器滚动栏所占据的宽度均是 17px，注意，很精准的是 17px，我不知道网上那些误人子弟的 20px、14px 是从哪里来的。当然，随着以后操作系统的升级，滚动栏的宽度发生变化也是有可能的。
 
 要知道自己浏览器的滚动栏宽度是多少其实很简单，代码如下：
 
 ```html
 <style>
-  .box {
-    width: 400px;
-    overflow: scroll;
-  }
+    .box {
+        width: 400px;
+        overflow: scroll;
+    }
 </style>
 <div class="box">
-  <div id="in" class="in"></div>
+    <div id="in" class="in"></div>
 </div>
 <script>
-  console.log(400 - document.getElementById('in').clientWidth);
+    console.log(400 - document.getElementById('in').clientWidth);
 </script>
 ```
 
@@ -728,7 +742,7 @@ HTML 中有两个标签是默认可以产生滚动条的，一个是根元素`<h
 
 ```css
 html {
-  overflow-y: scroll;
+    overflow-y: scroll;
 }
 ```
 
@@ -738,22 +752,22 @@ html {
 
 ```css
 html {
-  overflow-y: scroll; /* for IE8 */
+    overflow-y: scroll; /* for IE8 */
 }
 
 /* :root 这个 CSS 伪类匹配文档树的根元素。对于 HTML 来说，:root 表示 <html> 元素，除了优先级更高之外，与 html 选择器相同。 */
 :root {
-  overflow-y: auto;
-  overflow-x: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 :root body {
-  position: absolute;
+    position: absolute;
 }
 
 body {
-  width: 100vw;
-  overflow: hidden;
+    width: 100vw;
+    overflow: hidden;
 }
 ```
 
@@ -761,32 +775,32 @@ body {
 
 倒是支持-webkit-前缀的浏览器可以说说。例如，对于 Chrome 浏览器：
 
-- 整体部分，::-webkit-scrollbar；
-- 两端按钮，::-webkit-scrollbar-button；
-- 外层轨道，::-webkit-scrollbar-track；
-- 内层轨道，::-webkit-scrollbar-track-piece；
-- 滚动滑块，::-webkit-scrollbar-thumb；
-- 边角，::-webkit-scrollbar-corner。
+-  整体部分，::-webkit-scrollbar；
+-  两端按钮，::-webkit-scrollbar-button；
+-  外层轨道，::-webkit-scrollbar-track；
+-  内层轨道，::-webkit-scrollbar-track-piece；
+-  滚动滑块，::-webkit-scrollbar-thumb；
+-  边角，::-webkit-scrollbar-corner。
 
 但是我们平时开发中只用下面 3 个属性：
 
 ```css
 ::-webkit-scrollbar {
-  /* 血槽宽度 */
-  width: 8px;
-  height: 8px;
+    /* 血槽宽度 */
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  /* 拖动条 */
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
+    /* 拖动条 */
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  /* 背景槽 */
-  background-color: #ddd;
-  border-radius: 6px;
+    /* 背景槽 */
+    background-color: #ddd;
+    border-radius: 6px;
 }
 ```
 
@@ -800,9 +814,9 @@ body {
 
 ```css
 .ell {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 ```
 
@@ -812,9 +826,9 @@ body {
 
 ```css
 .ell-rows-2 {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 ```
 
@@ -847,8 +861,8 @@ body {
 
 下面两种情况可以触发锚点定位行为的发生：
 
-1. URL 地址中的锚链与锚点元素对应并有交互行为；
-2. 可 focus 的锚点元素处于 focus 状态。
+1.  URL 地址中的锚链与锚点元素对应并有交互行为；
+2.  可 focus 的锚点元素处于 focus 状态。
 
 上面百度百科的例子就是基于 URL 地址的锚链与锚点实现的，定位效果的发生需要行为触发。比方说，点击一个链接，改变地址栏的锚链值，或者新打开一个链接，后面带有一个锚链值，当然前提是这个锚链值可以找到页面中对应的元素，并且是非隐藏状态，否则不会有任何的定位行为发生。如果我们的锚链就是一个很简单的#，则定位行为发生的时候，页面是定位到顶部的，所以我们一般实现返回顶部效果都是使用这样的 HTML：
 
@@ -890,24 +904,24 @@ document.querySelector('input').focus();
 
 ```html
 <style>
-  .box {
-    height: 120px;
-    border: 1px solid #bbb;
-    overflow: auto;
-  }
-  .content {
-    height: 200px;
-    background-color: #eee;
-  }
+    .box {
+        height: 120px;
+        border: 1px solid #bbb;
+        overflow: auto;
+    }
+    .content {
+        height: 200px;
+        background-color: #eee;
+    }
 </style>
 <div class="box">
-  <div class="content"></div>
-  <h4 id="title">
-    底部标题
-  </h4>
+    <div class="content"></div>
+    <h4 id="title">
+        底部标题
+    </h4>
 </div>
 <p>
-  <a href="#title">点击测试</a>
+    <a href="#title">点击测试</a>
 </p>
 ```
 
@@ -927,9 +941,9 @@ document.querySelector('input').focus();
 
 ```css
 .box {
-  height: 120px;
-  border: 1px solid #bbb;
-  overflow: hidden;
+    height: 120px;
+    border: 1px solid #bbb;
+    overflow: hidden;
 }
 ```
 
@@ -951,28 +965,28 @@ HTML 和核心 CSS 代码如下：
 
 ```html
 <style>
-  .box {
-    height: 10em;
-    border: 1px solid #ddd;
-    overflow: hidden;
-  }
+    .box {
+        height: 10em;
+        border: 1px solid #ddd;
+        overflow: hidden;
+    }
 
-  .list {
-    line-height: 10em;
-    background: #ddd;
-  }
+    .list {
+        line-height: 10em;
+        background: #ddd;
+    }
 </style>
 <div class="box">
-  <div class="list" id="one">1</div>
-  <div class="list" id="two">2</div>
-  <div class="list" id="three">3</div>
-  <div class="list" id="four">4</div>
+    <div class="list" id="one">1</div>
+    <div class="list" id="two">2</div>
+    <div class="list" id="three">3</div>
+    <div class="list" id="four">4</div>
 </div>
 <div class="link">
-  <a href="#one">1</a>
-  <a href="#two">2</a>
-  <a href="#three">3</a>
-  <a href="#four">4</a>
+    <a href="#one">1</a>
+    <a href="#two">2</a>
+    <a href="#three">3</a>
+    <a href="#four">4</a>
 </div>
 ```
 
@@ -988,60 +1002,60 @@ HTML 和核心 CSS 代码如下：
 
 ```html
 <style>
-  .box {
-    height: 10em;
-    border: 1px solid #ddd;
-    overflow: hidden;
-  }
+    .box {
+        height: 10em;
+        border: 1px solid #ddd;
+        overflow: hidden;
+    }
 
-  .list {
-    height: 100%;
-    background: #ddd;
-    position: relative;
-  }
+    .list {
+        height: 100%;
+        background: #ddd;
+        position: relative;
+    }
 
-  .list > input {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 1px;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    clip: rect(0 0 0 0);
-  }
+    .list > input {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 1px;
+        border: 0;
+        padding: 0;
+        margin: 0;
+        clip: rect(0 0 0 0);
+    }
 </style>
 <div class="box">
-  <div class="list">
-    <input id="one" />
-    1
-  </div>
-  <div class="list">
-    <input id="two" />
-    2
-  </div>
-  <div class="list">
-    <input id="three" />
-    3
-  </div>
-  <div class="list">
-    <input id="four" />
-    4
-  </div>
+    <div class="list">
+        <input id="one" />
+        1
+    </div>
+    <div class="list">
+        <input id="two" />
+        2
+    </div>
+    <div class="list">
+        <input id="three" />
+        3
+    </div>
+    <div class="list">
+        <input id="four" />
+        4
+    </div>
 </div>
 <div class="link">
-  <label class="click" for="one">
-    1
-  </label>
-  <label class="click" for="two">
-    2
-  </label>
-  <label class="click" for="three">
-    3
-  </label>
-  <label class="click" for="four">
-    4
-  </label>
+    <label class="click" for="one">
+        1
+    </label>
+    <label class="click" for="two">
+        2
+    </label>
+    <label class="click" for="three">
+        3
+    </label>
+    <label class="click" for="four">
+        4
+    </label>
 </div>
 ```
 
@@ -1053,11 +1067,11 @@ HTML 和核心 CSS 代码如下：
 
 ```js
 $('label.click')
-  .removeAttr('for')
-  .on('click', function() {
-    // 'xxx'表示滚动数值
-    $('.box').scrollTop(xxx);
-  });
+    .removeAttr('for')
+    .on('click', function() {
+        // 'xxx'表示滚动数值
+        $('.box').scrollTop(xxx);
+    });
 ```
 
 于是，就算 JavaScript 出现异常或者加载缓慢，选项卡点击功能依然正常，并且直接用 Tab 键浏览选项卡内容的超级便捷的可访问性也保留下来了。综合来看，这是非常不错的一种选项卡实现技巧。
@@ -1074,14 +1088,14 @@ $('label.click')
 
 但是在我看来，最推荐的实现还是基于父容器自身的 scrollTop 值改变来实现自定义滚动条效果，其好处有如下这些。
 
-1. 实现简单，无须做边界判断。因为就算 scrollTop 设为-999，浏览器依然按照 0 来渲染，要想滚动到底部，直接一个很大的 scrollTop 值就可以了，无须任何计算。例如：
+1.  实现简单，无须做边界判断。因为就算 scrollTop 设为-999，浏览器依然按照 0 来渲染，要想滚动到底部，直接一个很大的 scrollTop 值就可以了，无须任何计算。例如：
 
-   container.scrollTop = 99999;
+    container.scrollTop = 99999;
 
-   列表滚动了多少直接就是 scrollTop 值，实时获取，天然存储。传统实现要变量以及边界更新，很啰嗦。
+    列表滚动了多少直接就是 scrollTop 值，实时获取，天然存储。传统实现要变量以及边界更新，很啰嗦。
 
-2. 可与原生的 scroll 事件天然集成，无缝对接。例如，我们的滚动延迟加载图片效果就可以直接应用，因为图片位置的计算往往都是和 scrollTop 值相关联的，所以传统实现 scrollTop 值一直是 0，很可能导致这类组件出现异常。
-3. 无须改变子元素的结构。传统实现为了定位方便，会给所有的列表元素外面包一层独立的`<div>`元素，这可能会导致某些选择器（类似于.container > .list{}）失效，但是，基于父容器本身的 scrollTop 滚动实现则无此问题，即使子元素全是兄弟元素也是可以的。
+2.  可与原生的 scroll 事件天然集成，无缝对接。例如，我们的滚动延迟加载图片效果就可以直接应用，因为图片位置的计算往往都是和 scrollTop 值相关联的，所以传统实现 scrollTop 值一直是 0，很可能导致这类组件出现异常。
+3.  无须改变子元素的结构。传统实现为了定位方便，会给所有的列表元素外面包一层独立的`<div>`元素，这可能会导致某些选择器（类似于.container > .list{}）失效，但是，基于父容器本身的 scrollTop 滚动实现则无此问题，即使子元素全是兄弟元素也是可以的。
 
 当然，没有哪种技术是万能的，基于改变 overflow:hidden 父容器的 scrollTop 实现自定义滚动条效果也有几点不足：一是无法添加类似 Bounce 回弹这种动效；二是渲染要比一般的渲染慢一些，但大多数场景下用户都是无感知的。
 
@@ -1089,8 +1103,8 @@ $('label.click')
 
 ```css
 .brother {
-  position: absolute;
-  float: left; /* 无效 */
+    position: absolute;
+    float: left; /* 无效 */
 }
 ```
 
@@ -1104,8 +1118,8 @@ $('label.click')
 
 ```css
 .wrap {
-  display: inline-block; /* 没有必要 */
-  position: absolute;
+    display: inline-block; /* 没有必要 */
+    position: absolute;
 }
 ```
 
@@ -1119,86 +1133,86 @@ $('label.click')
 
 普通元素的百分比宽度是相对于父元素的 content box 宽度计算的，而绝对定位元素的宽度是相对于第一个 position 不为 static 的祖先元素计算的，具体如下（剔除了不常用的部分内容）。
 
-1. 根元素（很多场景下可以看成是`<html>`）被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
-2. 对于其他元素，如果该元素的 position 是 relative 或者 static，则“包含块”由其最近的块容器祖先盒的 content box 边界形成。
-3. 如果元素 position:fixed，则“包含块”是“初始包含块”。
-4. 如果元素 position:absolute，则“包含块”由最近的 position 不为 static 的祖先元素建立，具体方式如下：
+1.  根元素（很多场景下可以看成是`<html>`）被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
+2.  对于其他元素，如果该元素的 position 是 relative 或者 static，则“包含块”由其最近的块容器祖先盒的 content box 边界形成。
+3.  如果元素 position:fixed，则“包含块”是“初始包含块”。
+4.  如果元素 position:absolute，则“包含块”由最近的 position 不为 static 的祖先元素建立，具体方式如下：
 
-   如果该祖先元素是纯 inline 元素，则规则略复杂：
+    如果该祖先元素是纯 inline 元素，则规则略复杂：
 
-   - 假设给内联元素的前后各生成一个宽度为 0 的内联盒子（inline box），则这两个内联盒子的 padding box 外面的包围盒就是内联元素的“包含块”；
-   - 如果该内联元素被跨行分割了，那么“包含块”是未定义的，也就是 CSS2.1 规范并没有明确定义，浏览器自行发挥。
+    -  假设给内联元素的前后各生成一个宽度为 0 的内联盒子（inline box），则这两个内联盒子的 padding box 外面的包围盒就是内联元素的“包含块”；
+    -  如果该内联元素被跨行分割了，那么“包含块”是未定义的，也就是 CSS2.1 规范并没有明确定义，浏览器自行发挥。
 
-   否则，“包含块”由该祖先的 padding box 边界形成。
+    否则，“包含块”由该祖先的 padding box 边界形成。
 
-   如果没有符合条件的祖先元素，则“包含块”是“初始包含块”。
+    如果没有符合条件的祖先元素，则“包含块”是“初始包含块”。
 
 可以看到，和常规元素相比，absolute 绝对定位元素的“包含块”有以下 3 个明显差异：
 
-1. 内联元素也可以作为“包含块”所在的元素；
-2. “包含块”所在的元素不是父块级元素，而是最近的 position 不为 static 的祖先元素或根元素；
-3. 边界是 padding box 而不是 content box。
+1.  内联元素也可以作为“包含块”所在的元素；
+2.  “包含块”所在的元素不是父块级元素，而是最近的 position 不为 static 的祖先元素或根元素；
+3.  边界是 padding box 而不是 content box。
 
 ### 差异点一：内联元素可以作为“包含块”
 
 首先讲第一点差异，也就是内联元素可以作为“包含块”。这一点估计很多人都不知道，因为平时使用得少。为何平时用得少？原因如下。
 
-1. 我们一旦使用 absolute 绝对定位，基本上都是用来布局，而内联元素主要的作用是图文展示，所谓道不同不相为谋，因此两者很难凑到一块儿。
-2. 理解和学习成本比较高。内联元素的“包含块”不能按照常规块级元素的“包含块”来理解。举个例子，如下 HTML 代码：
+1.  我们一旦使用 absolute 绝对定位，基本上都是用来布局，而内联元素主要的作用是图文展示，所谓道不同不相为谋，因此两者很难凑到一块儿。
+2.  理解和学习成本比较高。内联元素的“包含块”不能按照常规块级元素的“包含块”来理解。举个例子，如下 HTML 代码：
 
-   ```html
-   <span style="position:relative;"> 我是<big style="font-size:200%;">字号很大</big>的文字！ </span>
-   ```
+    ```html
+    <span style="position:relative;"> 我是<big style="font-size:200%;">字号很大</big>的文字！ </span>
+    ```
 
-   其效果如图 6-41 所示。请问：此时`<span>`元素的“包含块”范围是什么？
+    其效果如图 6-41 所示。请问：此时`<span>`元素的“包含块”范围是什么？
 
-   ![](2020-01-08-10-38-00.png)
+    ![](2020-01-08-10-38-00.png)
 
-   如果对定义理解不够，很容易误认为包含块的上下边缘被其中“字号很大”的`<big>`元素给撑大了。实际上，此时元素的“包含块”范围与`<big>`元素毫无关系，就算其字号大小设置得再大，“包含块”范围依然是图 6-42 虚线所示的那么大。原因很简单，内联元素的“包含块”是由“生成的”前后内联盒子决定的，与里面的内联盒子细节没有任何关系。
+    如果对定义理解不够，很容易误认为包含块的上下边缘被其中“字号很大”的`<big>`元素给撑大了。实际上，此时元素的“包含块”范围与`<big>`元素毫无关系，就算其字号大小设置得再大，“包含块”范围依然是图 6-42 虚线所示的那么大。原因很简单，内联元素的“包含块”是由“生成的”前后内联盒子决定的，与里面的内联盒子细节没有任何关系。
 
-   我根据自己的进一步测试发现，内联元素的“包含块”可以受::first-line 伪元素影响，但不受::first-letter 伪元素影响。
+    我根据自己的进一步测试发现，内联元素的“包含块”可以受::first-line 伪元素影响，但不受::first-letter 伪元素影响。
 
-   可以看出，内联元素的“包含块”范围相对稳固，不会受 line-height 等属性影响，因此，理论上其还是有实用价值的。
+    可以看出，内联元素的“包含块”范围相对稳固，不会受 line-height 等属性影响，因此，理论上其还是有实用价值的。
 
-3. 兼容性问题。无论内联元素是单行还是跨行都存在兼容性问题。单行的兼容性问题存在于“包含块”是一个空的内联元素的时候。例如，按照我们的理解，下面的代码实现的效果应该是图片在容器的右上角对齐：
+3.  兼容性问题。无论内联元素是单行还是跨行都存在兼容性问题。单行的兼容性问题存在于“包含块”是一个空的内联元素的时候。例如，按照我们的理解，下面的代码实现的效果应该是图片在容器的右上角对齐：
 
-   ```html
-   <p>
-     <span>
-       <img src="1.jpg" />
-     </span>
-   </p>
-   <style>
-     p {
-       text-align: right;
-     }
+    ```html
+    <p>
+        <span>
+            <img src="1.jpg" />
+        </span>
+    </p>
+    <style>
+        p {
+            text-align: right;
+        }
 
-     p > span {
-       position: relative;
-     }
+        p > span {
+            position: relative;
+        }
 
-     p > span > img {
-       position: absolute;
-       right: 0;
-     }
-   </style>
-   ```
+        p > span > img {
+            position: absolute;
+            right: 0;
+        }
+    </style>
+    ```
 
-   在 IE8 至 IE10 浏览器下，图片完全在`<p>`容器的左侧外部显示了，IE、Edge 中则无此问题。需要给空的`<span>`元素设置 border 或 padding 让“幽灵空白节点”显现或者直接插入字符才能表现一致。
+    在 IE8 至 IE10 浏览器下，图片完全在`<p>`容器的左侧外部显示了，IE、Edge 中则无此问题。需要给空的`<span>`元素设置 border 或 padding 让“幽灵空白节点”显现或者直接插入字符才能表现一致。
 
-   跨行的兼容性问题在于规范对此行为并未定义，导致浏览器在实现上各有差异。主要差异在于，Firefox 浏览器的“包含块”仅覆盖第一行，而 IE 和 Chrome 浏览器“包含块”的表现完全符合定义，由第一行开头和最后一行结尾的内联盒子共同决定。差异如图 6-43 所示。
+    跨行的兼容性问题在于规范对此行为并未定义，导致浏览器在实现上各有差异。主要差异在于，Firefox 浏览器的“包含块”仅覆盖第一行，而 IE 和 Chrome 浏览器“包含块”的表现完全符合定义，由第一行开头和最后一行结尾的内联盒子共同决定。差异如图 6-43 所示。
 
-   ![](2020-01-08-11-00-27.png)
+    ![](2020-01-08-11-00-27.png)
 
-   个人认为，IE（包括 IE8）和 Chrome 浏览器的渲染规则是更准确的，但这种渲染可能会带来另外一个疑惑：如果内联元素最后一个内联盒子的右边缘比第一个内联盒子的左边缘还要靠左，那岂不是“包含块”宽度要为负了？眼见为实，例如，我们修改一下 HTML，让“包含块”从后面的文字开始算起：
+    个人认为，IE（包括 IE8）和 Chrome 浏览器的渲染规则是更准确的，但这种渲染可能会带来另外一个疑惑：如果内联元素最后一个内联盒子的右边缘比第一个内联盒子的左边缘还要靠左，那岂不是“包含块”宽度要为负了？眼见为实，例如，我们修改一下 HTML，让“包含块”从后面的文字开始算起：
 
-   ```html
-   我是<big style="font-size:200%;">字号很大</big> <span style="position:relative;">的文字！我是第二行内容。</span>
-   ```
+    ```html
+    我是<big style="font-size:200%;">字号很大</big> <span style="position:relative;">的文字！我是第二行内容。</span>
+    ```
 
-   结果“包含块”的宽度按照 0 来处理了，起始位置为第一个内联盒子所在的位置，如图 6-44 所示。
+    结果“包含块”的宽度按照 0 来处理了，起始位置为第一个内联盒子所在的位置，如图 6-44 所示。
 
-   ![](2020-01-08-11-03-55.png)
+    ![](2020-01-08-11-03-55.png)
 
 ### 差异点二：绝对定位元素计算的容器
 
@@ -1210,12 +1224,12 @@ $('label.click')
 
 ```html
 <style>
-  .box {
-    position: absolute;
-  }
+    .box {
+        position: absolute;
+    }
 </style>
 <div class="box">
-  文字内容
+    文字内容
 </div>
 ```
 
@@ -1227,13 +1241,13 @@ $('label.click')
 
 ```css
 .container {
-  width: 200px;
-  border: 1px solid;
-  position: relative;
+    width: 200px;
+    border: 1px solid;
+    position: relative;
 }
 
 .box {
-  position: absolute;
+    position: absolute;
 }
 ```
 
@@ -1245,8 +1259,8 @@ $('label.click')
 
 ```css
 dialog {
-  position: absolute;
-  max-width: 100%; /* 多余 */
+    position: absolute;
+    max-width: 100%; /* 多余 */
 }
 ```
 
@@ -1276,13 +1290,13 @@ dialog {
 
 ```css
 .list {
-  padding: 1rem;
+    padding: 1rem;
 }
 
 .tag {
-  position: absolute;
-  top: 0;
-  right: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 ```
 
@@ -1290,13 +1304,13 @@ dialog {
 
 ```css
 .list {
-  padding: 1rem;
+    padding: 1rem;
 }
 
 .tag {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
 }
 ```
 
@@ -1306,13 +1320,13 @@ dialog {
 
 ```css
 .list-2 {
-  padding: 0.75rem;
+    padding: 0.75rem;
 }
 
 .tag-2 {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
 }
 ```
 
@@ -1324,13 +1338,13 @@ dialog {
 
 ```css
 .list {
-  padding: 1rem;
+    padding: 1rem;
 }
 
 .tag {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
 }
 ```
 
@@ -1338,13 +1352,13 @@ dialog {
 
 ```css
 .list {
-  border: 1rem solid transparent;
+    border: 1rem solid transparent;
 }
 
 .tag {
-  position: absolute;
-  top: 0;
-  right: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 ```
 
@@ -1352,7 +1366,7 @@ top、right 属性值都是 0，被固定了下来，于是当间距发生变化
 
 ```css
 .list-2 {
-  border: 0.75rem solid transparent;
+    border: 0.75rem solid transparent;
 }
 ```
 
@@ -1376,13 +1390,13 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```css
 .father {
-  position: relative;
+    position: relative;
 }
 
 .shape {
-  position: absolute;
-  top: 0;
-  left: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 ```
 
@@ -1390,7 +1404,7 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```css
 .shape {
-  position: absolute;
+    position: absolute;
 }
 ```
 
@@ -1404,11 +1418,11 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```css
 .icon-hot {
-  position: absolute;
-  margin: -6px 0 0 2px;
-  width: 28px;
-  height: 11px;
-  background: url(hot.gif);
+    position: absolute;
+    margin: -6px 0 0 2px;
+    width: 28px;
+    height: 11px;
+    background: url(hot.gif);
 }
 ```
 
@@ -1424,18 +1438,18 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```html
 <style>
-  .icon-x {
-    line-height: 20px;
-    padding-left: 20px;
-  }
+    .icon-x {
+        line-height: 20px;
+        padding-left: 20px;
+    }
 
-  .icon-warn {
-    position: absolute;
-    margin-left: -20px;
-    width: 20px;
-    height: 20px;
-    background: url(warn.png) no-repeat center;
-  }
+    .icon-warn {
+        position: absolute;
+        margin-left: -20px;
+        width: 20px;
+        height: 20px;
+        background: url(warn.png) no-repeat center;
+    }
 </style>
 <span class="icon-x"> <i class="icon-warn"></i>邮箱格式不准确 </span>
 ```
@@ -1448,8 +1462,8 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```css
 .box {
-  width: 356px;
-  margin: auto;
+    width: 356px;
+    margin: auto;
 }
 ```
 
@@ -1457,8 +1471,8 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```css
 .remark {
-  position: absolute;
-  margin-left: 10px;
+    position: absolute;
+    margin-left: 10px;
 }
 ```
 
@@ -1480,27 +1494,27 @@ absolute 是非常独立的 CSS 属性值，其样式和行为表现不依赖其
 
 ```html
 <style>
-  /* 下拉列表的无依赖绝对定位 */
-  .datalist {
-    position: absolute;
-  }
+    /* 下拉列表的无依赖绝对定位 */
+    .datalist {
+        position: absolute;
+    }
 
-  /* 列表的显隐控制 */
-  .search-result {
-    display: none;
-  }
+    /* 列表的显隐控制 */
+    .search-result {
+        display: none;
+    }
 
-  input:focus ~ .search-result {
-    display: block;
-  }
+    input:focus ~ .search-result {
+        display: block;
+    }
 </style>
 <input />
 <div class="search-result">
-  <div class="datalist">
-    <a href>搜索结果 1</a>
-    <a href>搜索结果 2</a>
-    <a href>搜索结果 3</a>
-  </div>
+    <div class="datalist">
+        <a href>搜索结果 1</a>
+        <a href>搜索结果 2</a>
+        <a href>搜索结果 3</a>
+    </div>
 </div>
 ```
 
@@ -1518,18 +1532,18 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```html
 <style>
-  /* 和输入框一样的样式 */
-  .placeholder,
-  input {
-  }
+    /* 和输入框一样的样式 */
+    .placeholder,
+    input {
+    }
 
-  /* 占位符元素特有样式 */
-  .placeholder {
-    position: absolute;
-  }
+    /* 占位符元素特有样式 */
+    .placeholder {
+        position: absolute;
+    }
 </style>
 <label class="placeholder" for="text">
-  占位符
+    占位符
 </label>
 <input id="test" />
 ```
@@ -1538,7 +1552,7 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```css
 .placeholder {
-  border-color: transparent;
+    border-color: transparent;
 }
 ```
 
@@ -1548,16 +1562,16 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```html
 <h3>
-  标题
-  <span class="follow">
-    span
-  </span>
+    标题
+    <span class="follow">
+        span
+    </span>
 </h3>
 <h3>
-  标题
-  <div class="follow">
-    div
-  </div>
+    标题
+    <div class="follow">
+        div
+    </div>
 </h3>
 ```
 
@@ -1565,7 +1579,7 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```css
 .follow {
-  position: absolute;
+    position: absolute;
 }
 ```
 
@@ -1577,16 +1591,16 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```html
 <h3>
-  标题
+    标题
 </h3>
 <span class="follow">
-  span
+    span
 </span>
 <h3>
-  标题
+    标题
 </h3>
 <div class="follow">
-  div
+    div
 </div>
 ```
 
@@ -1600,11 +1614,11 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```html
 <div class="nav">
-  导航 1
+    导航 1
 </div>
 <img src="new.png" class="follow" />
 <div class="nav">
-  导航 2
+    导航 2
 </div>
 ```
 
@@ -1612,16 +1626,16 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```css
 .follow {
-  position: absolute;
+    position: absolute;
 }
 
 .nav {
-  width: 100px;
-  line-height: 40px;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  float: left;
+    width: 100px;
+    line-height: 40px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    float: left;
 }
 ```
 
@@ -1641,16 +1655,16 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```html
 <style>
-  p {
-    text-align: center;
-  }
+    p {
+        text-align: center;
+    }
 
-  img {
-    position: absolute;
-  }
+    img {
+        position: absolute;
+    }
 </style>
 <p>
-  <img src="1.jpg" />
+    <img src="1.jpg" />
 </p>
 ```
 
@@ -1662,8 +1676,8 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 具体的渲染原理如下：
 
-1. 由于`<img>`是内联水平，`<p>`标签中存在一个宽度为 0、看不见摸不着的“幽灵空白节点”，也是内联水平，于是受 text-align:center 影响而水平居中显示。
-2. `<img>`设置了 position:absolute，表现为“无依赖绝对定位”，因此在“幽灵空白节点”后面定位显示；同时由于图片不占据空间，这里的“幽灵空白节点”当仁不让，正好在`<p>`元素水平中心位置显示，于是我们就看到了图片从`<p>`元素水平中间位置显示的效果。
+1.  由于`<img>`是内联水平，`<p>`标签中存在一个宽度为 0、看不见摸不着的“幽灵空白节点”，也是内联水平，于是受 text-align:center 影响而水平居中显示。
+2.  `<img>`设置了 position:absolute，表现为“无依赖绝对定位”，因此在“幽灵空白节点”后面定位显示；同时由于图片不占据空间，这里的“幽灵空白节点”当仁不让，正好在`<p>`元素水平中心位置显示，于是我们就看到了图片从`<p>`元素水平中间位置显示的效果。
 
 这是非常简约的定位表现。此时，我们只要 margin-left 一半图片宽度负值大小，就可以实现图片的水平居中效果了，与父元素 position:relative 然后定位元素设置 left:50% 的方法相比，其优势在于不需要改变父元素的定位属性，避免可能不希望出现的层级问题等。
 
@@ -1671,7 +1685,7 @@ IE9 及其以下浏览器不支持 placeholder 占位符效果，实际开发的
 
 ```css
 p:before {
-  content: '';
+    content: '';
 }
 ```
 
@@ -1679,17 +1693,17 @@ p:before {
 
 ```css
 p {
-  text-align: center;
-  font-size: 0.1px;
-  font-size: -webkit-calc(1px - 1px);
+    text-align: center;
+    font-size: 0.1px;
+    font-size: -webkit-calc(1px - 1px);
 }
 
 p:before {
-  content: '\2002';
+    content: '\2002';
 }
 
 img {
-  position: absolute;
+    position: absolute;
 }
 ```
 
@@ -1703,24 +1717,24 @@ img {
 
 ```html
 <style>
-  .alignright {
-    height: 0;
-    text-align: right;
-    overflow: hidden;
-  }
+    .alignright {
+        height: 0;
+        text-align: right;
+        overflow: hidden;
+    }
 
-  .alignright:before {
-    content: '\2002';
-  }
+    .alignright:before {
+        content: '\2002';
+    }
 
-  .follow {
-    position: fixed;
-    bottom: 100px;
-    z-index: 1;
-  }
+    .follow {
+        position: fixed;
+        bottom: 100px;
+        z-index: 1;
+    }
 </style>
 <div class="alignright">
-  <span class="follow"></span>
+    <span class="follow"></span>
 </div>
 ```
 
@@ -1742,7 +1756,7 @@ overflow 对 absolute 元素的剪裁规则用一句话表述就是：绝对定�
 
 ```html
 <div style="overflow: hidden;">
-  <img src="1.jpg" style="position: absolute;" />
+    <img src="1.jpg" style="position: absolute;" />
 </div>
 ```
 
@@ -1750,9 +1764,9 @@ overflow 元素父级是定位元素也不会剪裁，例如：
 
 ```html
 <div style="position: relative;">
-  <div style="overflow: hidden;">
-    <img src="1.jpg" style="position: absolute;" />
-  </div>
+    <div style="overflow: hidden;">
+        <img src="1.jpg" style="position: absolute;" />
+    </div>
 </div>
 ```
 
@@ -1760,8 +1774,8 @@ overflow 元素父级是定位元素也不会剪裁，例如：
 
 ```html
 <div style="overflow: hidden; position: relative;">
-  <img src="1.jpg" style="position: absolute;" />
-  <!-- 剪裁 -->
+    <img src="1.jpg" style="position: absolute;" />
+    <!-- 剪裁 -->
 </div>
 ```
 
@@ -1769,10 +1783,10 @@ overflow 元素父级是定位元素也不会剪裁，例如：
 
 ```html
 <div style="overflow: hidden;">
-  <div style="position: relative;">
-    <img src="1.jpg" style="position: absolute;" />
-    <!-- 剪裁 -->
-  </div>
+    <div style="position: relative;">
+        <img src="1.jpg" style="position: absolute;" />
+        <!-- 剪裁 -->
+    </div>
 </div>
 ```
 
@@ -1780,21 +1794,21 @@ overflow 元素父级是定位元素也不会剪裁，例如：
 
 ```html
 <style>
-  .box {
-    width: 300px;
-    height: 100px;
-    background-color: #f0f3f9;
-    overflow: auto;
-  }
+    .box {
+        width: 300px;
+        height: 100px;
+        background-color: #f0f3f9;
+        overflow: auto;
+    }
 
-  .box > img {
-    width: 256px;
-    height: 192px;
-    position: absolute;
-  }
+    .box > img {
+        width: 256px;
+        height: 192px;
+        position: absolute;
+    }
 </style>
 <div class="box">
-  <img src="1.jpg" />
+    <img src="1.jpg" />
 </div>
 ```
 
@@ -1816,13 +1830,13 @@ overflow 元素父级是定位元素也不会剪裁，例如：
 
 overflow 元素自身 transform：
 
-- IE9 及以上版本浏览器、Firefox 和 Safari（OS X、iOS）剪裁；
-- Chrome 和 Opera 不剪裁。
+-  IE9 及以上版本浏览器、Firefox 和 Safari（OS X、iOS）剪裁；
+-  Chrome 和 Opera 不剪裁。
 
 overflow 子元素 transform：
 
-- IE9 及以上版本浏览器、Firefox 和 Safari（OS X、iOS）剪裁；
-- Chrome 和 Opera 剪裁。
+-  IE9 及以上版本浏览器、Firefox 和 Safari（OS X、iOS）剪裁；
+-  Chrome 和 Opera 剪裁。
 
 可以看到 overflow 元素自身 transform 的时候，Chrome 和 Opera 浏览器下的 overflow 剪裁是无效的，这是唯一和有定位属性时的 overflow 剪裁不一样的地方，因此才有“角色扮演并不完全”的说法。
 
@@ -1866,8 +1880,8 @@ clip: rect(30px 200px 200px 20px);
 
 ```css
 .fixed-clip {
-  position: fixed;
-  clip: rect(30px 200px 200px 20px);
+    position: fixed;
+    clip: rect(30px 200px 200px 20px);
 }
 ```
 
@@ -1879,29 +1893,30 @@ clip: rect(30px 200px 200px 20px);
 
 ```html
 <a href="/" class="logo">
-  <h1>CSS 世界</h1>
+    <h1>CSS 世界</h1>
 </a>
 ```
 
 如何隐藏`<h1>`标签中的“CSS 世界”这几个文字，通常有以下一些技术选型。
 
-- 下策是 display: none 或者 visibility: hidden 隐藏，因为屏幕阅读设备会忽略这里的文字。
-- text-indent 缩进是中策，但文字如果缩进过大，大到屏幕之外，屏幕阅读设备也是不会读取的。
-- color: transparent 是移动端上策，但却是桌面端中策，因为原生 IE8 浏览器并不支持它。color: transparent 声明，很难用简单的方式阻止文本被框选。
-- clip 剪裁隐藏是上策，既满足视觉上的隐藏，屏幕阅读设备等辅助设备也支持得很好。
-  ```css
-  .logo h1 {
-    position: absolute;
-    clip: rect(0 0 0 0);
-  }
-  ```
+-  下策是 display: none 或者 visibility: hidden 隐藏，因为屏幕阅读设备会忽略这里的文字。
+-  text-indent 缩进是中策，但文字如果缩进过大，大到屏幕之外，屏幕阅读设备也是不会读取的。
+-  color: transparent 是移动端上策，但却是桌面端中策，因为原生 IE8 浏览器并不支持它。color: transparent 声明，很难用简单的方式阻止文本被框选。
+-  clip 剪裁隐藏是上策，既满足视觉上的隐藏，屏幕阅读设备等辅助设备也支持得很好。
+
+    ```css
+    .logo h1 {
+        position: absolute;
+        clip: rect(0 0 0 0);
+    }
+    ```
 
 clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是，它具有更强的普遍适应性，任何元素、任何场景都可以无障碍使用。例如，我定义一个如下的 CSS 语句块：
 
 ```css
 .clip {
-  position: absolute;
-  clip: rect(0 0 0 0);
+    position: absolute;
+    clip: rect(0 0 0 0);
 }
 ```
 
@@ -1913,8 +1928,8 @@ clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是
 
 ```html
 <form>
-  <input type="submit" id="someID" class="clip" />
-  <label for="someID">提交</label>
+    <input type="submit" id="someID" class="clip" />
+    <label for="someID">提交</label>
 </form>
 ```
 
@@ -1922,19 +1937,19 @@ clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是
 
 这里使用的 clip 剪裁隐藏是我工作这么多年大浪淘沙筛选后的最佳实践，有对比才能显出好在何处。
 
-- display:none 或者 visibility:hidden 隐藏有两个问题，一个是按钮无法被 focus 了，另外一个是 IE8 浏览器下提交行为丢失，原因应该与按钮 focus 特性丢失有关。
-- 透明度 0 覆盖也是一个不错的实践。如果是移动端项目，建议这么做；但如果是桌面端项目，则完全没有必要。使用透明度 0 覆盖的问题是每一个场景都需要根据环境的不同重新定位，以保证点击区域的准确性，成本较高，但 clip 隐藏直接用一个类名加一下就好。
-- 还有一种比较具有适用性的“可访问隐藏”是下面这种屏幕外隐藏：
+-  display:none 或者 visibility:hidden 隐藏有两个问题，一个是按钮无法被 focus 了，另外一个是 IE8 浏览器下提交行为丢失，原因应该与按钮 focus 特性丢失有关。
+-  透明度 0 覆盖也是一个不错的实践。如果是移动端项目，建议这么做；但如果是桌面端项目，则完全没有必要。使用透明度 0 覆盖的问题是每一个场景都需要根据环境的不同重新定位，以保证点击区域的准确性，成本较高，但 clip 隐藏直接用一个类名加一下就好。
+-  还有一种比较具有适用性的“可访问隐藏”是下面这种屏幕外隐藏：
 
-  ```css
-  .abs-out {
-    position: absolute;
-    left: -999px;
-    top: -999px;
-  }
-  ```
+    ```css
+    .abs-out {
+        position: absolute;
+        left: -999px;
+        top: -999px;
+    }
+    ```
 
-  然而，在本例中，会出现一个比较麻烦的问题。当一个控件元素被 focus 的时候，浏览器会自动改变滚动高度，让这个控件元素在屏幕内显示。假如说我们的`<label>`“提交”按钮在第二屏，则点击按钮的时候浏览器会自动跳到第一屏置顶，因为按钮隐藏在了屏幕外，于是发生了非常糟糕的体验问题。而 clip 就地剪裁，就不会有“页面跳动”的体验问题。于是，权衡成本和效果，clip 隐藏成为了最佳选择，特别是对于桌面端项目。
+    然而，在本例中，会出现一个比较麻烦的问题。当一个控件元素被 focus 的时候，浏览器会自动改变滚动高度，让这个控件元素在屏幕内显示。假如说我们的`<label>`“提交”按钮在第二屏，则点击按钮的时候浏览器会自动跳到第一屏置顶，因为按钮隐藏在了屏幕外，于是发生了非常糟糕的体验问题。而 clip 就地剪裁，就不会有“页面跳动”的体验问题。于是，权衡成本和效果，clip 隐藏成为了最佳选择，特别是对于桌面端项目。
 
 ## 深入了解 clip 的渲染
 
@@ -1942,17 +1957,17 @@ clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是
 
 ```css
 .box {
-  width: 300px;
-  height: 100px;
-  background-color: #f0f3f9;
-  position: relative;
-  overflow: auto;
+    width: 300px;
+    height: 100px;
+    background-color: #f0f3f9;
+    position: relative;
+    overflow: auto;
 }
 
 .box > img {
-  width: 256px;
-  height: 192px;
-  position: absolute;
+    width: 256px;
+    height: 192px;
+    position: absolute;
 }
 ```
 
@@ -1964,10 +1979,10 @@ clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是
 
 ```css
 .box > img {
-  width: 256px;
-  height: 192px;
-  position: absolute;
-  clip: rect(0 0 0 0);
+    width: 256px;
+    height: 192px;
+    position: absolute;
+    clip: rect(0 0 0 0);
 }
 ```
 
@@ -1989,9 +2004,9 @@ Chrome 浏览器的这种特性表现实际上让 clip 隐藏有了瑕疵，好�
 
 ```css
 .box {
-  position: absolute;
-  left: 0;
-  top: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 ```
 
@@ -1999,8 +2014,8 @@ Chrome 浏览器的这种特性表现实际上让 clip 隐藏有了瑕疵，好�
 
 ```css
 .box {
-  position: absolute;
-  left: 0;
+    position: absolute;
+    left: 0;
 }
 ```
 
@@ -2016,11 +2031,11 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```html
 <style>
-  .box {
-    position: absolute;
-    left: 0;
-    right: 0;
-  }
+    .box {
+        position: absolute;
+        left: 0;
+        right: 0;
+    }
 </style>
 <div class="box"></div>
 ```
@@ -2031,11 +2046,11 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .box {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 }
 ```
 
@@ -2043,11 +2058,11 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .box {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }
 ```
 
@@ -2057,23 +2072,23 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .box {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  padding: 30px;
-  /* 或 margin: 30px; */
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 30px;
+    /* 或 margin: 30px; */
 }
 
 .box {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  padding: 30px;
-  /* 或 margin: 30px; */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 30px;
+    /* 或 margin: 30px; */
 }
 ```
 
@@ -2093,8 +2108,8 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 绝对定位元素的 margin:auto 的填充规则和普通流体元素的一模一样：
 
-- 如果一侧定值，一侧 auto，auto 为剩余空间大小；
-- 如果两侧均是 auto，则平分剩余空间。
+-  如果一侧定值，一侧 auto，auto 为剩余空间大小；
+-  如果两侧均是 auto，则平分剩余空间。
 
 唯一的区别在于，绝对定位元素 margin:auto 居中从 IE8 浏览器开始支持，而普通元素的 margin:auto 居中很早就支持了。
 
@@ -2102,13 +2117,13 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .element {
-  width: 300px;
-  height: 200px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin-left: -150px; /* 宽度的一半 */
-  margin-top: -100px; /* 高度的一半 */
+    width: 300px;
+    height: 200px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -150px; /* 宽度的一半 */
+    margin-top: -100px; /* 高度的一半 */
 }
 ```
 
@@ -2116,12 +2131,12 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .element {
-  width: 300px;
-  height: 200px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%); /* 50%为自身尺寸的一半 */
+    width: 300px;
+    height: 200px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); /* 50%为自身尺寸的一半 */
 }
 ```
 
@@ -2129,14 +2144,14 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .element {
-  width: 300px;
-  height: 200px;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+    width: 300px;
+    height: 200px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
 }
 ```
 
@@ -2150,11 +2165,11 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .box {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 }
 ```
 
@@ -2162,9 +2177,9 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```css
 .icon {
-  width: 20px;
-  height: 20px;
-  position: relative;
+    width: 20px;
+    height: 20px;
+    position: relative;
 }
 ```
 
@@ -2172,7 +2187,7 @@ left/top/right/bottom 是具有定位特性元素专用的 CSS 属性，其中 l
 
 ```html
 <div class="icon">
-  <div class="box"></div>
+    <div class="box"></div>
 </div>
 ```
 
@@ -2190,7 +2205,7 @@ relative 的定位有两大特性：一是相对自身；二是无侵入。
 
 ```css
 .pk-1 {
-  margin-top: -50px;
+    margin-top: -50px;
 }
 ```
 
@@ -2198,8 +2213,8 @@ relative 则是：
 
 ```css
 .pk-2 {
-  position: relative;
-  top: -50px;
+    position: relative;
+    top: -50px;
 }
 ```
 
@@ -2215,11 +2230,11 @@ top 和 bottom 这两个垂直方向的百分比值计算跟 height 的百分比
 
 ```css
 .example {
-  position: relative;
-  top: 10px;
-  right: 10px; /* 无效 */
-  bottom: 10px; /* 无效 */
-  left: 10px;
+    position: relative;
+    top: 10px;
+    right: 10px; /* 无效 */
+    bottom: 10px; /* 无效 */
+    left: 10px;
 }
 ```
 
@@ -2227,8 +2242,8 @@ top 和 bottom 这两个垂直方向的百分比值计算跟 height 的百分比
 
 “relative 的最小化影响原则”是我自己总结的一套更好地布局实践的原则，主要分为以下两部分：
 
-1. 尽量不使用 relative，如果想定位某些元素，看看能否使用“无依赖的绝对定位”；
-2. 如果场景受限，一定要使用 relative，则该 relative 务必最小化。
+1.  尽量不使用 relative，如果想定位某些元素，看看能否使用“无依赖的绝对定位”；
+2.  如果场景受限，一定要使用 relative，则该 relative 务必最小化。
 
 第一点前文有重点介绍，应该很好理解，关键是第二点，“relative 最小化”是什么意思？
 
@@ -2236,11 +2251,11 @@ top 和 bottom 这两个垂直方向的百分比值计算跟 height 的百分比
 
 ```html
 <div>
-  <img src="icon.png" />
-  <p>内容 1</p>
-  <p>内容 2</p>
-  <p>内容 3</p>
-  <p>内容 4</p>
+    <img src="icon.png" />
+    <p>内容 1</p>
+    <p>内容 2</p>
+    <p>内容 3</p>
+    <p>内容 4</p>
 </div>
 ```
 
@@ -2248,11 +2263,11 @@ top 和 bottom 这两个垂直方向的百分比值计算跟 height 的百分比
 
 ```html
 <div style="position:relative;">
-  <img src="icon.png" style="position:absolute;top:0;right:0;" />
-  <p>内容 1</p>
-  <p>内容 2</p>
-  <p>内容 3</p>
-  <p>内容 4</p>
+    <img src="icon.png" style="position:absolute;top:0;right:0;" />
+    <p>内容 1</p>
+    <p>内容 2</p>
+    <p>内容 3</p>
+    <p>内容 4</p>
 </div>
 ```
 
@@ -2260,13 +2275,13 @@ top 和 bottom 这两个垂直方向的百分比值计算跟 height 的百分比
 
 ```html
 <div>
-  <div style="position:relative;">
-    <img src="icon.png" style="position:absolute;top:0;right:0;" />
-  </div>
-  <p>内容 1</p>
-  <p>内容 2</p>
-  <p>内容 3</p>
-  <p>内容 4</p>
+    <div style="position:relative;">
+        <img src="icon.png" style="position:absolute;top:0;right:0;" />
+    </div>
+    <p>内容 1</p>
+    <p>内容 2</p>
+    <p>内容 3</p>
+    <p>内容 4</p>
 </div>
 ```
 
@@ -2296,22 +2311,22 @@ position:fixed 固定定位元素的“包含块”是根元素，我们可以�
 
 ```html
 <style>
-  .father {
-    width: 300px;
-    height: 200px;
-    position: relative;
-  }
+    .father {
+        width: 300px;
+        height: 200px;
+        position: relative;
+    }
 
-  .son {
-    width: 40px;
-    height: 40px;
-    position: fixed;
-    top: 0;
-    right: 0;
-  }
+    .son {
+        width: 40px;
+        height: 40px;
+        position: fixed;
+        top: 0;
+        right: 0;
+    }
 </style>
 <div class="father">
-  <div class="son"></div>
+    <div class="son"></div>
 </div>
 ```
 
@@ -2323,32 +2338,32 @@ position:fixed 固定定位元素的“包含块”是根元素，我们可以�
 
 ```html
 <style>
-  .father {
-    width: 300px;
-    height: 200px;
-    position: relative;
-  }
+    .father {
+        width: 300px;
+        height: 200px;
+        position: relative;
+    }
 
-  .right {
-    height: 0;
-    text-align: right;
-    overflow: hidden;
-  }
+    .right {
+        height: 0;
+        text-align: right;
+        overflow: hidden;
+    }
 
-  .son {
-    display: inline;
-    width: 40px;
-    height: 40px;
-    position: fixed;
-    margin-left: -40px;
-  }
+    .son {
+        display: inline;
+        width: 40px;
+        height: 40px;
+        position: fixed;
+        margin-left: -40px;
+    }
 </style>
 <div class="father">
-  <div class="right">
-    <!-- 内联元素充当幽灵结点 -->
-    &nbsp;
-    <div class="son"></div>
-  </div>
+    <div class="right">
+        <!-- 内联元素充当幽灵结点 -->
+        &nbsp;
+        <div class="son"></div>
+    </div>
 </div>
 ```
 
@@ -2420,9 +2435,9 @@ position:fixed 固定定位元素的“包含块”是根元素，我们可以�
 
 ```js
 var widthBar = 17,
-  root = document.documentElement;
+    root = document.documentElement;
 if (typeof window.innerWidth == 'number') {
-  widthBar = window.innerWidth - root.clientWidth;
+    widthBar = window.innerWidth - root.clientWidth;
 }
 root.style.overflow = 'hidden';
 root.style.borderRight = widthBar + 'px solid transparent';

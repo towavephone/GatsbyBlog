@@ -41,8 +41,8 @@ tags: 前端, 调试
 
 ### 切换 DevTools 的面板
 
-- 按下 `ctrl + [ 和 ctrl + ]` 可以从当前面板的分别向左和向右切换面板
-- 按下 `ctrl + 1` 到 `ctrl + 9`可以直接转到编号 1...9 的面板(`ctrl + 1`转到元素面板，`ctrl + 4` 转到 网络信息面板等等)
+-  按下 `ctrl + [ 和 ctrl + ]` 可以从当前面板的分别向左和向右切换面板
+-  按下 `ctrl + 1` 到 `ctrl + 9`可以直接转到编号 1...9 的面板(`ctrl + 1`转到元素面板，`ctrl + 4` 转到 网络信息面板等等)
 
 ### 递增/递减
 
@@ -54,8 +54,8 @@ tags: 前端, 调试
 
 DevTools 中的前 4 个主要的面板，每一个都支持 `[ctrl] + [f]` 快捷方式，你可以使用对应的查询方式来查找信息:
 
-- 在 `Elements` 面板中 - 通过 `string`，`选择器` 或者 `XPath` 来查找
-- 而在 `Console`， `Network` 以及 `Source` 面板 - 通过区分大小写，或者可以被视为表达式的 `strings` 来查找
+-  在 `Elements` 面板中 - 通过 `string`，`选择器` 或者 `XPath` 来查找
+-  而在 `Console`， `Network` 以及 `Source` 面板 - 通过区分大小写，或者可以被视为表达式的 `strings` 来查找
 
 ## 使用 Command
 
@@ -73,9 +73,9 @@ DevTools 中的前 4 个主要的面板，每一个都支持 `[ctrl] + [f]` 快�
 
 输入 layout ，你会看到 2 到 3 个选项
 
-- 使用横向面板布局
-- 使用纵向面板布局
-- 使用自动面板布局
+-  使用横向面板布局
+-  使用纵向面板布局
+-  使用自动面板布局
 
 ### 快速切换主题
 
@@ -155,9 +155,9 @@ DevTools 中的前 4 个主要的面板，每一个都支持 `[ctrl] + [f]` 快�
 
 **解决方案**
 
-- 打印一个从这个对象复制出来的对象。
-- 使用资源面中的断点来调试
-- 使用 JSON.stringify() 方法处理打印的结果
+-  打印一个从这个对象复制出来的对象。
+-  使用资源面中的断点来调试
+-  使用 JSON.stringify() 方法处理打印的结果
 
 以上更新于`2019-03-10 19:21:45`
 
@@ -292,8 +292,8 @@ console.assert(assertion, msg [, subst1, ..., substN]); // c-like message format
 
 与其在所有事上展示一个时间戳，或许你对脚本中的特殊的节点之间执行的时间跨度更加感兴趣，对于这样的情况，我们可以采用一对有效的 console 方法
 
-- console.time() — 开启一个计时器
-- console.timeEnd() — 结束计时并且将结果在 console 中打印出来
+-  console.time() — 开启一个计时器
+-  console.timeEnd() — 结束计时并且将结果在 console 中打印出来
 
 如果你想一次记录多件事，可以往这些函数中传入不同的标签值。(例如: console.time('loading') ， console.timeEnd('loading') )
 

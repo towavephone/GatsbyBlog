@@ -33,10 +33,12 @@ promise.then(() => {
 });
 ```
 
-1. 写出以上代码的输出结果，分析原因
-   - 123B0undefined
-   - 执行顺序：同步环境执行 -> 事件循环 1(microtask queue 的 All)-> 事件循环 2(macrotask queue 中的一个) -> 事件循环 1(microtask queue 的 All)-> 事件循环 2(macrotask queue 中的一个)
-2. 修改代码，使 3 秒钟输出 3，再 2 秒钟输出 2，再 1 秒钟输出 1(A、B 可忽略)
+1.  写出以上代码的输出结果，分析原因
+
+-  123B0undefined
+-  执行顺序：同步环境执行 -> 事件循环 1(microtask queue 的 All)-> 事件循环 2(macrotask queue 中的一个) -> 事件循环 1(microtask queue 的 All)-> 事件循环 2(macrotask queue 中的一个)
+
+2.  修改代码，使 3 秒钟输出 3，再 2 秒钟输出 2，再 1 秒钟输出 1(A、B 可忽略)
 
 ```js
 function next(n) {

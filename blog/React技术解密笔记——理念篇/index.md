@@ -17,13 +17,13 @@ tags: 前端, React, 高级前端
 
 我们日常使用 App，浏览网页时，有两类场景会制约快速响应：
 
-- 当遇到大计算量的操作或者设备性能不足使页面掉帧，导致卡顿。
-- 发送网络请求后，由于需要等待数据返回才能进一步操作导致不能快速响应。
+-  当遇到大计算量的操作或者设备性能不足使页面掉帧，导致卡顿。
+-  发送网络请求后，由于需要等待数据返回才能进一步操作导致不能快速响应。
 
 这两类场景可以概括为：
 
-- CPU 的瓶颈
-- IO 的瓶颈
+-  CPU 的瓶颈
+-  IO 的瓶颈
 
 React 是如何解决这两个瓶颈的呢？
 
@@ -135,8 +135,8 @@ React 从 v15 升级到 v16 后重构了整个架构。本节我们聊聊 v15，
 
 React15 架构可以分为两层：
 
-- Reconciler（协调器）—— 负责找出变化的组件
-- Renderer（渲染器）—— 负责将变化的组件渲染到页面上
+-  Reconciler（协调器）—— 负责找出变化的组件
+-  Renderer（渲染器）—— 负责将变化的组件渲染到页面上
 
 #### Reconciler（协调器）
 
@@ -144,10 +144,10 @@ React15 架构可以分为两层：
 
 每当有更新发生时，Reconciler 会做如下工作：
 
-- 调用函数组件、或 class 组件的 render 方法，将返回的 JSX 转化为虚拟 DOM
-- 将虚拟 DOM 和上次更新时的虚拟 DOM 对比
-- 通过对比找出本次更新中变化的虚拟 DOM
-- 通知 Renderer 将变化的虚拟 DOM 渲染到页面上
+-  调用函数组件、或 class 组件的 render 方法，将返回的 JSX 转化为虚拟 DOM
+-  将虚拟 DOM 和上次更新时的虚拟 DOM 对比
+-  通过对比找出本次更新中变化的虚拟 DOM
+-  通知 Renderer 将变化的虚拟 DOM 渲染到页面上
 
 #### Renderer（渲染器）
 
@@ -155,9 +155,9 @@ React15 架构可以分为两层：
 
 除此之外，还有：
 
-- ReactNative 渲染器，渲染 App 原生组件
-- ReactTest 渲染器，渲染出纯 Js 对象用于测试
-- ReactArt 渲染器，渲染到 Canvas, SVG 或 VML (IE8)
+-  ReactNative 渲染器，渲染 App 原生组件
+-  ReactTest 渲染器，渲染出纯 Js 对象用于测试
+-  ReactArt 渲染器，渲染到 Canvas, SVG 或 VML (IE8)
 
 在每次更新发生时，Renderer 接到 Reconciler 通知，将变化的组件渲染在当前宿主环境。
 
@@ -198,9 +198,9 @@ React15 架构可以分为两层：
 
 React16 架构可以分为三层：
 
-- Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入 Reconciler
-- Reconciler（协调器）—— 负责找出变化的组件
-- Renderer（渲染器）—— 负责将变化的组件渲染到页面上
+-  Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入 Reconciler
+-  Reconciler（协调器）—— 负责找出变化的组件
+-  Renderer（渲染器）—— 负责将变化的组件渲染到页面上
 
 可以看到，相较于 React15，React16 中新增了 Scheduler（调度器），让我们来了解下他。
 
@@ -210,8 +210,8 @@ React16 架构可以分为三层：
 
 其实部分浏览器已经实现了这个 API，这就是 requestIdleCallback。但是由于以下因素，React 放弃使用：
 
-- 浏览器兼容性
-- 触发频率不稳定，受很多因素影响。比如当我们的浏览器切换 tab 后，之前 tab 注册的 requestIdleCallback 触发的频率会变得很低
+-  浏览器兼容性
+-  触发频率不稳定，受很多因素影响。比如当我们的浏览器切换 tab 后，之前 tab 注册的 requestIdleCallback 触发的频率会变得很低
 
 基于以上原因，React 实现了功能更完备的 requestIdleCallbackpolyfill，这就是 Scheduler。除了在空闲时触发回调的功能外，Scheduler 还提供了多种调度优先级供任务设置。
 
@@ -262,8 +262,8 @@ Renderer 根据 Reconciler 为虚拟 DOM 打的标记，同步执行对应的 DO
 
 其中红框中的步骤随时可能由于以下原因被中断：
 
-- 有其他更高优任务需要先更新
-- 当前帧没有剩余时间
+-  有其他更高优任务需要先更新
+-  当前帧没有剩余时间
 
 由于红框中的工作都在内存中进行，不会更新页面上的 DOM，所以即使反复中断，用户也不会看见更新不完全的 DOM（即上一节演示的情况）。
 
@@ -403,8 +403,8 @@ function ProfileDetails() {
 
 但是 Generator 的一些缺陷使 React 团队放弃了他：
 
-- 类似 async，Generator 也是传染性的，使用了 Generator 则上下文的其他函数也需要作出改变。这样心智负担比较重。
-- Generator 执行的中间状态是上下文关联的。
+-  类似 async，Generator 也是传染性的，使用了 Generator 则上下文的其他函数也需要作出改变。这样心智负担比较重。
+-  Generator 执行的中间状态是上下文关联的。
 
 考虑如下例子：
 
@@ -467,9 +467,9 @@ React 内部实现的一套状态更新机制。支持任务不同优先级，�
 
 Fiber 包含三层含义：
 
-1. 作为架构来说，之前 React15 的 Reconciler 采用递归的方式执行，数据保存在递归调用栈中，所以被称为 stack Reconciler。React16 的 Reconciler 基于 Fiber 节点实现，被称为 Fiber Reconciler。
-2. 作为静态的数据结构来说，每个 Fiber 节点对应一个 React element，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的 DOM 节点等信息。
-3. 作为动态的工作单元来说，每个 Fiber 节点保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
+1.  作为架构来说，之前 React15 的 Reconciler 采用递归的方式执行，数据保存在递归调用栈中，所以被称为 stack Reconciler。React16 的 Reconciler 基于 Fiber 节点实现，被称为 Fiber Reconciler。
+2.  作为静态的数据结构来说，每个 Fiber 节点对应一个 React element，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的 DOM 节点等信息。
+3.  作为动态的工作单元来说，每个 Fiber 节点保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
 
 ### Fiber 的结构
 
@@ -657,7 +657,7 @@ function App() {
 ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
-1. 首次执行 ReactDOM.render 会创建 fiberRootNode（源码中叫 fiberRoot）和 rootFiber。其中 fiberRootNode 是整个应用的根节点，rootFiber 是 `<App/>` 所在组件树的根节点。
+1.  首次执行 ReactDOM.render 会创建 fiberRootNode（源码中叫 fiberRoot）和 rootFiber。其中 fiberRootNode 是整个应用的根节点，rootFiber 是 `<App/>` 所在组件树的根节点。
 
    之所以要区分 fiberRootNode 与 rootFiber，是因为在应用中我们可以多次调用 ReactDOM.render 渲染不同的组件树，他们会拥有不同的 rootFiber。但是整个应用的根节点只有一个，那就是 fiberRootNode。
 
@@ -671,13 +671,13 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
    由于是首屏渲染，页面中还没有挂载任何 DOM，所以 fiberRootNode.current 指向的 rootFiber 没有任何子 Fiber 节点（即 current Fiber 树为空）。
 
-2. 接下来进入 render 阶段，根据组件返回的 JSX 在内存中依次创建 Fiber 节点并连接在一起构建 Fiber 树，被称为 workInProgress Fiber 树。（下图中右侧为内存中构建的树，左侧为页面显示的树）
+2.  接下来进入 render 阶段，根据组件返回的 JSX 在内存中依次创建 Fiber 节点并连接在一起构建 Fiber 树，被称为 workInProgress Fiber 树。（下图中右侧为内存中构建的树，左侧为页面显示的树）
 
    在构建 workInProgress Fiber 树时会尝试复用 current Fiber 树中已有的 Fiber 节点内的属性，在首屏渲染时只有 rootFiber 存在对应的 current fiber（即 rootFiber.alternate）。
 
    ![](res/2021-01-21-13-50-15.png)
 
-3. 图中右侧已构建完的 workInProgress Fiber 树在 commit 阶段渲染到页面。
+3.  图中右侧已构建完的 workInProgress Fiber 树在 commit 阶段渲染到页面。
 
    此时 DOM 更新为右侧树对应的样子。fiberRootNode 的 current 指针指向 workInProgress Fiber 树使其变为 current Fiber 树。
 
@@ -685,7 +685,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 ### update 时
 
-1. 接下来我们点击 p 节点触发状态改变，这会开启一次新的 render 阶段并构建一棵新的 workInProgress Fiber 树。
+1.  接下来我们点击 p 节点触发状态改变，这会开启一次新的 render 阶段并构建一棵新的 workInProgress Fiber 树。
 
    ![](res/2021-01-21-13-55-02.png)
 
@@ -693,7 +693,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
    > 这个决定是否复用的过程就是 Diff 算法，后面章节会详细讲解
 
-2. workInProgress Fiber 树在 render 阶段完成构建后进入 commit 阶段渲染到页面上。渲染完毕后，workInProgress Fiber 树变为 current Fiber 树。
+2.  workInProgress Fiber 树在 render 阶段完成构建后进入 commit 阶段渲染到页面上。渲染完毕后，workInProgress Fiber 树变为 current Fiber 树。
 
    ![](res/2021-01-21-13-58-36.png)
 
@@ -707,10 +707,10 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 通过本章的学习，我们了解了 React 的 Scheduler-Reconciler-Renderer 架构体系，在结束本章前，我想介绍几个源码内的术语：
 
-- Reconciler 工作的阶段被称为 render 阶段。因为在该阶段会调用组件的 render 方法。
-- Renderer 工作的阶段被称为 commit 阶段。就像你完成一个需求的编码后执行 git commit 提交代码。commit 阶段会把 render 阶段提交的信息渲染在页面上。
-- render 与 commit 阶段统称为 work，即 React 在工作中。相对应的，如果任务正在 Scheduler 内调度，就不属于 work。
-- 在架构篇我们会分别讲解 Reconciler 和 Renderer 的工作流程，所以章节名分别为 render 阶段和 commit 阶段。
+-  Reconciler 工作的阶段被称为 render 阶段。因为在该阶段会调用组件的 render 方法。
+-  Renderer 工作的阶段被称为 commit 阶段。就像你完成一个需求的编码后执行 git commit 提交代码。commit 阶段会把 render 阶段提交的信息渲染在页面上。
+-  render 与 commit 阶段统称为 work，即 React 在工作中。相对应的，如果任务正在 Scheduler 内调度，就不属于 work。
+-  在架构篇我们会分别讲解 Reconciler 和 Renderer 的工作流程，所以章节名分别为 render 阶段和 commit 阶段。
 
 # 前置知识
 
@@ -718,9 +718,9 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 经过之前的学习，我们已经知道 React16 的架构分为三层：
 
-- Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入 Reconciler
-- Reconciler（协调器）—— 负责找出变化的组件
-- Renderer（渲染器）—— 负责将变化的组件渲染到页面上
+-  Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入 Reconciler
+-  Reconciler（协调器）—— 负责找出变化的组件
+-  Renderer（渲染器）—— 负责将变化的组件渲染到页面上
 
 那么架构是如何体现在源码的文件结构上呢，让我们一起看看吧。
 
@@ -745,9 +745,9 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 React 的核心，包含所有全局 React API，如：
 
-- React.createElement
-- React.Component
-- React.Children
+-  React.createElement
+-  React.Component
+-  React.Children
 
 这些 API 是全平台通用的，它不包含 ReactDOM、ReactNative 等平台特定的代码。在 NPM 上作为单独的一个包发布。
 
@@ -954,9 +954,9 @@ ClassComponent.prototype.isReactComponent = {};
 
 比如如下信息就不包括在 JSX 中：
 
-- 组件在更新中的优先级
-- 组件的 state
-- 组件被打上的用于 Renderer 的标记
+-  组件在更新中的优先级
+-  组件的 state
+-  组件被打上的用于 Renderer 的标记
 
 这些内容都包含在 Fiber 节点中。
 

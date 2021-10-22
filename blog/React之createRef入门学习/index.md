@@ -167,11 +167,11 @@ export default class Hello extends React.Component {
 
 ## 注意
 
-- 当 `ref` 属性被用于一个普通的 HTML 元素时，`React.createRef()` 将接收底层 DOM 元素作为它的 `current` 属性以创建 `ref` ，我们可以通过 Refs 访问 DOM 元素属性。
-- 当 `ref` 属性被用于一个自定义 class 组件时，`ref` 对象将接收该组件已挂载的实例作为它的 `current`，与 `ref` 用于 HTML 元素不同的是，我们能够通过 `ref` 访问该组件的 props，state，方法以及它的整个原型 。
-- ref 是为了获取某个节点是实例，所以 **你不能在函数式组件上使用 ref 属性**，因为它们没有实例。
-- 推荐使用 **回调形式的 refs**， `stringRef` 将会废弃（严格模式下使用会报警告），`React.createRef()` API 是 React v16.3 引入的更新。
-- 避免使用 refs 来做任何可以通过 **声明式** 实现来完成的事情
+-  当 `ref` 属性被用于一个普通的 HTML 元素时，`React.createRef()` 将接收底层 DOM 元素作为它的 `current` 属性以创建 `ref` ，我们可以通过 Refs 访问 DOM 元素属性。
+-  当 `ref` 属性被用于一个自定义 class 组件时，`ref` 对象将接收该组件已挂载的实例作为它的 `current`，与 `ref` 用于 HTML 元素不同的是，我们能够通过 `ref` 访问该组件的 props，state，方法以及它的整个原型 。
+-  ref 是为了获取某个节点是实例，所以 **你不能在函数式组件上使用 ref 属性**，因为它们没有实例。
+-  推荐使用 **回调形式的 refs**， `stringRef` 将会废弃（严格模式下使用会报警告），`React.createRef()` API 是 React v16.3 引入的更新。
+-  避免使用 refs 来做任何可以通过 **声明式** 实现来完成的事情
 
 # createRef 与 Hook useRef
 

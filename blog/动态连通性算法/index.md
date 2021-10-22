@@ -17,8 +17,8 @@ path: /offer-connexity/
 
 ### 特点
 
-- 对于 N 个触点，加权 quick-union 算法构造的森林中的任意节点的深度最多为 lgN。
-- 对于加权 quick-union 算法和 N 个触点，在最坏情况下 find()、connected()和 union()的成本的增长数量级为 logN。
+-  对于 N 个触点，加权 quick-union 算法构造的森林中的任意节点的深度最多为 lgN。
+-  对于加权 quick-union 算法和 N 个触点，在最坏情况下 find()、connected()和 union()的成本的增长数量级为 logN。
 
 ### 实现
 

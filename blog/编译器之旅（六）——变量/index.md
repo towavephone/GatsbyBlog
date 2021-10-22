@@ -11,9 +11,9 @@ path: /tour-of-compiler-variables/
 
 在语言中添加变量，希望能够做到
 
-- 声明变量
-- 使用变量获取存储的值
-- 分配给变量
+-  声明变量
+-  使用变量获取存储的值
+-  分配给变量
 
 这是 input02 输入文件的内容：
 
@@ -68,9 +68,9 @@ static int Globs = 0;                   // Position of next free global symbol s
 
 Globs 实际上是位于 sym.c 中用于管理符号表的文件，具有以下功能：
 
-- int findglob(char \*s)：确定符号 s 是否在全局符号表中，返回其插槽位置；如果找不到，则返回 -1。
-- static int newglob(void)：获取新的全局符号槽的位置，否则如果我们用完所有位置则结束。
-- int addglob(char \*name)：将全局符号添加到符号表，返回符号表中的插槽号。
+-  int findglob(char \*s)：确定符号 s 是否在全局符号表中，返回其插槽位置；如果找不到，则返回 -1。
+-  static int newglob(void)：获取新的全局符号槽的位置，否则如果我们用完所有位置则结束。
+-  int addglob(char \*name)：将全局符号添加到符号表，返回符号表中的插槽号。
 
 该代码相当简单，因此我不会在这里给出代码。使用这些功能，我们可以找到符号并将新符号添加到符号表中。
 
@@ -78,9 +78,9 @@ Globs 实际上是位于 sym.c 中用于管理符号表的文件，具有以下�
 
 如果查看示例输入文件，我们需要一些新标记：
 
-- 'int'，称为 T_INT
-- '='，称为 T_EQUALS
-- 标识符名称，称为 T_IDENT
+-  'int'，称为 T_INT
+-  '='，称为 T_EQUALS
+-  标识符名称，称为 T_IDENT
 
 '=' 很容易添加到 scan()：
 
@@ -448,102 +448,102 @@ cc -o out out.s
 input01 生成的 out.s
 
 ```
-	.text
+ .text
 .LC0:
-	.string	"%d\n"
+ .string "%d\n"
 printint:
-	pushq	%rbp
-	movq	%rsp, %rbp
-	subq	$16, %rsp
-	movl	%edi, -4(%rbp)
-	movl	-4(%rbp), %eax
-	movl	%eax, %esi
-	leaq	.LC0(%rip), %rdi
-	movl	$0, %eax
-	call	printf@PLT
-	nop
-	leave
-	ret
+ pushq %rbp
+ movq %rsp, %rbp
+ subq $16, %rsp
+ movl %edi, -4(%rbp)
+ movl -4(%rbp), %eax
+ movl %eax, %esi
+ leaq .LC0(%rip), %rdi
+ movl $0, %eax
+ call printf@PLT
+ nop
+ leave
+ ret
 
-	.globl	main
-	.type	main, @function
+ .globl main
+ .type main, @function
 main:
-	pushq	%rbp
-	movq	%rsp, %rbp
-	movq	$12, %r8
-	movq	$3, %r9
-	imulq	%r8, %r9
-	movq	%r9, %rdi
-	call	printint
-	movq	$18, %r8
-	movq	$2, %r9
-	movq	$4, %r10
-	imulq	%r9, %r10
-	subq	%r10, %r8
-	movq	%r8, %rdi
-	call	printint
-	movq	$1, %r8
-	movq	$2, %r9
-	addq	%r8, %r9
-	movq	$9, %r8
-	addq	%r9, %r8
-	movq	$5, %r9
-	movq	$2, %r10
-	movq	%r9,%rax
-	cqo
-	idivq	%r10
-	movq	%rax,%r9
-	subq	%r9, %r8
-	movq	$3, %r9
-	movq	$5, %r10
-	imulq	%r9, %r10
-	addq	%r8, %r10
-	movq	%r10, %rdi
-	call	printint
-	movl	$0, %eax
-	popq	%rbp
-	ret
+ pushq %rbp
+ movq %rsp, %rbp
+ movq $12, %r8
+ movq $3, %r9
+ imulq %r8, %r9
+ movq %r9, %rdi
+ call printint
+ movq $18, %r8
+ movq $2, %r9
+ movq $4, %r10
+ imulq %r9, %r10
+ subq %r10, %r8
+ movq %r8, %rdi
+ call printint
+ movq $1, %r8
+ movq $2, %r9
+ addq %r8, %r9
+ movq $9, %r8
+ addq %r9, %r8
+ movq $5, %r9
+ movq $2, %r10
+ movq %r9,%rax
+ cqo
+ idivq %r10
+ movq %rax,%r9
+ subq %r9, %r8
+ movq $3, %r9
+ movq $5, %r10
+ imulq %r9, %r10
+ addq %r8, %r10
+ movq %r10, %rdi
+ call printint
+ movl $0, %eax
+ popq %rbp
+ ret
 ```
 
 input02 生成的 out.s
 
 ```
-	.text
+ .text
 .LC0:
-	.string	"%d\n"
+ .string "%d\n"
 printint:
-	pushq	%rbp
-	movq	%rsp, %rbp
-	subq	$16, %rsp
-	movl	%edi, -4(%rbp)
-	movl	-4(%rbp), %eax
-	movl	%eax, %esi
-	leaq	.LC0(%rip), %rdi
-	movl	$0, %eax
-	call	printf@PLT
-	nop
-	leave
-	ret
+ pushq %rbp
+ movq %rsp, %rbp
+ subq $16, %rsp
+ movl %edi, -4(%rbp)
+ movl -4(%rbp), %eax
+ movl %eax, %esi
+ leaq .LC0(%rip), %rdi
+ movl $0, %eax
+ call printf@PLT
+ nop
+ leave
+ ret
 
-	.globl	main
-	.type	main, @function
+ .globl main
+ .type main, @function
 main:
-	pushq	%rbp
-	movq	%rsp, %rbp
-	.comm	fred,8,8
-	.comm	jim,8,8
-	movq	$5, %r8
-	movq	%r8, fred(%rip)
-	movq	$12, %r8
-	movq	%r8, jim(%rip)
-	movq	fred(%rip), %r8
-	movq	jim(%rip), %r9
-	addq	%r8, %r9
-	movq	%r9, %rdi
-	call	printint
-	movl	$0, %eax
-	popq	%rbp
-	ret
+ pushq %rbp
+ movq %rsp, %rbp
+ .comm fred,8,8
+ .comm jim,8,8
+ movq $5, %r8
+ movq %r8, fred(%rip)
+ movq $12, %r8
+ movq %r8, jim(%rip)
+ movq fred(%rip), %r8
+ movq jim(%rip), %r9
+ addq %r8, %r9
+ movq %r9, %rdi
+ call printint
+ movl $0, %eax
+ popq %rbp
+ ret
 ```
 
 # 结论

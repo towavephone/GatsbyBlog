@@ -63,8 +63,9 @@ document.links[0].scrollIntoView({
 
 ## 其他
 
-- scrollIntoView()升级后的方法，除了支持'behavior'，还有'block'和'inline'等参数，有兴趣可以参阅 MDN 相关文档。
-- 如果我们的网页已经通过 CSS 设置了 scroll-behavior:smooth 声明，则我们直接执行 target.scrollIntoView()方法就会有平滑滚动，无需再额外设置 behavior 参数。
+-  scrollIntoView()升级后的方法，除了支持'behavior'，还有'block'和'inline'等参数，有兴趣可以参阅 MDN 相关文档。
+-  如果我们的网页已经通过 CSS 设置了 scroll-behavior:smooth 声明，则我们直接执行 target.scrollIntoView()方法就会有平滑滚动，无需再额外设置 behavior 参数。
+
   ```js
   document.forms[0].scrollIntoView();
   ```

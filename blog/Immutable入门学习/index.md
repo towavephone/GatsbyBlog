@@ -11,17 +11,17 @@ Immutable 数据就是一旦创建，就不能更改的数据。每当对 Immuta
 
 # Immutable 数据类型
 
-1. List: 有序索引集，类似 JavaScript 中的 Array。
-2. Map: 无序索引集，类似 JavaScript 中的 Object。
-3. OrderedMap: 有序的 Map，根据数据的 set()进行排序。
-4. Set: 没有重复值的集合。
-5. OrderedSet: 有序的 Set，根据数据的 add 进行排序。
-6. Stack: 有序集合，支持使用 unshift（）和 shift（）添加和删除。
-7. Range(): 返回一个 Seq.Indexed 类型的集合，这个方法有三个参数，start 表示开始值，默认值为 0，end 表示结束值，默认为无穷大，step 代表每次增大的数值，默认为 1.如果 start = end,则返回空集合。
-8. Repeat(): 返回一个 vSeq.Indexe 类型的集合，这个方法有两个参数，value 代表需要重复的值，times 代表要重复的次数，默认为无穷大。
-9. Record: 一个用于生成 Record 实例的类。类似于 JavaScript 的 Object，但是只接收特定字符串为 key，具有默认值。
-10. Seq: 序列，但是可能不能由具体的数据结构支持。
-11. Collection: 是构建所有数据结构的基类，不可以直接构建。
+1.  List: 有序索引集，类似 JavaScript 中的 Array。
+2.  Map: 无序索引集，类似 JavaScript 中的 Object。
+3.  OrderedMap: 有序的 Map，根据数据的 set()进行排序。
+4.  Set: 没有重复值的集合。
+5.  OrderedSet: 有序的 Set，根据数据的 add 进行排序。
+6.  Stack: 有序集合，支持使用 unshift（）和 shift（）添加和删除。
+7.  Range(): 返回一个 Seq.Indexed 类型的集合，这个方法有三个参数，start 表示开始值，默认值为 0，end 表示结束值，默认为无穷大，step 代表每次增大的数值，默认为 1.如果 start = end,则返回空集合。
+8.  Repeat(): 返回一个 vSeq.Indexe 类型的集合，这个方法有两个参数，value 代表需要重复的值，times 代表要重复的次数，默认为无穷大。
+9.  Record: 一个用于生成 Record 实例的类。类似于 JavaScript 的 Object，但是只接收特定字符串为 key，具有默认值。
+10.  Seq: 序列，但是可能不能由具体的数据结构支持。
+11.  Collection: 是构建所有数据结构的基类，不可以直接构建。
 
 用的最多就是 List 和 Map，所以在这里主要介绍这两种数据类型的 API。
 
@@ -326,11 +326,11 @@ List([1, 2, 3, 4]).clear(); // List
 
 ## List 中的各种删除与插入
 
-1. push()：在 List 末尾插入一个元素
-2. pop(): 在 List 末尾删除一个元素
-3. unshift: 在 List 首部插入一个元素
-4. shift: 在 List 首部删除一个元素
-5. insert：在 List 的 index 处插入元素
+1.  push()：在 List 末尾插入一个元素
+2.  pop(): 在 List 末尾删除一个元素
+3.  unshift: 在 List 首部插入一个元素
+4.  shift: 在 List 首部删除一个元素
+5.  insert：在 List 的 index 处插入元素
 
 ### 代码示例
 

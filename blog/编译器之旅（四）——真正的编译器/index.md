@@ -103,8 +103,8 @@ static int genAST(struct ASTnode *n) {
 
 看起来很熟吧？我们正在进行相同的深度优先树遍历。这次：
 
-- A_INTLIT：使用文字值加载寄存器
-- 其他运算符：在保存左子树和右子树的两个寄存器上执行数学函数
+-  A_INTLIT：使用文字值加载寄存器
+-  其他运算符：在保存左子树和右子树的两个寄存器上执行数学函数
 
 不是传递值而是通过代码 genAST() 传递寄存器标识符，例如 cgload() 将值加载到寄存器中，并返回具有已加载值的寄存器的标识。
 
@@ -140,9 +140,9 @@ void generatecode(struct ASTnode *n) {
 
 有三个函数处理寄存器分配：
 
-- freeall_registers()：将所有寄存器设置为可用
-- alloc_register()：分配寄存器
-- free_register()：释放分配的寄存器
+-  freeall_registers()：将所有寄存器设置为可用
+-  alloc_register()：分配寄存器
+-  free_register()：释放分配的寄存器
 
 我不会通过代码使用因为它很简单，但是会进行一些错误检查。现在如果我用完了寄存器，程序将崩溃。稍后当自由寄存器用完时，我将处理这种情况。
 

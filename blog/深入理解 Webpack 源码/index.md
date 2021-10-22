@@ -1151,10 +1151,10 @@ window['webpackJsonp'] = function webpackJsonpCallback(chunkIds, moreModules) {
 
 仔细观察 [output.js](https://github.com/towavephone/fake-webpack/blob/1bfcd0edf10f1a2ff3bfd7c418e7490a735b9823/examples/simple/output.js)，我们能够发现：
 
-1. 不管有多少个模块，头部那一块都是一样的，所以可以写成一个模板，也就是 templateSingle.js。
-2. 需要分析出各个模块间的依赖关系。也就是说，需要知道 example 依赖于 a、b 和 c。
-3. c 模块位于 node_modules 文件夹当中，但是我们调用的时候却可以直接 `require('c')`，这里肯定是存在某种自动查找的功能。
-4. 在生成的 output.js 中，每个模块的唯一标识是模块的 ID，所以在拼接 output.js 的时候，需要将每个模块的名字替换成模块的 ID。
+1.  不管有多少个模块，头部那一块都是一样的，所以可以写成一个模板，也就是 templateSingle.js。
+2.  需要分析出各个模块间的依赖关系。也就是说，需要知道 example 依赖于 a、b 和 c。
+3.  c 模块位于 node_modules 文件夹当中，但是我们调用的时候却可以直接 `require('c')`，这里肯定是存在某种自动查找的功能。
+4.  在生成的 output.js 中，每个模块的唯一标识是模块的 ID，所以在拼接 output.js 的时候，需要将每个模块的名字替换成模块的 ID。
 
    ```js
    // 转换前
@@ -1174,8 +1174,8 @@ ok，下面我们来逐一看看这些问题
 
 CommonJS 不同于 AMD，是不会在一开始声明所有依赖的。CommonJS 最显著的特征就是用到的时候再 require，所以我们得在整个文件的范围内查找到底有多少个 require。怎么办呢？最先蹦入脑海的思路是正则。然而，用正则来匹配 require，有以下两个缺点：
 
-1. 如果 require 是写在注释中，也会匹配到。
-2. 如果后期要支持 require 的参数是表达式的情况，如 `require('a'+'b')`，正则很难处理。
+1.  如果 require 是写在注释中，也会匹配到。
+2.  如果后期要支持 require 的参数是表达式的情况，如 `require('a'+'b')`，正则很难处理。
 
 因此，正则行不通。
 
@@ -1209,9 +1209,9 @@ let c = require('c');
 
 目前实现的查找逻辑是：
 
-1. 如果给出的是绝对路径/相对路径，只查找一次。找到？返回绝对路径。找不到？返回 false。
-2. 如果给出的是模块的名字，先在入口 js（example.js）文件所在目录下寻找同名 JS 文件（可省略扩展名）。找到？返回绝对路径。找不到？走第 3 步。
-3. 在入口 js（example.js）同级的 node_modules 文件夹（如果存在的话）查找。找到？返回绝对路径。找不到？返回 false。
+1.  如果给出的是绝对路径/相对路径，只查找一次。找到？返回绝对路径。找不到？返回 false。
+2.  如果给出的是模块的名字，先在入口 js（example.js）文件所在目录下寻找同名 JS 文件（可省略扩展名）。找到？返回绝对路径。找不到？走第 3 步。
+3.  在入口 js（example.js）同级的 node_modules 文件夹（如果存在的话）查找。找到？返回绝对路径。找不到？返回 false。
 
 当然，此处实现的算法还比较简陋，之后有时间可以再考虑实现逐层往上的查找，就像 nodejs 默认的模块查找算法那样。
 
@@ -1293,9 +1293,9 @@ let c = require('c');
 
 ## 遗留问题
 
-1. 尚未支持 `require('a' + 'b')` 这种情况。
-2. 如何实现自动 watch 的功能？
-3. 其 loader 或者插件机制又是怎样的？
+1.  尚未支持 `require('a' + 'b')` 这种情况。
+2.  如何实现自动 watch 的功能？
+3.  其 loader 或者插件机制又是怎样的？
 
 # code-splitting
 
@@ -1305,8 +1305,8 @@ let c = require('c');
 
 一般说来，code-splitting 有两种含义：
 
-1. 将第三方类库单独打包成 vendor.js ，以提高缓存命中率（这一点我们不作考虑）
-2. 将项目本身的代码分成多个 js 文件，分别进行加载（我们只研究这一点）
+1.  将第三方类库单独打包成 vendor.js ，以提高缓存命中率（这一点我们不作考虑）
+2.  将项目本身的代码分成多个 js 文件，分别进行加载（我们只研究这一点）
 
 换句话说，我们的目标是：将原先集中到一个 output.js 中的代码，切割成若干个 js 文件，然后分别进行加载。也就是说：原先只加载 output.js，现在把代码分割到 3 个文件中，先加载 output.js，然后 output.js 又会自动加载 1.output.js 和 2.output.js。
 
@@ -1394,11 +1394,11 @@ if (
 
 观察上面的例子，得出以下结论：
 
-- chunk0（也就是主 chunk，也就是 output.js）应该包含 example 本身和 a、b 三个模块。
-- chunk1（1.output.js）是从 chunk0 中切割出来的，所以 chunk0 是 chunk1 的 parent。
-- 本来 chunk1 应该是包含模块 c、b 和 d 的，但是由于 b 已经被其 parent-chunk（也就是 chunk1）包含，所以，必须将 b 从 chunk1 中移除，这样方能避免代码的冗余。
-- chunk2（2.output.js）是从 chunk0 中切割出来的，所以 chunk0 也是 chunk2 的 parent。
-- chunk2 包含 e 和 f 两个模块。
+-  chunk0（也就是主 chunk，也就是 output.js）应该包含 example 本身和 a、b 三个模块。
+-  chunk1（1.output.js）是从 chunk0 中切割出来的，所以 chunk0 是 chunk1 的 parent。
+-  本来 chunk1 应该是包含模块 c、b 和 d 的，但是由于 b 已经被其 parent-chunk（也就是 chunk1）包含，所以，必须将 b 从 chunk1 中移除，这样方能避免代码的冗余。
+-  chunk2（2.output.js）是从 chunk0 中切割出来的，所以 chunk0 也是 chunk2 的 parent。
+-  chunk2 包含 e 和 f 两个模块。
 
 好了，下面进入重头戏。
 
@@ -1420,8 +1420,8 @@ if (
 
 此处的拼接与上一篇最后提到的拼接大同小异，主要不同点有以下 2 个：
 
-1. 模板的不同。原先是一个 output.js 的时候，用的模板是 templateSingle 。现在是多个 chunks 了，所以要使用模板 templateAsync。其中不同点主要是 templateAsync 会发起 jsonp 的请求，以加载后续的 x.output.js，此处就不加多阐述了。仔细 debug 生成的 output.js 应该就能看懂这一点。
-2. 模块名字替换为模块 id 的算法有所改进。原先我直接使用正则进行匹配替换，但是如果存在重复的模块名的话，比如此例子中 example.js 出现了 2 次模块 b，那么简单的匹配就会出现错乱。因为 repalces 是从后往前匹配，而正则本身是从前往后匹配的。webpack 原作者提供了一种非常巧妙的方式，具体的代码可以参考[这里](https://github.com/towavephone/fake-webpack/commit/d6589263f90752ef8222749208694df654b631e3#diff-62f46802ba4c21e21b2dfedcce5fa86dR60)。
+1.  模板的不同。原先是一个 output.js 的时候，用的模板是 templateSingle 。现在是多个 chunks 了，所以要使用模板 templateAsync。其中不同点主要是 templateAsync 会发起 jsonp 的请求，以加载后续的 x.output.js，此处就不加多阐述了。仔细 debug 生成的 output.js 应该就能看懂这一点。
+2.  模块名字替换为模块 id 的算法有所改进。原先我直接使用正则进行匹配替换，但是如果存在重复的模块名的话，比如此例子中 example.js 出现了 2 次模块 b，那么简单的匹配就会出现错乱。因为 repalces 是从后往前匹配，而正则本身是从前往后匹配的。webpack 原作者提供了一种非常巧妙的方式，具体的代码可以参考[这里](https://github.com/towavephone/fake-webpack/commit/d6589263f90752ef8222749208694df654b631e3#diff-62f46802ba4c21e21b2dfedcce5fa86dR60)。
 
 ## 后话
 
@@ -1460,15 +1460,15 @@ require('./style.less');
 
 由此我们进行以下思考：
 
-1. 既然最终 css 代码会被插入到 head 标签中，那么一定是模块 2 在起作用。但是，项目中并不包含这部分代码，经过排查，发现源自于 node-modules/style-loader/addStyle.js ，也就是说，是由 style-loader 引入的。（后面我们再考察是如何引入的）
-2. 观察模块 3，那应该是 less 代码经过 less-loader 的转换之后，再包装一层 module.exports，成为一个 JS module。
-3. style-loader 和 less-loader 的作用已经明了，但是，css-loader 发挥什么作用呢？虽然我一直按照官方文档配置三个 loader，但我从未真正理解为什么需要 css-loader。后来我在 css-loader 的文档中找到了答案。
+1.  既然最终 css 代码会被插入到 head 标签中，那么一定是模块 2 在起作用。但是，项目中并不包含这部分代码，经过排查，发现源自于 node-modules/style-loader/addStyle.js ，也就是说，是由 style-loader 引入的。（后面我们再考察是如何引入的）
+2.  观察模块 3，那应该是 less 代码经过 less-loader 的转换之后，再包装一层 module.exports，成为一个 JS module。
+3.  style-loader 和 less-loader 的作用已经明了，但是，css-loader 发挥什么作用呢？虽然我一直按照官方文档配置三个 loader，但我从未真正理解为什么需要 css-loader。后来我在 css-loader 的文档中找到了答案。
 
    > @import and url() are interpreted like import and will be resolved by the css-loader
 
    既然如此，为了降低实现的难度，我们暂时不予考虑 import 和 url 的情况，也就无需实现 css-loader 了。
 
-4. 观察模块 1，`require(2)(require(3))`，很显然：”模块 3 的导出作为模块 2 的输入参数，执行模块 2“，也就是说：“将模块 3 中的 css 代码插入到 head 标签中“。理解这个逻辑不难，难点在于：webpack 如何知道应该拼接成 `require(2)(require(3))`，而不是别的什么。也就说，如何控制拼接出 `require(2)(require(3))`？
+4.  观察模块 1，`require(2)(require(3))`，很显然：”模块 3 的导出作为模块 2 的输入参数，执行模块 2“，也就是说：“将模块 3 中的 css 代码插入到 head 标签中“。理解这个逻辑不难，难点在于：webpack 如何知道应该拼接成 `require(2)(require(3))`，而不是别的什么。也就说，如何控制拼接出 `require(2)(require(3))`？
 
 ## 思路
 
@@ -1646,5 +1646,5 @@ function generateDirs(context, identifiers) {
 
 至此，我们就完成了一个非常简单的 loader 机制，可以通过 style-loader 和 less-loader 处理加载 less 文件。当然，还有很多可以完善的地方，比如：
 
-- css-loader，以处理 import 和 url 的情况
-- 给 loader 传递选项参数，以控制是否压缩代码等等特性
+-  css-loader，以处理 import 和 url 的情况
+-  给 loader 传递选项参数，以控制是否压缩代码等等特性

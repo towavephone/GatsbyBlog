@@ -15,15 +15,15 @@ tags: 前端, React, Redux
 
 这两个时刻都可能会更改应用的 state；为此，你需要 dispatch 普通的同步 action。一般情况下，每个 API 请求都需要 dispatch 至少三种 action
 
-- 一种通知 reducer 请求开始的 action
+-  一种通知 reducer 请求开始的 action
 
 对于这种 action，reducer 可能会切换一下 state 中的 isFetching 标记。以此来告诉 UI 来显示加载界面。
 
-- 一种通知 reducer 请求成功的 action
+-  一种通知 reducer 请求成功的 action
 
 对于这种 action，reducer 可能会把接收到的新数据合并到 state 中，并重置 isFetching。UI 则会隐藏加载界面，并显示接收到的数据。
 
-- 一种通知 reducer 请求失败的 action
+-  一种通知 reducer 请求失败的 action
 
 对于这种 action，reducer 可能会重置 isFetching。另外，有些 reducer 会保存这些失败信息，并在 UI 里显示出来
 
@@ -155,9 +155,9 @@ export function receivePosts(subreddit, json) {
 
 下面列出几个要点：
 
-- 分开存储 subreddit 信息，是为了缓存所有 subreddit。当用户来回切换 subreddit 时，可以立即更新，同时在不需要的时候可以不请求数据。不要担心把所有帖子放到内存中（会浪费内存）：除非你需要处理成千上万条帖子，同时用户还很少关闭标签页，否则你不需要做任何清理
+-  分开存储 subreddit 信息，是为了缓存所有 subreddit。当用户来回切换 subreddit 时，可以立即更新，同时在不需要的时候可以不请求数据。不要担心把所有帖子放到内存中（会浪费内存）：除非你需要处理成千上万条帖子，同时用户还很少关闭标签页，否则你不需要做任何清理
 
-- 每个帖子的列表都需要使用 isFetching 来显示进度条，didInvalidate 来标记数据是否过期，lastUpdated 来存放数据最后更新时间，还有 items 存放列表信息本身。在实际应用中，你还需要存放 fetchedPageCount 和 nextPageUrl 这样分页相关的 state
+-  每个帖子的列表都需要使用 isFetching 来显示进度条，didInvalidate 来标记数据是否过期，lastUpdated 来存放数据最后更新时间，还有 items 存放列表信息本身。在实际应用中，你还需要存放 fetchedPageCount 和 nextPageUrl 这样分页相关的 state
 
 ### 嵌套内容须知
 
@@ -282,7 +282,7 @@ export default rootReducer;
 
 上面代码有两个有趣的点
 
-- 使用 ES6 计算属性语法，使用 Object.assign() 来简洁高效地更新 state[action.subreddit]
+-  使用 ES6 计算属性语法，使用 Object.assign() 来简洁高效地更新 state[action.subreddit]
 
 ```js
 return Object.assign({}, state, {
@@ -290,7 +290,7 @@ return Object.assign({}, state, {
 });
 ```
 
-- 我们提取出 posts(state, action) 来管理指定帖子列表的 state。这就是 reducer 组合 ！我们还可以借此机会把 reducer 分拆成更小的 reducer，这种情况下，我们把对象内列表的更新代理到了 posts reducer 上。在真实场景的案例中甚至更进一步，里面介绍了如何做一个 reducer 工厂来生成参数化的分页 reducer
+-  我们提取出 posts(state, action) 来管理指定帖子列表的 state。这就是 reducer 组合 ！我们还可以借此机会把 reducer 分拆成更小的 reducer，这种情况下，我们把对象内列表的更新代理到了 posts reducer 上。在真实场景的案例中甚至更进一步，里面介绍了如何做一个 reducer 工厂来生成参数化的分页 reducer
 
 记住 reducer 只是函数而已，所以你可以尽情使用函数组合和高阶函数这些特性
 
@@ -502,11 +502,11 @@ store.dispatch(fetchPostsIfNeeded('reactjs')).then(() => console.log(store.getSt
 
 Thunk middleware 并不是 Redux 处理异步 action 的唯一方式：
 
-- 你可以使用 redux-promise 或者 redux-promise-middleware 来 dispatch Promise 来替代函数。
-- 你可以使用 redux-observable 来 dispatch Observable。
-- 你可以使用 redux-saga 中间件来创建更加复杂的异步 action。
-- 你可以使用 redux-pack 中间件 dispatch 基于 Promise 的异步 Action。
-- 你甚至可以写一个自定义的 middleware 来描述 API 请求，就像这个真实场景的案例中的做法一样。
+-  你可以使用 redux-promise 或者 redux-promise-middleware 来 dispatch Promise 来替代函数。
+-  你可以使用 redux-observable 来 dispatch Observable。
+-  你可以使用 redux-saga 中间件来创建更加复杂的异步 action。
+-  你可以使用 redux-pack 中间件 dispatch 基于 Promise 的异步 Action。
+-  你甚至可以写一个自定义的 middleware 来描述 API 请求，就像这个真实场景的案例中的做法一样。
 
 你也可以先尝试一些不同做法，选择喜欢的，并使用下去，不论有没有使用到 middleware 都行
 
@@ -783,9 +783,9 @@ function applyMiddleware(store, middlewares) {
 
 这与 Redux 中 applyMiddleware() 的实现已经很接近了，但是有三个重要的不同之处：
 
-- 它只暴露一个 store API 的子集给 middleware：dispatch(action) 和 getState()。
-- 它用了一个非常巧妙的方式，以确保如果你在 middleware 中调用的是 store.dispatch(action) 而不是 next(action)，那么这个操作会再次遍历包含当前 middleware 在内的整个 middleware 链。这对异步的 middleware 非常有用，正如我们在之前的章节中提到的。
-- 为了保证你只能应用 middleware 一次，它作用在 createStore() 上而不是 store 本身。因此它的签名不是 (store, middlewares) => store， 而是 (...middlewares) => (createStore) => createStore。
+-  它只暴露一个 store API 的子集给 middleware：dispatch(action) 和 getState()。
+-  它用了一个非常巧妙的方式，以确保如果你在 middleware 中调用的是 store.dispatch(action) 而不是 next(action)，那么这个操作会再次遍历包含当前 middleware 在内的整个 middleware 链。这对异步的 middleware 非常有用，正如我们在之前的章节中提到的。
+-  为了保证你只能应用 middleware 一次，它作用在 createStore() 上而不是 store 本身。因此它的签名不是 (store, middlewares) => store， 而是 (...middlewares) => (createStore) => createStore。
 
 由于在使用之前需要先应用方法到 createStore() 之上有些麻烦，createStore() 也接受将希望被应用的函数作为最后一个可选参数传入。
 

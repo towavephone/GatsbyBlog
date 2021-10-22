@@ -13,8 +13,8 @@ Web 界面由 DOM 树来构成，当其中某一部分发生变化时，其实�
 
 即给定任意两棵树，找到最少的转换步骤。但是标准的的 Diff 算法复杂度需要 O(n^3)，这显然无法满足性能要求。要达到每次界面都可以整体刷新界面的目的，势必需要对算法进行优化。这看上去非常有难度，然而 Facebook 工程师却做到了，他们结合 Web 界面的特点做出了两个简单的假设，使得 Diff 算法复杂度直接降低到 O(n)
 
-1. 两个相同组件产生类似的 DOM 结构，不同的组件产生不同的 DOM 结构；
-2. 对于同一层次的一组子节点，它们可以通过唯一的 id 进行区分。
+1.  两个相同组件产生类似的 DOM 结构，不同的组件产生不同的 DOM 结构；
+2.  对于同一层次的一组子节点，它们可以通过唯一的 id 进行区分。
 
 算法上的优化是 React 整个界面 Render 的基础，事实也证明这两个假设是合理而精确的，保证了整体界面构建的性能。
 
@@ -83,10 +83,10 @@ D.append(A);
 
 在上一篇文章中介绍了 React 组件的生命周期，其中的每个阶段其实都是和 DOM Diff 算法息息相关的。例如以下几个方法：
 
-- constructor: 构造函数，组件被创建时执行；
-- componentDidMount: 当组件添加到 DOM 树之后执行；
-- componentWillUnmount: 当组件从 DOM 树中移除之后执行，在 React 中可以认为组件被销毁；
-- componentDidUpdate: 当组件更新时执行。
+-  constructor: 构造函数，组件被创建时执行；
+-  componentDidMount: 当组件添加到 DOM 树之后执行；
+-  componentWillUnmount: 当组件从 DOM 树中移除之后执行，在 React 中可以认为组件被销毁；
+-  componentDidUpdate: 当组件更新时执行。
 
 为了演示组件生命周期和 DOM Diff 算法的关系，笔者创建了一个示例：https://supnate.github.io/react-dom-diff/index.html ，大家可以直接访问试用。这时当 DOM 树进行如下转变时，即从“shape1”转变到“shape2”时。我们来观察这几个方法的执行情况：
 

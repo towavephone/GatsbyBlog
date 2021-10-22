@@ -11,9 +11,9 @@ tags: 前端, JS, 高级前端
 
 在前端开发中会遇到一些频繁的事件触发，比如：
 
-1. window 的 resize、scroll
-2. mousedown、mousemove
-3. keyup、keydown
+1.  window 的 resize、scroll
+2.  mousedown、mousemove
+3.  keyup、keydown
 
 为此，我们举个示例代码来了解事件如何频繁的触发：
 
@@ -68,8 +68,8 @@ container.onmousemove = getUserAction;
 
 为了解决这个问题，一般有两种解决方案：
 
-1. debounce 防抖
-2. throttle 节流
+1.  debounce 防抖
+2.  throttle 节流
 
 ## 防抖
 
@@ -172,8 +172,8 @@ function debounce(func, wait) {
 
 到此为止，我们修复了两个小问题：
 
-1. this 指向
-2. event 对象
+1.  this 指向
+2.  event 对象
 
 ## 立刻执行
 
@@ -391,8 +391,8 @@ function throttle(func, wait) {
 
 所以比较两个方法：
 
-1. 第一种事件会立刻执行，第二种事件会在 n 秒后第一次执行
-2. 第一种事件停止触发后没有办法再执行事件，第二种事件停止触发后依然会再执行一次事件
+1.  第一种事件会立刻执行，第二种事件会在 n 秒后第一次执行
+2.  第一种事件停止触发后没有办法再执行事件，第二种事件停止触发后依然会再执行一次事件
 
 ## 双剑合璧
 
@@ -449,8 +449,8 @@ function throttle(func, wait) {
 
 那我们设置个 options 作为第三个参数，然后根据传的值判断到底哪种效果，我们约定:
 
-- leading：false 表示禁用第一次执行
-- trailing: false 表示禁用停止触发的回调
+-  leading：false 表示禁用第一次执行
+-  trailing: false 表示禁用停止触发的回调
 
 我们来改一下代码：
 
@@ -957,11 +957,11 @@ console.log(typeof error); // object
 
 > When the toString method is called, the following steps are taken:
 >
-> 1. If the `this` value is `undefined`, return `"[object Undefined]"`.
-> 2. If the `this` value is `null`, return `"[object Null]"`.
-> 3. Let O be the result of calling ToObject passing the `this` value as the argument.
-> 4. Let class be the value of the [[Class]] internal property of O.
-> 5. Return the String value that is the result of concatenating the three Strings `"[object ", class, and "]"`.
+> 1.  If the `this` value is `undefined`, return `"[object Undefined]"`.
+> 2.  If the `this` value is `null`, return `"[object Null]"`.
+> 3.  Let O be the result of calling ToObject passing the `this` value as the argument.
+> 4.  Let class be the value of the [[Class]] internal property of O.
+> 5.  Return the String value that is the result of concatenating the three Strings `"[object ", class, and "]"`.
 
 凡是规范上加粗或者斜体的，在这里我也加粗或者斜体了，就是要让大家感受原汁原味的规范！
 
@@ -969,11 +969,11 @@ console.log(typeof error); // object
 
 当 toString 方法被调用的时候，下面的步骤会被执行：
 
-1. 如果 this 值是 undefined，就返回 [object Undefined]
-2. 如果 this 的值是 null，就返回 [object Null]
-3. 让 O 成为 ToObject(this) 的结果
-4. 让 class 成为 O 的内部属性 [[Class]] 的值
-5. 最后返回由 "[object " 和 class 和 "]" 三个部分组成的字符串
+1.  如果 this 值是 undefined，就返回 [object Undefined]
+2.  如果 this 的值是 null，就返回 [object Null]
+3.  让 O 成为 ToObject(this) 的结果
+4.  让 class 成为 O 的内部属性 [[Class]] 的值
+5.  最后返回由 "[object " 和 class 和 "]" 三个部分组成的字符串
 
 通过规范，我们至少知道了调用 Object.prototype.toString 会返回一个由 "[object " 和 class 和 "]" 组成的字符串，而 class 是要判断的对象的内部属性。
 
@@ -1266,9 +1266,9 @@ function isArrayLike(obj) {
 
 所以如果 isArrayLike 返回 true，至少要满足三个条件之一：
 
-1. 是数组
-2. 长度为 0
-3. lengths 属性是大于 0 的数字类型，并且 obj[length - 1] 必须存在
+1.  是数组
+2.  长度为 0
+3.  lengths 属性是大于 0 的数字类型，并且 obj[length - 1] 必须存在
 
 第一个就不说了，看第二个，为什么长度为 0 就可以直接判断为 true 呢？
 
@@ -1492,13 +1492,13 @@ Math.max([value1[,value2, ...]])
 
 值得注意的是：
 
-1. 如果有任一参数不能被转换为数值，则结果为 NaN。
-2. max 是 Math 的静态方法，所以应该像这样使用：Math.max()，而不是作为 Math 实例的方法 (简单的来说，就是不使用 new )
-3. 如果没有参数，则结果为 -Infinity (注意是负无穷大)
+1.  如果有任一参数不能被转换为数值，则结果为 NaN。
+2.  max 是 Math 的静态方法，所以应该像这样使用：Math.max()，而不是作为 Math 实例的方法 (简单的来说，就是不使用 new )
+3.  如果没有参数，则结果为 -Infinity (注意是负无穷大)
 
 而我们需要分析的是：
 
-1. 如果任一参数不能被转换为数值，这就意味着如果参数可以被转换成数字，就是可以进行比较的，比如：
+1.  如果任一参数不能被转换为数值，这就意味着如果参数可以被转换成数字，就是可以进行比较的，比如：
 
 ```js
 Math.max(true, 0); // 1
@@ -1507,7 +1507,7 @@ Math.max(1, undefined); // NaN
 Math.max(1, {}); // NaN
 ```
 
-2. 如果没有参数，则结果为 -Infinity，对应的 Math.min 函数，如果没有参数，则结果为 Infinity，所以：
+2.  如果没有参数，则结果为 -Infinity，对应的 Math.min 函数，如果没有参数，则结果为 Infinity，所以：
 
 ```js
 var min = Math.min();
@@ -1748,10 +1748,10 @@ console.log(flatten(arr, true, true)); // [3, 4]
 
 那么设置 strict 到底有什么用呢？不急，我们先看下 shallow 和 strct 各种值对应的结果：
 
-- shallow true + strict false ：正常扁平一层
-- shallow false + strict false ：正常扁平所有层
-- shallow true + strict true ：去掉非数组元素
-- shallow false + strict true ： 返回一个[]
+-  shallow true + strict false ：正常扁平一层
+-  shallow false + strict false ：正常扁平所有层
+-  shallow true + strict true ：去掉非数组元素
+-  shallow false + strict true ： 返回一个[]
 
 我们看看 underscore 中哪些方法调用了 flatten 这个基本函数：
 
@@ -1841,15 +1841,15 @@ function difference(array, ...rest) {
 
 我们认为：
 
-1. NaN 和 NaN 是相等
-2. [1] 和 [1] 是相等
-3. {value: 1} 和 {value: 1} 是相等
+1.  NaN 和 NaN 是相等
+2.  [1] 和 [1] 是相等
+3.  {value: 1} 和 {value: 1} 是相等
 
 不仅仅是这些长得一样的，还有
 
-1. 1 和 new Number(1) 是相等
-2. 'Curly' 和 new String('Curly') 是相等
-3. true 和 new Boolean(true) 是相等
+1.  1 和 new Number(1) 是相等
+2.  'Curly' 和 new String('Curly') 是相等
+3.  true 和 new Boolean(true) 是相等
 
 更复杂的我们会在接下来的内容中看到。
 
@@ -3807,8 +3807,8 @@ console.log(fibonacci(5)); // 1 1 2 3 5
 
 总结一下递归的特点：
 
-1. 子问题须与原始问题为同样的事，且更为简单；
-2. 不能无限制地调用本身，须有个出口，化简为非递归状况处理。
+1.  子问题须与原始问题为同样的事，且更为简单；
+2.  不能无限制地调用本身，须有个出口，化简为非递归状况处理。
 
 了解这些特点可以帮助我们更好的编写递归函数。
 
@@ -4225,9 +4225,9 @@ console.log(insertionSort(arr));
 
 ### 原理
 
-1. 选择一个元素作为"基准"
-2. 小于"基准"的元素，都移到"基准"的左边；大于"基准"的元素，都移到"基准"的右边。
-3. 对"基准"左边和右边的两个子集，不断重复第一步和第二步，直到所有子集只剩下一个元素为止。
+1.  选择一个元素作为"基准"
+2.  小于"基准"的元素，都移到"基准"的左边；大于"基准"的元素，都移到"基准"的右边。
+3.  对"基准"左边和右边的两个子集，不断重复第一步和第二步，直到所有子集只剩下一个元素为止。
 
 ### 示例
 
@@ -4523,71 +4523,71 @@ console.log(arr);
 
 我们以数组 [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0] 为例，分析执行的过程。
 
-1. 执行 QuickSort 函数参数 from 值为 0，参数 to 的值 11。
-2. 10 < to - from < 1000 第三个基准元素的下标为 (0 + 11 >> 1) = 5，基准值 a[5] 为 5。
-3. 比较 a[0] a[10] a[5] 的值，然后根据比较结果修改数组，数组此时为 [0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10]
-4. 将基准值和数组的第(from + 1)个即数组的第二个元素互换，此时数组为 [0, 5, 8, 7, 6, 9, 4, 3, 2, 1, 10]，此时在基准值 5 前面的元素肯定是小于 5 的，因为第三步已经做了一次比较。后面的元素是未排序的。我们接下来要做的就是把后面的元素中小于 5 的全部移到 5 的前面。
-5. 然后我们进入 partition 循环，我们依然以这个数组为例，单独抽出来写个 demo 讲一讲
+1.  执行 QuickSort 函数参数 from 值为 0，参数 to 的值 11。
+2.  10 < to - from < 1000 第三个基准元素的下标为 (0 + 11 >> 1) = 5，基准值 a[5] 为 5。
+3.  比较 a[0] a[10] a[5] 的值，然后根据比较结果修改数组，数组此时为 [0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10]
+4.  将基准值和数组的第(from + 1)个即数组的第二个元素互换，此时数组为 [0, 5, 8, 7, 6, 9, 4, 3, 2, 1, 10]，此时在基准值 5 前面的元素肯定是小于 5 的，因为第三步已经做了一次比较。后面的元素是未排序的。我们接下来要做的就是把后面的元素中小于 5 的全部移到 5 的前面。
+5.  然后我们进入 partition 循环，我们依然以这个数组为例，单独抽出来写个 demo 讲一讲
 
-```js
-// 假设代码执行到这里，为了方便演示，我们直接设置 low_end 等变量的值
-// 可以直接复制到浏览器中查看数组变换效果
-var a = [0, 5, 8, 7, 6, 9, 4, 3, 2, 1, 10];
-var low_end = 1;
-var high_start = 10;
-var pivot = 5;
+    ```js
+    // 假设代码执行到这里，为了方便演示，我们直接设置 low_end 等变量的值
+    // 可以直接复制到浏览器中查看数组变换效果
+    var a = [0, 5, 8, 7, 6, 9, 4, 3, 2, 1, 10];
+    var low_end = 1;
+    var high_start = 10;
+    var pivot = 5;
 
-console.log('起始数组为', a);
+    console.log('起始数组为', a);
 
-partition: for (var i = low_end + 1; i < high_start; i++) {
-  var element = a[i];
-  console.log('循环当前的元素为：', a[i]);
-  var order = element - pivot;
+    partition: for (var i = low_end + 1; i < high_start; i++) {
+      var element = a[i];
+      console.log('循环当前的元素为：', a[i]);
+      var order = element - pivot;
 
-  if (order < 0) {
-    a[i] = a[low_end];
-    a[low_end] = element;
-    low_end++;
-    console.log(a);
-  } else if (order > 0) {
-    do {
-      high_start--;
-      if (high_start == i) break partition;
-      var top_elem = a[high_start];
-      order = top_elem - pivot;
-    } while (order > 0);
+      if (order < 0) {
+        a[i] = a[low_end];
+        a[low_end] = element;
+        low_end++;
+        console.log(a);
+      } else if (order > 0) {
+        do {
+          high_start--;
+          if (high_start == i) break partition;
+          var top_elem = a[high_start];
+          order = top_elem - pivot;
+        } while (order > 0);
 
-    a[i] = a[high_start];
-    a[high_start] = element;
+        a[i] = a[high_start];
+        a[high_start] = element;
 
-    console.log(a);
+        console.log(a);
 
-    if (order < 0) {
-      element = a[i];
-      a[i] = a[low_end];
-      a[low_end] = element;
-      low_end++;
+        if (order < 0) {
+          element = a[i];
+          a[i] = a[low_end];
+          a[low_end] = element;
+          low_end++;
+        }
+        console.log(a);
+      }
     }
-    console.log(a);
-  }
-}
 
-console.log('最后的结果为', a);
-console.log(low_end);
-console.log(high_start);
-```
+    console.log('最后的结果为', a);
+    console.log(low_end);
+    console.log(high_start);
+    ```
 
-6. 此时数组为 [0, 5, 8, 7, 6, 9, 4, 3, 2, 1, 10]，循环从第三个元素开始，a[i] 的值为 8，因为大于基准值 5，即 order > 0，开始执行 do while 循环，do while 循环的目的在于倒序查找元素，找到第一个小于基准值的元素，然后让这个元素跟 a[i] 的位置交换。第一个小于基准值的元素为 1，然后 1 与 8 交换，数组变成 [0, 5, 1, 7, 6, 9, 4, 3, 2, 8, 10]。high_start 的值是为了记录倒序查找到哪里了。
-7. 此时 a[i] 的值变成了 1，然后让 1 跟基准值 5 交换，数组变成了 [0, 1, 5, 7, 6, 9, 4, 3, 2, 8, 10]，low_end 的值加 1，low_end 的值是为了记录基准值的所在位置。
-8. 循环接着执行，遍历第四个元素 7，跟第 6、7 的步骤一致，数组先变成 [0, 1, 5, 2, 6, 9, 4, 3, 7, 8, 10]，再变成 [0, 1, 2, 5, 6, 9, 4, 3, 7, 8, 10]
-9. 遍历第五个元素 6，跟第 6、7 的步骤一致，数组先变成 [0, 1, 2, 5, 3, 9, 4, 6, 7, 8, 10]，再变成 [0, 1, 2, 3, 5, 9, 4, 6, 7, 8, 10]
-10. 遍历第六个元素 9，跟第 6、7 的步骤一致，数组先变成 [0, 1, 2, 3, 5, 4, 9, 6, 7, 8, 10]，再变成 [0, 1, 2, 3, 4, 5, 9, 6, 7, 8, 10]
-11. 在下一次遍历中，因为 i == high_start，意味着正序和倒序的查找终于找到一起了，后面的元素肯定都是大于基准值的，此时退出循环
-12. 遍历后的结果为 [0, 1, 2, 3, 4, 5, 9, 6, 7, 8, 10]，在基准值 5 前面的元素都小于 5，后面的元素都大于 5，然后我们分别对两个子集进行 QuickSort
-13. 此时 low_end 值为 5，high_start 值为 6，to 的值依然是 10，from 的值依然是 0，to - high_start < low_end - from 的结果为 true，我们对 QuickSort(a, 6, 10)，即对后面的元素进行排序，但是注意，在新的 QuickSort 中，因为 to - from 的值小于 10，所以这一次其实是采用了插入排序。所以准确的说，当数组长度大于 10 的时候，v8 采用了快速排序和插入排序的混合排序方法。
-14. 然后 to = low_end 即设置 to 为 5，因为 while(true) 的原因，会再执行一遍，to - from 的值为 5，执行 InsertionSort(a, 0, 5)，即对基准值前面的元素执行一次插入排序。
-15. 因为在 to - from <= 10 的判断中，有 return 语句，所以 while 循环结束。
-16. v8 在对数组进行了一次快速排序后，然后对两个子集分别进行了插入排序，最终修改数组为正确排序后的数组。
+6.  此时数组为 [0, 5, 8, 7, 6, 9, 4, 3, 2, 1, 10]，循环从第三个元素开始，a[i] 的值为 8，因为大于基准值 5，即 order > 0，开始执行 do while 循环，do while 循环的目的在于倒序查找元素，找到第一个小于基准值的元素，然后让这个元素跟 a[i] 的位置交换。第一个小于基准值的元素为 1，然后 1 与 8 交换，数组变成 [0, 5, 1, 7, 6, 9, 4, 3, 2, 8, 10]。high_start 的值是为了记录倒序查找到哪里了。
+7.  此时 a[i] 的值变成了 1，然后让 1 跟基准值 5 交换，数组变成了 [0, 1, 5, 7, 6, 9, 4, 3, 2, 8, 10]，low_end 的值加 1，low_end 的值是为了记录基准值的所在位置。
+8.  循环接着执行，遍历第四个元素 7，跟第 6、7 的步骤一致，数组先变成 [0, 1, 5, 2, 6, 9, 4, 3, 7, 8, 10]，再变成 [0, 1, 2, 5, 6, 9, 4, 3, 7, 8, 10]
+9.  遍历第五个元素 6，跟第 6、7 的步骤一致，数组先变成 [0, 1, 2, 5, 3, 9, 4, 6, 7, 8, 10]，再变成 [0, 1, 2, 3, 5, 9, 4, 6, 7, 8, 10]
+10.  遍历第六个元素 9，跟第 6、7 的步骤一致，数组先变成 [0, 1, 2, 3, 5, 4, 9, 6, 7, 8, 10]，再变成 [0, 1, 2, 3, 4, 5, 9, 6, 7, 8, 10]
+11.  在下一次遍历中，因为 i == high_start，意味着正序和倒序的查找终于找到一起了，后面的元素肯定都是大于基准值的，此时退出循环
+12.  遍历后的结果为 [0, 1, 2, 3, 4, 5, 9, 6, 7, 8, 10]，在基准值 5 前面的元素都小于 5，后面的元素都大于 5，然后我们分别对两个子集进行 QuickSort
+13.  此时 low_end 值为 5，high_start 值为 6，to 的值依然是 10，from 的值依然是 0，to - high_start < low_end - from 的结果为 true，我们对 QuickSort(a, 6, 10)，即对后面的元素进行排序，但是注意，在新的 QuickSort 中，因为 to - from 的值小于 10，所以这一次其实是采用了插入排序。所以准确的说，当数组长度大于 10 的时候，v8 采用了快速排序和插入排序的混合排序方法。
+14.  然后 to = low_end 即设置 to 为 5，因为 while(true) 的原因，会再执行一遍，to - from 的值为 5，执行 InsertionSort(a, 0, 5)，即对基准值前面的元素执行一次插入排序。
+15.  因为在 to - from <= 10 的判断中，有 return 语句，所以 while 循环结束。
+16.  v8 在对数组进行了一次快速排序后，然后对两个子集分别进行了插入排序，最终修改数组为正确排序后的数组。
 
 ## 比较
 

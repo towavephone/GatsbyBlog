@@ -88,8 +88,8 @@ img.src = 'https://avatars3.githubusercontent.com/u/496048?s=120&v=4';
 
 crossOrigin 可以有下面两个值：
 
-- anonymous：元素的跨域资源请求不需要凭证标志设置。
-- use-credentials：元素的跨域资源请求需要凭证标志设置，意味着该请求需要提供凭证。
+-  anonymous：元素的跨域资源请求不需要凭证标志设置。
+-  use-credentials：元素的跨域资源请求需要凭证标志设置，意味着该请求需要提供凭证。
 
 其中，只要 crossOrigin 的属性值不是 use-credentials，全部都会解析为 anonymous，包括空字符串，包括类似'abc'这样的字符。
 

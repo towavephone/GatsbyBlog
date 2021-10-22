@@ -25,9 +25,10 @@
     "dev:lan": "cross-env NODE_OPTIONS=--max-old-space-size=4048 gatsby develop -H 0.0.0.0",
     "serve": "gatsby serve",
     "lint": "yarn lint:markdown",
-    "lint:js": "eslint --fix src/**/*.js gatsby-config.js gatsby-browser.js gatsby-node.js",
-    "test": "echo \"Should probably write some tests!\"",
-    "lint:markdown": "markdownlint --config .markdownlint.json ./blog/**/*.md",
+    "lint:markdown": "markdownlint ./blog/**/*.md",
+    "lint:js": "eslint src/**/*.js gatsby-config.js gatsby-browser.js gatsby-node.js",
+    "fix": "yarn fix:markdown",
+    "fix:markdown": "markdownlint --fix ./blog/**/*.md",
     "precommit": "yarn lint:markdown",
     "cleanup": "rimraf -rf node_modules/gh-pages/.cache"
   },
@@ -42,7 +43,7 @@
     "husky": "^1.0.0-rc.2",
     "lint-staged": "^7.1.0",
     "markdownlint": "^0.8.1",
-    "markdownlint-cli": "^0.8.1",
+    "markdownlint-cli": "^0.27.1",
     "prettier": "^1.12.1"
   },
   "dependencies": {

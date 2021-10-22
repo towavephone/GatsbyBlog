@@ -92,23 +92,23 @@ window.requestAnimFrame = (function() {
 
 这里需要了解下缓动(Tween)知识：
 
-- Linear：无缓动效果
-- Quadratic：二次方的缓动（t^2）
-- Cubic：三次方的缓动（t^3）
-- Quartic：四次方的缓动（t^4）
-- Quintic：五次方的缓动（t^5）
-- Sinusoidal：正弦曲线的缓动（sin(t)）
-- Exponential：指数曲线的缓动（2^t）
-- Circular：圆形曲线的缓动（sqrt(1-t^2)）
-- Elastic：指数衰减的正弦曲线缓动
-- 超过范围的三次方缓动（(s+1)*t^3 – s*t^2）
-- 指数衰减的反弹缓动
+-  Linear：无缓动效果
+-  Quadratic：二次方的缓动（t^2）
+-  Cubic：三次方的缓动（t^3）
+-  Quartic：四次方的缓动（t^4）
+-  Quintic：五次方的缓动（t^5）
+-  Sinusoidal：正弦曲线的缓动（sin(t)）
+-  Exponential：指数曲线的缓动（2^t）
+-  Circular：圆形曲线的缓动（sqrt(1-t^2)）
+-  Elastic：指数衰减的正弦曲线缓动
+-  超过范围的三次方缓动（(s+1)*t^3 – s*t^2）
+-  指数衰减的反弹缓动
 
 每个效果都分三个缓动方式，分别是：
 
-- easeIn：从 0 开始加速的缓动，先慢后快；
-- easeOut：减速到 0 的缓动，先快后慢；
-- easeInOut：前半段从 0 开始加速，后半段减速到 0 的缓动，先慢后快然后再慢。
+-  easeIn：从 0 开始加速的缓动，先慢后快；
+-  easeOut：减速到 0 的缓动，先快后慢；
+-  easeInOut：前半段从 0 开始加速，后半段减速到 0 的缓动，先慢后快然后再慢。
 
 每周动画效果都有其自身的算法。我们都知道 jQuery UI 中就有缓动，As 脚本也内置了缓动，其中的运动算法都是一致的：
 

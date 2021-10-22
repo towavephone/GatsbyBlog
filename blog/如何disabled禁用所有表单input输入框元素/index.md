@@ -13,13 +13,15 @@ path: /disabled-all-form-elements/
 
 很多人用的下面这两种方法实现：
 
-1. 设置 pointer-events:none，例如：
+1.  设置 pointer-events:none，例如：
+
    ```css
    form {
      pointer-events: none;
    }
    ```
-2. 使用::before 伪元素创建一个浮层该在所有的表单元素上，例如：
+
+2.  使用::before 伪元素创建一个浮层该在所有的表单元素上，例如：
 
    ```css
    form {

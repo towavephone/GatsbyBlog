@@ -30,22 +30,22 @@ class Counter extends React.PureComponent {
 
 在这段代码中，`React.PureComponent` 会浅比较 `props.color` 或 `state.count` 是否改变，来决定是否重新渲染组件。
 
-- **实现**
+-  **实现**
 
   `React.PureComponent` 和 `React.Component` 类似，都是定义一个组件类。不同是 `React.Component` 没有实现 `shouldComponentUpdate()`，而 `React.PureComponent` 通过 props 和 state 的 **浅比较** 实现了。
 
-- **使用场景**
+-  **使用场景**
 
   当 `React.Component` 的 props 和 state 均为基本类型，使用 `React.PureComponent` 会节省应用的性能
 
-- **可能出现的问题及解决方案**
+-  **可能出现的问题及解决方案**
 
   当 props 或 state 为 **复杂的数据结构** （例如：嵌套对象和数组）时，因为 `React.PureComponent` 仅仅是 **浅比较** ，可能会渲染出 **错误的结果** 。这时有 **两种解决方案** ：
 
-  - 当 **知道** 有深度数据结构更新时，可以直接调用 **forceUpdate** 强制更新
-  - 考虑使用 [immutable objects](https://facebook.github.io/immutable-js/)（不可突变的对象），实现快速的比较对象
+-  当 **知道** 有深度数据结构更新时，可以直接调用 **forceUpdate** 强制更新
+-  考虑使用 [immutable objects](https://facebook.github.io/immutable-js/)（不可突变的对象），实现快速的比较对象
 
-- **注意**
+-  **注意**
 
   `React.PureComponent` 中的 `shouldComponentUpdate()` 将跳过所有子组件树的 props 更新（具体原因参考 [Hooks 与 React 生命周期](https://github.com/sisterAn/blog/issues/34)：即：更新阶段，由父至子去判断是否需要重新渲染），所以使用 React.PureComponent 的组件，它的所有 **子组件也必须都为 React.PureComponent** 。
 
@@ -79,9 +79,9 @@ React 16.8 之后，React 引入 Hooks 。它可以让你在不编写 class 的�
 
 `React.memo` 为高阶组件。它实现的效果与 `React.PureComponent` 相似，不同的是：
 
-- `React.memo` 用于函数组件
-- `React.PureComponent` 适用于 class 组件
-- `React.PureComponent` 只是浅比较 `props`、`state`，`React.memo` 也是浅比较，但它可以自定义比较函数
+-  `React.memo` 用于函数组件
+-  `React.PureComponent` 适用于 class 组件
+-  `React.PureComponent` 只是浅比较 `props`、`state`，`React.memo` 也是浅比较，但它可以自定义比较函数
 
 ## React.memo
 
@@ -104,11 +104,11 @@ function areEqual(prevProps, nextProps) {
 export default React.memo(MyComponent, areEqual);
 ```
 
-- `React.memo` 通过记忆组件渲染结果的方式实现，提高组件的性能
-- 只会对 `props` 浅比较，如果相同，React 将跳过渲染组件的操作并直接复用最近一次渲染的结果。
-- 可以将自定义的比较函数作为第二个参数，实现自定义比较
-- 此方法仅作为性能优化的方式而存在。但请不要依赖它来“阻止”渲染，这会产生 bug。
-- 与 class 组件中 `shouldComponentUpdate()` 方法不同的是，如果 props 相等，`areEqual`会返回 `true`；如果 props 不相等，则返回 `false`。这与 `shouldComponentUpdate` 方法的返回值相反。
+-  `React.memo` 通过记忆组件渲染结果的方式实现，提高组件的性能
+-  只会对 `props` 浅比较，如果相同，React 将跳过渲染组件的操作并直接复用最近一次渲染的结果。
+-  可以将自定义的比较函数作为第二个参数，实现自定义比较
+-  此方法仅作为性能优化的方式而存在。但请不要依赖它来“阻止”渲染，这会产生 bug。
+-  与 class 组件中 `shouldComponentUpdate()` 方法不同的是，如果 props 相等，`areEqual`会返回 `true`；如果 props 不相等，则返回 `false`。这与 `shouldComponentUpdate` 方法的返回值相反。
 
 # 使用 PureComponent 常见误区
 
@@ -226,8 +226,8 @@ setTopTenPosts(posts) {
 
 在使用 `PureComponent` 时，请注意：
 
-- 突变一般是不好的，但在使用 `PureComponent` 时，问题会更加复杂。
-- 不要在渲染方法中创建新函数、对象或数组，这会导致项目性能显著降低。
+-  突变一般是不好的，但在使用 `PureComponent` 时，问题会更加复杂。
+-  不要在渲染方法中创建新函数、对象或数组，这会导致项目性能显著降低。
 
 # PureComponent 源码解析
 
@@ -344,13 +344,13 @@ function shallowEqual(objA: mixed, objB: mixed): boolean {
 
 如果下列任何一项成立，则两个值相同：
 
-- 两个值都是 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)
-- 两个值都是 [`null`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/null)
-- 两个值都是 `true` 或者都是 `false`
-- 两个值是由相同个数的字符按照相同的顺序组成的字符串
-- 两个值指向同一个对象
-- 两个值都是数字并且
-  - 都是正零 `+0`
-  - 都是负零 `-0`
-  - 都是 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN)
-  - 都是除零和 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN) 外的其它同一个数字
+-  两个值都是 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)
+-  两个值都是 [`null`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/null)
+-  两个值都是 `true` 或者都是 `false`
+-  两个值是由相同个数的字符按照相同的顺序组成的字符串
+-  两个值指向同一个对象
+-  两个值都是数字并且
+   -  都是正零 `+0`
+   -  都是负零 `-0`
+   -  都是 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN)
+   -  都是除零和 [`NaN`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/NaN) 外的其它同一个数字

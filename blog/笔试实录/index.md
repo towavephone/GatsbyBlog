@@ -229,9 +229,9 @@ function mod(a, b, n) {
 
 Input:
 
-1. Positive integer n, means the length of the list. (0<n<10^7)
-2. n Positive integers of the list.
-3. Positive integer i.
+1.  Positive integer n, means the length of the list. (0<n<10^7)
+2.  n Positive integers of the list.
+3.  Positive integer i.
 
 Output:
 
@@ -429,15 +429,15 @@ b 2
 
 Input:
 
-1. Positive integer n, means the days you can predict.
-2. n integers, means the bitcoin's changed in i-th day
+1.  Positive integer n, means the days you can predict.
+2.  n integers, means the bitcoin's changed in i-th day
 
-- you can buy one bitcoin
-- you can buy and sell one time
+-  you can buy one bitcoin
+-  you can buy and sell one time
 
 Output:
 
-- the max profit you can earn.
+-  the max profit you can earn.
 
 exmaple:
 

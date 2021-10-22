@@ -250,18 +250,18 @@ z-index 看上去其实很简单，根据 z-index 的高低决定层叠的优先
 
 如何触发一个元素形成堆叠上下文？
 
-- 根元素 (HTML),
-- z-index 值不为"auto"的 绝对/相对定位
-- 一个 z-index 值不为"auto"的 flex 项目 (flex item)，即：父元素 display: flex|inline-flex
-- opacity 属性值小于 1 的元素（参考 the specification for opacity）
-- transform 属性值不为"none"的元素
-- mix-blend-mode 属性值不为"normal"的元素
-- filter 值不为“none”的元素，
-- perspective 值不为“none”的元素
-- isolation 属性被设置为 "isolate"的元素
-- position: fixed
-- 在 will-change 中指定了任意 CSS 属性，即便你没有直接指定这些属性的值
-- -webkit-overflow-scrolling 属性被设置"touch"的元素
+-  根元素 (HTML),
+-  z-index 值不为"auto"的 绝对/相对定位
+-  一个 z-index 值不为"auto"的 flex 项目 (flex item)，即：父元素 display: flex|inline-flex
+-  opacity 属性值小于 1 的元素（参考 the specification for opacity）
+-  transform 属性值不为"none"的元素
+-  mix-blend-mode 属性值不为"normal"的元素
+-  filter 值不为“none”的元素，
+-  perspective 值不为“none”的元素
+-  isolation 属性被设置为 "isolate"的元素
+-  position: fixed
+-  在 will-change 中指定了任意 CSS 属性，即便你没有直接指定这些属性的值
+-  -webkit-overflow-scrolling 属性被设置"touch"的元素
 
 在层叠上下文中，其子元素同样也按照上面解释的规则进行层叠。 特别值得一提的是，其子元素的 z-index 值只在父级层叠上下文中有意义。意思就是父元素的 z-index 低于父元素另一个同级元素，子元素 z-index 再高也没用。
 
@@ -335,9 +335,9 @@ em {
 
 超出两行省略，主要用到如下几个：
 
-- display: -webkit-box; // 设置 display，将对象作为弹性伸缩盒子模型显示
-- -webkit-line-clamp: 2; // 限制在一个块元素显示的文本的行数
-- -webkit-box-orient: vertical; // 规定框的子元素应该被水平或垂直排列
+-  display: -webkit-box; // 设置 display，将对象作为弹性伸缩盒子模型显示
+-  -webkit-line-clamp: 2; // 限制在一个块元素显示的文本的行数
+-  -webkit-box-orient: vertical; // 规定框的子元素应该被水平或垂直排列
 
 上述 3 条样式配合 overflow : hidden 和 text-overflow: ellipsis 即可实现 webkit 内核下的多行省略。
 

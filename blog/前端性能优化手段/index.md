@@ -43,17 +43,17 @@ path: /front-end-performance-optimization-2021/
 
 DNS 服务本身是一个树状层级结构，其解析是一个递归与迭代的过程。例如 github.com 的大致解析流程如下：
 
-1. 先检查本地 hosts 文件中是否有映射，有则使用；
-2. 查找本地 DNS 缓存，有则返回；
-3. 根据配置在 TCP/IP 参数中设置 DNS 查询服务器，并向其进行查询，这里先称为本地 DNS；
-4. 如果该服务器无法解析域名（没有缓存），且不需要转发，则会向根服务器请求；
-5. 根服务器根据域名类型判断对应的顶级域名服务器（.com），返回给本地 DNS，然后重复该过程，直到找到该域名；
-6. 当然，如果设置了转发，本地 DNS 会将请求逐级转发，直到转发服务器返回或者也不能解析。
+1.  先检查本地 hosts 文件中是否有映射，有则使用；
+2.  查找本地 DNS 缓存，有则返回；
+3.  根据配置在 TCP/IP 参数中设置 DNS 查询服务器，并向其进行查询，这里先称为本地 DNS；
+4.  如果该服务器无法解析域名（没有缓存），且不需要转发，则会向根服务器请求；
+5.  根服务器根据域名类型判断对应的顶级域名服务器（.com），返回给本地 DNS，然后重复该过程，直到找到该域名；
+6.  当然，如果设置了转发，本地 DNS 会将请求逐级转发，直到转发服务器返回或者也不能解析。
 
 这里我们需要了解的是：
 
-- 首先，DNS 解析流程可能会很长，耗时很高，所以整个 DNS 服务，包括客户端都会有缓存机制，这个作为前端不好涉入；
-- 其次，在 DNS 解析上，前端还是可以通过浏览器提供的其他手段来“加速”的。
+-  首先，DNS 解析流程可能会很长，耗时很高，所以整个 DNS 服务，包括客户端都会有缓存机制，这个作为前端不好涉入；
+-  其次，在 DNS 解析上，前端还是可以通过浏览器提供的其他手段来“加速”的。
 
 DNS Prefetch 就是浏览器提供给我们的一个 API。它是 Resource Hint 的一部分。它可以告诉浏览器：过会我就可能要去 yourwebsite.com 上下载一个资源啦，帮我先解析一下域名吧。这样之后用户点击某个按钮，触发了 yourwebsite.com 域名下的远程请求时，就略去了 DNS 解析的步骤。使用方式很简单：
 
@@ -71,10 +71,10 @@ DNS Prefetch 就是浏览器提供给我们的一个 API。它是 Resource Hint 
 
 根据规范，当你使用 Preconnect 时，浏览器大致做了如下处理：
 
-- 首先，解析 Preconnect 的 url；
-- 其次，根据当前 link 元素中的属性进行 cors 的设置；
-- 然后，默认先将 credential 设为 true，如果 cors 为 Anonymous 并且存在跨域，则将 credential 置为 false；
-- 最后，进行连接。
+-  首先，解析 Preconnect 的 url；
+-  其次，根据当前 link 元素中的属性进行 cors 的设置；
+-  然后，默认先将 credential 设为 true，如果 cors 为 Anonymous 并且存在跨域，则将 credential 置为 false；
+-  最后，进行连接。
 
 使用 Preconnect 只需要将 rel 属性设为 preconnect 即可：
 
@@ -110,8 +110,8 @@ DNS Prefetch 就是浏览器提供给我们的一个 API。它是 Resource Hint 
 
 把这一部分放进前端性能优化并不是很严谨：
 
-- 服务端有着服务端的通用技术手段，这块深入去研究，会是一个不一样的领域；
-- 我们既然在讨论前端性能优化，这部分主要还是指 NodeJS，但不是所有业务都使用 NodeJS。
+-  服务端有着服务端的通用技术手段，这块深入去研究，会是一个不一样的领域；
+-  我们既然在讨论前端性能优化，这部分主要还是指 NodeJS，但不是所有业务都使用 NodeJS。
 
 所以这里只会提一些实践中碰到的小点，辅以一些拓展阅读，希望能帮助大家抛砖引玉，开拓思维。
 
@@ -133,20 +133,20 @@ BFF 非常合适做的一件事就是后端服务的聚合。
 
 代码问题其实就非常细节了。简单列举一些常见的问题：
 
-- async await 的不当使用导致并行请求被串行化了；
-- 频繁地 JSON.parse 和 JSON.stringify 大对象；
-- 正则表达式的灾难性回溯；
-- 闭包导致的内存泄漏；
-- CPU 密集型任务导致事件循环 delay 严重；
-- 未捕获的异常导致进程频繁退出，守护进程（pm2/supervisor）又将进程重启，这种频繁的启停也会比较消耗资源；
+-  async await 的不当使用导致并行请求被串行化了；
+-  频繁地 JSON.parse 和 JSON.stringify 大对象；
+-  正则表达式的灾难性回溯；
+-  闭包导致的内存泄漏；
+-  CPU 密集型任务导致事件循环 delay 严重；
+-  未捕获的异常导致进程频繁退出，守护进程（pm2/supervisor）又将进程重启，这种频繁的启停也会比较消耗资源；
 
 # 页面解析与处理
 
 这一阶段浏览器需要处理的东西很多，为了更好地理解性能优化，我们主要将其分为几个部分：
 
-- 页面 DOM 的解析；
-- 页面静态资源的加载，包括了页面引用的 JavaScript/CSS/图片/字体等；
-- 静态资源的解析与处理，像是 JavaScript 的执行、CSSOM 的构建与样式合成等；
+-  页面 DOM 的解析；
+-  页面静态资源的加载，包括了页面引用的 JavaScript/CSS/图片/字体等；
+-  静态资源的解析与处理，像是 JavaScript 的执行、CSSOM 的构建与样式合成等；
 
 大致过程就是解析页面 DOM 结构，遇到外部资源就加载，加载好了就使用。但是由于这部分的内容比较多，所以在这一节里我们重点关注页面的解析（其他部分在写一节中介绍）。
 
@@ -202,10 +202,10 @@ HTML 的文档大小也会极大影响响应体下载的时间。一般会进行
 
 但咱们还是要先从整体维度上进行一些分析。其实在总体原则上，各类资源的优化思路都是大体类似的，包括但不限于：
 
-- 减少不必要的请求
-- 减少包体大小
-- 降低应用资源时的消耗
-- 利用缓存
+-  减少不必要的请求
+-  减少包体大小
+-  降低应用资源时的消耗
+-  利用缓存
 
 为了大家能更好理解各类优化实施策略从何而来，先初步扩展一下以上的思路。
 
@@ -217,9 +217,9 @@ HTML 的文档大小也会极大影响响应体下载的时间。一般会进行
 
 减少不必要的请求主要分为几个维度：
 
-- 对于不需要使用的内容，其实不需要请求，否则相当于做了无用功；
-- 对于可以延迟加载的内容，不必要现在就立刻加载，最好就在需要使用之前再加载；
-- 对于可以合并的资源，进行资源合并也是一种方法。
+-  对于不需要使用的内容，其实不需要请求，否则相当于做了无用功；
+-  对于可以延迟加载的内容，不必要现在就立刻加载，最好就在需要使用之前再加载；
+-  对于可以合并的资源，进行资源合并也是一种方法。
 
 ### 减少包体大小
 
@@ -227,8 +227,8 @@ HTML 的文档大小也会极大影响响应体下载的时间。一般会进行
 
 减少包体大小常用的方式包括了：
 
-- 使用适合当前资源的压缩技术；
-- 避免在响应包体里“塞入”一些不需要的内容。
+-  使用适合当前资源的压缩技术；
+-  避免在响应包体里“塞入”一些不需要的内容。
 
 ### 降低应用资源时的消耗
 
@@ -695,12 +695,12 @@ body > main.container > section.intro h2:nth-of-type(odd) + p::first-line a[href
 
 有一些 CSS 的属性在渲染上是有比较高的成本的，渲染速度相较而言也会慢些。在不同的浏览器上，具体的表现不太一致，但总体来说，下面一些属性是比较昂贵的：
 
-- border-radius
-- box-shadow
-- opacity
-- transform
-- filter
-- position: fixed
+-  border-radius
+-  box-shadow
+-  opacity
+-  transform
+-  filter
+-  position: fixed
 
 #### 使用先进的布局方式
 
@@ -759,8 +759,8 @@ module.exports = {
 
 雪碧图的核心原理在于设置不同的背景偏移量，大致包含两点：
 
-- 不同的图标元素都会将 background-url 设置为合并后的雪碧图的 uri；
-- 不同的图标通过设置对应的 background-position 来展示大图中对应的图标部分。
+-  不同的图标元素都会将 background-url 设置为合并后的雪碧图的 uri；
+-  不同的图标通过设置对应的 background-position 来展示大图中对应的图标部分。
 
 你可以用 Photoshop 这类工具自己制作雪碧图。当然比较推荐的还是将雪碧图的生成集成到前端自动化构建工具中，例如在 webpack 中使用 webpack-spritesmith，或者在 gulp 中使用 gulp.spritesmith。它们两者都是基于 spritesmith 这个库，你也可以自己将这个库集成到你喜欢的构建工具中。
 
@@ -836,9 +836,9 @@ window.addEventListener('orientationchange', lazy);
 
 在使用懒加载时也有一些注意点：
 
-- 首屏可以不需要懒加载，对首屏图片也使用懒加载会延迟图片的展示。
-- 设置合理的占位图，避免图片加载后的页面“抖动”。
-- 虽然目前基本所有用户都不会禁用 JavaScript，但还是建议做一些 JavaScript 不可用时的 backup。
+-  首屏可以不需要懒加载，对首屏图片也使用懒加载会延迟图片的展示。
+-  设置合理的占位图，避免图片加载后的页面“抖动”。
+-  虽然目前基本所有用户都不会禁用 JavaScript，但还是建议做一些 JavaScript 不可用时的 backup。
 
 对于占位图这块可以再补充一点。为了更好的用户体验，我们可以使用一个基于原图生成的体积小、清晰度低的图片作为占位图。这样一来不会增加太大的体积，二来会有很好的用户体验。LQIP (Low Quality Image Placeholders) 就是这种技术。目前也已经有了 LQIP 和 SQIP(SVG-based LQIP) 的自动化工具可以直接使用。
 
@@ -868,7 +868,7 @@ window.addEventListener('orientationchange', lazy);
 
 图片格式是一个比较大的话题，选择合适的格式有利于性能优化。这里我们简单总结一些。
 
-1. 使用 WebP：
+1.  使用 WebP：
 
    考虑在网站上使用 WebP 格式。在有损与无损压缩上，它的表现都会优于传统（JPEG/PNG）格式。WebP 无损压缩比 PNG 的体积小 26%，webP 的有损压缩比同质量的 JPEG 格式体积小 25-34%。同时 WebP 也支持透明度。下面提供了一种兼容性较好的写法。
 
@@ -880,15 +880,15 @@ window.addEventListener('orientationchange', lazy);
    </picture>
    ```
 
-2. 使用 SVG 应对矢量图场景：
+2.  使用 SVG 应对矢量图场景：
 
    在一些需要缩放与高保真的情况，或者用作图标的场景下，使用 SVG 这种矢量图非常不错。有时使用 SVG 格式会比相同的 PNG 或 JPEG 更小。
 
-3. 使用 video 替代 GIF：
+3.  使用 video 替代 GIF：
 
    在兼容性允许的情况下考虑，可以在想要动图效果时使用视频，通过静音（muted）的 video 来代替 GIF。相同的效果下，GIF 比视频（MPEG-4）大 5 ～ 20 倍。Smashing Magazine 上有篇文章[9]详细介绍使用方式。
 
-4. 渐进式 JPEG：
+4.  渐进式 JPEG：
 
    基线 JPEG (baseline JPEG) 会从上往下逐步呈现，类似下面这种：
 
@@ -1042,10 +1042,10 @@ WebM(VP9) 相较于 MPEG-4(x264) 来说会更小，不过兼容性相对来说�
 
 对于视频，我们也可以进行有损与无损压缩，同样可以有效减少视频大小。下面列举了一些常用的工具：
 
-- HandBrake
-- Freemake
-- Hybrid
-- MeGUI
+-  HandBrake
+-  Freemake
+-  Hybrid
+-  MeGUI
 
 ### 移除不必要的音轨信息
 
@@ -1176,18 +1176,18 @@ Virtual List 是一种用来优化长列表的技术。它可以保证在列表�
 
 其大致的实现思路如下：
 
-1. 监听页面滚动（或者其他导致视口变化的事件）；
-2. 滚动时根据滚动的距离计算需要展示的列表项；
-3. 将列表项中展示的数据与组件替换成当前需要展示的内容；
-4. 修改偏移量到对应的位置。
+1.  监听页面滚动（或者其他导致视口变化的事件）；
+2.  滚动时根据滚动的距离计算需要展示的列表项；
+3.  将列表项中展示的数据与组件替换成当前需要展示的内容；
+4.  修改偏移量到对应的位置。
 
 这样还有一个好处，相当于是不断改变这 N 个元素的位置属性和内部的一些节点，不会有频繁的 DOM 创建与销毁，配合下面提到的 composite 可以获得不错的性能。
 
 如果你想要使用这项技术，除了自己实现外，一些常见的框架也有不错的开源实现。例如：
 
-- 基于 React 的 react-virtualized，它的开发者也在 dev.to 上分享了一些[关于 virtual list 的内容](https://dev.to/nishanbajracharya/what-i-learned-from-building-my-own-virtualized-list-library-for-react-45ik)；
-- 基于 Vue 的 vue-virtual-scroll-list；
-- 基于 Angular 的 ngx-virtual-scroller；
+-  基于 React 的 react-virtualized，它的开发者也在 dev.to 上分享了一些[关于 virtual list 的内容](https://dev.to/nishanbajracharya/what-i-learned-from-building-my-own-virtualized-list-library-for-react-45ik)；
+-  基于 Vue 的 vue-virtual-scroll-list；
+-  基于 Angular 的 ngx-virtual-scroller；
 
 ### 原生的 Virtual Scroller
 
@@ -1279,8 +1279,8 @@ window.requestIdleCallback(
 
 一般来说，延迟执行分为两种策略：
 
-- 一种是懒执行，例如当我需要某个值时，我才去计算；
-- 第二种是延后执行，即利用 setTimeout、requestIdleCallback 这样的方法把计算放到后续的事件循环或空闲时刻。
+-  一种是懒执行，例如当我需要某个值时，我才去计算；
+-  第二种是延后执行，即利用 setTimeout、requestIdleCallback 这样的方法把计算放到后续的事件循环或空闲时刻。
 
 一些场景下，这两个都是可行的方法。除此以外，在 Idle Until Urgent 中作者介绍了一种改进的方法：把计算放到 requestIdleCallback 中，如果你一直不需要用到计算结果也没有关系，它会等到空闲时再执行，不影响性能；而当你要使用时，如果还未计算好则会立刻进行计算并返回结果，同时取消未执行的 requestIdleCallback。
 
@@ -1356,9 +1356,9 @@ Composite 这个概念和我们的渲染管线关系密切，可以看到它处�
 
 总得来说，合成层在性能优化上的优点在于：
 
-- 合成层的位图，会交由 GPU 合成，比 CPU 处理要快；
-- 当需要 repaint 时，只需要 repaint 本身，不会影响到其他的层；
-- 对于 transform 和 opacity 效果，不会触发 layout 和 paint。
+-  合成层的位图，会交由 GPU 合成，比 CPU 处理要快；
+-  当需要 repaint 时，只需要 repaint 本身，不会影响到其他的层；
+-  对于 transform 和 opacity 效果，不会触发 layout 和 paint。
 
 但同时，也要注意避免层爆炸，防止在无法进行层压缩的情况下出现过多的层，反而导致性能的下降。这篇文章介绍了 [composite 的原理及其相关应用](https://fed.taobao.org/blog/2016/04/26/performance-composite/)。
 
@@ -1600,8 +1600,8 @@ img.src = '/static/img/prefetch.jpg';
 
 预加载一般都会面临一些矛盾：
 
-- 预加载资源过多，可能导致流量消耗过大，占用正常请求的通道；
-- 预加载资源过少，可能导致覆盖率太低，对于大部分资源用户无法享受到预加载效果。
+-  预加载资源过多，可能导致流量消耗过大，占用正常请求的通道；
+-  预加载资源过少，可能导致覆盖率太低，对于大部分资源用户无法享受到预加载效果。
 
 设计一个高效的预加载策略是一个很复杂的问题 ，这里只简单介绍一些工具。
 
@@ -1625,11 +1625,11 @@ Guess.js 则是一个更为完备的工具包。它会结合前端访问与打�
 
 Web 发展到现今阶段，性能指标已经不再只是 DOMContentLoad 和 load 这样的“面向浏览器”的指标，更多的会是以用户为中心（user-centric）的指标，例如：
 
-- FP (First Paint)
-- FID (First Input Delay)
-- FCP (First Contentful Paint)
-- FMP (First Meaningful Paint)
-- TTI (Time to interactive)
+-  FP (First Paint)
+-  FID (First Input Delay)
+-  FCP (First Contentful Paint)
+-  FMP (First Meaningful Paint)
+-  TTI (Time to interactive)
 
 所以在性能优化之前最重要的还是明确你的监控指标和分析维度，关于性能指标其实也是一个可以继续聊下去的内容，这里就不展开了，以后有机会希望把这部分也补充进来。
 
@@ -1647,14 +1647,14 @@ Web 发展到现今阶段，性能指标已经不再只是 DOMContentLoad 和 lo
 
 我们一般会把性能数据分为两种：
 
-- 一种叫 Lab data，主要是在开发和测试人员本地或内部测试机器上跑出来的数据，例如在 CI/CD 中加入 lighthouse。它的优点在于采集的指标更全面，也易于复现问题；缺点主要在于有时候可能不能反应真实的用户体验情况。
-- 另一种叫 Field data，也被称为 RUM (Real User Monitoring)，是指采集线上实际的性能数据来进行监控。它的优点则是能更好地发现用户实际遇到的性能问题；缺点主要是比较难以调试与复现问题，同时采集到的指标的详细程度不及 Lab data。
+-  一种叫 Lab data，主要是在开发和测试人员本地或内部测试机器上跑出来的数据，例如在 CI/CD 中加入 lighthouse。它的优点在于采集的指标更全面，也易于复现问题；缺点主要在于有时候可能不能反应真实的用户体验情况。
+-  另一种叫 Field data，也被称为 RUM (Real User Monitoring)，是指采集线上实际的性能数据来进行监控。它的优点则是能更好地发现用户实际遇到的性能问题；缺点主要是比较难以调试与复现问题，同时采集到的指标的详细程度不及 Lab data。
 
 而 [The Three Types of Performance Testing](https://csswizardry.com/2018/10/three-types-of-performance-testing/) 则进一步划分出了三类性能测试。
 
-- 第一种叫做 Proactive：它可以理解为是工程师在开发阶段，通过浏览器调试等本地工具来发现并解决性能问题（善于利用 Chrome DevTools 也是一个优秀前端工程师所需要具备的）；
-- 第二种叫做 Reactive：它是一种自动化的性能测试，可以集成到自动化测试或流水线的其他阶段，会在构建与每次发布前执行；
-- 第三种叫做 Passive：它就是在产品发布后，通过收集线上数据（或用户反馈）来发现性能问题，主要是基于一些 RUM。
+-  第一种叫做 Proactive：它可以理解为是工程师在开发阶段，通过浏览器调试等本地工具来发现并解决性能问题（善于利用 Chrome DevTools 也是一个优秀前端工程师所需要具备的）；
+-  第二种叫做 Reactive：它是一种自动化的性能测试，可以集成到自动化测试或流水线的其他阶段，会在构建与每次发布前执行；
+-  第三种叫做 Passive：它就是在产品发布后，通过收集线上数据（或用户反馈）来发现性能问题，主要是基于一些 RUM。
 
 选择哪种性能测试呢？答案是将它们结合使用（就像是自动化测试会结合单元测试、集成测试与端到端测试）。
 

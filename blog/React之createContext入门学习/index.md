@@ -126,11 +126,11 @@ const LocaleContext = React.createContext(defaultValue);
 <LocaleContext.Provider value={/* 某个值 */}>
 ```
 
-- Provider 接收一个 **value** 属性，传递给消费组件。
-- 一个 Provider 可以和 **多个消费组件** 有对应关系。多个 Provider 可以 **嵌套使用** ，里层的会覆盖外层的数据。
-- 当 Provider 的 value 值发生变化时，它内部的所有消费组件都会 **重新渲染** 。
-- Provider 及其内部 consumer 组件都 **不受制于 shouldComponentUpdate** 函数，因此当 consumer 组件在其祖先组件退出更新的情况下也能更新。
-- 通过新旧值检测来确定变化，使用了与 **Object.is** （[Object.is MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/is)） 相同的算法。
+-  Provider 接收一个 **value** 属性，传递给消费组件。
+-  一个 Provider 可以和 **多个消费组件** 有对应关系。多个 Provider 可以 **嵌套使用** ，里层的会覆盖外层的数据。
+-  当 Provider 的 value 值发生变化时，它内部的所有消费组件都会 **重新渲染** 。
+-  Provider 及其内部 consumer 组件都 **不受制于 shouldComponentUpdate** 函数，因此当 consumer 组件在其祖先组件退出更新的情况下也能更新。
+-  通过新旧值检测来确定变化，使用了与 **Object.is** （[Object.is MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/is)） 相同的算法。
 
 ### Class.contextType
 
@@ -154,10 +154,10 @@ let value = this.context;
 
 # 深入 context
 
-- 当 Provider 的 value 值发生变化时，它内部的所有消费组件都会 **重新渲染**
-- 当需要在 **Consumer 中触发 Provider 执行更新 context value 操作** 时，可以通过 context 传递一个 **函数** ，使得 consumer 组件触发更新 context
-- 多个 context 可以 **嵌套使用**
-- 注意： **不要在 Provider value 直接赋值** （`<LocaleProvider.Provider value={{name: 'AnGe'}}>`），因为这样会导致，每次 Provider 的父组件进行重渲染时，都会导致 Consumer 组件中重新渲染，因为 `value` 属性总是被赋值为新的对象（Object.is 新旧值检测）
+-  当 Provider 的 value 值发生变化时，它内部的所有消费组件都会 **重新渲染**
+-  当需要在 **Consumer 中触发 Provider 执行更新 context value 操作** 时，可以通过 context 传递一个 **函数** ，使得 consumer 组件触发更新 context
+-  多个 context 可以 **嵌套使用**
+-  注意： **不要在 Provider value 直接赋值** （`<LocaleProvider.Provider value={{name: 'AnGe'}}>`），因为这样会导致，每次 Provider 的父组件进行重渲染时，都会导致 Consumer 组件中重新渲染，因为 `value` 属性总是被赋值为新的对象（Object.is 新旧值检测）
 
 locale-context.js
 

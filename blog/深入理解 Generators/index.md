@@ -30,9 +30,9 @@ iter.next(); // {value:undefined，done:true}
 
 上述代码中定义了一个生成器函数，当调用生成器函数 example() 时，并非立即执行该函数，而是返回一个生成器对象。每当调用生成器对象的 .next() 方法时，函数将运行到下一个 yield 表达式，返回表达式结果并暂停自身。当抵达生成器函数的末尾时，返回结果中 done 的值为 true，value 的值为 undefined。我们将上述 example() 函数称之为生成器函数，与普通函数相比二者有如下区别
 
-- 普通函数使用 function 声明，生成器函数用 function\* 声明
-- 普通函数使用 return 返回值，生成器函数使用 yield 返回值
-- 普通函数是 run to completion 模式，即普通函数开始执行后，会一直执行到该函数所有语句完成，在此期间别的代码语句是不会被执行的；生成器函数是 run-pause-run 模式，即生成器函数可以在函数运行中被暂停一次或多次，并且在后面再恢复执行，在暂停期间允许其他代码语句被执行
+-  普通函数使用 function 声明，生成器函数用 function\* 声明
+-  普通函数使用 return 返回值，生成器函数使用 yield 返回值
+-  普通函数是 run to completion 模式，即普通函数开始执行后，会一直执行到该函数所有语句完成，在此期间别的代码语句是不会被执行的；生成器函数是 run-pause-run 模式，即生成器函数可以在函数运行中被暂停一次或多次，并且在后面再恢复执行，在暂停期间允许其他代码语句被执行
 
 # Generators in C
 
@@ -122,10 +122,10 @@ private sealed class YieldEnumerator :
 
 原始的 Example() 方法仅返回一个 YieldEnumerator 的实例，并将初始状态 -2 传递给它自身和其引用者，每一个迭代器保存一个状态指示
 
-- -2：初始化为可迭代类 Enumerable
-- -1: 迭代结束
-- 0: 初始化为迭代器 Enumerator
-- 1-n: 原始 Example() 方法中的 yield return 索引值
+-  -2：初始化为可迭代类 Enumerable
+-  -1: 迭代结束
+-  0: 初始化为迭代器 Enumerator
+-  1-n: 原始 Example() 方法中的 yield return 索引值
 
 Example() 方法中代码被转换为 YieldingEnumerator.MoveNext()，在我们的示例中转换后代码如下
 
@@ -161,10 +161,10 @@ bool MoveNext() {
 
 ![](res/2021-06-25-11-35-01.png)
 
-- Before 为迭代器初始状态
-- Running 为调用 MoveNext 后进入这个状态。在这个状态，枚举数检测并设置下一项的位置。遇到 yield return、yield break 或者迭代结束时，退出该状态
-- Suspended 为状态机等待下次调用 MoveNext 的状态
-- After 为迭代结束的状态
+-  Before 为迭代器初始状态
+-  Running 为调用 MoveNext 后进入这个状态。在这个状态，枚举数检测并设置下一项的位置。遇到 yield return、yield break 或者迭代结束时，退出该状态
+-  Suspended 为状态机等待下次调用 MoveNext 的状态
+-  After 为迭代结束的状态
 
 # Generators in Javascript
 

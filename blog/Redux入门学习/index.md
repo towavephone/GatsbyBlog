@@ -167,8 +167,8 @@ reducer 指定了应用状态的变化如何响应 actions 并发送到 store �
 
 以 todo 应用为例，需要保存两种不同的数据
 
-- 当前选中的任务过滤条件
-- 完整的任务列表
+-  当前选中的任务过滤条件
+-  完整的任务列表
 
 通常，还需要存放一些其他的数据，以及一些 UI 相关的 state，尽量分开数据与 UI 的 state
 
@@ -200,9 +200,9 @@ redux 是一个纯函数，接收旧的 state 和 action，返回新的 state
 
 注意，永远不要在 reducer 里做以下操作
 
-- 修改传入参数
-- 执行有副作用的操作，如 API 请求与路由跳转
-- 调用非纯函数，如`Date.now()`或`Math.random()`
+-  修改传入参数
+-  执行有副作用的操作，如 API 请求与路由跳转
+-  调用非纯函数，如`Date.now()`或`Math.random()`
 
 在以后的章节会介绍如何执行有副作用的操作，只要传入参数相同，返回计算得到的下一个 state 就一定相同。没有特殊情况、没有副作用，没有 API 请求、没有变量修改，单纯执行计算
 
@@ -254,8 +254,8 @@ function todoApp(state = initialState, action) {
 
 注意
 
-1. 不要修改 state。 使用 Object.assign() 新建了一个副本。不能这样使用 Object.assign(state, { visibilityFilter: action.filter })，因为它会改变第一个参数的值。你必须把第一个参数设置为空对象。你也可以开启对 ES7 提案对象展开运算符的支持, 从而使用 { ...state, ...newState } 达到相同的目的
-2. 在 default 情况下返回旧的 state。遇到未知的 action 时，一定要返回旧的 state
+1.  不要修改 state。 使用 Object.assign() 新建了一个副本。不能这样使用 Object.assign(state, { visibilityFilter: action.filter })，因为它会改变第一个参数的值。你必须把第一个参数设置为空对象。你也可以开启对 ES7 提案对象展开运算符的支持, 从而使用 { ...state, ...newState } 达到相同的目的
+2.  在 default 情况下返回旧的 state。遇到未知的 action 时，一定要返回旧的 state
 
 **Object.assign 须知**
 
@@ -539,11 +539,11 @@ export default todoApp;
 
 Store 就是把他们联系到一起的对象，store 有以下职责
 
-- 维持应用的 state
-- 提供 getState()方法获取 state
-- 提供 dispatch(action)方法更新 state
-- 通过 subscribe(listener)注册监听器
-- 通过 subscribe(listener)返回的函数注销监听器
+-  维持应用的 state
+-  提供 getState()方法获取 state
+-  提供 dispatch(action)方法更新 state
+-  通过 subscribe(listener)注册监听器
+-  通过 subscribe(listener)返回的函数注销监听器
 
 Redux 应用只有一个单一的 store，但需要拆分数据处理逻辑时，要使用 reducer 组合而不是创建多个 store
 
@@ -738,17 +738,17 @@ Redux 的 React 绑定库是基于容器组件和展示组件相分离的开发�
 
 以下的这些组件（和它们的 props ）就是从这个设计里来的
 
-- TodoList 用于显示 todos 列表
-  - todos: Array 以 { text, completed } 形式显示的 todo 项数组
-  - onTodoClick(index: number) 当 todo 项被点击时调用的回调函数
-- Todo 一个 todo 项
-  - text: string 显示的文本内容
-  - completed: boolean todo 项是否显示删除线
-  - onClick() 当 todo 项被点击时调用的回调函数
-- Link 带有 callback 回调功能的链接
-  - onClick() 当点击链接时会触发
-- Footer 一个允许用户改变可见 todo 过滤器的组件
-- App 根组件，渲染余下的所有内容
+-  TodoList 用于显示 todos 列表
+-  todos: Array 以 { text, completed } 形式显示的 todo 项数组
+-  onTodoClick(index: number) 当 todo 项被点击时调用的回调函数
+-  Todo 一个 todo 项
+-  text: string 显示的文本内容
+-  completed: boolean todo 项是否显示删除线
+-  onClick() 当 todo 项被点击时调用的回调函数
+-  Link 带有 callback 回调功能的链接
+-  onClick() 当点击链接时会触发
+-  Footer 一个允许用户改变可见 todo 过滤器的组件
+-  App 根组件，渲染余下的所有内容
 
 这些组件只定义外观并不关心数据来源和如何改变。传入什么就渲染什么。如果你把代码从 Redux 迁移到别的架构，这些组件可以不做任何改动直接使用。它们并不依赖于 Redux
 
@@ -756,15 +756,15 @@ Redux 的 React 绑定库是基于容器组件和展示组件相分离的开发�
 
 还需要一些容器组件来把展示组件连接到 Redux。例如，展示型的 TodoList 组件需要一个类似 VisibleTodoList 的容器来监听 Redux store 变化并处理如何过滤出要显示的数据。为了实现状态过滤，需要实现 FilterLink 的容器组件来渲染 Link 并在点击时触发对应的 action
 
-- VisibleTodoList 根据当前显示的状态来对 todo 列表进行过滤，并渲染 TodoList
-- FilterLink 得到当前过滤器并渲染 Link
-  - filter: string 就是当前过滤的状态
+-  VisibleTodoList 根据当前显示的状态来对 todo 列表进行过滤，并渲染 TodoList
+-  FilterLink 得到当前过滤器并渲染 Link
+-  filter: string 就是当前过滤的状态
 
 ### 其他组件
 
 有时很难分清到底该使用容器组件还是展示组件。例如，有时表单和函数严重耦合在一起，如这个小的组件
 
-- AddTodo 含有“Add”按钮的输入框
+-  AddTodo 含有“Add”按钮的输入框
 
 技术上讲可以把它分成两个组件，但一开始就这么做有点早。在一些非常小的组件里混用容器和展示是可以的。当业务变复杂后，如何拆分就很明显了。所以现在就使用混合型的吧
 

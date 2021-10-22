@@ -9,13 +9,13 @@ tags: 前端, JS, JS知识点
 
 目前页面可见性 API 有两个属性，一个事件，如下：
 
-- document.hidden: Boolean 值，表示当前页面可见还是不可见
-- document.visibilityState: 返回当前页面的可见状态
-  - hidden
-  - visible
-  - prerender
-  - preview
-- visibilitychange: 当可见状态改变时候触发的事件
+-  document.hidden: Boolean 值，表示当前页面可见还是不可见
+-  document.visibilityState: 返回当前页面的可见状态
+   -  hidden
+   -  visible
+   -  prerender
+   -  preview
+-  visibilitychange: 当可见状态改变时候触发的事件
 
 # 兼容
 
@@ -98,9 +98,9 @@ pageVisibility.visibilitychange(function() { /* this指的就是pageVisibility *
 
 ## 登录同步
 
-1. 去淘宝买东西，未登录状态下，进入首页。
-2. 然后新窗口打开任意页面，登录并成功返回。
-3. 再次访问刚才打开的首页，发现页面还是未登录状态（见下图），实际上用户已经登录了。
+1.  去淘宝买东西，未登录状态下，进入首页。
+2.  然后新窗口打开任意页面，登录并成功返回。
+3.  再次访问刚才打开的首页，发现页面还是未登录状态（见下图），实际上用户已经登录了。
 
 <iframe src="/examples/page-visibility-api-introduction-extend/login-sync-step-1.html" width="400" height="300"></iframe>
 

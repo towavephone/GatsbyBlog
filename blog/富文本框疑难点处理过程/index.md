@@ -31,18 +31,18 @@ input 和 textarea 能轻松实现 placeholder 提示语的效果，但作用于
 
 可以利用 innerHTML、innerText、textContent 获取输入框的内容，详细对比介绍一下这几个方法：
 
-1. innerHTML 返回或修改标签之间的内容，包括标签和文本信息，基本上所有浏览器都支持。
-2. innerText 打印标签之间的纯文本信息，会将标签过滤掉,此功能最初由 Internet Explorer 引入，在 Firefox 上存在兼容问题。
+1.  innerHTML 返回或修改标签之间的内容，包括标签和文本信息，基本上所有浏览器都支持。
+2.  innerText 打印标签之间的纯文本信息，会将标签过滤掉,此功能最初由 Internet Explorer 引入，在 Firefox 上存在兼容问题。
 
 ### innerText !== textContent
 
 innerText 和 textContent 均能获取标签的内容，但二者存在差别，使用的时候还需注意浏览器兼容性：
 
-1. textContent 会获取 style 元素里的文本（若有 script 元素也是这样），而 innerText 不会
-2. textContent 会保留空行、空格与换行符
-3. innerText 并不是标准，而 textContent 更早被纳入标准中
-4. innerText 会忽略 display: none 标签内的内容，textContent 则不会
-5. 性能上 textContent > innerText
+1.  textContent 会获取 style 元素里的文本（若有 script 元素也是这样），而 innerText 不会
+2.  textContent 会保留空行、空格与换行符
+3.  innerText 并不是标准，而 textContent 更早被纳入标准中
+4.  innerText 会忽略 display: none 标签内的内容，textContent 则不会
+5.  性能上 textContent > innerText
 
 ## 光标的位置
 
@@ -474,7 +474,7 @@ export default GraphHintTextArea;
 
 这里遇到两个兼容性问题，如以上代码高亮部分
 
-- 在 IE9 下 draft-js 源码里面的 `parseFromString('', 'text/html')` 会报错，引入一段兼容代码如下
+-  在 IE9 下 draft-js 源码里面的 `parseFromString('', 'text/html')` 会报错，引入一段兼容代码如下
 
 ```js
 /*
@@ -523,4 +523,4 @@ export default GraphHintTextArea;
 })(DOMParser);
 ```
 
-- IE9 下不能弹出下拉框，这里查看了源码发现了是 IE9 transfrom 属性需要兼容下 IE9，去掉 transfrom 变换或者添加 -ms 前缀
+-  IE9 下不能弹出下拉框，这里查看了源码发现了是 IE9 transfrom 属性需要兼容下 IE9，去掉 transfrom 变换或者添加 -ms 前缀

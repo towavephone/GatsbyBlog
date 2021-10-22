@@ -47,10 +47,10 @@ class Counter extends React.Component {
 }
 ```
 
-- 在函数组件中，它的输入输出全部由 props 决定，且不会产生任何副作用，这说明函数组件也是无状态组件。
-- 在函数组件中，无法修改 props，无法使用 state 及组件的生命周期，说明函数组件也是展示组件。
-- 函数组件的功能只是接收 props，渲染页面，它不执行与 UI 无关的逻辑处理，它只是一个纯函数。
-- 函数组件，相对于类组件来说，更加简洁。无论是复用性还是性能，都优于类组件。
+-  在函数组件中，它的输入输出全部由 props 决定，且不会产生任何副作用，这说明函数组件也是无状态组件。
+-  在函数组件中，无法修改 props，无法使用 state 及组件的生命周期，说明函数组件也是展示组件。
+-  函数组件的功能只是接收 props，渲染页面，它不执行与 UI 无关的逻辑处理，它只是一个纯函数。
+-  函数组件，相对于类组件来说，更加简洁。无论是复用性还是性能，都优于类组件。
 
 ## 受控组件与非受控组件
 
@@ -113,13 +113,13 @@ export default class AnForm extends React.Component {
 }
 ```
 
-- onChange & value 模式（单选按钮和复选按钮对应的是 checked props）
+-  onChange & value 模式（单选按钮和复选按钮对应的是 checked props）
 
-- react 通过这种方式消除了组件的局部状态，使得应用的整个状态可控。
+-  react 通过这种方式消除了组件的局部状态，使得应用的整个状态可控。
 
-- 注意 `<input type="file" />`，它是一个非受控组件。
+-  注意 `<input type="file" />`，它是一个非受控组件。
 
-- 可以使用计算属性名将多个相似的操作组合成一个。
+-  可以使用计算属性名将多个相似的操作组合成一个。
 
   ```js
   this.setState({
@@ -148,9 +148,9 @@ export default class AnForm extends Component {
 }
 ```
 
-- 非受控组件是最简单快速的实现方式，项目中出现极简的表单时使用它，但受控组件才是最权威的。
-- 通常指定一个 defaultValue/defaultChecked 默认值来控制初始状态，不使用 value。
-- 非受控组件相比于受控组件，更容易同时集成 React 和非 React 代码。
+-  非受控组件是最简单快速的实现方式，项目中出现极简的表单时使用它，但受控组件才是最权威的。
+-  通常指定一个 defaultValue/defaultChecked 默认值来控制初始状态，不使用 value。
+-  非受控组件相比于受控组件，更容易同时集成 React 和非 React 代码。
 
 ### 使用场景
 
@@ -194,8 +194,8 @@ export default class Counter extends React.Component {
 const Button = (props) => <button onClick={props.onClick}>{props.text}</button>;
 ```
 
-- 无状态组件一般会搭配高阶组件（简称：HOC）一起使用，高阶组件用来托管 state，Redux 框架就是通过 store 管理数据源和所有状态，其中所有负责展示的组件都使用无状态函数式的写法。
-- 一个简单的无状态(stateless) 按钮组件，仅依赖于 props（属性），这也称为函数式组件。
+-  无状态组件一般会搭配高阶组件（简称：HOC）一起使用，高阶组件用来托管 state，Redux 框架就是通过 store 管理数据源和所有状态，其中所有负责展示的组件都使用无状态函数式的写法。
+-  一个简单的无状态(stateless) 按钮组件，仅依赖于 props（属性），这也称为函数式组件。
 
 ## 展示组件与容器组件
 
@@ -223,12 +223,12 @@ class TodoList extends React.Component {
 }
 ```
 
-- 只能通过 **props** 的方式**接收数据和进行回调**(callback)操作。
-- **很少拥有自己的状态**，即使有也是用于展示 UI 状态的。
-- 通常允许通过 **this.props.children** 方式来包含其他组件。
-- **内部可以包含展示组件和容器组件**，通常会包含一些自己的 DOM 标记和样式(style)
-- 对应用程序的其他部分没有依赖关系，例如 Flux 操作或 store。
-- 会被写成函数式组件除非该组件需要自己的状态，生命周期或者做一些性能优化。
+-  只能通过 **props** 的方式**接收数据和进行回调**(callback)操作。
+-  **很少拥有自己的状态**，即使有也是用于展示 UI 状态的。
+-  通常允许通过 **this.props.children** 方式来包含其他组件。
+-  **内部可以包含展示组件和容器组件**，通常会包含一些自己的 DOM 标记和样式(style)
+-  对应用程序的其他部分没有依赖关系，例如 Flux 操作或 store。
+-  会被写成函数式组件除非该组件需要自己的状态，生命周期或者做一些性能优化。
 
 ### 容器组件
 
@@ -264,11 +264,11 @@ class TodoListContainer extends React.Component {
 }
 ```
 
-- **内部可以包含容器组件和展示组件**，但通常没有任何自己的 DOM 标记，除了一些包装 divs，并且从不具有任何样式。
-- 提供数据和行为给其他的展示组件或容器组件。
-- 可以调用 Flux 操作并将它们作为回调函数（callback）提供给展示组件。
-- 往往是**有状态**的，因为它们倾向于**作为数据源**
-- 通常使用**高阶组件**生成，例如 React Redux 的 connect()
+-  **内部可以包含容器组件和展示组件**，但通常没有任何自己的 DOM 标记，除了一些包装 divs，并且从不具有任何样式。
+-  提供数据和行为给其他的展示组件或容器组件。
+-  可以调用 Flux 操作并将它们作为回调函数（callback）提供给展示组件。
+-  往往是**有状态**的，因为它们倾向于**作为数据源**
+-  通常使用**高阶组件**生成，例如 React Redux 的 connect()
 
 ## 高阶组件
 
@@ -280,8 +280,8 @@ class TodoListContainer extends React.Component {
 
 实现高阶组件的方法有以下两种：
 
-- **属性代理（props proxy）**，高阶组件通过被包裹的 React 组件来操作 props。
-- **反向继承（inheritance inversion）**，高阶组件继承于被包裹的 React 组件。
+-  **属性代理（props proxy）**，高阶组件通过被包裹的 React 组件来操作 props。
+-  **反向继承（inheritance inversion）**，高阶组件继承于被包裹的 React 组件。
 
 ```jsx
 // 属性代理
@@ -313,13 +313,13 @@ export default function (WrappedComponent) {
 }
 ```
 
-- 注意：不要在 HOC 内修改一个组件的原型（或以其它方式修改组件）
-- 贯穿传递不相关 props 属性给被包裹的组件，帮助确保高阶组件最大程度的灵活性和可重用性
-- 应该使用**最大化的组合性**
-- 为了便于调试，可以选择一个显示名字，传达它是一个高阶组件的结果，`WrappedComponent.displayName || WrappedComponent.name || 'Component';`
-- **不要在 render() 方法中创建 HOC**，否则，每一次渲染，都会重新创建渲染 HOC
-- 必须将原始组件的静态方法在 HOC 中做拷贝，否则 HOC 将没有原始组件的任何静态方法
-- Refs 属性不能贯穿传递，我们可以使用 React.forwardRef 解决
+-  注意：不要在 HOC 内修改一个组件的原型（或以其它方式修改组件）
+-  贯穿传递不相关 props 属性给被包裹的组件，帮助确保高阶组件最大程度的灵活性和可重用性
+-  应该使用**最大化的组合性**
+-  为了便于调试，可以选择一个显示名字，传达它是一个高阶组件的结果，`WrappedComponent.displayName || WrappedComponent.name || 'Component';`
+-  **不要在 render() 方法中创建 HOC**，否则，每一次渲染，都会重新创建渲染 HOC
+-  必须将原始组件的静态方法在 HOC 中做拷贝，否则 HOC 将没有原始组件的任何静态方法
+-  Refs 属性不能贯穿传递，我们可以使用 React.forwardRef 解决
 
 ## Hook 组件
 
@@ -359,14 +359,14 @@ function Example() {
 }
 ```
 
-- Hooks 组件更接近于实现状态同步，而不是响应生命周期事件
-- 只能在**函数最外层**调用 Hook。只能在 **React 的函数组件**中调用 Hook。
-- `useLayoutEffect` 与 `componentDidMount`、`componentDidUpdate` 的调用阶段是一样的。但是，我们推荐你**一开始先用 useEffect**，只有当它出问题的时候再尝试使用 `useLayoutEffect`
-- 与 `componentDidMount` 或 `componentDidUpdate` 不同的是，Hook 在浏览器完成布局与绘制**之后**，传给 `useEffect` 的函数会延迟调用，但会保证在任何新的渲染前执行
-- effect 的清除（cleanup）并不会读取“最新”的 props 。它只能读取到定义它的那次渲染中的 props 值
-- effect 中可以读取到最新的 count 状态值，并不是 count 的值在“不变”的 effect 中发生了改变，而是 effect 函数本身在每一次渲染中都不相同
-- 在 class 组件生命周期的思维模型中，副作用的行为和渲染输出是不同的。UI 渲染是被 props 和 state 驱动的，并且能确保步调一致，但副作用并不是这样。这是一类常见问题的来源。
-- 而在 `useEffect` 的思维模型中，默认都是同步的。副作用变成了 React 数据流的一部分。对于每一个 `useEffect` 调用，一旦你处理正确，你的组件能够更好地处理边缘情况。
+-  Hooks 组件更接近于实现状态同步，而不是响应生命周期事件
+-  只能在**函数最外层**调用 Hook。只能在 **React 的函数组件**中调用 Hook。
+-  `useLayoutEffect` 与 `componentDidMount`、`componentDidUpdate` 的调用阶段是一样的。但是，我们推荐你**一开始先用 useEffect**，只有当它出问题的时候再尝试使用 `useLayoutEffect`
+-  与 `componentDidMount` 或 `componentDidUpdate` 不同的是，Hook 在浏览器完成布局与绘制**之后**，传给 `useEffect` 的函数会延迟调用，但会保证在任何新的渲染前执行
+-  effect 的清除（cleanup）并不会读取“最新”的 props 。它只能读取到定义它的那次渲染中的 props 值
+-  effect 中可以读取到最新的 count 状态值，并不是 count 的值在“不变”的 effect 中发生了改变，而是 effect 函数本身在每一次渲染中都不相同
+-  在 class 组件生命周期的思维模型中，副作用的行为和渲染输出是不同的。UI 渲染是被 props 和 state 驱动的，并且能确保步调一致，但副作用并不是这样。这是一类常见问题的来源。
+-  而在 `useEffect` 的思维模型中，默认都是同步的。副作用变成了 React 数据流的一部分。对于每一个 `useEffect` 调用，一旦你处理正确，你的组件能够更好地处理边缘情况。
 
 # Component 源码解读
 

@@ -137,8 +137,8 @@ axios.run = (config) => {
 
 从 axios.run 这个函数看运行时的机制，首先构造一个 chain 作为 promise 链，并且把正常的请求也就是我们的请求参数 axios 也构造为一个拦截器的结构，接下来
 
-- 把 request 的 interceptor 给 unshift 到 chain 顶部
-- 把 response 的 interceptor 给 push 到 chain 尾部
+-  把 request 的 interceptor 给 unshift 到 chain 顶部
+-  把 response 的 interceptor 给 push 到 chain 尾部
 
 ```js
 // 请求拦截器1
@@ -210,7 +210,7 @@ axios.useResponseInterceptor(
 );
 ```
 
-1. 成功的调用
+1.  成功的调用
 
    在成功的调用下输出 `result1: extraParams1 extraParams2 message1`
 
@@ -223,7 +223,7 @@ axios.useResponseInterceptor(
    })();
    ```
 
-2. 失败的调用
+2.  失败的调用
 
    ```js
    (async function() {
@@ -610,12 +610,12 @@ res is {"code":200,"result":"req ssh success"}
 
 # 总结
 
-1. axios 把用户注册的每个拦截器构造成一个 promise.then 所接受的参数，在运行时把所有的拦截器按照一个 promise 链的形式以此执行。
-   1. 在发送到服务端之前，config 已经是请求拦截器处理过后的结果
-   2. 服务器响应结果后，response 会经过响应拦截器，最后用户拿到的就是处理过后的结果了。
-2. vuex 的实现最为简单，就是提供了两个回调函数，vuex 内部在合适的时机去调用（我个人感觉大部分的库提供这样的机制也足够了）。
-3. redux 的源码里写的最复杂最绕，它的中间件机制本质上就是用高阶函数不断的把 dispatch 包装再包装，形成套娃。本文实现的已经是精简了 n 倍以后的结果了，不过复杂的实现也是为了很多权衡和考量，Dan 对于闭包和高阶函数的运用已经炉火纯青了，只是外人去看源码有点头秃...
-4. koa 的洋葱模型实现的很精妙，和 redux 有相似之处，但是在源码理解和使用上个人感觉更优于 redux 的中间件。
+1.  axios 把用户注册的每个拦截器构造成一个 promise.then 所接受的参数，在运行时把所有的拦截器按照一个 promise 链的形式以此执行。
+1.  在发送到服务端之前，config 已经是请求拦截器处理过后的结果
+2.  服务器响应结果后，response 会经过响应拦截器，最后用户拿到的就是处理过后的结果了。
+2.  vuex 的实现最为简单，就是提供了两个回调函数，vuex 内部在合适的时机去调用（我个人感觉大部分的库提供这样的机制也足够了）。
+3.  redux 的源码里写的最复杂最绕，它的中间件机制本质上就是用高阶函数不断的把 dispatch 包装再包装，形成套娃。本文实现的已经是精简了 n 倍以后的结果了，不过复杂的实现也是为了很多权衡和考量，Dan 对于闭包和高阶函数的运用已经炉火纯青了，只是外人去看源码有点头秃...
+4.  koa 的洋葱模型实现的很精妙，和 redux 有相似之处，但是在源码理解和使用上个人感觉更优于 redux 的中间件。
 
 中间件机制其实是非框架强相关的，请求库一样可以加入 koa 的洋葱中间件机制（如 umi-request），不同的框架可能适合不同的中间件机制，这还是取决于你编写的框架想要解决什么问题，想给用户什么样的自由度。
 

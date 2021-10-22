@@ -89,13 +89,13 @@ MySQL 中提供了两种封锁粒度：行级锁以及表级锁。
 
 ### 1. 排它锁与共享锁
 
-- 排它锁（Exclusive），简写为 X 锁，又称写锁。
-- 共享锁（Shared），简写为 S 锁，又称读锁。
+-  排它锁（Exclusive），简写为 X 锁，又称写锁。
+-  共享锁（Shared），简写为 S 锁，又称读锁。
 
 有以下两个规定：
 
-1. 一个事务对数据对象 A 加了 X 锁，就可以对 A 进行读取和更新。加锁期间其它事务不能对 A 加任何锁。
-2. 一个事务对数据对象 A 加了 S 锁，可以对 A 进行读取操作，但是不能进行更新操作。加锁期间其它事务能对 A 加 S 锁，但是不能加 X 锁。
+1.  一个事务对数据对象 A 加了 X 锁，就可以对 A 进行读取和更新。加锁期间其它事务不能对 A 加任何锁。
+2.  一个事务对数据对象 A 加了 S 锁，可以对 A 进行读取操作，但是不能进行更新操作。加锁期间其它事务能对 A 加 S 锁，但是不能加 X 锁。
 
 锁的兼容关系如下：
 
@@ -110,8 +110,8 @@ MySQL 中提供了两种封锁粒度：行级锁以及表级锁。
 
 有以下两个规定：
 
-1. 一个事务在获得某个数据行对象的 S 锁之前，必须先获得 IS 锁或者更强的锁；
-2. 一个事务在获得某个数据行对象的 X 锁之前，必须先获得 IX 锁。
+1.  一个事务在获得某个数据行对象的 S 锁之前，必须先获得 IS 锁或者更强的锁；
+2.  一个事务在获得某个数据行对象的 X 锁之前，必须先获得 IX 锁。
 
 各种锁的兼容关系如下：
 
@@ -238,13 +238,13 @@ lock-x(A)...unlock(A)...lock-s(B)...unlock(B)...lock-s(c)...unlock(C)...
 
 ## 版本号
 
-- 系统版本号：是一个递增的数字，每开始一个新的事务，系统版本号就会自动递增。
-- 事务版本号：事务开始时的系统版本号。
+-  系统版本号：是一个递增的数字，每开始一个新的事务，系统版本号就会自动递增。
+-  事务版本号：事务开始时的系统版本号。
 
 InooDB 的 MVCC 在每行记录后面都保存着两个隐藏的列，用来存储两个版本号：
 
-- 创建版本号：指示创建一个数据行的快照时的系统版本号；
-- 删除版本号：如果该快照的删除版本号大于当前事务版本号表示该快照有效，否则表示该快照已经被删除了。
+-  创建版本号：指示创建一个数据行的快照时的系统版本号；
+-  删除版本号：如果该快照的删除版本号大于当前事务版本号表示该快照有效，否则表示该快照已经被删除了。
 
 ## Undo 日志
 
@@ -366,10 +366,10 @@ SELECT c FROM t WHERE c BETWEEN 10 and 20 FOR UPDATE;
 
 不符合范式的关系，会产生很多异常，主要有以下四种异常：
 
-1. 冗余数据，例如学生-2 出现了两次。
-2. 修改异常，修改了一个记录中的信息，但是另一个记录中相同的信息却没有被修改。
-3. 删除异常，删除一个信息，那么也会丢失其它信息。例如如果删除了课程-1，需要删除第二行和第三行，那么学生-1 的信息就会丢失。
-4. 插入异常，例如想要插入一个学生的信息，如果这个学生还没选课，那么就无法插入。
+1.  冗余数据，例如学生-2 出现了两次。
+2.  修改异常，修改了一个记录中的信息，但是另一个记录中相同的信息却没有被修改。
+3.  删除异常，删除一个信息，那么也会丢失其它信息。例如如果删除了课程-1，需要删除第二行和第三行，那么学生-1 的信息就会丢失。
+4.  插入异常，例如想要插入一个学生的信息，如果这个学生还没选课，那么就无法插入。
 
 ## 范式
 
@@ -397,11 +397,11 @@ SELECT c FROM t WHERE c BETWEEN 10 and 20 FOR UPDATE;
 
 以上学生课程关系中，{Sno, Cname} 为键码，有如下函数依赖：
 
-- Sno, Cname -> Sname, Sdept, Mname
-- Sno -> Sname, Sdept
-- Sdept -> Mname
-- Sno -> Manme
-- Sno, Cname-> Grade
+-  Sno, Cname -> Sname, Sdept, Mname
+-  Sno -> Sname, Sdept
+-  Sdept -> Mname
+-  Sno -> Manme
+-  Sno, Cname-> Grade
 
 Grade 完全函数依赖于键码，它没有任何冗余数据，每个学生的每门课都有特定的成绩。
 
@@ -418,8 +418,8 @@ Sname, Sdept 和 Manme 都函数依赖于 Sno，而部分依赖于键码。当�
 
 有以下函数依赖：
 
-- Sno -> Sname, Sdept, Mname
-- Sdept -> Mname
+-  Sno -> Sname, Sdept, Mname
+-  Sdept -> Mname
 
 关系-2
 
@@ -431,7 +431,7 @@ Sname, Sdept 和 Manme 都函数依赖于 Sno，而部分依赖于键码。当�
 
 有以下函数依赖：
 
-- Sno, Cname -> Grade
+-  Sno, Cname -> Grade
 
 ### 3. 第三范式 (3NF)
 
@@ -459,15 +459,15 @@ Sname, Sdept 和 Manme 都函数依赖于 Sno，而部分依赖于键码。当�
 
 关系 STC(Sname, Tname, Cname, Grade) 的四个属性分别为学生姓名、教师姓名、课程名和成绩，它的键码为 (Sname, Cname, Tname)，有以下函数依赖：
 
-- Sname, Cname -> Tname
-- Sname, Cname -> Grade
-- Sname, Tname -> Cname
-- Sname, Tname -> Grade
-- Tname -> Cname
+-  Sname, Cname -> Tname
+-  Sname, Cname -> Grade
+-  Sname, Tname -> Cname
+-  Sname, Tname -> Grade
+-  Tname -> Cname
 
 存在着以下函数传递依赖：
 
-- Sname -> Tname -> Cname
+-  Sname -> Tname -> Cname
 
 可以分解成 SC(Sname, Cname, Grade) 和 ST(Sname, Tname)，对于 ST，属性之间是多对多关系，无函数依赖。
 
@@ -485,9 +485,9 @@ Sname, Sdept 和 Manme 都函数依赖于 Sno，而部分依赖于键码。当�
 
 ## 数据库的三层模式和两层映像
 
-- 外模式：局部逻辑结构
-- 模式：全局逻辑结构
-- 内模式：物理结构
+-  外模式：局部逻辑结构
+-  模式：全局逻辑结构
+-  内模式：物理结构
 
 ![](./20150928140509757.png)
 
@@ -575,15 +575,15 @@ Entity-Relationship，有三个组成部分：实体、属性、联系。
 
 # 参考资料
 
-- 史嘉权. 数据库系统概论[M]. 清华大学出版社有限公司, 2006.
-- 施瓦茨. 高性能 MYSQL(第 3 版) [M]. 电子工业出版社, 2013.
-- [The InnoDB Storage Engine](https://dev.mysql.com/doc/refman/5.7/en/innodb-storage-engine.html)
-- [Transaction isolation levels](https://www.slideshare.net/ErnestoHernandezRodriguez/transaction-isolation-levels)
-- [Concurrency Control](http://scanftree.com/dbms/2-phase-locking-protocol)
-- [The Nightmare of Locking, Blocking and Isolation Levels!](https://www.slideshare.net/brshristov/the-nightmare-of-locking-blocking-and-isolation-levels-46391666)
-- [三级模式与两级映像](http://blog.csdn.net/d2457638978/article/details/48783923)
-- [Database Normalization and Normal Forms with an Example](https://aksakalli.github.io/2012/03/12/database-normalization-and-normal-forms-with-an-example.html)
-- [The basics of the InnoDB undo logging and history system](https://blog.jcole.us/2014/04/16/the-basics-of-the-innodb-undo-logging-and-history-system/)
-- [MySQL locking for the busy web developer](https://www.brightbox.com/blog/2013/10/31/on-mysql-locks/)
-- [浅入浅出 MySQL 和 InnoDB](https://draveness.me/mysql-innodb)
-- [fd945daf-4a6c-4f20-b9c2-5390f5955ce5.jpg](https://tech.meituan.com/innodb-lock.html)
+-  史嘉权. 数据库系统概论[M]. 清华大学出版社有限公司, 2006.
+-  施瓦茨. 高性能 MYSQL(第 3 版) [M]. 电子工业出版社, 2013.
+-  [The InnoDB Storage Engine](https://dev.mysql.com/doc/refman/5.7/en/innodb-storage-engine.html)
+-  [Transaction isolation levels](https://www.slideshare.net/ErnestoHernandezRodriguez/transaction-isolation-levels)
+-  [Concurrency Control](http://scanftree.com/dbms/2-phase-locking-protocol)
+-  [The Nightmare of Locking, Blocking and Isolation Levels!](https://www.slideshare.net/brshristov/the-nightmare-of-locking-blocking-and-isolation-levels-46391666)
+-  [三级模式与两级映像](http://blog.csdn.net/d2457638978/article/details/48783923)
+-  [Database Normalization and Normal Forms with an Example](https://aksakalli.github.io/2012/03/12/database-normalization-and-normal-forms-with-an-example.html)
+-  [The basics of the InnoDB undo logging and history system](https://blog.jcole.us/2014/04/16/the-basics-of-the-innodb-undo-logging-and-history-system/)
+-  [MySQL locking for the busy web developer](https://www.brightbox.com/blog/2013/10/31/on-mysql-locks/)
+-  [浅入浅出 MySQL 和 InnoDB](https://draveness.me/mysql-innodb)
+-  [fd945daf-4a6c-4f20-b9c2-5390f5955ce5.jpg](https://tech.meituan.com/innodb-lock.html)

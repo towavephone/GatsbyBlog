@@ -53,15 +53,15 @@ arr.concat(arr2)
 
 ## 实现要点
 
-1. 空数组项也会作为 length 的一部分；空数组项和空字符串项是有区别的。
-2. 第 2 题，本题只是过滤空数组项，不包括 null, undefined 这类。
-3. 去除空数组项两个比较好的回答：
-   1. 数组中的 empty 元素不会参与数组项遍历，故只需返回 true 即可过滤掉 empty 元素（而不会牵连 0、NaN、null、undefined、'' 这些）arr.filter(it => true)。然后补充，但是走 for 循环，还是会遍历 empty 数组项。
-   2. 或者 filter 方法参数直接就是一个 function 即可。例如：~arr.filter(Boolean)~（纠正：不能是 Boolean，false 会被过滤），arr.filter(Number)， arr.filter(String)
-   3. 上面并不是最好的方法。数组有个 API，天然去除空数组项，arr.flat()。flat()可以让数组扁平化的方法。
-4. 第 3 题标准答案应该是[1, NaN, NaN]，map 里面 Function 支持参数(value, index, arr)，参见 wingmeng 的释义。
-5. 第 4 题就是 concat，可以数组合并。我自己用“连接猫”记忆这个 API。可以分别连接子项，也可以直接连接数组。如果不考虑兼容，可以[...arr, ...arr2]。其他参考方法：Array.prototype.push.apply(arr3, arr2)，也可以[].push.apply(arr3, arr2)，此时 arr3 是合并后的数组。
-6. 数组去重。使用 new Set(arr3)，然后把 Set 对象转换成数组。转数组两个常用方法，一个是 Array.from，还有一个是`[...]`。
+1.  空数组项也会作为 length 的一部分；空数组项和空字符串项是有区别的。
+2.  第 2 题，本题只是过滤空数组项，不包括 null, undefined 这类。
+3.  去除空数组项两个比较好的回答：
+1.  数组中的 empty 元素不会参与数组项遍历，故只需返回 true 即可过滤掉 empty 元素（而不会牵连 0、NaN、null、undefined、'' 这些）arr.filter(it => true)。然后补充，但是走 for 循环，还是会遍历 empty 数组项。
+2.  或者 filter 方法参数直接就是一个 function 即可。例如：~arr.filter(Boolean)~（纠正：不能是 Boolean，false 会被过滤），arr.filter(Number)， arr.filter(String)
+3.  上面并不是最好的方法。数组有个 API，天然去除空数组项，arr.flat()。flat()可以让数组扁平化的方法。
+4.  第 3 题标准答案应该是[1, NaN, NaN]，map 里面 Function 支持参数(value, index, arr)，参见 wingmeng 的释义。
+5.  第 4 题就是 concat，可以数组合并。我自己用“连接猫”记忆这个 API。可以分别连接子项，也可以直接连接数组。如果不考虑兼容，可以[...arr, ...arr2]。其他参考方法：Array.prototype.push.apply(arr3, arr2)，也可以[].push.apply(arr3, arr2)，此时 arr3 是合并后的数组。
+6.  数组去重。使用 new Set(arr3)，然后把 Set 对象转换成数组。转数组两个常用方法，一个是 Array.from，还有一个是`[...]`。
 
 # JS 测试二
 
@@ -107,9 +107,9 @@ Number.prototype.toFixed = function(digits) {
 
 ## 实现要点
 
-1. toFixed 有两个问题，一是兼容性，二是四舍五入不符合正常的四舍五入认知。金钱计算的时候容易出问题，必须两位小数。
-2. 应该返回字符串；补全末尾的 0。
-3. 机智是实现：方式一：替换小数点保留精度后面一位 5 为 6，方式二：给小数点保留精度后面补一位小数。其中方式 2 是最简单的
+1.  toFixed 有两个问题，一是兼容性，二是四舍五入不符合正常的四舍五入认知。金钱计算的时候容易出问题，必须两位小数。
+2.  应该返回字符串；补全末尾的 0。
+3.  机智是实现：方式一：替换小数点保留精度后面一位 5 为 6，方式二：给小数点保留精度后面补一位小数。其中方式 2 是最简单的
 
 # JS 测试三
 
@@ -223,14 +223,14 @@ function destoryRewriteLocalStorage() {
 
 ## 实现要点
 
-1. 通过前端手段设置 cookie 的过期时间，一定要使用服务器时间，不能使用本地时间。两个原因：一个是和服务端统一；本地时间是不准的，用户可以修改的；
-2. 获取 cookie 方法，一类：字符分隔，数组遍历，查询对应的键值。二类：正则，可以看看 Seasonley 的实现。
-3. ?<指的什么？--- （“(?<=\bsub)\w+\b”定位“sub”后面的字符串）。零宽断言。有兼容性问题，见下面讨论，不推荐实际项目使用。
-4. 设置过期时间可以 expires，也可以是 max-age。区别是什么呢？max-age 是更新的过期时间用法，是 IE9+浏览器才支持的，更容易理解和记忆。
-5. 删除 cookie 可以设置过期时间为之前。
-6. localStorage.setItem('userid', 1)或者简写：localStorage.userid = 1;
-7. localStorage 过期时间，JSON.stringify 和 JSON.parse 是可读性很不错，也容易维护的实现。
-8. 可以以上 localStorage 重写，隐藏时间过期的细节，非常适合作为小工具，小组件。
+1.  通过前端手段设置 cookie 的过期时间，一定要使用服务器时间，不能使用本地时间。两个原因：一个是和服务端统一；本地时间是不准的，用户可以修改的；
+2.  获取 cookie 方法，一类：字符分隔，数组遍历，查询对应的键值。二类：正则，可以看看 Seasonley 的实现。
+3.  ?<指的什么？--- （“(?<=\bsub)\w+\b”定位“sub”后面的字符串）。零宽断言。有兼容性问题，见下面讨论，不推荐实际项目使用。
+4.  设置过期时间可以 expires，也可以是 max-age。区别是什么呢？max-age 是更新的过期时间用法，是 IE9+浏览器才支持的，更容易理解和记忆。
+5.  删除 cookie 可以设置过期时间为之前。
+6.  localStorage.setItem('userid', 1)或者简写：localStorage.userid = 1;
+7.  localStorage 过期时间，JSON.stringify 和 JSON.parse 是可读性很不错，也容易维护的实现。
+8.  可以以上 localStorage 重写，隐藏时间过期的细节，非常适合作为小工具，小组件。
 
 # JS 测试四
 
@@ -290,11 +290,11 @@ function testLengthNoURL(str) {
 
 ## 实现要点
 
-1. 空格替换直接 trim()方法，以及/\s+/g 正则即可；
-2. ASCII 字符非连续也算半个字符，可以使用`str.match(/[\x00-\xff]/g).length`；
-3. 网址优先判断；
-4. 替换的字符务必是非 ASCII 字符（否则会认为是 5 个字符长度）；
-5. 20 个 ASCII 字符长度，可以 Array(20).join()或者','.repeat(20)；
+1.  空格替换直接 trim()方法，以及/\s+/g 正则即可；
+2.  ASCII 字符非连续也算半个字符，可以使用`str.match(/[\x00-\xff]/g).length`；
+3.  网址优先判断；
+4.  替换的字符务必是非 ASCII 字符（否则会认为是 5 个字符长度）；
+5.  20 个 ASCII 字符长度，可以 Array(20).join()或者','.repeat(20)；
 
 # JS 测试五
 
@@ -538,10 +538,10 @@ format(28374); //27.71K
 
 ## 实现要点
 
-1. 这个匹配值得大家关注：bankCode.match(/\d{3,4}/g).join(' ')。然后“\$&是最后匹配的字符”。
-2. 数字千位分隔符表示语义会更好。`<meta name="format-detection" content="telephone=no">` 这个其实不推荐的。Number(numberCode).toLocaleString()是最佳实现了。toLocaleString 保留三位小数（细节可以关注下）。
-3. Intl.NumberFormat： https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
-4. 最后一题要点：注意取几位小数，最好向上取，然后注意下文件大小的单位是比特。
+1.  这个匹配值得大家关注：bankCode.match(/\d{3,4}/g).join(' ')。然后“\$&是最后匹配的字符”。
+2.  数字千位分隔符表示语义会更好。`<meta name="format-detection" content="telephone=no">` 这个其实不推荐的。Number(numberCode).toLocaleString()是最佳实现了。toLocaleString 保留三位小数（细节可以关注下）。
+3.  Intl.NumberFormat： https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
+4.  最后一题要点：注意取几位小数，最好向上取，然后注意下文件大小的单位是比特。
 
 # JS 测试七
 
@@ -577,9 +577,9 @@ str1.replace(/["%#{}<>]/g, encodeURI);
 
 ## 实现要点
 
-1. 老老实实用一个简单正则，然后 callback 中处理，虽然代码不是很简单，但是看得懂也不出错。简洁用法：`/fill="(?!none")[^"]+"/gi`。
-2. window.btoa(str)可以转 base64。但是如果有中文是会报错的。可以先 encodeURI 下，或者 encodeURIComponent 也可以。可以试试这个：btoa(unescape(encodeURIComponent(str)))。base64 到常规格式 window.atob(str);
-3. data:image/svg+xml;utf8, 加原始 SVG 代码是可以作为 CSS background 图片的，但是 Chrome 支持，IE 浏览器不支持。我们可以部分转义，"，%，#，{，}，<，>。IE 浏览器也支持，包括 IE9。`str.replace(/[%#{}<>]/g, encodeURI)`。
+1.  老老实实用一个简单正则，然后 callback 中处理，虽然代码不是很简单，但是看得懂也不出错。简洁用法：`/fill="(?!none")[^"]+"/gi`。
+2.  window.btoa(str)可以转 base64。但是如果有中文是会报错的。可以先 encodeURI 下，或者 encodeURIComponent 也可以。可以试试这个：btoa(unescape(encodeURIComponent(str)))。base64 到常规格式 window.atob(str);
+3.  data:image/svg+xml;utf8, 加原始 SVG 代码是可以作为 CSS background 图片的，但是 Chrome 支持，IE 浏览器不支持。我们可以部分转义，"，%，#，{，}，<，>。IE 浏览器也支持，包括 IE9。`str.replace(/[%#{}<>]/g, encodeURI)`。
 
 # JS 测试八
 
@@ -679,9 +679,9 @@ pattern.test(phone);
 
 ## 实现要点
 
-1. 去除前后空格：xxx.trim()，trim()不止过滤普通空格（Space 键敲出来的空格），IE9+，如果想要兼容 IE8，xxxx.replace(/^\s*|\s*\$/g, "")。
-2. 全角转半角 String.fromCharCode(str.charCodeAt(i)-65248)是常规方法，适用于任何全角字符。本期可以只考虑数值的全角转半角，reduce()是一种方法（参考 Seasonley 的回答），还有 const doubleByteNums = '０１２３４５６７８９';strTel.replace( new RegExp('[０-９]', 'g'), matched => doubleByteNums.indexOf(matched))或者使用映射 dict = { "０": 0,"１": 1, "２": 2,"３": 3,"４": 4, "５": 5, "６": 6, "７": 7, "８": 8, "９": 9, }进行替换。注意：只有全角才需要 code 减值。
-3. /^+86/
-4. 需要数字个数匹配。因为输入框可能既支持输入手机号，又支持邮箱。
-5. /^1\d{10}\$/
-6. 本小测的初衷：一个普通的手机账号输入框体验做好是不容易的事情。大部分的开发，都只是完成字符串前后空格的过滤就结束了，测试同学测试呢，也是可以通过的。啊，但实际上这并不是一个非常好的体验实现，正如我公众号文章（ https://mp.weixin.qq.com/s/3iYaxKJLjLo_gWgb8lvabw ）所讲的那样，做前端要想交互体验做到非常好，需要扎实的技术和经验积累作为前提的。例如输入框粘贴的时候自动在剪切板层把字符过滤，这个是需要技术积累的，需要对剪切板对象比较了解。 又例如全角半角的转化，以及+86 的过滤这都需要足够多的经验的。讲这个的目的是想让大家知道做前端开发要想做的东西非常好，关键是把技术给好好积累，充分扎实，这个是做小测的目的，也是你竞争力所在。
+1.  去除前后空格：xxx.trim()，trim()不止过滤普通空格（Space 键敲出来的空格），IE9+，如果想要兼容 IE8，xxxx.replace(/^\s*|\s*\$/g, "")。
+2.  全角转半角 String.fromCharCode(str.charCodeAt(i)-65248)是常规方法，适用于任何全角字符。本期可以只考虑数值的全角转半角，reduce()是一种方法（参考 Seasonley 的回答），还有 const doubleByteNums = '０１２３４５６７８９';strTel.replace( new RegExp('[０-９]', 'g'), matched => doubleByteNums.indexOf(matched))或者使用映射 dict = { "０": 0,"１": 1, "２": 2,"３": 3,"４": 4, "５": 5, "６": 6, "７": 7, "８": 8, "９": 9, }进行替换。注意：只有全角才需要 code 减值。
+3.  /^+86/
+4.  需要数字个数匹配。因为输入框可能既支持输入手机号，又支持邮箱。
+5.  /^1\d{10}\$/
+6.  本小测的初衷：一个普通的手机账号输入框体验做好是不容易的事情。大部分的开发，都只是完成字符串前后空格的过滤就结束了，测试同学测试呢，也是可以通过的。啊，但实际上这并不是一个非常好的体验实现，正如我公众号文章（ https://mp.weixin.qq.com/s/3iYaxKJLjLo_gWgb8lvabw ）所讲的那样，做前端要想交互体验做到非常好，需要扎实的技术和经验积累作为前提的。例如输入框粘贴的时候自动在剪切板层把字符过滤，这个是需要技术积累的，需要对剪切板对象比较了解。 又例如全角半角的转化，以及+86 的过滤这都需要足够多的经验的。讲这个的目的是想让大家知道做前端开发要想做的东西非常好，关键是把技术给好好积累，充分扎实，这个是做小测的目的，也是你竞争力所在。

@@ -60,8 +60,8 @@ new Promise((resolve) => {
 
 本文将围绕这个最核心的案例来讲，这段代码的表现如下：
 
-1. 500ms 后输出 1
-2. 500ms 后输出 2
+1.  500ms 后输出 1
+2.  500ms 后输出 2
 
 ## 实现
 
@@ -154,9 +154,9 @@ promise1.then((res) => {
 
 注意这里的命名：
 
-1. 我们把 new Promise 返回的实例叫做 promise1
-2. 在 Promise.prototype.then 的实现中，我们构造了一个新的 promise 返回，叫它 promise2
-3. 在用户调用 then 方法的时候，用户手动构造了一个 promise 并且返回，用来做异步的操作，叫它 user promise
+1.  我们把 new Promise 返回的实例叫做 promise1
+2.  在 Promise.prototype.then 的实现中，我们构造了一个新的 promise 返回，叫它 promise2
+3.  在用户调用 then 方法的时候，用户手动构造了一个 promise 并且返回，用来做异步的操作，叫它 user promise
 
 那么在 then 的实现中，内部的 this 其实就指向 promise1
 
@@ -234,11 +234,11 @@ then1 这一整块其实返回的是 promise2，那么 then2 其实本质上是 
 
 ## Promise 标准解读
 
-1. 只有一个 then 方法，没有 catch，race，all 等方法，甚至没有构造函数
+1.  只有一个 then 方法，没有 catch，race，all 等方法，甚至没有构造函数
 
    Promise 标准中仅指定了 Promise 对象的 then 方法的行为，其它一切我们常见的方法/函数都并没有指定，包括 catch，race，all 等常用方法，甚至也没有指定该如何构造出一个 Promise 对象，另外 then 也没有一般实现中（Q, \$q 等）所支持的第三个参数，一般称 onProgress
 
-2. then 方法返回一个新的 Promise
+2.  then 方法返回一个新的 Promise
 
    Promise 的 then 方法返回一个新的 Promise，而不是返回 this，此处在下文会有更多解释
 
@@ -247,8 +247,8 @@ then1 这一整块其实返回的是 promise2，那么 then2 其实本质上是 
    promise2 != promise1; // true
    ```
 
-3. 不同 Promise 的实现需要可以相互调用(interoperable)
-4. Promise 的初始状态为 pending，它可以由此状态转换为 fulfilled（本文为了一致把此状态叫做 resolved）或者 rejected，一旦状态确定，就不可以再次转换为其它状态，状态确定的过程称为 settle
+3.  不同 Promise 的实现需要可以相互调用(interoperable)
+4.  Promise 的初始状态为 pending，它可以由此状态转换为 fulfilled（本文为了一致把此状态叫做 resolved）或者 rejected，一旦状态确定，就不可以再次转换为其它状态，状态确定的过程称为 settle
 
 ## 构造函数
 
@@ -280,8 +280,8 @@ function Promise(executor) {
 
 上面的代码基本实现了 Promise 构造函数的主体，但目前还有两个问题：
 
-1. 我们给 executor 函数传了两个参数：resolve 和 reject，这两个参数目前还没有定义
-2. executor 有可能会出错（throw），类似下面这样，而如果 executor 出错，Promise 应该被其 throw 出的值 reject：
+1.  我们给 executor 函数传了两个参数：resolve 和 reject，这两个参数目前还没有定义
+2.  executor 有可能会出错（throw），类似下面这样，而如果 executor 出错，Promise 应该被其 throw 出的值 reject：
 
    ```js
    new Promise(function(resolve, reject) {

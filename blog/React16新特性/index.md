@@ -19,43 +19,43 @@ path: /react-16-new-feature/
 
 **React v16.0**
 
-- render 支持返回数组和字符串、Error Boundaries、createPortal、支持自定义 DOM 属性、减少文件体积、fiber；
+-  render 支持返回数组和字符串、Error Boundaries、createPortal、支持自定义 DOM 属性、减少文件体积、fiber；
 
 **React v16.1**
 
-- react-call-return；
+-  react-call-return；
 
 **React v16.2**
 
-- Fragment；
+-  Fragment；
 
 **React v16.3**
 
-- createContext、createRef、forwardRef、生命周期函数的更新、Strict Mode；
+-  createContext、createRef、forwardRef、生命周期函数的更新、Strict Mode；
 
 **React v16.4**
 
-- Pointer Events、update getDerivedStateFromProps；
+-  Pointer Events、update getDerivedStateFromProps；
 
 **React v16.5**
 
-- Profiler；
+-  Profiler；
 
 **React v16.6**
 
-- memo、lazy、Suspense、static contextType、static getDerivedStateFromError()；
+-  memo、lazy、Suspense、static contextType、static getDerivedStateFromError()；
 
 **React v16.7（~Q1 2019）**
 
-- Hooks；
+-  Hooks；
 
 **React v16.8（~Q2 2019）**
 
-- Concurrent Rendering；
+-  Concurrent Rendering；
 
 **React v16.9（~mid 2019）**
 
-- Suspense for Data Fetching；
+-  Suspense for Data Fetching；
 
 下面将按照上述的 React16 更新路径对每个新特性进行详细或简短的解析。
 
@@ -140,9 +140,9 @@ class Dialog extends React.Component {
 
 React16 使用 Rollup 针对不同的目标格式进行代码打包，由于打包工具的改变使得库文件大小得到缩减。
 
-- React 库大小从 20.7kb（压缩后 6.9kb）降低到 5.3kb（压缩后 2.2kb）
-- ReactDOM 库大小从 141kb（压缩后 42.9kb）降低到 103.7kb（压缩后 32.6kb）
-- React + ReactDOM 库大小从 161.7kb（压缩后 49.8kb）降低到 109kb（压缩后 43.8kb）
+-  React 库大小从 20.7kb（压缩后 6.9kb）降低到 5.3kb（压缩后 2.2kb）
+-  ReactDOM 库大小从 141kb（压缩后 42.9kb）降低到 103.7kb（压缩后 32.6kb）
+-  React + ReactDOM 库大小从 161.7kb（压缩后 49.8kb）降低到 109kb（压缩后 43.8kb）
 
 ### Fiber
 
@@ -154,21 +154,21 @@ Fiber 利用分片的思想，把一个耗时长的任务分成很多小片，�
 
 因此，在组件更新时有可能一个更新任务还没有完成，就被另一个更高优先级的更新过程打断，优先级高的更新任务会优先处理完，而低优先级更新任务所做的工作则会完全作废，然后等待机会重头再来。所以 React Fiber 把一个更新过程分为两个阶段：
 
-- 第一个阶段 Reconciliation Phase，Fiber 会找出需要更新的 DOM，这个阶段是可以被打断的；
-- 第二个阶段 Commit Phase，无法被打断，完成 DOM 的更新并展示；
+-  第一个阶段 Reconciliation Phase，Fiber 会找出需要更新的 DOM，这个阶段是可以被打断的；
+-  第二个阶段 Commit Phase，无法被打断，完成 DOM 的更新并展示；
 
 在使用 Fiber 后，需要要检查与第一阶段相关的生命周期函数，避免逻辑的多次或重复调用：
 
-- componentWillMount
-- componentWillReceiveProps
-- shouldComponentUpdate
-- componentWillUpdate
+-  componentWillMount
+-  componentWillReceiveProps
+-  shouldComponentUpdate
+-  componentWillUpdate
 
 与第二阶段相关的生命周期函数：
 
-- componentDidMount
-- componentDidUpdate
-- componentWillUnmount
+-  componentDidMount
+-  componentDidUpdate
+-  componentWillUnmount
 
 ## React v16.1
 
@@ -178,17 +178,17 @@ react-call-return 目前还是一个独立的 npm 包，主要是针对父组件
 
 在 React16 之前，针对上述场景一般有两个解决方案：
 
-- 首先让子组件初始化渲染，通过回调函数把信息传给父组件，父组件完成处理后更新子组件 props，触发子组件的第二次渲染才可以解决，子组件需要经过两次渲染周期，可能会造成渲染的抖动或闪烁等问题；
+-  首先让子组件初始化渲染，通过回调函数把信息传给父组件，父组件完成处理后更新子组件 props，触发子组件的第二次渲染才可以解决，子组件需要经过两次渲染周期，可能会造成渲染的抖动或闪烁等问题；
 
-- 首先在父组件通过 children 获得子组件并读取其信息，利用 React.cloneElement 克隆产生新元素，并将新的属性传递进去，父组件 render 返回的是克隆产生的子元素。虽然这种方法只需要使用一个生命周期，但是父组件的代码编写会比较麻烦；
+-  首先在父组件通过 children 获得子组件并读取其信息，利用 React.cloneElement 克隆产生新元素，并将新的属性传递进去，父组件 render 返回的是克隆产生的子元素。虽然这种方法只需要使用一个生命周期，但是父组件的代码编写会比较麻烦；
 
 React16 支持的 react-call-return，提供了两个函数 unstable_createCall 和 unstable_createReturn，其中 unstable_createCall 是 父组件使用，unstable_createReturn 是 子组件使用，父组件发出 Call，子组件响应这个 Call，即 Return。
 
-- 在父组件 render 函数中返回对 unstable_createCall 的调用，第一个参数是 props.children，第二个参数是一个回调函数，用于接受子组件响应 Call 所返回的信息，第三个参数是 props；
+-  在父组件 render 函数中返回对 unstable_createCall 的调用，第一个参数是 props.children，第二个参数是一个回调函数，用于接受子组件响应 Call 所返回的信息，第三个参数是 props；
 
-- 在子组件 render 函数返回对 unstable_createReturn 的调用，参数是一个对象，这个对象会在 unstable_createCall 第二个回调函数参数中访问到；
+-  在子组件 render 函数返回对 unstable_createReturn 的调用，参数是一个对象，这个对象会在 unstable_createCall 第二个回调函数参数中访问到；
 
-- 当父组件下的所有子组件都完成渲染周期后，由于子组件返回的是对 unstable_createReturn 的调用所以并没有渲染元素，unstable_createCall 的第二个回调函数参数会被调用，这个回调函数返回的是真正渲染子组件的元素；
+-  当父组件下的所有子组件都完成渲染周期后，由于子组件返回的是对 unstable_createReturn 的调用所以并没有渲染元素，unstable_createCall 的第二个回调函数参数会被调用，这个回调函数返回的是真正渲染子组件的元素；
 
 针对普通场景来说，react-call-return 有点过度设计的感觉，但是如果针对一些特定场景的话，它的作用还是非常明显，比如，在渲染瀑布流布局时，利用 react-call-return 可以先缓存子组件的 ReactElement，等必要的信息足够之后父组件再触发 render，完成渲染。
 
@@ -253,9 +253,9 @@ render() {
 
 全新的 Context API 可以很容易穿透组件而无副作用，其包含三部分：React.createContext，Provider，Consumer。
 
-- React.createContext 是一个函数，它接收初始值并返回带有 Provider 和 Consumer 组件的对象；
-- Provider 组件是数据的发布方，一般在组件树的上层并接收一个数据的初始值；
-- Consumer 组件是数据的订阅方，它的 props.children 是一个函数，接收被发布的数据，并且返回 React Element；
+-  React.createContext 是一个函数，它接收初始值并返回带有 Provider 和 Consumer 组件的对象；
+-  Provider 组件是数据的发布方，一般在组件树的上层并接收一个数据的初始值；
+-  Consumer 组件是数据的订阅方，它的 props.children 是一个函数，接收被发布的数据，并且返回 React Element；
 
 ```js
 const ThemeContext = React.createContext('light');
@@ -347,9 +347,9 @@ getDerivedStateFromProps(nextProps, prevState) 其作用是根据传递的 props
 
 为了配合未来的 React 异步渲染机制，React v16.4 对 getDerivedStateFromProps 做了一些改变， 使其不仅在 props 更新时会被调用，setState 时也会被触发。
 
-- 如果改变 props 的同时，有副作用的产生，这时应该使用 componentDidUpdate；
-- 如果想要根据 props 计算属性，应该考虑将结果 memoization 化；
-- 如果想要根据 props 变化来重置某些状态，应该考虑使用受控组件；
+-  如果改变 props 的同时，有副作用的产生，这时应该使用 componentDidUpdate；
+-  如果想要根据 props 计算属性，应该考虑将结果 memoization 化；
+-  如果想要根据 props 变化来重置某些状态，应该考虑使用受控组件；
 
 ```js
 static getDerivedStateFromProps(props, state) {
@@ -383,11 +383,11 @@ componentWillReceiveProps / componentWillUpdate 被标记为不安全，主要�
 
 StrictMode 可以在开发阶段开启严格模式，发现应用存在的潜在问题，提升应用的健壮性，主要能检测下列问题：
 
-- 识别被标志位不安全的生命周期函数
-- 对弃用的 API 进行警告
-- 探测某些产生副作用的方法
-- 检测是否使用 findDOMNode
-- 检测是否采用了老的 Context API
+-  识别被标志位不安全的生命周期函数
+-  对弃用的 API 进行警告
+-  探测某些产生副作用的方法
+-  检测是否使用 findDOMNode
+-  检测是否采用了老的 Context API
 
 ```js
 class App extends React.Component {
@@ -515,15 +515,15 @@ class ErrorBoundary extends React.Component {
 
 Hooks 要解决的是状态逻辑复用问题，且不会产生 JSX 嵌套地狱，其特性如下：
 
-- 多个状态不会产生嵌套，依然是平铺写法；
-- Hooks 可以引用其他 Hooks；
-- 更容易将组件的 UI 与状态分离；
+-  多个状态不会产生嵌套，依然是平铺写法；
+-  Hooks 可以引用其他 Hooks；
+-  更容易将组件的 UI 与状态分离；
 
 Hooks 并不是通过 Proxy 或者 getters 实现，而是通过数组实现，每次 useState 都会改变下标，如果 useState 被包裹在 condition 中，那每次执行的下标就可能对不上，导致 useState 导出的 setter 更新错数据。
 
 更多 Hooks 使用场景可以阅读下列文章：
 
-- [精读《怎么用 React Hooks 造轮子》](https://zhuanlan.zhihu.com/p/50274018)
+-  [精读《怎么用 React Hooks 造轮子》](https://zhuanlan.zhihu.com/p/50274018)
 
 ```js
 function App() {

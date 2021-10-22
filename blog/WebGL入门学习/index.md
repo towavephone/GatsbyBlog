@@ -82,7 +82,7 @@ function webglInit() {
   }
   // 如果浏览器支持 WebGL，那么我们就获取 WebGL 的上下文对象并复制给变量 gl
   const context = canvasEl.getContext('webgl') ? canvasEl.getContext('webgl') : getContext('experimental-webgl');
-  /* 
+  /*
       设置视口 context.viewport(x, y, width, height);
       x: 用来设定视口的左下角水平坐标。默认值：0
       y: 用来设定视口的左下角垂直坐标。默认值：0
@@ -230,8 +230,8 @@ function initThree() {
 var camera;
 // 初始化相机函数 Three.js 中相机的类型有好几种可以根据具体需要进行选择这里我们要创建的是一个旋转的立方体所以采用的是透视相机，而如果需要创建 3D 阴影效果的场景则需要使用正交相机
 function initCamera() {
-  /* 
-    创建透视相机的实例语法 PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number ) 
+  /*
+    创建透视相机的实例语法 PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number )
     fov - 视角
     aspect - 物体的长宽比
     near - 相机近点截图

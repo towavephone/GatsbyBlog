@@ -9,27 +9,27 @@ tags: 前端, 设计模式, React
 
 ## 组件接口设计三原则
 
-1. 保持接口小，props 数量要少
-2. 根据数据边界来划分组件，利用组合（composition）
-3. 把 state 尽量往上层组件提取
+1.  保持接口小，props 数量要少
+2.  根据数据边界来划分组件，利用组合（composition）
+3.  把 state 尽量往上层组件提取
 
 同时，我们也接触了这样一些最佳实践：
 
-1. 避免 renderXXXX 函数，直接使用独立的纯函数组件
-2. 给回调函数类型的 props 加统一前缀，比如 on 或者 handle
-3. 使用 propTypes 来定义组件的 props
+1.  避免 renderXXXX 函数，直接使用独立的纯函数组件
+2.  给回调函数类型的 props 加统一前缀，比如 on 或者 handle
+3.  使用 propTypes 来定义组件的 props
 
 ## 组件内部实现
 
-1. 尽量每个组件都有自己专属的源代码文件；
-2. 用解构赋值（destructuring assignment）的方法获取参数 props 的每个属性值；
-3. 利用属性初始化（property initializer）来定义 state 和成员函数。
+1.  尽量每个组件都有自己专属的源代码文件；
+2.  用解构赋值（destructuring assignment）的方法获取参数 props 的每个属性值；
+3.  利用属性初始化（property initializer）来定义 state 和成员函数。
 
 ## 组件化样式
 
-1. React 将内容、样式和动态功能聚集在一个模块中，是高聚合的表现；
-2. React 原生 style 属性的用法；
-3. 组件化样式 styled jsx 的用法。
+1.  React 将内容、样式和动态功能聚集在一个模块中，是高聚合的表现；
+2.  React 原生 style 属性的用法；
+3.  组件化样式 styled jsx 的用法。
 
 # 组件设计模式
 
@@ -101,9 +101,9 @@ const withDoNothing = (Component) => {
 
 ### 基本思路
 
-1. 高阶组件不能去修改作为参数的组件，高阶组件必须是一个纯函数，不应该有任何副作用。
-2. 高阶组件返回的结果必须是一个新的 React 组件，这个新的组件的 JSX 部分肯定会包含作为参数的组件。
-3. 高阶组件一般需要把传给自己的 props 转手传递给作为参数的组件。
+1.  高阶组件不能去修改作为参数的组件，高阶组件必须是一个纯函数，不应该有任何副作用。
+2.  高阶组件返回的结果必须是一个新的 React 组件，这个新的组件的 JSX 部分肯定会包含作为参数的组件。
+3.  高阶组件一般需要把传给自己的 props 转手传递给作为参数的组件。
 
 ### 用高阶组件抽取共同逻辑
 
@@ -467,8 +467,8 @@ const withLogin = (Component) => {
 
 在 React v16.3.0 之前，要实现提供者，就要实现一个 React 组件，不过这个组件要做两个特殊处理。
 
-1. 需要实现 getChildContext 方法，用于返回“上下文”的数据；
-2. 需要定义 childContextTypes 属性，声明“上下文”的结构。
+1.  需要实现 getChildContext 方法，用于返回“上下文”的数据；
+2.  需要定义 childContextTypes 属性，声明“上下文”的结构。
 
 下面就是一个实现“提供者”的例子，组件名为 ThemeProvider：
 
@@ -664,9 +664,9 @@ const Paragraph = (props, context) => {
 
 上面的 TabItem 组件接受 active 这个 props，如果 true 代表当前是选中状态，当然可以工作，但是，也存在大问题：
 
-1. 每次使用 TabItem 都要传递一堆 props，好麻烦；
-2. 每增加一个新的 TabItem，都要增加对应的 props，更麻烦；
-3. 如果要增加 TabItem，就要去修改 Tabs 的 JSX 代码，超麻烦。
+1.  每次使用 TabItem 都要传递一堆 props，好麻烦；
+2.  每增加一个新的 TabItem，都要增加对应的 props，更麻烦；
+3.  如果要增加 TabItem，就要去修改 Tabs 的 JSX 代码，超麻烦。
 
 我们不想要这么麻烦，理想情况下，我们希望可以随意增加减少 TabItem 实例，不用传递一堆 props，也不用去修改 Tabs 的代码，最好代码就这样：
 
@@ -753,8 +753,8 @@ class Tabs extends React.Component {
 
 在 render 函数中，我们用了 React 中不常用的两个 API：
 
-1. React.Children.map
-2. React.cloneElement
+1.  React.Children.map
+2.  React.cloneElement
 
 使用 React.Children.map，可以遍历 children 中所有的元素，因为 children 可能是一个数组嘛。
 

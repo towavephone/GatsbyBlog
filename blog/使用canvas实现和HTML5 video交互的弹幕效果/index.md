@@ -41,10 +41,11 @@ canvasBarrage(canvas, data);
 
 其中：
 
-- canvas  
+-  canvas  
   canvas 表示我们的`<canvas>`画布元素，可以直接是 DOM 元素，也可以是`<canvas>`画布元素的选择器。
-- data  
+-  data  
   data 表示弹幕数据，是一个数组。例如下面：
+
   ```js
   [
     {
@@ -88,11 +89,11 @@ new CanvasBarrage(canvas, video, options);
 
 其中：
 
-- canvas  
+-  canvas  
   canvas 表示我们的`<canvas>`画布元素，只能是 DOM 元素。
-- video  
+-  video  
   video 表示我们播放的视频元素，只能是 DOM 元素。
-- options  
+-  options  
   options 为可选参数，包括：
 
 ![](2019-12-23-01-49-36.png)

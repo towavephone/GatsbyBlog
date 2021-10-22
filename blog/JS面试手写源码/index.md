@@ -907,7 +907,7 @@ function Promise2(fn) {
     })
   };
 
-  // 执行用户传入的函数 
+  // 执行用户传入的函数
   // 并且把 resolve 方法交给用户执行
   fn(resolve);
 }
@@ -975,8 +975,8 @@ function createStore(reducer, middlewares) {
 
   // 初始化一个随意的 dispatch，要求外部在 type 匹配不到的时候返回初始状态
   // 在这个 dispatch 后 currentState 就有值了。
-  dispatch({ 
-    type: "INIT" 
+  dispatch({
+    type: "INIT"
   });
 
   let enhancedDispatch = dispatch;
@@ -1041,15 +1041,15 @@ class Koa {
         function dispatch(i) {
           // index 向后移动
           index = i;
-    
+
           // 找出数组中存放的相应的中间件
           const fn = middlewares[i];
-    
+
           // 最后一个中间件调用 next 也不会报错
           if (!fn) {
             return Promise.resolve();
           }
-    
+
           return Promise.resolve(
             fn(
               // 继续传递 ctx

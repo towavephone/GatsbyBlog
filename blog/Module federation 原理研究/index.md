@@ -47,8 +47,8 @@ import('./moduleB').then((module) => {});
 
 非常简单，入口 js 是 main.js，里面就是直接引入 moduleA.js，然后动态引入 moduleB.js，那么最终生成的文件就是两个 chunk，分别是:
 
-1. main.js 和 moduleA.js 组成的 bundle.js
-2. moduleB.js 组成的 0.bundle.js
+1.  main.js 和 moduleA.js 组成的 bundle.js
+2.  moduleB.js 组成的 0.bundle.js
 
 如果你了解 webpack 底层原理的话，那你会知道这里是用 mainTemplate 和 chunkTemplate 分别渲染出来的，不了解也没关系，我们继续解读生成的代码
 
@@ -269,8 +269,8 @@ import RemoteButton from 'app2/Button';
 
 这个其实就是 Module federation 的配置了，大概能看到想表达的意思：
 
-1. 用了远程模块 app2，它叫 app2
-2. 用了共享模块，它叫 shared
+1.  用了远程模块 app2，它叫 app2
+2.  用了共享模块，它叫 shared
 
 remotes 和 shared 还是有一点区别的，我们先来看效果。
 
@@ -322,8 +322,8 @@ app1/src_bootstrap.js
 
 这里最需要关注的其实还是每个文件从哪里加载，在不去分析原理之前，看文件加载我们至少有这些结论：
 
-1. remotes 的代码自己不打包，类似 external，例如 app2/button 就是加载 app2 打包的代码
-2. shared 的代码自己是有打包的
+1.  remotes 的代码自己不打包，类似 external，例如 app2/button 就是加载 app2 打包的代码
+2.  shared 的代码自己是有打包的
 
 ## Module federation 的原理
 
@@ -424,9 +424,9 @@ var __webpack_modules__ = {
 
 从代码看起来就三个 module：
 
-1. `./src/index.js` 这个看起来就是我们的 `app1/index.js`，里面去动态加载 `bootstrap.js` 对应的 `chunk src_bootstrap_js`
-2. `container-reference/app2` 直接返回一个全局的 `app2`，这里感觉和我们的 `app2` 有关系
-3. `?8bfd` 这个字符串是我们上面提到的 `app2/button` 对应的文件引用 `id`
+1.  `./src/index.js` 这个看起来就是我们的 `app1/index.js`，里面去动态加载 `bootstrap.js` 对应的 `chunk src_bootstrap_js`
+2.  `container-reference/app2` 直接返回一个全局的 `app2`，这里感觉和我们的 `app2` 有关系
+3.  `?8bfd` 这个字符串是我们上面提到的 `app2/button` 对应的文件引用 `id`
 
 那在加载 src_bootstrap.js 之前加载的那些 react 文件还有 app2/button 文件都是谁做的呢？通过 debug，我们发现秘密就在 webpack_require\_\_.e("src_bootstrap_js") 这句话
 
@@ -504,21 +504,21 @@ __webpack_require__.f.j = (chunkId, promises) => {};
 
 这三个函数我把核心部分节选出来了，其实注释也写得比较清楚了，我还是解释一下：
 
-1. overridables 可覆盖的，看代码你应该已经知道和 shared 配置有关
-2. remotes 远程的，看代码非常明显是和 remotes 配置相关
-3. jsonp 这个就是原有的加载 chunk 函数，对应的是以前的懒加载或者公共代码提取
+1.  overridables 可覆盖的，看代码你应该已经知道和 shared 配置有关
+2.  remotes 远程的，看代码非常明显是和 remotes 配置相关
+3.  jsonp 这个就是原有的加载 chunk 函数，对应的是以前的懒加载或者公共代码提取
 
 ### 加载流程
 
 知道了核心在 webpack_require.e 以及内部实现后，不知道你脑子里是不是对整个加载流程有了一定的思路，如果没有，容我来给你解析一下
 
-1. 先加载 src_main.js，这个没什么好说的，注入在 html 里面的
-2. src_main.js 里面执行 webpack_require("./src/index.js")
-3. src/index.js 这个 module 的逻辑很简单，就是动态加载 src_bootstrap_js 这个 chunk
-4. 动态加载 src_bootstrap_js 这个 chunk 时，经过 overridables，发现这个 chunk 依赖了 react、react-dom，那就看是否已经加载，没有加载就去加载对应的 js 文件，地址也告诉你了
-5. 动态加载 src_bootstrap_js 这个 chunk 时，经过 remotes，发现这个 chunk 依赖了?ad8d，那就去加载这个 js
-6. 动态加载 src_bootstrap_js 这个 chunk 时，经过 jsonp，就正常加载就好了
-7. 所有依赖以及 chunk 都加载完成了，就去执行 then 逻辑：webpack_require src_bootstrap_js 里面的 module：./src/bootstrap.js
+1.  先加载 src_main.js，这个没什么好说的，注入在 html 里面的
+2.  src_main.js 里面执行 webpack_require("./src/index.js")
+3.  src/index.js 这个 module 的逻辑很简单，就是动态加载 src_bootstrap_js 这个 chunk
+4.  动态加载 src_bootstrap_js 这个 chunk 时，经过 overridables，发现这个 chunk 依赖了 react、react-dom，那就看是否已经加载，没有加载就去加载对应的 js 文件，地址也告诉你了
+5.  动态加载 src_bootstrap_js 这个 chunk 时，经过 remotes，发现这个 chunk 依赖了?ad8d，那就去加载这个 js
+6.  动态加载 src_bootstrap_js 这个 chunk 时，经过 jsonp，就正常加载就好了
+7.  所有依赖以及 chunk 都加载完成了，就去执行 then 逻辑：webpack_require src_bootstrap_js 里面的 module：./src/bootstrap.js
 
 到此就一切都正常启动了，其实就是我们之前提到的依赖前置，先去分析，然后生成配置文件，再去加载。
 
@@ -651,8 +651,8 @@ app2 = (() => {
 
 这里解决的主要是 2 个问题：
 
-1. 如何解决依赖问题，这里的实现方式是重写了加载 chunk 的 webpack_require.e，从而前置加载依赖
-2. 如何解决 modules 的共享问题，这里是使用全局变量来 hook
+1.  如何解决依赖问题，这里的实现方式是重写了加载 chunk 的 webpack_require.e，从而前置加载依赖
+2.  如何解决 modules 的共享问题，这里是使用全局变量来 hook
 
 这种实现方式的优缺点其实也明显：
 

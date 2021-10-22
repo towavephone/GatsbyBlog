@@ -185,7 +185,7 @@ http {
 
 虽然只是一个 / 的区别但结果确千差万别。分为以下两种情况：
 
-1. 目标地址中不带 uri(`proxy_pass` `http://tomcats`)。此时新的目标 url 中，匹配的 uri 部分不做修改，原来是什么就是什么。
+1.  目标地址中不带 uri(`proxy_pass` `http://tomcats`)。此时新的目标 url 中，匹配的 uri 部分不做修改，原来是什么就是什么。
 
    ```
    location /ops-coffee/ {
@@ -196,7 +196,7 @@ http {
    http://domain/ops-coffee/action/abc   -->     http://192.168.106.135:8181/ops-coffee/action/abc
    ```
 
-2. 目标地址中带 uri (`proxy_pass` `http://tomcats/`，/也是 uri) ,此时新的目标 url 中，匹配的 uri 部分将会被修改为该参数中的 uri。
+2.  目标地址中带 uri (`proxy_pass` `http://tomcats/`，/也是 uri) ,此时新的目标 url 中，匹配的 uri 部分将会被修改为该参数中的 uri。
 
    ```
    location /ops-coffee/ {

@@ -1,20 +1,30 @@
 {
-    "default": true,
-    "MD002": false,
-    "MD007": { "indent": 4 },
-    "MD013": { "line_length": 600 },
-    "MD026": false,
-    "MD029": { "style": "ordered"},
-    "MD033": false,
-    "MD036": false,
-    "MD041": false,
-    "no-hard-tabs": false,
-    "whitespace": false,
-    "single-h1": false,
-    "commands-show-output": false,
-    "list-indent": false,
-    "no-duplicate-header": false,
-    "no-alt-text": false,
-    "no-bare-urls": false,
-    "line-length": false
+  "default": true,
+  "line-length": false,
+  "no-inline-html": false,
+  "first-line-h1": false,
+  "single-h1": false,
+  "no-alt-text": false,
+  "commands-show-output": false,
+  "fenced-code-language": false,
+  "no-duplicate-header": false,
+  "no-blanks-blockquote": false,
+  "no-bare-urls": false,
+  "no-space-in-links": false,
+  "first-header-h1": false,
+  "no-emphasis-as-header": false,
+  "no-trailing-punctuation": false,
+  "no-space-in-emphasis": false,
+  "ol-prefix": false,
+  "no-reversed-links": false,
+  "ul-indent": {
+    "indent": 3
+  },
+  "list-marker-space": {
+    "ul_single": 2,
+    "ul_multi": 2,
+    "ol_single": 2,
+    "ol_multi": 2
+  },
+  "code-block-style": false
 }

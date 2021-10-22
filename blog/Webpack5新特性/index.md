@@ -23,11 +23,11 @@ Webpack 在执行的时候，以配置的 entry 为入口，递归解析文件�
 
 之前可以使用 loader 设置缓存：
 
-1. 使用 cache-loader 可以将编译结果写入硬盘缓存，Webpack 再次构建时如果文件没有发生变化则会直接拉取缓存
-2. 还有一部分 loader 自带缓存配置，比如 babel-loader，可以配置参数 cacheDirectory 使用缓存，将每次的编译结果写进磁盘（默认在 node_modules/.cache/babel-loader 目录），UglifyJsPlugin 插件中的 cache 选项
-3. terser-webpack-plugin 开启缓存
-4. hard-source-webpack-plugin 插件
-5. webpack.DllPlugin 插件
+1.  使用 cache-loader 可以将编译结果写入硬盘缓存，Webpack 再次构建时如果文件没有发生变化则会直接拉取缓存
+2.  还有一部分 loader 自带缓存配置，比如 babel-loader，可以配置参数 cacheDirectory 使用缓存，将每次的编译结果写进磁盘（默认在 node_modules/.cache/babel-loader 目录），UglifyJsPlugin 插件中的 cache 选项
+3.  terser-webpack-plugin 开启缓存
+4.  hard-source-webpack-plugin 插件
+5.  webpack.DllPlugin 插件
 
 ## 现在的方案
 
@@ -131,8 +131,8 @@ UMD 优点在 runtime。缺点也明显，体积优化不方便，容易有版�
 
 独立应用间的共享也是问题。一般有两种打包方式：
 
-1. 子应用独立打包，模块解耦了，但公共的依赖不易维护处理
-2. 整体应用一起打包，能解决公共依赖；但庞大的多个项目又使打包变慢，后续也不好扩展
+1.  子应用独立打包，模块解耦了，但公共的依赖不易维护处理
+2.  整体应用一起打包，能解决公共依赖；但庞大的多个项目又使打包变慢，后续也不好扩展
 
 ## 全新的解决方案
 
@@ -455,7 +455,7 @@ app1 则从 app2 加载 react 依赖：
 
 # 其他特性
 
-- Top Level Await
-- SplitChunks 支持更灵活的资源拆分
-- 不包含 JS 代码的 Chunk 将不再生成 JS 文件
-- Output 默认生成 ES6 规范代码，也支持配置为 5 - 11
+-  Top Level Await
+-  SplitChunks 支持更灵活的资源拆分
+-  不包含 JS 代码的 Chunk 将不再生成 JS 文件
+-  Output 默认生成 ES6 规范代码，也支持配置为 5 - 11
