@@ -57,9 +57,9 @@ exports.increment = function(val) {
 
 CommonJS 对模块的定义意义主要在于将类聚的方法或变量等限定在私有的作用域内，同时支持引入和导出功能以顺畅的连接上下游依赖。
 
--  模块内所有的变量或方法都运行在模块作用域内，不会污染全局作用域
--  模块可以多次加载，但每次加载只会运行一次，并将运行结果缓存，以待下次使用，如果想要模块再次运行，则需要清除缓存
--  模块加载顺序和代码运行顺序一致
+- 模块内所有的变量或方法都运行在模块作用域内，不会污染全局作用域
+- 模块可以多次加载，但每次加载只会运行一次，并将运行结果缓存，以待下次使用，如果想要模块再次运行，则需要清除缓存
+- 模块加载顺序和代码运行顺序一致
 
 CommonJS 构建的这套模块导出或引用机制使得用户完全不必考虑变量污染，命名空间等方案与之相比相形见绌。
 
@@ -69,13 +69,13 @@ CommonJS 构建的这套模块导出或引用机制使得用户完全不必考�
 
 通常一个`module`有以下几个属性
 
--  module.id 模块的识别符，通常是带有绝对路径的模块文件名
--  module.filename 模块文件名，带有绝对路径
--  module.loaded 返回一个 boolean 值，标识模块是否已经加载完成
--  module.parent 返回调用该模块的对象
--  module.children 返回该模块调用的其他模块数组
--  module.exports 返回该模块对外的输出
--  module.paths 模块的搜索路径例如：
+- module.id 模块的识别符，通常是带有绝对路径的模块文件名
+- module.filename 模块文件名，带有绝对路径
+- module.loaded 返回一个 boolean 值，标识模块是否已经加载完成
+- module.parent 返回调用该模块的对象
+- module.children 返回该模块调用的其他模块数组
+- module.exports 返回该模块对外的输出
+- module.paths 模块的搜索路径例如：
 
    ```js
    // math.js
@@ -234,18 +234,18 @@ function require(/* ... */) {
 
 `require`的加载顺序是：
 
--  以`/`开头，加载绝对路径模块文件
--  以`./`开头，加载相对路径模块文件
--  除以上两种情况外，加载的是一个默认提供的核心模块（位于 Node 的系统安装目录中），或者一个位于各级 node_modules 目录的已安装模块（全局安装或局部安装）。举例来说，脚本/Users/a123/projects/foo.js`执行了`require('bar.js')`命令，Node 会依次搜索以下文件。
+- 以`/`开头，加载绝对路径模块文件
+- 以`./`开头，加载相对路径模块文件
+- 除以上两种情况外，加载的是一个默认提供的核心模块（位于 Node 的系统安装目录中），或者一个位于各级 node_modules 目录的已安装模块（全局安装或局部安装）。举例来说，脚本/Users/a123/projects/foo.js`执行了`require('bar.js')`命令，Node 会依次搜索以下文件。
 
-   -  /usr/local/lib/node/bar.js
-   -  /Users/a123/projects/node_modules/bar.js
-   -  /Users/a123/node_modules/bar.js
-   -  /Users/node_modules/bar.js
-   -  /node_modules/bar.js
+   - /usr/local/lib/node/bar.js
+   - /Users/a123/projects/node_modules/bar.js
+   - /Users/a123/node_modules/bar.js
+   - /Users/node_modules/bar.js
+   - /node_modules/bar.js
 
--  如果指定的模块文件没有发现，Node 会尝试为文件名添加`.js`、`.json`、`.node`后，再去搜索。`.js`件会以文本格式的 JavaScript 脚本文件解析，`.json`文件会以 JSON 格式的文本文件解析，`.node`文件会以编译后的二进制文件解析。
--  如果想得到`require`命令加载的确切文件名，使用`require.resolve()`方法。
+- 如果指定的模块文件没有发现，Node 会尝试为文件名添加`.js`、`.json`、`.node`后，再去搜索。`.js`件会以文本格式的 JavaScript 脚本文件解析，`.json`文件会以 JSON 格式的文本文件解析，`.node`文件会以编译后的二进制文件解析。
+- 如果想得到`require`命令加载的确切文件名，使用`require.resolve()`方法。
 
 通常，我们会把相关的文件放在一个目录里面，便于组织，这就需要给该目录设置一个入口文件，可以让`require`方法通过这个入口文件，加载整个目录，例如`package.json`：
 
@@ -285,13 +285,13 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
 
 **define(id?, dependencies?, factory)**
 
--  id 为字符串类型，表示了模块标识，为可选参数。若不存在则模块标识应该默认定义为在加载器中被请求脚本的标识。如果存在，那么模块标识必须为顶层的或者一个绝对的标识。
--  dependencies ，是一个当前模块依赖的，已被模块定义的模块标识的数组字面量。
--  factory，是一个需要进行实例化的函数或者一个对象。
+- id 为字符串类型，表示了模块标识，为可选参数。若不存在则模块标识应该默认定义为在加载器中被请求脚本的标识。如果存在，那么模块标识必须为顶层的或者一个绝对的标识。
+- dependencies ，是一个当前模块依赖的，已被模块定义的模块标识的数组字面量。
+- factory，是一个需要进行实例化的函数或者一个对象。
 
-1.  定义模块
+1. 定义模块
 
--  定义无依赖模块
+- 定义无依赖模块
 
    ```js
    define({
@@ -301,7 +301,7 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
    });
    ```
 
--  定义有依赖模块
+- 定义有依赖模块
 
    ```js
    define(['some'], function(alpha) {
@@ -313,7 +313,7 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
    });
    ```
 
--  定义数据对象模块
+- 定义数据对象模块
 
    ```js
    define({
@@ -322,7 +322,7 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
    });
    ```
 
--  具名模块
+- 具名模块
 
    ```js
    define("alpha", [ "require", "exports", "beta" ], function( require, exports, beta ){
@@ -334,7 +334,7 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
    });
    ```
 
--  包装模块
+- 包装模块
 
    ```js
    define(function(require, exports, module) {
@@ -347,13 +347,13 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
 
    不考虑多了一层函数外，格式和 Node.js 是一样的：使用 require 获取依赖模块，使用 exports 导出 API。除了 define 外，AMD 还保留一个关键字 require。require 作为规范保留的全局标识符，可以实现为 module loader，也可以不实现。
 
-2.  模块加载
+2. 模块加载
 
    **require([module], callback)**
 
--  [module]：是一个数组，里面的成员就是要加载的模块
--  callback：是模块加载完成之后的回调函数
--  require 方法允许添加第三个参数，即错误处理的回调函数。
+- [module]：是一个数组，里面的成员就是要加载的模块
+- callback：是模块加载完成之后的回调函数
+- require 方法允许添加第三个参数，即错误处理的回调函数。
 
    ```js
    require(['math'], function(math) {
@@ -365,8 +365,8 @@ RequireJS 即为遵循 AMD 规范的模块化工具。 RequireJS 的基本思想
 
 CMD 的规范由国内的玉伯提出，与 AMD 的区别主要在于 **定义模块与依赖引入** 的部分。
 
-1.  CMD 更接近与 Node 对 CommonJS 规范的定义： **define(factory)**
-2.  在依赖部分，CMD 支持动态引入
+1. CMD 更接近与 Node 对 CommonJS 规范的定义： **define(factory)**
+2. 在依赖部分，CMD 支持动态引入
 
    ```js
    define(function(require, exports, module) {
@@ -384,7 +384,7 @@ ES6 的模块自动采用严格模式，不管你有没有在模块头部加上`
 
 模块功能主要由两个命令构成：`export`和`import`。`export`命令用于规定模块的对外接口，`import`命令用于输入其他模块提供的功能。
 
-1.  export
+1. export
 
    ```js
    //导出变量
@@ -424,7 +424,7 @@ ES6 的模块自动采用严格模式，不管你有没有在模块头部加上`
 
    上面代码输出变量`foo`，值为`bar`，500 毫秒之后变成`baz`。
 
-2.  import
+2. import
 
    ```js
    // 第一组 example.js
@@ -464,9 +464,9 @@ ES6 的模块自动采用严格模式，不管你有没有在模块头部加上`
    // import fun from 'modules';
    ```
 
-3.  `CommonJS`和 ES6 中模块化的两者区别
+3. `CommonJS`和 ES6 中模块化的两者区别
 
--  前者支持动态导入，也就是 `require(${path}/xx.js)`，后者目前不支持，但是已有提案
--  前者是同步导入，因为用于服务端，文件都在本地，同步导入即使卡住主线程影响也不大。而后者是异步导入，因为用于浏览器，需要下载文件，如果也采用同步导入会对渲染有很大影响
--  前者在导出时都是值拷贝，就算导出的值变了，导入的值也不会改变，所以如果想更新值，必须重新导入一次。但是后者采用实时绑定的方式，导入导出的值都指向同一个内存地址，所以导入值会跟随导出值变化
--  后者会编译成 `require/exports` 来执行的
+- 前者支持动态导入，也就是 `require(${path}/xx.js)`，后者目前不支持，但是已有提案
+- 前者是同步导入，因为用于服务端，文件都在本地，同步导入即使卡住主线程影响也不大。而后者是异步导入，因为用于浏览器，需要下载文件，如果也采用同步导入会对渲染有很大影响
+- 前者在导出时都是值拷贝，就算导出的值变了，导入的值也不会改变，所以如果想更新值，必须重新导入一次。但是后者采用实时绑定的方式，导入导出的值都指向同一个内存地址，所以导入值会跟随导出值变化
+- 后者会编译成 `require/exports` 来执行的

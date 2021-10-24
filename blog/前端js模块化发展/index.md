@@ -116,8 +116,8 @@ YUI3 的 sandbox 像极了差不多同时出现的 AMD 规范，但早期 yahoo 
 
 ## 补充阅读
 
--  [JavaScript 模块化七日谈](https://huangxuan.me/2015/07/09/js-module-7day/)
--  [JavaScript 模块化编程简史（2009-2016）](https://yuguo.us/weblog/javascript-module-development-history/)
+- [JavaScript 模块化七日谈](https://huangxuan.me/2015/07/09/js-module-7day/)
+- [JavaScript 模块化编程简史（2009-2016）](https://yuguo.us/weblog/javascript-module-development-history/)
 
 # 总结
 

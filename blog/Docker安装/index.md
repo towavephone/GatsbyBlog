@@ -9,19 +9,19 @@ tags: 后端, Docker, Docker安装
 
 ## 安装环境
 
--  Ubuntu16.04（Xenial LTS）
+- Ubuntu16.04（Xenial LTS）
 
 ## 使用存储库进行安装
 
 ### 设置存储库
 
-1.  更新`apt`软件包索引：
+1. 更新`apt`软件包索引：
 
    ```bash
    $ sudo apt-get update
    ```
 
-2.  安装软件包允许`apt`通过`HTTPS`使用存储库：
+2. 安装软件包允许`apt`通过`HTTPS`使用存储库：
 
    ```bash
    $ sudo apt-get install \
@@ -31,7 +31,7 @@ tags: 后端, Docker, Docker安装
        software-properties-common
    ```
 
-3.  添加`Docker`官方`GPG`密钥：
+3. 添加`Docker`官方`GPG`密钥：
 
    ```bash
    $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -48,7 +48,7 @@ tags: 后端, Docker, Docker安装
    sub   4096R/F273FCD8 2017-02-22
    ```
 
-4.  使用以下命令来设置稳定的存储库：
+4. 使用以下命令来设置稳定的存储库：
 
    ```bash
    $ sudo add-apt-repository \
@@ -59,19 +59,19 @@ tags: 后端, Docker, Docker安装
 
 ### 安装 DOCKER CE
 
-1.  更新`apt`软件包索引。
+1. 更新`apt`软件包索引。
 
    ```bash
    $ sudo apt-get update
    ```
 
-2.  安装最新版本的`Docker CE`，任何现有的`Docker`安装都将被替换。
+2. 安装最新版本的`Docker CE`，任何现有的`Docker`安装都将被替换。
 
    ```bash
    $ sudo apt-get install docker-ce
    ```
 
-3.  通过运行`hello-world`镜像验证是否正确安装了`Docker CE`。
+3. 通过运行`hello-world`镜像验证是否正确安装了`Docker CE`。
 
    ```bash
    $ sudo docker run hello-world
@@ -85,13 +85,13 @@ tags: 后端, Docker, Docker安装
 
 ## 卸载 Docker CE
 
-1.  卸载`Docker CE`软件包：
+1. 卸载`Docker CE`软件包：
 
    ```bash
    $ sudo apt-get purge docker-ce
    ```
 
-2.  主机上的镜像，容器，卷或自定义配置文件不会自动删除，必须手动删除任何已编辑的配置文件：
+2. 主机上的镜像，容器，卷或自定义配置文件不会自动删除，必须手动删除任何已编辑的配置文件：
 
    ```bash
    $ sudo rm -rf /var/lib/docker

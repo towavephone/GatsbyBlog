@@ -57,9 +57,9 @@ date: 2018-04-02 17:54:51
 
 依赖于抽象意味着：
 
--  任何变量都不应该持有一个指向具体类的指针或者引用；
--  任何类都不应该从具体类派生；
--  任何方法都不应该覆写它的任何基类中的已经实现的方法。
+- 任何变量都不应该持有一个指向具体类的指针或者引用；
+- 任何类都不应该从具体类派生；
+- 任何方法都不应该覆写它的任何基类中的已经实现的方法。
 
 ## 其他常见原则
 
@@ -101,9 +101,9 @@ date: 2018-04-02 17:54:51
 
 封装有三大好处：
 
-1.  减少耦合
-2.  隐藏内部细节，因此内部结构可以自由修改
-3.  可以对成员进行更精确的控制
+1. 减少耦合
+2. 隐藏内部细节，因此内部结构可以自由修改
+3. 可以对成员进行更精确的控制
 
 以下 Person 类封装 name、gender、age 等属性，外界只能通过 get() 方法获取一个 Person 对象的 name 属性和 gender 属性，而无法获取 age 属性，但是 age 属性可以供 work() 方法使用。
 
@@ -151,9 +151,9 @@ Animal animal = new Cat();
 
 运行时多态有三个条件：
 
-1.  继承
-2.  覆盖
-3.  向上转型
+1. 继承
+2. 覆盖
+3. 向上转型
 
 下面的代码中，乐器类（Instrument）有两个子类：Wind 和 Percussion，它们都覆盖了父类的 play() 方法，并且在 main() 方法中使用父类 Instrument 来引用 Wind 和 Percussion 对象。在 Instrument 引用调用 play() 方法时，会执行实际引用对象所在类的 play() 方法，而不是 Instrument 类的方法。
 
@@ -262,9 +262,9 @@ public class School
 
 和关联关系不同的是，依赖关系是在运行过程中起作用的。A 类和 B 类是依赖关系主要有三种形式：
 
-1.  A 类是 B 类中的（某中方法的）局部变量；
-2.  A 类是 B 类方法当中的一个参数；
-3.  A 类向 B 类发送消息，从而影响 B 类发生变化；
+1. A 类是 B 类中的（某中方法的）局部变量；
+2. A 类是 B 类方法当中的一个参数；
+3. A 类向 B 类发送消息，从而影响 B 类发生变化；
 
 ![](./c7d4956c-9988-4a10-a704-28fdae7f3d28.png)
 
@@ -284,9 +284,9 @@ public class Transport
 
 # 参考资料
 
--  Java 编程思想
--  敏捷软件开发：原则、模式与实践
--  [面向对象设计的 SOLID 原则](http://www.cnblogs.com/shanyou/archive/2009/09/21/1570716.html)
--  [看懂 UML 类图和时序图](http://design-patterns.readthedocs.io/zh_CN/latest/read_uml.html#generalization)
--  [UML 系列——时序图（顺序图）sequence diagram](http://www.cnblogs.com/wolf-sun/p/UML-Sequence-diagram.html)
--  [面向对象编程三大特性 ------ 封装、继承、多态](http://blog.csdn.net/jianyuerensheng/article/details/51602015)
+- Java 编程思想
+- 敏捷软件开发：原则、模式与实践
+- [面向对象设计的 SOLID 原则](http://www.cnblogs.com/shanyou/archive/2009/09/21/1570716.html)
+- [看懂 UML 类图和时序图](http://design-patterns.readthedocs.io/zh_CN/latest/read_uml.html#generalization)
+- [UML 系列——时序图（顺序图）sequence diagram](http://www.cnblogs.com/wolf-sun/p/UML-Sequence-diagram.html)
+- [面向对象编程三大特性 ------ 封装、继承、多态](http://blog.csdn.net/jianyuerensheng/article/details/51602015)

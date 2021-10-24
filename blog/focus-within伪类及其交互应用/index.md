@@ -157,8 +157,8 @@ html:focus-within xxx {
 }
 ```
 
-1.  相邻选择器，加号，或者弯弯都只能选择后面的元素，但是有了:focus-within，我们就可以对前面元素进行控制，虽然只能在:focus 行为场景下。例如请重复输入密码时候，让上面的输入密码框也高亮。
-2.  基于纯 CSS 和 focus 行为实现下拉列表的交互成为了可能。只要把按钮和下拉元素放在一个容器中，就可以了。
+1. 相邻选择器，加号，或者弯弯都只能选择后面的元素，但是有了:focus-within，我们就可以对前面元素进行控制，虽然只能在:focus 行为场景下。例如请重复输入密码时候，让上面的输入密码框也高亮。
+2. 基于纯 CSS 和 focus 行为实现下拉列表的交互成为了可能。只要把按钮和下拉元素放在一个容器中，就可以了。
 
    <iframe src="/examples/css-focus-within-pseudo-class-selector/focus-within-pure-css-droplist.html" width="400" height="100"></iframe>
 

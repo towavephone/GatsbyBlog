@@ -33,21 +33,21 @@ tags: 前端, 中级前端
 
 最新的 ECMAScript 标准定义了 8 种数据类型:
 
--  6 种原始类型
-   -  Boolean
-   -  Undefined
-   -  Number
-   -  BigInt
-   -  String
-   -  Symbol
--  null
--  Object
--  Function
+- 6 种原始类型
+   - Boolean
+   - Undefined
+   - Number
+   - BigInt
+   - String
+   - Symbol
+- null
+- Object
+- Function
 
 ## 讲讲 Map 和 Set？
 
-1.  Map 的 key 相比较普通对象来说更为灵活，普通对象的 key 只能以基础数据类型作为 key 值，并且所有传入的 key 值都会被转化成 string 类型，而 Map 的 key 可以是各种数据类型格式。
-2.  Set 可以讲讲它去重的特性。
+1. Map 的 key 相比较普通对象来说更为灵活，普通对象的 key 只能以基础数据类型作为 key 值，并且所有传入的 key 值都会被转化成 string 类型，而 Map 的 key 可以是各种数据类型格式。
+2. Set 可以讲讲它去重的特性。
 
 ## WeakMap 和 Map 之间的区别？
 
@@ -76,7 +76,7 @@ console.log(Object.prototype.__proto__ === null); // true
 
 ## 浅拷贝和深拷贝的区别
 
--  浅拷贝：一般指的是把对象的第一层拷贝到一个新对象上去，比如
+- 浅拷贝：一般指的是把对象的第一层拷贝到一个新对象上去，比如
 
   ```js
   var a = { count: 1, deep: { count: 2 } };
@@ -85,7 +85,7 @@ console.log(Object.prototype.__proto__ === null); // true
   var b = { ...a };
   ```
 
--  深拷贝：一般需要借助递归实现，如果对象的值还是个对象，要进一步的深入拷贝，完全替换掉每一个复杂类型的引用。
+- 深拷贝：一般需要借助递归实现，如果对象的值还是个对象，要进一步的深入拷贝，完全替换掉每一个复杂类型的引用。
 
   ```js
   var deepCopy = (obj) => {
@@ -128,10 +128,10 @@ b.deep.count; // 2
 
 ### 有没有使用过 React Hooks？
 
--  常用的有哪些？都有什么作用？
--  如何使用 hook 在依赖改变的时候重新发送请求？
--  写过自定义 hook 吗？解决了哪些问题。
--  讲讲 React Hooks 的闭包陷阱，你是怎么解决的？
+- 常用的有哪些？都有什么作用？
+- 如何使用 hook 在依赖改变的时候重新发送请求？
+- 写过自定义 hook 吗？解决了哪些问题。
+- 讲讲 React Hooks 的闭包陷阱，你是怎么解决的？
 
 [useEffect 完整指南](https://overreacted.io/zh-hans/a-complete-guide-to-useeffect/)
 
@@ -187,9 +187,9 @@ b.deep.count; // 2
 
 ### 手写各种原生方法
 
--  如何模拟实现一个 new 的效果？
--  如何模拟实现一个 bind 的效果？
--  如何实现一个 call/apply 函数？
+- 如何模拟实现一个 new 的效果？
+- 如何模拟实现一个 bind 的效果？
+- 如何实现一个 call/apply 函数？
 
 [三元-手写代码系列](http://47.98.159.95/my_blog/js-api/001.html)
 

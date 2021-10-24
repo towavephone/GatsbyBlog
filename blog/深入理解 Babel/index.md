@@ -55,11 +55,11 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 @babel/core 这也是上面说的微内核架构中的内核。对于 Babel 来说，这个内核主要干这些事情
 
--  加载和处理配置(config)
--  加载插件
--  调用 Parser 进行语法解析，生成 AST
--  调用 Traverser 遍历 AST，并使用访问者模式应用插件对 AST 进行转换
--  生成代码，包括 SourceMap 转换和源代码生成
+- 加载和处理配置(config)
+- 加载插件
+- 调用 Parser 进行语法解析，生成 AST
+- 调用 Traverser 遍历 AST，并使用访问者模式应用插件对 AST 进行转换
+- 生成代码，包括 SourceMap 转换和源代码生成
 
 ## 核心周边支撑
 
@@ -89,8 +89,8 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 用于对 AST 进行转换，实现转换为 ES5 代码、压缩、功能增强等目的。Babel 仓库将转换插件划分为两种（只是命名上的区别）
 
--  @babel/plugin-transform-\*：普通的转换插件
--  @babel/plugin-proposal-\*：还在提议阶段（非正式）的语言特性, 目前有[这些](https://babeljs.io/docs/en/next/plugins#experimental)
+- @babel/plugin-transform-\*：普通的转换插件
+- @babel/plugin-proposal-\*：还在提议阶段（非正式）的语言特性, 目前有[这些](https://babeljs.io/docs/en/next/plugins#experimental)
 
 ### 预定义集合(@babel/presets-\*)
 
@@ -98,16 +98,16 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 ## 插件开发辅助
 
--  @babel/template：某些场景直接操作 AST 太麻烦，就比如我们直接操作 DOM 一样，所以 Babel 实现了这么一个简单的模板引擎，可以将字符串代码转换为 AST，比如在生成一些辅助代码（helper）时会用到这个库
--  @babel/types：AST 节点构造器和断言，插件开发时使用很频繁
--  @babel/helper-\*：一些辅助器，用于辅助插件开发，例如简化 AST 操作
--  @babel/helper：辅助代码，单纯的语法转换可能无法让代码运行起来，比如低版本浏览器无法识别 class 关键字，这时候需要添加辅助代码，对 class 进行模拟
+- @babel/template：某些场景直接操作 AST 太麻烦，就比如我们直接操作 DOM 一样，所以 Babel 实现了这么一个简单的模板引擎，可以将字符串代码转换为 AST，比如在生成一些辅助代码（helper）时会用到这个库
+- @babel/types：AST 节点构造器和断言，插件开发时使用很频繁
+- @babel/helper-\*：一些辅助器，用于辅助插件开发，例如简化 AST 操作
+- @babel/helper：辅助代码，单纯的语法转换可能无法让代码运行起来，比如低版本浏览器无法识别 class 关键字，这时候需要添加辅助代码，对 class 进行模拟
 
 ## 工具
 
--  @babel/node：Node.js CLI，通过它直接运行需要 Babel 处理的 JavaScript 文件
--  @babel/register：Patch NodeJs 的 require 方法，支持导入需要 Babel 处理的 JavaScript 模块
--  @babel/cli：CLI 工具
+- @babel/node：Node.js CLI，通过它直接运行需要 Babel 处理的 JavaScript 文件
+- @babel/register：Patch NodeJs 的 require 方法，支持导入需要 Babel 处理的 JavaScript 模块
+- @babel/cli：CLI 工具
 
 # 访问者模式
 
@@ -117,9 +117,9 @@ Babel 是一个 [MonoRepo](https://github.com/lerna/lerna) 项目，不过组织
 
 所以转换器操作 AST 一般都是使用访问器模式，由这个访问者(Visitor)来
 
-1.  进行统一的遍历操作
-2.  提供节点的操作方法
-3.  响应式维护节点之间的关系，而插件(设计模式中称为具体访问者)只需要定义自己感兴趣的节点类型，当访问者访问到对应节点时，就调用插件的访问(visit)方法。
+1. 进行统一的遍历操作
+2. 提供节点的操作方法
+3. 响应式维护节点之间的关系，而插件(设计模式中称为具体访问者)只需要定义自己感兴趣的节点类型，当访问者访问到对应节点时，就调用插件的访问(visit)方法。
 
 ## 节点的遍历
 
@@ -274,12 +274,12 @@ Babel 会按照插件定义的顺序来应用访问方法，比如你注册了�
 
 通过上面的代码，读者应该可以猜出几分，每个 visit 方法都接收一个 Path 对象, 你可以将它当做一个上下文对象，类似于 JQuery 的 `JQuery(const $el = $('.el'))` 对象，这里面包含了很多信息：
 
--  当前节点信息
--  节点的关联信息。父节点、子节点、兄弟节点等等
--  作用域信息
--  上下文信息
--  节点操作方法。节点增删查改
--  断言方法。isXXX，assertXXX
+- 当前节点信息
+- 节点的关联信息。父节点、子节点、兄弟节点等等
+- 作用域信息
+- 上下文信息
+- 节点操作方法。节点增删查改
+- 断言方法。isXXX，assertXXX
 
 下面是它的主要结构:
 
@@ -759,8 +759,8 @@ a + b < c + d ? a + b : c + d;
 
 ![](res/2021-07-27-11-29-06.png)
 
--  它的语法非常简单，只有 S-表达式(s-expression)（特征为括号化的前缀表示法, 可以认为 S-表达式就是近似的 Lisp 的抽象语法树(AST)）
--  数据即代码，S-表达式本身就是树形数据结构，另外 Lisp 支持数据和代码之间的转换
+- 它的语法非常简单，只有 S-表达式(s-expression)（特征为括号化的前缀表示法, 可以认为 S-表达式就是近似的 Lisp 的抽象语法树(AST)）
+- 数据即代码，S-表达式本身就是树形数据结构，另外 Lisp 支持数据和代码之间的转换
 
 由于 Lisp 这种简单的语法结构，使得数据和程序之间只有一线之隔(quote 修饰就是数据，没有 quote 就是程序)，换句话说就是程序和数据之间可以灵活地转换。这种数据即程序、程序即数据的概念，使得 Lisp 可以轻松地自定义宏。不妨来看一下 Lisp 定义宏的示例：
 
@@ -956,9 +956,9 @@ syntax m = ctx => {
 
 Sweet.js 和其他语言的宏一样，有了它你可以:
 
--  新增语法糖(和 Sweet.js 一样甜)，实现自己的语法或者某些实验性的语言特性
--  自定义[操作符](https://www.sweetjs.org/doc/tutorial#sweet-operators)，很强大
--  消灭重复的代码，提升语言的表达能力。
+- 新增语法糖(和 Sweet.js 一样甜)，实现自己的语法或者某些实验性的语言特性
+- 自定义[操作符](https://www.sweetjs.org/doc/tutorial#sweet-operators)，很强大
+- 消灭重复的代码，提升语言的表达能力。
 
 很遗憾！Sweet.js 基本死了。所以现在当个玩具玩玩尚可，切勿用于生产环境。即使没有死，Sweet.js 这种非标准的语法，和现有的 Javascript 工具链生态格格不入，开发和调试都会比较麻烦(比如 Typescript)
 
@@ -988,13 +988,13 @@ CRA 是强约定的，它是按照 React 社区的最佳实践给你准备的，
 
 Babel 在现代的前端开发中扮演着一个很重要的角色，越来越多的框架或库会创建自己的 Babel 插件，它们会在编译阶段做一些优化，来提高用户体验、开发体验以及运行时的性能。比如:
 
--  babel-plugin-lodash：将 lodash 导入转换为按需导入
--  babel-plugin-import：实现按需导入
--  babel-react-optimize：静态分析 React 代码，利用一定的措施优化运行效率。比如将静态的 props 或组件抽离为常量
--  root-import：将基于根目录的导入路径重写为相对路径
--  styled-components：典型的 CSS-in-js 方案，利用 Babel 插件来支持服务端渲染、预编译模板、样式压缩、清除死代码、提升调试体验
--  preval：在编译时预执行代码
--  babel-plugin-graphql-tag：预编译 GraphQL 查询
+- babel-plugin-lodash：将 lodash 导入转换为按需导入
+- babel-plugin-import：实现按需导入
+- babel-react-optimize：静态分析 React 代码，利用一定的措施优化运行效率。比如将静态的 props 或组件抽离为常量
+- root-import：将基于根目录的导入路径重写为相对路径
+- styled-components：典型的 CSS-in-js 方案，利用 Babel 插件来支持服务端渲染、预编译模板、样式压缩、清除死代码、提升调试体验
+- preval：在编译时预执行代码
+- babel-plugin-graphql-tag：预编译 GraphQL 查询
 
 上面列举的插件场景中，并不是所有插件都是通用的，它们要么是跟某一特定的框架绑定、要么用于处理特定的文件类型或数据，这些非通用的插件是最适合使用 macro 取代的。
 
@@ -1032,29 +1032,29 @@ const greeting = preval`
 
 这两者达到的效果是一样的，但意义却不太一样。有哪些区别？
 
-1.  很显然，Macro 不需要配置 `.babelrc`（当然 babel-plugin-macros 这个基座需要装好），这个对于 CRA 这种不推荐配置构建脚本的工具来说很有帮助
-2.  由隐式转换为了显式。上一节就说了显式好于隐式。你必须在源代码中通过导入语句声明你使用了 Macro；而基于插件的方式，你可能不知道 preval 这个标识符哪里来的? 如何被应用？何时被应用？而且通常你还需要和其他工具链的配合，例如 ESlint、Typescript 声明等
+1. 很显然，Macro 不需要配置 `.babelrc`（当然 babel-plugin-macros 这个基座需要装好），这个对于 CRA 这种不推荐配置构建脚本的工具来说很有帮助
+2. 由隐式转换为了显式。上一节就说了显式好于隐式。你必须在源代码中通过导入语句声明你使用了 Macro；而基于插件的方式，你可能不知道 preval 这个标识符哪里来的? 如何被应用？何时被应用？而且通常你还需要和其他工具链的配合，例如 ESlint、Typescript 声明等
 
    Macro 由代码显式地引用，我们更明确它被应用的目的和时机，对源代码的侵入性最小。因为中间多了 `babel-plugin-macro` 这一层，我们降低了对构建环境的耦合，让我们的代码更方便被迁移
 
-3.  Macro 相比 Plugin 更容易被实现。因为它专注于具体的 AST 节点，见下文
-4.  另外，当配置出错时，Macro 可以得到更好的错误提示
+3. Macro 相比 Plugin 更容易被实现。因为它专注于具体的 AST 节点，见下文
+4. 另外，当配置出错时，Macro 可以得到更好的错误提示
 
 有利有弊，Babel Macro 肯定也有些缺陷，例如相对于插件来说只能显式转换，这样代码可能会比较啰嗦，不过个人觉得在某些场景利大于弊，能显式的就显式。
 
 那么 Babel Macro 也是宏？相对于 Sweet.js 这些正统的宏机制有哪些不足？
 
--  首先 Babel Macro 必须是合法的 Javascript 语法。不支持自定义语法，也要分两面讨论，合法的 Javascript 语法不至于打破现有的工具协作链，如果允许用户毫无限制地创建新的语法，将来指不定会和标准的语法发生歧义。反过来不能自定义语法的宏，是否显得不太地道，不够强大?
--  因为必须是合法的 Javascript 语法，Babel Macro 实现 DSL（Domain-specific languages）能力就弱化了
--  再者，Babel Macro 和 Babel Plugin 没有本质的区别，相比 Sweet.js 提供了显式定义和应用宏的语法，Babel Macro 直接操作 AST 则要复杂得多，你还是需要了解一些编译原理，这把一般的开发者挡在了门外。
+- 首先 Babel Macro 必须是合法的 Javascript 语法。不支持自定义语法，也要分两面讨论，合法的 Javascript 语法不至于打破现有的工具协作链，如果允许用户毫无限制地创建新的语法，将来指不定会和标准的语法发生歧义。反过来不能自定义语法的宏，是否显得不太地道，不够强大?
+- 因为必须是合法的 Javascript 语法，Babel Macro 实现 DSL（Domain-specific languages）能力就弱化了
+- 再者，Babel Macro 和 Babel Plugin 没有本质的区别，相比 Sweet.js 提供了显式定义和应用宏的语法，Babel Macro 直接操作 AST 则要复杂得多，你还是需要了解一些编译原理，这把一般的开发者挡在了门外。
 
 > Babel 可以实现自定义语法，只不过你需要 Fork `@babel/parser`，对它进行改造(可以看这篇文章[用 Babel 创造自定义 JS 语法](https://juejin.im/post/5d9be731f265da5bbc3e879b))。这个有点折腾，不太推荐
 
 总之，Babel Macro 本质上和 Babel Plugin 没有什么区别，它只是在 Plugin 之上封装了一层(分层架构模式的强大)，创建了一个新的平台，让开发者可以在源代码层面显式地应用代码转换。所以，任何适合显式去转换的场景都适合用 Babel Macro 来做：
 
--  特定框架、库的代码转换，如 styled-components
--  动态生成代码，如 preval
--  特定文件、语言的处理，如 `graphql-tag.macro`、`yaml.macro`、`svgr.macro`
+- 特定框架、库的代码转换，如 styled-components
+- 动态生成代码，如 preval
+- 特定文件、语言的处理，如 `graphql-tag.macro`、`yaml.macro`、`svgr.macro`
 
 # 如何写一个 Babel Macro
 
@@ -1081,9 +1081,9 @@ module.exports = createMacro(({ references, state, babel }) => {
 
 macro 文件必须默认导出一个由 createMacro 创建的实例，在其回调中可以获取到一些关键对象
 
--  babel 和普通的 Babel 插件一样，Macro 可以获取到一个 babel-core 对象
--  state 这个我们也比较熟悉，Babel 插件的 visitor 方法的第二个参数就是它，我们可以通过它获取一些配置信息以及保存一些自定义状态
--  references 获取 Macro 导出标识符的所有引用
+- babel 和普通的 Babel 插件一样，Macro 可以获取到一个 babel-core 对象
+- state 这个我们也比较熟悉，Babel 插件的 visitor 方法的第二个参数就是它，我们可以通过它获取一些配置信息以及保存一些自定义状态
+- references 获取 Macro 导出标识符的所有引用
 
 假设用户这样子使用你的 Macro
 
@@ -1131,9 +1131,9 @@ const x = 6765;
 
 创建 Macro 文件，按照上一节的介绍
 
-1.  我们使用 createMacro 来创建一个 Macro 实例
-2.  并从 references 中拿出所有导出标识符的引用路径
-3.  接着就是对这些引用路径进行 AST 转换
+1. 我们使用 createMacro 来创建一个 Macro 实例
+2. 并从 references 中拿出所有导出标识符的引用路径
+3. 接着就是对这些引用路径进行 AST 转换
 
 ```js
 const { createMacro, MacroError } = require('babel-plugin-macros');

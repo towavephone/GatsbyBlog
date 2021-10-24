@@ -36,13 +36,13 @@ class TestComponent extends React.Component {
 }
 ```
 
--  只在使用 `React.forwardRef` 定义组件时，**第二个参数 ref** 才存在
+- 只在使用 `React.forwardRef` 定义组件时，**第二个参数 ref** 才存在
 
--  在项目中组件库中尽量不要使用 `React.forwardRef` ，因为它可能会导致子组件被 **破坏性更改**
+- 在项目中组件库中尽量不要使用 `React.forwardRef` ，因为它可能会导致子组件被 **破坏性更改**
 
--  **函数组件 和 class 组件均不接收 `ref` 参数** ，即 props 中不存在 `ref`，**ref 必须独立 props** 出来，否则会被 React 特殊处理掉。
+- **函数组件 和 class 组件均不接收 `ref` 参数** ，即 props 中不存在 `ref`，**ref 必须独立 props** 出来，否则会被 React 特殊处理掉。
 
--  **通常在高阶组件（HOC）中使用 `React.forwardRef`**
+- **通常在高阶组件（HOC）中使用 `React.forwardRef`**
 
   ```jsx
   function enhance(WrappedComponent) {

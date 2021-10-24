@@ -468,9 +468,9 @@ ECStack.pop();
 
 对于每个执行上下文，都有三个重要属性：
 
--  变量对象(Variable object，VO)
--  作用域链(Scope chain)
--  this
+- 变量对象(Variable object，VO)
+- 作用域链(Scope chain)
+- this
 
 今天重点讲讲创建变量对象的过程。
 
@@ -492,19 +492,19 @@ ECStack.pop();
 
 如果看的不是很懂的话，容我再来介绍下全局对象:
 
-1.  可以通过 this 引用，在客户端 JavaScript 中，全局对象就是 Window 对象。
+1. 可以通过 this 引用，在客户端 JavaScript 中，全局对象就是 Window 对象。
 
    ```js
    console.log(this);
    ```
 
-2.  全局对象是由 Object 构造函数实例化的一个对象。
+2. 全局对象是由 Object 构造函数实例化的一个对象。
 
    ```js
    console.log(this instanceof Object);
    ```
 
-3.  预定义了一堆，嗯，一大堆函数和属性。
+3. 预定义了一堆，嗯，一大堆函数和属性。
 
    ```js
    // 都能生效
@@ -512,14 +512,14 @@ ECStack.pop();
    console.log(this.Math.random());
    ```
 
-4.  作为全局变量的宿主。
+4. 作为全局变量的宿主。
 
    ```js
    var a = 1;
    console.log(this.a);
    ```
 
-5.  客户端 JavaScript 中，全局对象有 window 属性指向自身。
+5. 客户端 JavaScript 中，全局对象有 window 属性指向自身。
 
    ```js
    var a = 1;
@@ -545,8 +545,8 @@ ECStack.pop();
 
 执行上下文的代码会分成两个阶段进行处理：分析和执行，我们也可以叫做：
 
-1.  进入执行上下文
-2.  代码执行
+1. 进入执行上下文
+2. 代码执行
 
 ## 进入执行上下文
 
@@ -554,20 +554,20 @@ ECStack.pop();
 
 变量对象会包括：
 
-1.  函数的所有形参 (如果是函数上下文)
+1. 函数的所有形参 (如果是函数上下文)
 
--  由名称和对应值组成的一个变量对象的属性被创建
--  没有实参，属性值设为 undefined
+- 由名称和对应值组成的一个变量对象的属性被创建
+- 没有实参，属性值设为 undefined
 
-2.  函数声明
+2. 函数声明
 
--  由名称和对应值（函数对象(function-object)）组成一个变量对象的属性被创建
--  如果变量对象已经存在相同名称的属性，则完全替换这个属性
+- 由名称和对应值（函数对象(function-object)）组成一个变量对象的属性被创建
+- 如果变量对象已经存在相同名称的属性，则完全替换这个属性
 
-3.  变量声明
+3. 变量声明
 
--  由名称和对应值（undefined）组成一个变量对象的属性被创建；
--  如果变量名称跟已经声明的形式参数或函数相同，则变量声明不会干扰已经存在的这类属性
+- 由名称和对应值（undefined）组成一个变量对象的属性被创建；
+- 如果变量名称跟已经声明的形式参数或函数相同，则变量声明不会干扰已经存在的这类属性
 
 ```js
 function foo(a) {
@@ -616,10 +616,10 @@ AO = {
 
 到这里变量对象的创建过程就介绍完了，让我们简洁的总结我们上述所说：
 
-1.  全局上下文的变量对象初始化是全局对象
-2.  函数上下文的变量对象初始化只包括 Arguments 对象
-3.  在进入执行上下文时会给变量对象添加形参、函数声明、变量声明等初始的属性值
-4.  在代码执行阶段，会再次修改变量对象的属性值
+1. 全局上下文的变量对象初始化是全局对象
+2. 函数上下文的变量对象初始化只包括 Arguments 对象
+3. 在进入执行上下文时会给变量对象添加形参、函数声明、变量声明等初始的属性值
+4. 在代码执行阶段，会再次修改变量对象的属性值
 
 ## 思考题
 
@@ -715,9 +715,9 @@ a(1, 2);
 
 对于每个执行上下文，都有三个重要属性：
 
--  变量对象(Variable object，VO)
--  作用域链(Scope chain)
--  this
+- 变量对象(Variable object，VO)
+- 作用域链(Scope chain)
+- this
 
 今天重点讲讲作用域链。
 
@@ -783,7 +783,7 @@ checkscope();
 
 执行过程如下：
 
-1.  checkscope 函数被创建，保存作用域链到内部属性[[scope]]
+1. checkscope 函数被创建，保存作用域链到内部属性[[scope]]
 
    ```js
    checkscope.[[scope]] = [
@@ -791,13 +791,13 @@ checkscope();
    ];
    ```
 
-2.  执行 checkscope 函数，创建 checkscope 函数执行上下文，checkscope 函数执行上下文被压入执行上下文栈
+2. 执行 checkscope 函数，创建 checkscope 函数执行上下文，checkscope 函数执行上下文被压入执行上下文栈
 
    ```js
    ECStack = [checkscopeContext, globalContext];
    ```
 
-3.  checkscope 函数并不立刻执行，开始做准备工作，第一步：复制函数[[scope]]属性创建作用域链
+3. checkscope 函数并不立刻执行，开始做准备工作，第一步：复制函数[[scope]]属性创建作用域链
 
    ```js
    checkscopeContext = {
@@ -805,7 +805,7 @@ checkscope();
    }
    ```
 
-4.  第二步：用 arguments 创建活动对象，随后初始化活动对象，加入形参、函数声明、变量声明
+4. 第二步：用 arguments 创建活动对象，随后初始化活动对象，加入形参、函数声明、变量声明
 
    ```js
    checkscopeContext = {
@@ -819,7 +819,7 @@ checkscope();
    }
    ```
 
-5.  第三步：将活动对象压入 checkscope 作用域链顶端
+5. 第三步：将活动对象压入 checkscope 作用域链顶端
 
    ```js
    checkscopeContext = {
@@ -833,7 +833,7 @@ checkscope();
    };
    ```
 
-6.  准备工作做完，开始执行函数，随着函数的执行，修改 AO 的属性值
+6. 准备工作做完，开始执行函数，随着函数的执行，修改 AO 的属性值
 
    ```js
    checkscopeContext = {
@@ -847,7 +847,7 @@ checkscope();
    };
    ```
 
-7.  查找到 scope2 的值，返回后函数执行完毕，函数上下文从执行上下文栈中弹出
+7. 查找到 scope2 的值，返回后函数执行完毕，函数上下文从执行上下文栈中弹出
 
    ```js
    ECStack = [globalContext];
@@ -859,9 +859,9 @@ checkscope();
 
 对于每个执行上下文，都有三个重要属性
 
--  变量对象(Variable object，VO)
--  作用域链(Scope chain)
--  this
+- 变量对象(Variable object，VO)
+- 作用域链(Scope chain)
+- this
 
 今天重点讲讲 this。
 
@@ -923,9 +923,9 @@ ECMAScript 语言类型是开发者直接使用 ECMAScript 可以操作的，其
 
 这段讲述了 Reference 的构成，由三个组成部分，分别是：
 
--  base value
--  referenced name
--  strict reference
+- base value
+- referenced name
+- strict reference
 
 我们简单的理解的话：
 
@@ -969,13 +969,13 @@ var BarReference = {
 
 这两个方法很简单，简单看一看：
 
-1.  GetBase
+1. GetBase
 
    > GetBase(V). Returns the base value component of the reference V.
 
    返回 reference 的 base value。
 
-2.  IsPropertyReference
+2. IsPropertyReference
 
    > IsPropertyReference(V). Returns true if either the base value is an object or HasPrimitiveBase(V) is true; otherwise returns false.
 
@@ -1029,28 +1029,28 @@ GetValue 返回对象属性真正的值，但是要注意：
 
 让我们描述一下：
 
-1.  计算 MemberExpression 的结果赋值给 ref
-2.  判断 ref 是不是一个 Reference 类型
+1. 计算 MemberExpression 的结果赋值给 ref
+2. 判断 ref 是不是一个 Reference 类型
 
-1.  如果 ref 是 Reference，并且 IsPropertyReference(ref) 是 true, 那么 this 的值为 GetBase(ref)
-2.  如果 ref 是 Reference，并且 base value 值是 Environment Record, 那么 this 的值为 ImplicitThisValue(ref)
-3.  如果 ref 不是 Reference，那么 this 的值为 undefined
+1. 如果 ref 是 Reference，并且 IsPropertyReference(ref) 是 true, 那么 this 的值为 GetBase(ref)
+2. 如果 ref 是 Reference，并且 base value 值是 Environment Record, 那么 this 的值为 ImplicitThisValue(ref)
+3. 如果 ref 不是 Reference，那么 this 的值为 undefined
 
 ## 具体分析
 
 让我们一步一步看：
 
-1.  计算 MemberExpression 的结果赋值给 ref
+1. 计算 MemberExpression 的结果赋值给 ref
 
 什么是 MemberExpression？看规范 11.2 Left-Hand-Side Expressions：
 
 MemberExpression:
 
--  PrimaryExpression // 原始表达式 可以参见《JavaScript 权威指南第四章》
--  FunctionExpression // 函数定义表达式
--  MemberExpression [ Expression ] // 属性访问表达式
--  MemberExpression . IdentifierName // 属性访问表达式
--  new MemberExpression Arguments // 对象创建表达式
+- PrimaryExpression // 原始表达式 可以参见《JavaScript 权威指南第四章》
+- FunctionExpression // 函数定义表达式
+- MemberExpression [ Expression ] // 属性访问表达式
+- MemberExpression . IdentifierName // 属性访问表达式
+- new MemberExpression Arguments // 对象创建表达式
 
 举个例子：
 
@@ -1080,7 +1080,7 @@ foo.bar(); // MemberExpression 是 foo.bar
 
 所以简单理解 MemberExpression 其实就是()左边的部分。
 
-2.  判断 ref 是不是一个 Reference 类型。
+2. 判断 ref 是不是一个 Reference 类型。
 
 关键就在于看规范是如何处理各种 MemberExpression，返回的结果是不是一个 Reference 类型。
 
@@ -1288,9 +1288,9 @@ console.log((false || foo.bar)()); // 1
 
 对于每个执行上下文，都有三个重要属性：
 
--  变量对象(Variable object，VO)
--  作用域链(Scope chain)
--  this
+- 变量对象(Variable object，VO)
+- 作用域链(Scope chain)
+- this
 
 然后分别在变量对象、作用域链、从 ECMAScript 规范解读 this 中讲解了这三个属性。
 
@@ -1348,13 +1348,13 @@ checkscope();
 
 执行过程如下：
 
-1.  执行全局代码，创建全局执行上下文，全局上下文被压入执行上下文栈
+1. 执行全局代码，创建全局执行上下文，全局上下文被压入执行上下文栈
 
    ```js
    ECStack = [globalContext];
    ```
 
-2.  全局上下文初始化
+2. 全局上下文初始化
 
    ```js
    globalContext = {
@@ -1364,7 +1364,7 @@ checkscope();
    };
    ```
 
-3.  初始化的同时，checkscope 函数被创建，保存作用域链到函数的内部属性[[scope]]
+3. 初始化的同时，checkscope 函数被创建，保存作用域链到函数的内部属性[[scope]]
 
    ```js
    checkscope.[[scope]] = [
@@ -1372,18 +1372,18 @@ checkscope();
    ];
    ```
 
-4.  执行 checkscope 函数，创建 checkscope 函数执行上下文，checkscope 函数执行上下文被压入执行上下文栈
+4. 执行 checkscope 函数，创建 checkscope 函数执行上下文，checkscope 函数执行上下文被压入执行上下文栈
 
    ```js
    ECStack = [checkscopeContext, globalContext];
    ```
 
-5.  checkscope 函数执行上下文初始化：
+5. checkscope 函数执行上下文初始化：
 
-1.  复制函数 [[scope]] 属性创建作用域链
-2.  用 arguments 创建活动对象
-3.  初始化活动对象，即加入形参、函数声明、变量声明
-4.  将活动对象压入 checkscope 作用域链顶端
+1. 复制函数 [[scope]] 属性创建作用域链
+2. 用 arguments 创建活动对象
+3. 初始化活动对象，即加入形参、函数声明、变量声明
+4. 将活动对象压入 checkscope 作用域链顶端
 
    同时 f 函数被创建，保存作用域链到 f 函数的内部属性[[scope]]
 
@@ -1401,18 +1401,18 @@ checkscope();
    }
    ```
 
-6.  执行 f 函数，创建 f 函数执行上下文，f 函数执行上下文被压入执行上下文栈
+6. 执行 f 函数，创建 f 函数执行上下文，f 函数执行上下文被压入执行上下文栈
 
    ```js
    ECStack = [fContext, checkscopeContext, globalContext];
    ```
 
-7.  f 函数执行上下文初始化, 以下跟第 4 步相同：
+7. f 函数执行上下文初始化, 以下跟第 4 步相同：
 
-1.  复制函数 [[scope]] 属性创建作用域链
-2.  用 arguments 创建活动对象
-3.  初始化活动对象，即加入形参、函数声明、变量声明
-4.  将活动对象压入 f 作用域链顶端
+1. 复制函数 [[scope]] 属性创建作用域链
+2. 用 arguments 创建活动对象
+3. 初始化活动对象，即加入形参、函数声明、变量声明
+4. 将活动对象压入 f 作用域链顶端
 
    ```js
    fContext = {
@@ -1426,14 +1426,14 @@ checkscope();
    };
    ```
 
-8.  f 函数执行，沿着作用域链查找 scope 值，返回 scope 值
-9.  f 函数执行完毕，f 函数上下文从执行上下文栈中弹出
+8. f 函数执行，沿着作用域链查找 scope 值，返回 scope 值
+9. f 函数执行完毕，f 函数上下文从执行上下文栈中弹出
 
    ```js
    ECStack = [checkscopeContext, globalContext];
    ```
 
-10.  checkscope 函数执行完毕，checkscope 执行上下文从执行上下文栈中弹出
+10. checkscope 函数执行完毕，checkscope 执行上下文从执行上下文栈中弹出
 
    ```js
    ECStack = [globalContext];
@@ -1497,10 +1497,10 @@ foo 函数可以访问变量 a，但是 a 既不是 foo 函数的局部变量，
 
 ECMAScript 中，闭包指的是：
 
-1.  从理论角度：所有的函数。因为它们都在创建的时候就将上层上下文的数据保存起来了。哪怕是简单的全局变量也是如此，因为函数中访问全局变量就相当于是在访问自由变量，这个时候使用最外层的作用域。
-2.  从实践角度：以下函数才算是闭包：
-1.  即使创建它的上下文已经销毁，它仍然存在（比如，内部函数从父函数中返回）
-2.  在代码中引用了自由变量
+1. 从理论角度：所有的函数。因为它们都在创建的时候就将上层上下文的数据保存起来了。哪怕是简单的全局变量也是如此，因为函数中访问全局变量就相当于是在访问自由变量，这个时候使用最外层的作用域。
+2. 从实践角度：以下函数才算是闭包：
+1. 即使创建它的上下文已经销毁，它仍然存在（比如，内部函数从父函数中返回）
+2. 在代码中引用了自由变量
 
 接下来就来讲讲实践上的闭包。
 
@@ -1528,14 +1528,14 @@ foo();
 
 这里直接给出简要的执行过程：
 
-1.  进入全局代码，创建全局执行上下文，全局执行上下文压入执行上下文栈
-2.  全局执行上下文初始化
-3.  执行 checkscope 函数，创建 checkscope 函数执行上下文，checkscope 执行上下文被压入执行上下文栈
-4.  checkscope 执行上下文初始化，创建变量对象、作用域链、this 等
-5.  checkscope 函数执行完毕，checkscope 执行上下文从执行上下文栈中弹出
-6.  执行 f 函数，创建 f 函数执行上下文，f 执行上下文被压入执行上下文栈
-7.  f 执行上下文初始化，创建变量对象、作用域链、this 等
-8.  f 函数执行完毕，f 函数上下文从执行上下文栈中弹出
+1. 进入全局代码，创建全局执行上下文，全局执行上下文压入执行上下文栈
+2. 全局执行上下文初始化
+3. 执行 checkscope 函数，创建 checkscope 函数执行上下文，checkscope 执行上下文被压入执行上下文栈
+4. checkscope 执行上下文初始化，创建变量对象、作用域链、this 等
+5. checkscope 函数执行完毕，checkscope 执行上下文从执行上下文栈中弹出
+6. 执行 f 函数，创建 f 函数执行上下文，f 执行上下文被压入执行上下文栈
+7. f 执行上下文初始化，创建变量对象、作用域链、this 等
+8. f 函数执行完毕，f 函数上下文从执行上下文栈中弹出
 
 了解到这个过程，我们应该思考一个问题，那就是：
 
@@ -1557,8 +1557,8 @@ fContext = {
 
 所以，让我们再看一遍实践角度上闭包的定义：
 
-1.  即使创建它的上下文已经销毁，它仍然存在（比如，内部函数从父函数中返回）
-2.  在代码中引用了自由变量
+1. 即使创建它的上下文已经销毁，它仍然存在（比如，内部函数从父函数中返回）
+2. 在代码中引用了自由变量
 
 在这里再补充一个《JavaScript 权威指南》英文原版对闭包的定义:
 
@@ -1774,8 +1774,8 @@ bar.call(foo); // 1
 
 注意两点：
 
-1.  call 改变了 this 的指向，指向到 foo
-2.  bar 函数执行了
+1. call 改变了 this 的指向，指向到 foo
+2. bar 函数执行了
 
 ## 模拟实现第一步（函数设为对象属性）
 
@@ -1802,9 +1802,9 @@ foo.bar(); // 1
 
 所以我们模拟的步骤可以分为：
 
-1.  将函数设为对象的属性
-2.  执行该函数
-3.  删除该函数
+1. 将函数设为对象的属性
+2. 执行该函数
+3. 删除该函数
 
 以上个例子为例，就是：
 
@@ -1940,7 +1940,7 @@ bar.call2(foo, 'kevin', 18);
 
 模拟代码已经完成 80%，还有两个小点要注意：
 
-1.  this 参数可以传 null，当为 null 的时候，视为指向 window
+1. this 参数可以传 null，当为 null 的时候，视为指向 window
 
 举个例子：
 
@@ -1956,7 +1956,7 @@ bar.call(null); // 1
 
 虽然这个例子本身不使用 call，结果依然一样。
 
-2.  函数是可以有返回值的！
+2. 函数是可以有返回值的！
 
 举个例子：
 
@@ -2062,8 +2062,8 @@ Function.prototype.apply = function(context, arr) {
 
 由此我们可以首先得出 bind 函数的两个特点：
 
-1.  返回一个函数
-2.  可以传入参数
+1. 返回一个函数
+2. 可以传入参数
 
 ## 返回函数的模拟实现
 
@@ -2270,7 +2270,7 @@ Function.prototype.bind2 = function(context) {
 
 接下来处理些小问题:
 
-1.  apply 这段代码跟 MDN 上的稍有不同
+1. apply 这段代码跟 MDN 上的稍有不同
 
 在 MDN 中文版讲 bind 的模拟实现时，apply 这里的代码是：
 
@@ -2302,7 +2302,7 @@ foo.bar(); // 2
 
 (2018 年 3 月 27 日更新，中文版已经改了 😀)
 
-2.  调用 bind 的不是函数咋办？
+2. 调用 bind 的不是函数咋办？
 
 不行，我们要报错！
 
@@ -2312,7 +2312,7 @@ if (typeof this !== 'function') {
 }
 ```
 
-3.  我要在线上用
+3. 我要在线上用
 
 那别忘了做个兼容：
 
@@ -2386,8 +2386,8 @@ person.sayYourName(); // I am Kevin
 
 从这个例子中，我们可以看到，实例 person 可以：
 
--  访问到 Otaku 构造函数里的属性
--  访问到 Otaku.prototype 中的属性
+- 访问到 Otaku 构造函数里的属性
+- 访问到 Otaku.prototype 中的属性
 
 接下来，我们可以尝试着模拟一下了。
 
@@ -2425,11 +2425,11 @@ function objectFactory() {
 
 在这一版中，我们：
 
-1.  用 new Object() 的方式新建了一个对象 obj
-2.  取出第一个参数，就是我们要传入的构造函数。此外因为 shift 会修改原数组，所以 arguments 会被去除第一个参数
-3.  将 obj 的原型指向构造函数，这样 obj 就可以访问到构造函数原型中的属性
-4.  使用 apply，改变构造函数 this 的指向到新建的对象，这样 obj 就可以访问到构造函数中的属性
-5.  返回 obj
+1. 用 new Object() 的方式新建了一个对象 obj
+2. 取出第一个参数，就是我们要传入的构造函数。此外因为 shift 会修改原数组，所以 arguments 会被去除第一个参数
+3. 将 obj 的原型指向构造函数，这样 obj 就可以访问到构造函数原型中的属性
+4. 使用 apply，改变构造函数 this 的指向到新建的对象，这样 obj 就可以访问到构造函数中的属性
+5. 返回 obj
 
 复制以下的代码，到浏览器中，我们可以做一下测试：
 
@@ -2754,10 +2754,10 @@ arguments 的应用其实很多，在下个系列，也就是 JavaScript 专题�
 
 如果要总结这些场景的话，暂时能想到的包括：
 
--  参数不定长
--  函数柯里化
--  递归调用
--  函数重载
+- 参数不定长
+- 函数柯里化
+- 递归调用
+- 函数重载
 
 # 创建对象的多种方式以及优缺点
 
@@ -2945,10 +2945,10 @@ person2.getName();
 
 我们回顾下 new 的实现步骤：
 
-1.  首先新建一个对象
-2.  然后将对象的原型指向 Person.prototype
-3.  然后 Person.apply(obj)
-4.  返回这个对象
+1. 首先新建一个对象
+2. 然后将对象的原型指向 Person.prototype
+3. 然后 Person.apply(obj)
+4. 返回这个对象
 
 注意这个时候，回顾下 apply 的实现步骤，会执行 obj.Person 方法，这个时候就会执行 if 语句里的内容，注意构造函数的 prototype 属性指向了实例的原型，使用字面量方式直接覆盖 Person.prototype，并不会更改实例的原型的值，person1 依然是指向了以前的原型，而不是 Person.prototype。而之前的原型是没有 getName 方法的，所以就报错了！
 
@@ -3071,8 +3071,8 @@ console.log(person1.name); // daisy
 
 与寄生构造函数模式有两点不同：
 
-1.  新创建的实例方法不引用 this
-2.  不使用 new 操作符调用构造函数
+1. 新创建的实例方法不引用 this
+2. 不使用 new 操作符调用构造函数
 
 稳妥对象最适合在一些安全的环境中。
 
@@ -3106,7 +3106,7 @@ console.log(child1.getName()); // kevin
 
 问题：
 
-1.  引用类型的属性被所有实例共享，举个例子：
+1. 引用类型的属性被所有实例共享，举个例子：
 
 ```js
 function Parent() {
@@ -3128,7 +3128,7 @@ var child2 = new Child();
 console.log(child2.names); // ["kevin", "daisy", "yayu"]
 ```
 
-2.  在创建 Child 的实例时，不能向 Parent 传参
+2. 在创建 Child 的实例时，不能向 Parent 传参
 
 ## 借用构造函数（经典继承）
 
@@ -3154,9 +3154,9 @@ console.log(child2.names); // ["kevin", "daisy"]
 
 优点：
 
-1.  避免了引用类型的属性被所有实例共享
+1. 避免了引用类型的属性被所有实例共享
 
-2.  可以在 Child 中向 Parent 传参
+2. 可以在 Child 中向 Parent 传参
 
 举个例子：
 

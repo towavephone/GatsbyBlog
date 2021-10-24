@@ -21,13 +21,13 @@ path: /ui-auto-test-note/
 
 目标：在 macaca 编译成功输出报告后打开相应的浏览器查看
 
-1.  安装 open 库
+1. 安装 open 库
 
 ```bash
 yarn add open
 ```
 
-2.  编写 open.js 工具类
+2. 编写 open.js 工具类
 
 ```js
 const open = require('open');
@@ -40,7 +40,7 @@ const path = require('path');
 })();
 ```
 
-3.  在 package.json 文件调用
+3. 在 package.json 文件调用
 
 ```json
 "scripts": {
@@ -112,11 +112,11 @@ sendKeys 方法直接赋值给 input 控件也是不成功，原因同上
 
 ### 用 autoit 软件编辑脚本，模拟上传操作
 
-1.  首先在官网下载 autoit 软件，安装完毕后打开上传窗口同时打开 autoit 软件，找出文件名和打开两个控件所对应的 ID，如下图
+1. 首先在官网下载 autoit 软件，安装完毕后打开上传窗口同时打开 autoit 软件，找出文件名和打开两个控件所对应的 ID，如下图
 
    ![](2019-04-16-19-57-29.png)
 
-2.  打开编辑器，添加以下代码
+2. 打开编辑器，添加以下代码
 
    ```cs
    ControlFocus("[Class:#32770]","","Edit1") // 对文件名发起焦点事件
@@ -126,9 +126,9 @@ sendKeys 方法直接赋值给 input 控件也是不成功，原因同上
    ControlClick("[Class:#32770]","","Button1") // 点击打开按钮
    ```
 
-3.  编译以上代码生成 upload.exe
+3. 编译以上代码生成 upload.exe
 
-4.  在 wx-extend.js 中编写自定义方法
+4. 在 wx-extend.js 中编写自定义方法
 
    ```js
    require('shelljs/global');
@@ -139,7 +139,7 @@ sendKeys 方法直接赋值给 input 控件也是不成功，原因同上
    });
    ```
 
-5.  愉快的调用方法，成功上传
+5. 愉快的调用方法，成功上传
 
    ```js
    driver.uploadFile(文件名);

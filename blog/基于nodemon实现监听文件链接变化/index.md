@@ -9,8 +9,8 @@ tags: 后端, nodejs, nodemon, 预研
 
 公司项目分为以下几种架构：
 
-1.  主项目-扩展项目：扩展项目前端独立，是以 npm 包的形式安装到主项目，后端可以独立编译，但不能独立运行，即后端与主项目共用一套，主项目需要对扩展项目编译出的后端代码进行监听来实现增量编译
-2.  主项目-子项目：微前端架构，子项目前、后端独立可运行
+1. 主项目-扩展项目：扩展项目前端独立，是以 npm 包的形式安装到主项目，后端可以独立编译，但不能独立运行，即后端与主项目共用一套，主项目需要对扩展项目编译出的后端代码进行监听来实现增量编译
+2. 主项目-子项目：微前端架构，子项目前、后端独立可运行
 
 # 需求背景
 
@@ -78,14 +78,14 @@ gulp.task('default', ['sync', 'watch']);
 
 ## nodemon + npm link
 
-1.  对扩展项目进行 npm link 操作，然后在主项目中 npm link 扩展项目，可以在主项目的 node_modules 下看到指向扩展项目的软链接
-2.  主项目使用了 nodemon 来监听 node_modules 文件变化，鉴于每次重启主项目之后扩展项目的代码才会生效的问题，需要解决 nodemon 不能监听软链接下文件变化的问题
+1. 对扩展项目进行 npm link 操作，然后在主项目中 npm link 扩展项目，可以在主项目的 node_modules 下看到指向扩展项目的软链接
+2. 主项目使用了 nodemon 来监听 node_modules 文件变化，鉴于每次重启主项目之后扩展项目的代码才会生效的问题，需要解决 nodemon 不能监听软链接下文件变化的问题
 
 核心逻辑：
 
-1.  在不影响 nodemon 脚本调用逻辑的情况下，在 nodemon.json 添加 `watchSymbolLink` 属性，明确监听软链接的文件位置
-2.  利用 glob 三方库读取 watchSymbolLink 下的文件，当判断读到的文件是软链接文件时（isSymbolicLink），读取真实的文件路径（realpathSync）
-3.  在监听原来文件的基础上，调用 nodemon 监听另外真实的文件路径
+1. 在不影响 nodemon 脚本调用逻辑的情况下，在 nodemon.json 添加 `watchSymbolLink` 属性，明确监听软链接的文件位置
+2. 利用 glob 三方库读取 watchSymbolLink 下的文件，当判断读到的文件是软链接文件时（isSymbolicLink），读取真实的文件路径（realpathSync）
+3. 在监听原来文件的基础上，调用 nodemon 监听另外真实的文件路径
 
 package.json
 

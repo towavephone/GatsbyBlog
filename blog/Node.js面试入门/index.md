@@ -186,11 +186,11 @@ Module.prototype._compile = function(content, filename) {
 
 上面的第 1 步和第 2 步，require 函数及其辅助方法主要如下。
 
-1.  require(): 加载外部模块
-2.  require.resolve()：将模块名解析到一个绝对路径
-3.  require.main：指向主模块
-4.  require.cache：指向所有缓存的模块
-5.  require.extensions：根据文件的后缀名，调用不同的执行函数
+1. require(): 加载外部模块
+2. require.resolve()：将模块名解析到一个绝对路径
+3. require.main：指向主模块
+4. require.cache：指向所有缓存的模块
+5. require.extensions：根据文件的后缀名，调用不同的执行函数
 
 一旦 require 函数准备完毕，整个所要加载的脚本内容，就被放到一个新的函数之中，这样可以避免污染全局环境。该函数的参数包括 require、module、exports，以及其他一些参数。
 
@@ -416,9 +416,9 @@ emitter.emit('myEvent');
 
 开放性问题, 每个写 node 的人都有一套自己的判断方式.
 
--  看文档
--  console.log 打印看看
--  看是否有 IO 操作
+- 看文档
+- console.log 打印看看
+- 看是否有 IO 操作
 
 单纯使用回调函数并不会异步, IO 操作才可能会异步, 除此之外还有使用 setTimeout 等方式实现异步.
 
@@ -504,10 +504,10 @@ console.log(asyncRes, `Took ${new Date().getTime() - startTime} ms`);
 
 setImmediate vs process.nextTick
 
--  setImmediate() 属于 check 观察者，其设置的回调函数，会插入到下次事件循环的末尾。
--  process.nextTick() 设置的回调函数，会在代码运行完成后立即执行，会在下次事件循环之前被调用，原文是 “the callback will fire as soon as the code runs to completion, but before going back to the event loop.”
--  process.nextTick() 所设置的回调函数会存放到数组中，一次性执行所有回调函数。
--  setImmediate() 所设置的回调函数会存到到链表中，每次事件循环只执行链表中的一个回调函数。
+- setImmediate() 属于 check 观察者，其设置的回调函数，会插入到下次事件循环的末尾。
+- process.nextTick() 设置的回调函数，会在代码运行完成后立即执行，会在下次事件循环之前被调用，原文是 “the callback will fire as soon as the code runs to completion, but before going back to the event loop.”
+- process.nextTick() 所设置的回调函数会存放到数组中，一次性执行所有回调函数。
+- setImmediate() 所设置的回调函数会存到到链表中，每次事件循环只执行链表中的一个回调函数。
 
 setTimeout(fn, 0) vs setImmediate
 
@@ -575,14 +575,14 @@ Node.js 通过事件循环来挨个抽取事件队列中的一个个 Task 执行
 
 这里来讨论 Node.js 中的 process 对象. 直接在代码中通过 console.log(process) 即可打印出来. 可以看到 process 对象暴露了非常多有用的属性以及方法, 具体的细节见[官方文档](https://nodejs.org/dist/latest-v6.x/docs/api/process.html), 已经说的挺详细了. 其中包括但不限于:
 
--  进程基础信息
--  进程 Usage
--  进程级事件
--  依赖模块/版本信息
--  OS 基础信息
--  账户信息
--  信号收发
--  三个标准流
+- 进程基础信息
+- 进程 Usage
+- 进程级事件
+- 依赖模块/版本信息
+- OS 基础信息
+- 账户信息
+- 信号收发
+- 三个标准流
 
 ### process.nextTick
 
@@ -627,10 +627,10 @@ function test() {
 }
 ```
 
--  process.nextTick 是将异步回调放到当前帧的末尾、io 回调之前，如果 nextTick 过多，会导致 io 回调不断延后,最后 callback 堆积太多.
--  setImmediate 是将异步回调放到下一帧，不影响 io 回调，不会造成 callback 堆积.
--  process.nextTick() 所设置的回调函数会存放到数组中，一次性执行所有回调函数。
--  setImmediate() 所设置的回调函数会存到到链表中，每次事件循环只执行链表中的一个回调函数。
+- process.nextTick 是将异步回调放到当前帧的末尾、io 回调之前，如果 nextTick 过多，会导致 io 回调不断延后,最后 callback 堆积太多.
+- setImmediate 是将异步回调放到下一帧，不影响 io 回调，不会造成 callback 堆积.
+- process.nextTick() 所设置的回调函数会存放到数组中，一次性执行所有回调函数。
+- setImmediate() 所设置的回调函数会存到到链表中，每次事件循环只执行链表中的一个回调函数。
 
 ### 配置
 
@@ -664,15 +664,15 @@ function test() {
 
 Node.js 的 child_process.fork() 在 Unix 上的实现最终调用了 POSIX [fork(2)](http://man7.org/linux/man-pages/man2/fork.2.html), 而 POSIX 的 fork 需要手动管理子进程的资源释放 (waitpid), child_process.fork 则不用关心这个问题, Node.js 会自动释放, 并且可以在 option 中选择父进程死后是否允许子进程存活.
 
--  spawn() 启动一个子进程来执行命令
-   -  options.detached 父进程死后是否允许子进程存活
-   -  options.stdio 指定子进程的三个标准流
--  spawnSync() 同步版的 spawn, 可指定超时, 返回的对象可获得子进程的情况
--  exec() 启动一个子进程来执行命令, 带回调参数获知子进程的情况, 可指定进程运行的超时时间
--  execSync() 同步版的 exec(), 可指定超时, 返回子进程的输出 (stdout)
--  execFile() 启动一个子进程来执行一个可执行文件, 可指定进程运行的超时时间
--  execFileSync() 同步版的 execFile(), 返回子进程的输出, 如何超时或者 exit code 不为 0, 会直接 throw Error
--  fork() 加强版的 spawn(), 返回值是 ChildProcess 对象可以与子进程交互
+- spawn() 启动一个子进程来执行命令
+   - options.detached 父进程死后是否允许子进程存活
+   - options.stdio 指定子进程的三个标准流
+- spawnSync() 同步版的 spawn, 可指定超时, 返回的对象可获得子进程的情况
+- exec() 启动一个子进程来执行命令, 带回调参数获知子进程的情况, 可指定进程运行的超时时间
+- execSync() 同步版的 exec(), 可指定超时, 返回子进程的输出 (stdout)
+- execFile() 启动一个子进程来执行一个可执行文件, 可指定进程运行的超时时间
+- execFileSync() 同步版的 execFile(), 返回子进程的输出, 如何超时或者 exit code 不为 0, 会直接 throw Error
+- fork() 加强版的 spawn(), 返回值是 ChildProcess 对象可以与子进程交互
 
 其中 exec/execSync 方法会直接调用 bash 来解释命令, 所以如果有命令有外部参数, 则需要注意被注入的情况.
 
@@ -1200,16 +1200,16 @@ Read-Eval-Print-Loop (REPL)
 
 可以参见网上流传比较广的一个例子, 连续调用两次 send 分别发送两段数据 data1 和 data2, 在接收端有以下几种常见的情况:
 
--  A. 先接收到 data1, 然后接收到 data2 .
--  B. 先接收到 data1 的部分数据, 然后接收到 data1 余下的部分以及 data2 的全部.
--  C. 先接收到了 data1 的全部数据和 data2 的部分数据, 然后接收到了 data2 的余下的数据.
--  D. 一次性接收到了 data1 和 data2 的全部数据.
+- A. 先接收到 data1, 然后接收到 data2 .
+- B. 先接收到 data1 的部分数据, 然后接收到 data1 余下的部分以及 data2 的全部.
+- C. 先接收到了 data1 的全部数据和 data2 的部分数据, 然后接收到了 data2 的余下的数据.
+- D. 一次性接收到了 data1 和 data2 的全部数据.
 
 其中的 BCD 就是我们常见的粘包的情况. 而对于处理粘包的问题, 常见的解决方案有:
 
-1.  多次发送之前间隔一个等待时间
-2.  关闭 Nagle 算法
-3.  进行封包/拆包
+1. 多次发送之前间隔一个等待时间
+2. 关闭 Nagle 算法
+3. 进行封包/拆包
 
 **_方案 1_**
 
@@ -1349,8 +1349,8 @@ POST 是新建 (create) 资源, 非幂等, 同一个请求如果重复 POST 会�
 
 HTTP headers 是在进行 HTTP 请求的交互过程中互相支会对方一些信息的主要字段. 比如请求 (Request) 的时候告诉服务端自己能接受的各项参数, 以及之前就存在本地的一些数据等. 详细各位可以参见 wikipedia:
 
--  [Request fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields)
--  [Response fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields)
+- [Request fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields)
+- [Response fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields)
 
 > cookie 与 session 的区别? 服务端如何清除 cookie?
 
@@ -1391,8 +1391,8 @@ Node.js 中的 `http.Agent` 用于池化 HTTP 客户端请求的 socket (pooling
 
 另外, 目前在 Node.js 的 6.8.1（包括）到 6.10（不包括）版本中发现一个问题:
 
--  1. 你将 keepAlive 设置为 `true` 时, socket 有复用
--  2. 即使 keepAlive 没有设置成 `true` 但是长时间内有大量请求时, 同样有复用 socket (复用情况参见[@zcs19871221](https://github.com/zcs19871221)的[解析](https://github.com/zcs19871221/mydoc/blob/master/nodejsAgent.md))
+- 1. 你将 keepAlive 设置为 `true` 时, socket 有复用
+- 2. 即使 keepAlive 没有设置成 `true` 但是长时间内有大量请求时, 同样有复用 socket (复用情况参见[@zcs19871221](https://github.com/zcs19871221)的[解析](https://github.com/zcs19871221/mydoc/blob/master/nodejsAgent.md))
 
 1 和 2 这两种情况下, 一旦设置了 request timeout, 由于 socket 一直未销毁, 如果你在请求完成以后没有注意清除该事件, 会导致事件重复监听, 且该事件闭包引用了 req, 会导致内存泄漏.
 
@@ -1484,9 +1484,9 @@ RPC (Remote Procedure Call Protocol) 基于 TCP/IP 来实现调用远程服务�
 
 常见的 RPC 方式:
 
--  [Thrift](http://thrift.apache.org/)
--  HTTP
--  MQ
+- [Thrift](http://thrift.apache.org/)
+- HTTP
+- MQ
 
 ### Thrift
 
@@ -1583,10 +1583,10 @@ end of line (EOL) 同 newline, line ending, 以及 line break.
 
 ### OS 常量
 
--  信号常量 (Signal Constants), 如 `SIGHUP`, `SIGKILL` 等.
--  POSIX 错误常量 (POSIX Error Constants), 如 `EACCES`, `EADDRINUSE` 等.
--  Windows 错误常量 (Windows Specific Error Constants), 如 `WSAEACCES`, `WSAEBADF` 等.
--  libuv 常量 (libuv Constants), 仅 `UV_UDP_REUSEADDR`.
+- 信号常量 (Signal Constants), 如 `SIGHUP`, `SIGKILL` 等.
+- POSIX 错误常量 (POSIX Error Constants), 如 `EACCES`, `EADDRINUSE` 等.
+- Windows 错误常量 (Windows Specific Error Constants), 如 `WSAEACCES`, `WSAEBADF` 等.
+- libuv 常量 (libuv Constants), 仅 `UV_UDP_REUSEADDR`.
 
 ## Path
 
@@ -1677,10 +1677,10 @@ path.parse('C:\\path\\dir\\file.txt');
 
 命令行参数 (Command Line Options), 即对 CLI 使用上的一些文档. 关于 CLI 主要有 4 种使用方式:
 
--  node [options][v8 options] [script.js | -e "script"][arguments]
--  node debug [script.js | -e "script" | `<host>:<port>`] …
--  node --v8-options
--  无参数直接启动 REPL 环境
+- node [options][v8 options] [script.js | -e "script"][arguments]
+- node debug [script.js | -e "script" | `<host>:<port>`] …
+- node --v8-options
+- 无参数直接启动 REPL 环境
 
 ### Options
 
@@ -1880,12 +1880,12 @@ file locks                      (-x) unlimited
 
 其中标准的 JavaScript 错误常见有：
 
--  [EvalError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError): 调用 eval() 出现错误时抛出该错误
--  [SyntaxError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError): 代码不符合 JavaScript 语法规范时抛出该错误
--  [RangeError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError): 数组越界时抛出该错误
--  [ReferenceError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError): 引用未定义的变量时抛出该错误
--  [TypeError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError): 参数类型错误时抛出该错误
--  [URIError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError): 误用全局的 URI 处理函数时抛出该错误
+- [EvalError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError): 调用 eval() 出现错误时抛出该错误
+- [SyntaxError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError): 代码不符合 JavaScript 语法规范时抛出该错误
+- [RangeError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError): 数组越界时抛出该错误
+- [ReferenceError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError): 引用未定义的变量时抛出该错误
+- [TypeError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError): 参数类型错误时抛出该错误
+- [URIError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError): 误用全局的 URI 处理函数时抛出该错误
 
 而常见的系统错误列表可以通过 Node.js 的 os 对象常看列表：
 
@@ -1905,19 +1905,19 @@ console.log(os.constants.errno);
 
 在 Node.js 中错误处理主要有一下几种方法:
 
--  callback(err, data) 回调约定
--  throw / try / catch
--  EventEmitter 的 error 事件
+- callback(err, data) 回调约定
+- throw / try / catch
+- EventEmitter 的 error 事件
 
 callback(err, data) 这种形式的错误处理起来繁琐, 并不具备强制性, 目前已经处于仅需要了解, 不推荐使用的情况. 而 domain 模块则是半只脚踏进棺材了.
 
-1.  感谢 [co](https://github.com/visionmedia/co) 的先河, 现在的你已经简单的使用 try/catch 保护关键的位置, 以 koa 为例, 可以通过中间件的形式来进行错误处理, 详见 [Koa error handling](https://github.com/koajs/koa/wiki/Error-Handling). 之后的 async/await 均属于这种模式.
+1. 感谢 [co](https://github.com/visionmedia/co) 的先河, 现在的你已经简单的使用 try/catch 保护关键的位置, 以 koa 为例, 可以通过中间件的形式来进行错误处理, 详见 [Koa error handling](https://github.com/koajs/koa/wiki/Error-Handling). 之后的 async/await 均属于这种模式.
 
-2.  通过 EventEmitter 的错误监听形式为各大关键的对象加上错误监听的回调. 例如监听 http server, tcp server 等对象的 `error` 事件以及 process 对象提供的 `uncaughtException` 和 `unhandledRejection` 等等.
+2. 通过 EventEmitter 的错误监听形式为各大关键的对象加上错误监听的回调. 例如监听 http server, tcp server 等对象的 `error` 事件以及 process 对象提供的 `uncaughtException` 和 `unhandledRejection` 等等.
 
-3.  使用 Promise 来封装异步, 并通过 Promise 的错误处理来 handle 错误.
+3. 使用 Promise 来封装异步, 并通过 Promise 的错误处理来 handle 错误.
 
-4.  如果上述办法不能起到良好的作用, 那么你需要学习如何优雅的 [Let It Crash](http://wiki.c2.com/?LetItCrash)
+4. 如果上述办法不能起到良好的作用, 那么你需要学习如何优雅的 [Let It Crash](http://wiki.c2.com/?LetItCrash)
 
 > 为什么要在 cb 的第一参数传 error? 为什么有的 cb 第一个参数不是 error, 例如 http.createServer?
 
@@ -2036,8 +2036,8 @@ console.log('This will not run.');
 
 该事件的回调函数接收以下参数：
 
--  `reason` [`<Error>`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | `<any>` 该 Promise 被 reject 的对象 (通常为 Error 对象)
--  `p` 被 reject 的 Promise 本身
+- `reason` [`<Error>`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) | `<any>` 该 Promise 被 reject 的对象 (通常为 Error 对象)
+- `p` 被 reject 的 Promise 本身
 
 例如
 
@@ -2311,27 +2311,27 @@ console.log(qs.parse(str)); // { arr: [ '1', '2', '3', '4' ] }
 
 util.is\*() 从 v4.0.0 开始被不建议使用即将废弃 (deprecated). 大概的废弃原因, 笔者个人认为是维护这些功能吃力不讨好, 而且现在流行的轮子那么多. 那么一下是具体列表:
 
--  util.debug(string)
--  util.error([...strings])
--  util.isArray(object)
--  util.isBoolean(object)
--  util.isBuffer(object)
--  util.isDate(object)
--  util.isError(object)
--  util.isFunction(object)
--  util.isNull(object)
--  util.isNullOrUndefined(object)
--  util.isNumber(object)
--  util.isObject(object)
--  util.isPrimitive(object)
--  util.isRegExp(object)
--  util.isString(object)
--  util.isSymbol(object)
--  util.isUndefined(object)
--  util.log(string)
--  util.print([...strings])
--  util.puts([...strings])
--  util.\_extend(target, source)
+- util.debug(string)
+- util.error([...strings])
+- util.isArray(object)
+- util.isBoolean(object)
+- util.isBuffer(object)
+- util.isDate(object)
+- util.isError(object)
+- util.isFunction(object)
+- util.isNull(object)
+- util.isNullOrUndefined(object)
+- util.isNumber(object)
+- util.isObject(object)
+- util.isPrimitive(object)
+- util.isRegExp(object)
+- util.isString(object)
+- util.isSymbol(object)
+- util.isUndefined(object)
+- util.log(string)
+- util.print([...strings])
+- util.puts([...strings])
+- util.\_extend(target, source)
 
 其中大部分都可以作为面试题来问如何实现.
 
@@ -2459,11 +2459,11 @@ SQL (Structured Query Language) 是[关系式数据库管理系统](https://en.w
 | count rows      | fast           | slow                  |
 | auto_increment  | fast           | slow                  |
 
--  你的数据库有外键吗？
--  你需要事务支持吗？
--  你需要全文索引吗？
--  你经常使用什么样的查询模式？
--  你的数据有多大？
+- 你的数据库有外键吗？
+- 你需要事务支持吗？
+- 你需要全文索引吗？
+- 你经常使用什么样的查询模式？
+- 你的数据有多大？
 
 参见 [MYSQL: INNODB 还是 MYISAM?](http://coolshell.cn/articles/652.html)
 
@@ -2475,13 +2475,13 @@ SQL (Structured Query Language) 是[关系式数据库管理系统](https://en.w
 
 > Monogdb 连接问题(超时/断开等)有可能是什么问题导致的?
 
--  网络问题
--  任务跑不完, 超过了 driver 的默认链接超时时间 (如 30s)
--  Monogdb 宕机了
--  超过了连接空闲时间 (connection idle time) 被断开
--  fd 不够用 (ulimit 设置)
--  mongodb 最大连接数不够用 (可能是连接未复用导致)
--  etc...
+- 网络问题
+- 任务跑不完, 超过了 driver 的默认链接超时时间 (如 30s)
+- Monogdb 宕机了
+- 超过了连接空闲时间 (connection idle time) 被断开
+- fd 不够用 (ulimit 设置)
+- mongodb 最大连接数不够用 (可能是连接未复用导致)
+- etc...
 
 ### other
 
@@ -2529,12 +2529,12 @@ Cursor
 
 > 什么情况下数据会出现脏数据? 如何避免?
 
--  从 A 帐号中把余额读出来
--  对 A 帐号做减法操作
--  把结果写回 A 帐号中
--  从 B 帐号中把余额读出来
--  对 B 帐号做加法操作
--  把结果写回 B 帐号中
+- 从 A 帐号中把余额读出来
+- 对 A 帐号做减法操作
+- 把结果写回 A 帐号中
+- 从 B 帐号中把余额读出来
+- 对 B 帐号做加法操作
+- 把结果写回 B 帐号中
 
 为了数据的一致性, 这 6 件事, 要么都成功做完, 要么都不成功, 而且这个操作的过程中, 对 A、B 帐号的其它访问必需锁死, 所谓锁死就是要排除其它的读写操作, 否则就会出现脏数据 ---- 即数据一致性的问题.
 
@@ -2542,9 +2542,9 @@ Cursor
 
 ### 矛盾
 
--  1）要想让数据有高可用性，就得写多份数据
--  2）写多份的问题会导致数据一致性的问题
--  3）数据一致性的问题又会引发性能问题
+- 1）要想让数据有高可用性，就得写多份数据
+- 2）写多份的问题会导致数据一致性的问题
+- 3）数据一致性的问题又会引发性能问题
 
 强一致性必然导致性能短板, 而弱一致性则有很好的性能但是存在数据安全(灾备数据丢失)/一致性(脏读/脏写等)的问题.
 
@@ -2556,20 +2556,20 @@ Cursor
 
 第一阶段：
 
--  协调者会问所有的参与者结点，是否可以执行提交操作。
--  各个参与者开始事务执行的准备工作：如：为资源上锁，预留资源，写 undo/redo log……
--  参与者响应协调者，如果事务的准备工作成功，则回应“可以提交”，否则回应“拒绝提交”。
+- 协调者会问所有的参与者结点，是否可以执行提交操作。
+- 各个参与者开始事务执行的准备工作：如：为资源上锁，预留资源，写 undo/redo log……
+- 参与者响应协调者，如果事务的准备工作成功，则回应“可以提交”，否则回应“拒绝提交”。
 
 第二阶段：
 
--  如果所有的参与者都回应“可以提交”，那么，协调者向所有的参与者发送“正式提交”的命令。参与者完成正式提交，并释放所有资源，然后回应“完成”，协调者收集各结点的“完成”回应后结束这个 Global Transaction。
--  如果有一个参与者回应“拒绝提交”，那么，协调者向所有的参与者发送“回滚操作”，并释放所有资源，然后回应“回滚完成”，协调者收集各结点的“回滚”回应后，取消这个 Global Transaction。
+- 如果所有的参与者都回应“可以提交”，那么，协调者向所有的参与者发送“正式提交”的命令。参与者完成正式提交，并释放所有资源，然后回应“完成”，协调者收集各结点的“完成”回应后结束这个 Global Transaction。
+- 如果有一个参与者回应“拒绝提交”，那么，协调者向所有的参与者发送“回滚操作”，并释放所有资源，然后回应“回滚完成”，协调者收集各结点的“回滚”回应后，取消这个 Global Transaction。
 
 异常:
 
--  如果第一阶段中，参与者没有收到询问请求，或是参与者的回应没有到达协调者。那么，需要协调者做超时处理，一旦超时，可以当作失败，也可以重试。
--  如果第二阶段中，正式提交发出后，如果有的参与者没有收到，或是参与者提交/回滚后的确认信息没有返回，一旦参与者的回应超时，要么重试，要么把那个参与者标记为问题结点剔除整个集群，这样可以保证服务结点都是数据一致性的。
--  第二阶段中，如果参与者收不到协调者的 commit/fallback 指令，参与者将处于“状态未知”阶段，参与者完全不知道要怎么办。
+- 如果第一阶段中，参与者没有收到询问请求，或是参与者的回应没有到达协调者。那么，需要协调者做超时处理，一旦超时，可以当作失败，也可以重试。
+- 如果第二阶段中，正式提交发出后，如果有的参与者没有收到，或是参与者提交/回滚后的确认信息没有返回，一旦参与者的回应超时，要么重试，要么把那个参与者标记为问题结点剔除整个集群，这样可以保证服务结点都是数据一致性的。
+- 第二阶段中，如果参与者收不到协调者的 commit/fallback 指令，参与者将处于“状态未知”阶段，参与者完全不知道要怎么办。
 
 ## 缓存
 
@@ -2587,11 +2587,11 @@ Cursor
 
 ## 其他
 
--  zookeeper
--  kafka
--  storm
--  hadoop
--  spark
+- zookeeper
+- kafka
+- storm
+- hadoop
+- spark
 
 # 安全
 
@@ -2609,15 +2609,15 @@ Node.js 的加密貌似有点问题, 某些算法算出来跟别的语言 (比�
 
 早期的网络传输协议由于只在大学内使用, 所以是默认互相信任的. 所以传统的网络通信可以说是没有考虑网络安全的. 早年的浏览器大厂网景公司为了应对这个情况设计了 SSL (Secure Socket Layer), SSL 的主要用途是:
 
-1.  认证用户和服务器, 确保数据发送到正确的客户机和服务器;
-2.  加密数据以防止数据中途被窃取;
-3.  维护数据的完整性, 确保数据在传输过程中不被改变.
+1. 认证用户和服务器, 确保数据发送到正确的客户机和服务器;
+2. 加密数据以防止数据中途被窃取;
+3. 维护数据的完整性, 确保数据在传输过程中不被改变.
 
 存在三个特性:
 
--  机密性：SSL 协议使用密钥加密通信数据
--  可靠性：服务器和客户都会被认证, 客户的认证是可选的
--  完整性：SSL 协议会对传送的数据进行完整性检查
+- 机密性：SSL 协议使用密钥加密通信数据
+- 可靠性：服务器和客户都会被认证, 客户的认证是可选的
+- 完整性：SSL 协议会对传送的数据进行完整性检查
 
 1999 年, SSL 因为应用广泛, 已经成为互联网上的事实标准. IETF 就在那年把 SSL 标准化/强化. 标准化之后的名称改为传输层安全协议 (Transport Layer Security, TLS). 很多相关的文章都把这两者并列称呼 (TLS/SSL), 因为这两者可以视作同一个东西的不同阶段.
 
@@ -2739,15 +2739,15 @@ c.public.com
 
 预防:
 
-1.  A 站 (预防站) 检查 http 请求的 header 确认其 origin
-2.  检查 CSRF token
+1. A 站 (预防站) 检查 http 请求的 header 确认其 origin
+2. 检查 CSRF token
 
 ### 1.同源检查
 
 通过检查来过滤简单的 CSRF 攻击, 主要检查一下两个 header:
 
--  Origin Header
--  Referer Header
+- Origin Header
+- Referer Header
 
 ### 2.CSRF token
 
@@ -2783,11 +2783,11 @@ SELECT * FROM users WHERE usernae = 'myName' AND password = ''; DROP TABLE users
 
 其能实现的功能, 包括但不限于删除数据 (经济损失), 篡改数据 (密码等), 窃取数据 (网站管理权限, 用户数据) 等. 防治手段常见于:
 
--  给表名/字段名加前缀 (避免被猜到)
--  报错隐藏表信息 (避免被看到, 12306 早期就出现过的问题)
--  过滤可以拼接 SQL 的关键字符
--  对用户输入进行转义
--  验证用户输入的类型 (避免 limit, order by 等注入)
+- 给表名/字段名加前缀 (避免被猜到)
+- 报错隐藏表信息 (避免被看到, 12306 早期就出现过的问题)
+- 过滤可以拼接 SQL 的关键字符
+- 对用户输入进行转义
+- 验证用户输入的类型 (避免 limit, order by 等注入)
 
 ### NoSQL
 

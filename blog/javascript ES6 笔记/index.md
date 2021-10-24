@@ -45,8 +45,8 @@ console.log(i); // 10
 
 块级作用域存在于：
 
--  函数内部
--  块中(字符 { 和 } 之间的区域)
+- 函数内部
+- 块中(字符 { 和 } 之间的区域)
 
 ## let 和 const
 
@@ -695,9 +695,9 @@ let html = `
 
 实现的思路如下：
 
-1.  使用 match 函数，匹配每一行的空白字符，得到一个包含每一行空白字符的数组
-2.  数组遍历比较，得到最小的空白字符长度
-3.  构建一个正则表达式，然后每一行都替换掉最小长度的空白字符
+1. 使用 match 函数，匹配每一行的空白字符，得到一个包含每一行空白字符的数组
+2. 数组遍历比较，得到最小的空白字符长度
+3. 构建一个正则表达式，然后每一行都替换掉最小长度的空白字符
 
 实现的代码如下：
 
@@ -1108,29 +1108,29 @@ obj.c();
 
 ES6 引入了一种新的原始数据类型 Symbol，表示独一无二的值。
 
-1.  Symbol 值通过 Symbol 函数生成，使用 typeof，结果为 "symbol"
+1. Symbol 值通过 Symbol 函数生成，使用 typeof，结果为 "symbol"
 
 ```js
 var s = Symbol();
 console.log(typeof s); // "symbol"
 ```
 
-2.  Symbol 函数前不能使用 new 命令，否则会报错。这是因为生成的 Symbol 是一个原始类型的值，不是对象。
-3.  instanceof 的结果为 false
+2. Symbol 函数前不能使用 new 命令，否则会报错。这是因为生成的 Symbol 是一个原始类型的值，不是对象。
+3. instanceof 的结果为 false
 
 ```js
 var s = Symbol('foo');
 console.log(s instanceof Symbol); // false
 ```
 
-4.  Symbol 函数可以接受一个字符串作为参数，表示对 Symbol 实例的描述，主要是为了在控制台显示，或者转为字符串时，比较容易区分。
+4. Symbol 函数可以接受一个字符串作为参数，表示对 Symbol 实例的描述，主要是为了在控制台显示，或者转为字符串时，比较容易区分。
 
 ```js
 var s1 = Symbol('foo');
 console.log(s1); // Symbol(foo)
 ```
 
-5.  如果 Symbol 的参数是一个对象，就会调用该对象的 toString 方法，将其转为字符串，然后才生成一个 Symbol 值
+5. 如果 Symbol 的参数是一个对象，就会调用该对象的 toString 方法，将其转为字符串，然后才生成一个 Symbol 值
 
 ```js
 const obj = {
@@ -1142,7 +1142,7 @@ const sym = Symbol(obj);
 console.log(sym); // Symbol(abc)
 ```
 
-6.  Symbol 函数的参数只是表示对当前 Symbol 值的描述，相同参数的 Symbol 函数的返回值是不相等的。
+6. Symbol 函数的参数只是表示对当前 Symbol 值的描述，相同参数的 Symbol 函数的返回值是不相等的。
 
 ```js
 // 没有参数的情况
@@ -1158,7 +1158,7 @@ var s2 = Symbol('foo');
 console.log(s1 === s2); // false
 ```
 
-7.  Symbol 值不能与其他类型的值进行运算，会报错。
+7. Symbol 值不能与其他类型的值进行运算，会报错。
 
 ```js
 var sym = Symbol('My symbol');
@@ -1166,7 +1166,7 @@ var sym = Symbol('My symbol');
 console.log('your symbol is ' + sym); // TypeError: can't convert symbol to string
 ```
 
-8.  Symbol 值可以显式转为字符串。
+8. Symbol 值可以显式转为字符串。
 
 ```js
 var sym = Symbol('My symbol');
@@ -1175,7 +1175,7 @@ console.log(String(sym)); // 'Symbol(My symbol)'
 console.log(sym.toString()); // 'Symbol(My symbol)'
 ```
 
-9.  Symbol 值可以作为标识符，用于对象的属性名，可以保证不会出现同名的属性。
+9. Symbol 值可以作为标识符，用于对象的属性名，可以保证不会出现同名的属性。
 
 ```js
 var mySymbol = Symbol();
@@ -1197,7 +1197,7 @@ Object.defineProperty(a, mySymbol, { value: 'Hello!' });
 console.log(a[mySymbol]); // "Hello!"
 ```
 
-10.  Symbol 作为属性名，该属性不会出现在 for...in、for...of 循环中，也不会被 Object.keys()、Object.getOwnPropertyNames()、JSON.stringify() 返回。但是，它也不是私有属性，有一个 Object.getOwnPropertySymbols 方法，可以获取指定对象的所有 Symbol 属性名。
+10. Symbol 作为属性名，该属性不会出现在 for...in、for...of 循环中，也不会被 Object.keys()、Object.getOwnPropertyNames()、JSON.stringify() 返回。但是，它也不是私有属性，有一个 Object.getOwnPropertySymbols 方法，可以获取指定对象的所有 Symbol 属性名。
 
    ```js
     var obj = {};
@@ -1293,15 +1293,15 @@ console.log(a[mySymbol]); // "Hello!"
 
 我们来看看其他的特性该如何实现：
 
-1.  使用 typeof，结果为 "symbol"。
+1. 使用 typeof，结果为 "symbol"。
 
 利用 ES5，我们并不能修改 typeof 操作符的结果，所以这个无法实现。
 
-3.  instanceof 的结果为 false
+3. instanceof 的结果为 false
 
 因为不是通过 new 的方式实现的，所以 instanceof 的结果自然是 false。
 
-4.  Symbol 函数可以接受一个字符串作为参数，表示对 Symbol 实例的描述。主要是为了在控制台显示，或者转为字符串时，比较容易区分。
+4. Symbol 函数可以接受一个字符串作为参数，表示对 Symbol 实例的描述。主要是为了在控制台显示，或者转为字符串时，比较容易区分。
 
 当我们打印一个原生 Symbol 值的时候：
 
@@ -1311,7 +1311,7 @@ console.log(Symbol('1')); // Symbol(1)
 
 可是我们模拟实现的时候返回的却是一个对象，所以这个也是无法实现的，当然你修改 console.log 这个方法是另讲
 
-8.  Symbol 值可以显式转为字符串。
+8. Symbol 值可以显式转为字符串。
 
 ```js
 var sym = Symbol('My symbol');
@@ -1338,7 +1338,7 @@ var symbol = Object.create({
 
 ## 第三版
 
-9.  Symbol 值可以作为标识符，用于对象的属性名，可以保证不会出现同名的属性。
+9. Symbol 值可以作为标识符，用于对象的属性名，可以保证不会出现同名的属性。
 
 看着好像没什么，这点其实和第 8 点是冲突的，这是因为当我们模拟的所谓 Symbol 值其实是一个有着 toString 方法的对象，当对象作为对象的属性名的时候，就会进行隐式类型转换，还是会调用我们添加的 toString 方法，对于 Symbol('foo') 和 Symbol('foo') 两个 Symbol 值，虽然描述一样，但是因为是两个对象，所以并不相等，但是当作为对象的属性名的时候，都会隐式转换为 Symbol(foo) 字符串，这个时候就会造成同名的属性。举个例子：
 
@@ -1422,7 +1422,7 @@ console.log(o); // Object { "@@foo_1": "hello", "@@foo_2": "hi" }
 
 我们再看看接下来的特性。
 
-7.  Symbol 值不能与其他类型的值进行运算，会报错。
+7. Symbol 值不能与其他类型的值进行运算，会报错。
 
 以 + 操作符为例，当进行隐式类型转换的时候，会先调用对象的 valueOf 方法，如果没有返回基本值，就会再调用 toString 方法，所以我们考虑在 valueOf 方法中进行报错，比如：
 
@@ -1464,15 +1464,15 @@ var symbol = Object.create({
 
 ## 第五版
 
-10.  Symbol 作为属性名，该属性不会出现在 for...in、for...of 循环中，也不会被 Object.keys()、Object.getOwnPropertyNames()、JSON.stringify() 返回。但是，它也不是私有属性，有一个 Object.getOwnPropertySymbols 方法，可以获取指定对象的所有 Symbol 属性名。
+10. Symbol 作为属性名，该属性不会出现在 for...in、for...of 循环中，也不会被 Object.keys()、Object.getOwnPropertyNames()、JSON.stringify() 返回。但是，它也不是私有属性，有一个 Object.getOwnPropertySymbols 方法，可以获取指定对象的所有 Symbol 属性名。
 
 嗯，无法实现。
 
-11.  有时，我们希望重新使用同一个 Symbol 值，Symbol.for 方法可以做到这一点。它接受一个字符串作为参数，然后搜索有没有以该参数作为名称的 Symbol 值。如果有，就返回这个 Symbol 值，否则就新建并返回一个以该字符串为名称的 Symbol 值。
+11. 有时，我们希望重新使用同一个 Symbol 值，Symbol.for 方法可以做到这一点。它接受一个字符串作为参数，然后搜索有没有以该参数作为名称的 Symbol 值。如果有，就返回这个 Symbol 值，否则就新建并返回一个以该字符串为名称的 Symbol 值。
 
 这个实现类似于函数记忆，我们建立一个对象，用来储存已经创建的 Symbol 值即可。
 
-12.  Symbol.keyFor 方法返回一个已登记的 Symbol 类型值的 key。
+12. Symbol.keyFor 方法返回一个已登记的 Symbol 类型值的 key。
 
 遍历 forMap, 查找该值对应的键值即可。
 
@@ -1747,12 +1747,12 @@ for (let color of colors) {
 
 所以 for...of 循环可以使用的范围包括：
 
-1.  数组
-2.  Set
-3.  Map
-4.  类数组对象，如 arguments 对象、DOM NodeList 对象
-5.  Generator 对象
-6.  字符串
+1. 数组
+2. Set
+3. Map
+4. 类数组对象，如 arguments 对象、DOM NodeList 对象
+5. Generator 对象
+6. 字符串
 
 ## 模拟实现 for of
 
@@ -1779,9 +1779,9 @@ function forOf(obj, cb) {
 
 为了更好的访问对象中的内容，比如有的时候我们仅需要数组中的值，但有的时候不仅需要使用值还需要使用索引，ES6 为数组、Map、Set 集合内建了以下三种迭代器：
 
-1.  entries() 返回一个遍历器对象，用来遍历[键名, 键值]组成的数组。对于数组，键名就是索引值。
-2.  keys() 返回一个遍历器对象，用来遍历所有的键名。
-3.  values() 返回一个遍历器对象，用来遍历所有的键值。
+1. entries() 返回一个遍历器对象，用来遍历[键名, 键值]组成的数组。对于数组，键名就是索引值。
+2. keys() 返回一个遍历器对象，用来遍历所有的键名。
+3. values() 返回一个遍历器对象，用来遍历所有的键值。
 
 以数组为例：
 

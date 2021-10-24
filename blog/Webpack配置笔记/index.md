@@ -9,9 +9,9 @@ path: /webpack-config-note/
 
 # webpack4 配置一览
 
--  基于[react-boilerplate](https://github.com/react-boilerplate/react-boilerplate)
--  技术栈 antd + react + less
--  不断更新
+- 基于[react-boilerplate](https://github.com/react-boilerplate/react-boilerplate)
+- 技术栈 antd + react + less
+- 不断更新
 
 ## 前端的发展
 
@@ -23,9 +23,9 @@ path: /webpack-config-note/
 
 jQuery 库把它的 API 都放在了 `window.$` 下，在加载完 jQuery 后其他模块再通过 `window.$` 去使用 jQuery
 
--  命名空间冲突，两个库可能会使用同一个名称，例如 Zepto 也被放在 `window.$` 下；
--  无法合理地管理项目的依赖和版本；
--  无法方便地控制依赖的加载顺序。
+- 命名空间冲突，两个库可能会使用同一个名称，例如 Zepto 也被放在 `window.$` 下；
+- 无法合理地管理项目的依赖和版本；
+- 无法方便地控制依赖的加载顺序。
 
 ### CommonJS
 
@@ -41,8 +41,8 @@ module.exports = moduleA.someFunc;
 
 CommonJS 的优点在于：
 
--  代码可复用于 Node.js 环境下并运行，例如做同构应用；
--  通过 NPM 发布的很多第三方模块都采用了 CommonJS 规范。
+- 代码可复用于 Node.js 环境下并运行，例如做同构应用；
+- 通过 NPM 发布的很多第三方模块都采用了 CommonJS 规范。
 
 缺点在于这样的代码无法直接运行在浏览器环境下，必须通过工具转换成标准的 ES5。
 
@@ -61,10 +61,10 @@ require(['module'], function(module) {});
 
 AMD 的优点在于：
 
--  可在不转换代码的情况下直接在浏览器中运行；
--  可异步加载依赖；
--  可并行加载多个依赖；
--  代码可运行在浏览器环境和 Node.js 环境下。
+- 可在不转换代码的情况下直接在浏览器中运行；
+- 可异步加载依赖；
+- 可并行加载多个依赖；
+- 代码可运行在浏览器环境和 Node.js 环境下。
 
 AMD 的缺点在于 JavaScript 运行环境没有原生支持 AMD，需要先导入实现了 AMD 的库后才能正常使用。
 
@@ -89,12 +89,12 @@ export default {
 
 源代码无法直接运行，必须通过转换后才可以正常运行。
 
--  Entry：入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
--  Module：模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。Webpack 会从配置的 Entry 开始递归找出所有依赖的模块。
--  Chunk：代码块，一个 Chunk 由多个模块组合而成，用于代码合并与分割。
--  Loader：模块转换器，用于把模块原内容按照需求转换成新内容。
--  Plugin：扩展插件，在 Webpack 构建流程中的特定时机注入扩展逻辑来改变构建结果或做你想要的事情。
--  Output：输出结果，在 Webpack 经过一系列处理并得出最终想要的代码后输出结果。
+- Entry：入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
+- Module：模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。Webpack 会从配置的 Entry 开始递归找出所有依赖的模块。
+- Chunk：代码块，一个 Chunk 由多个模块组合而成，用于代码合并与分割。
+- Loader：模块转换器，用于把模块原内容按照需求转换成新内容。
+- Plugin：扩展插件，在 Webpack 构建流程中的特定时机注入扩展逻辑来改变构建结果或做你想要的事情。
+- Output：输出结果，在 Webpack 经过一系列处理并得出最终想要的代码后输出结果。
 
 Webpack 启动后会从 Entry 里配置的 Module 开始递归解析 Entry 依赖的所有 Module。每找到一个 Module，就会根据配置的 Loader 去找出对应的转换规则，对 Module 进行转换后，再解析出当前 Module 依赖的 Module。这些模块会以 Entry 为单位进行分组，一个 Entry 和其所有依赖的 Module 被分到一个组也就是一个 Chunk。最后 Webpack 会把所有 Chunk 转换成文件输出。在整个流程中 Webpack 会在恰当的时机执行 Plugin 里定义的逻辑。
 
@@ -915,7 +915,7 @@ module.exports = require('./webpack.base.babel')({
 
 ## 解决步骤
 
-1.  在 `index.html` 中注入全局变量
+1. 在 `index.html` 中注入全局变量
 
 ```html
 <script>
@@ -931,7 +931,7 @@ module.exports = require('./webpack.base.babel')({
 </script>
 ```
 
-2.  在 `app.js` 中注入此文件，编译时 `webpack` 会拷贝文件到 `build` 目录下
+2. 在 `app.js` 中注入此文件，编译时 `webpack` 会拷贝文件到 `build` 目录下
 
 ```js
 import '!file-loader?name=[name].[ext]!./config.js';
@@ -945,7 +945,7 @@ new CopyWebpackPlugin([
 ].map((src) => ({ from: src, to: path.resolve(process.cwd(), 'build') }))),
 ```
 
-3.  在 `config.js` 中添加全局变量
+3. 在 `config.js` 中添加全局变量
 
 ```js
 window.RUNTIME_CONSTANTS = {
@@ -953,4 +953,4 @@ window.RUNTIME_CONSTANTS = {
 };
 ```
 
-4.  愉快使用全局变量
+4. 愉快使用全局变量

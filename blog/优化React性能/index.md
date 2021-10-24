@@ -13,10 +13,10 @@ categories:
 
 > 您是否知道 key 在列表中使用不正确可以将 DOM 操作增加 10 倍以上？据了解，React 的 Virtual DOM 实现速度非常快。但是，即使使用 React 的内置性能，也有一些 UI 可能开始感觉迟缓的情况。造成业绩不佳的罪魁祸首是产生了太多渲染和状态同步。我们将介绍 4 种技术，以帮助确保您的应用程序得到优化，并提供快速的用户体验。
 
-1.  key 正确使用
-2.  管理 shouldComponentUpdate
-3.  扩展 PureComponent 而不是 Component
-4.  建立生产
+1. key 正确使用
+2. 管理 shouldComponentUpdate
+3. 扩展 PureComponent 而不是 Component
+4. 建立生产
 
 # 衡量效率
 
@@ -66,8 +66,8 @@ const users = [{ id: 1, name: 'Khaleesi' }, { id: 2, name: 'Jon' }, { id: 3, nam
 
 React 提供 PureComponent 了管理 shouldComponentUpdate 开发人员的生命周期钩子。PureComponent 将做所有道具/状态的浅层比较，并且只会在任何道具/状态发生变化时进行渲染。大多数情况下，您可以放弃使用 PureComponent 而不是自己处理。它确实带有一些仔细的考虑，可能导致讨厌的错误。在将对象分配给变量时，JavaScript 使用指针。这意味着变量指向内存中的特定位置，而不是指向对象本身的任何特定位置。如果更新对象的属性，指针将保持不变，因此浅比较将无法识别更新。为了避免这种情况，您可以
 
-1.  直接将变量传递给组件，而不是传递给对象
-2.  包含不可变的数据结构。
+1. 直接将变量传递给组件，而不是传递给对象
+2. 包含不可变的数据结构。
 
 以下示例使用 PureComponent 将获得与我们的示例相同的结果 shouldComponentUpdate。
 

@@ -15,23 +15,23 @@ Webpack 以其使用简单著称，在使用它的过程中，使用者只需把
 
 在了解 Webpack 原理前，需要掌握以下几个核心概念，以方便后面的理解：
 
--  Entry：入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
--  Module：模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。Webpack 会从配置的 Entry 开始递归找出所有依赖的模块。
--  Chunk：代码块，一个 Chunk 由多个模块组合而成，用于代码合并与分割。
--  Loader：模块转换器，用于把模块原内容按照需求转换成新内容。
--  Plugin：扩展插件，在 Webpack 构建流程中的特定时机会广播出对应的事件，插件可以监听这些事件的发生，在特定时机做对应的事情。
+- Entry：入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
+- Module：模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。Webpack 会从配置的 Entry 开始递归找出所有依赖的模块。
+- Chunk：代码块，一个 Chunk 由多个模块组合而成，用于代码合并与分割。
+- Loader：模块转换器，用于把模块原内容按照需求转换成新内容。
+- Plugin：扩展插件，在 Webpack 构建流程中的特定时机会广播出对应的事件，插件可以监听这些事件的发生，在特定时机做对应的事情。
 
 ## 流程概括
 
 Webpack 的运行流程是一个串行的过程，从启动到结束会依次执行以下流程：
 
-1.  初始化参数：从配置文件和 Shell 语句中读取与合并参数，得出最终的参数；
-2.  开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的 run 方法开始执行编译；
-3.  确定入口：根据配置中的 entry 找出所有的入口文件；
-4.  编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理；
-5.  完成模块编译：在经过第 4 步使用 Loader 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系；
-6.  输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk，再把每个 Chunk 转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会；
-7.  输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统。
+1. 初始化参数：从配置文件和 Shell 语句中读取与合并参数，得出最终的参数；
+2. 开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的 run 方法开始执行编译；
+3. 确定入口：根据配置中的 entry 找出所有的入口文件；
+4. 编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理；
+5. 完成模块编译：在经过第 4 步使用 Loader 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系；
+6. 输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk，再把每个 Chunk 转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会；
+7. 输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统。
 
 在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果。
 
@@ -39,9 +39,9 @@ Webpack 的运行流程是一个串行的过程，从启动到结束会依次执
 
 Webpack 的构建流程可以分为以下三大阶段：
 
-1.  初始化：启动构建，读取与合并配置参数，加载 Plugin，实例化 Compiler。
-2.  编译：从 Entry 发出，针对每个 Module 串行调用对应的 Loader 去翻译文件内容，再找到该 Module 依赖的 Module，递归地进行编译处理。
-3.  输出：对编译后的 Module 组合成 Chunk，把 Chunk 转换成文件，输出到文件系统。
+1. 初始化：启动构建，读取与合并配置参数，加载 Plugin，实例化 Compiler。
+2. 编译：从 Entry 发出，针对每个 Module 串行调用对应的 Loader 去翻译文件内容，再找到该 Module 依赖的 Module，递归地进行编译处理。
+3. 输出：对编译后的 Module 组合成 Chunk，把 Chunk 转换成文件，输出到文件系统。
 
 如果只执行一次构建，以上阶段将会按照顺序各执行一次。但在开启监听模式下，流程将变为如下：
 
@@ -358,8 +358,8 @@ bundle.js 内容如下：
 
 这里的 bundle.js 和上面所讲的 bundle.js 非常相似，区别在于：
 
--  多了一个 `__webpack_require__.e` 用于加载被分割出去的，需要异步加载的 Chunk 对应的文件;
--  多了一个 webpackJsonp 函数用于从异步加载的文件中安装模块。
+- 多了一个 `__webpack_require__.e` 用于加载被分割出去的，需要异步加载的 Chunk 对应的文件;
+- 多了一个 webpackJsonp 函数用于从异步加载的文件中安装模块。
 
 在使用了 CommonsChunkPlugin 去提取公共代码时输出的文件和使用了异步加载时输出的文件是一样的，都会有 `__webpack_require__.e` 和 webpackJsonp。 原因在于提取公共代码和异步加载本质上都是代码分割。
 
@@ -369,9 +369,9 @@ Loader 就像是一个翻译员，能把源文件经过转化后输出新的结�
 
 以处理 SCSS 文件为例：
 
-1.  SCSS 源代码会先交给 sass-loader 把 SCSS 转换成 CSS；
-2.  把 sass-loader 输出的 CSS 交给 css-loader 处理，找出 CSS 中依赖的资源、压缩 CSS 等；
-3.  把 css-loader 输出的 CSS 交给 style-loader 处理，转换成通过脚本加载的 JavaScript 代码；
+1. SCSS 源代码会先交给 sass-loader 把 SCSS 转换成 CSS；
+2. 把 sass-loader 输出的 CSS 交给 css-loader 处理，找出 CSS 中依赖的资源、压缩 CSS 等；
+3. 把 css-loader 输出的 CSS 交给 style-loader 处理，转换成通过脚本加载的 JavaScript 代码；
 
 可以看出以上的处理过程需要有顺序的链式执行，先 sass-loader 再 css-loader 再 style-loader。 以上处理的 Webpack 相关配置如下：
 
@@ -533,17 +533,17 @@ module.exports = function(source) {
 
 除了以上提到的在 Loader 中能调用的 Webpack API 外，还存在以下常用 API：
 
--  this.context：当前处理文件的所在目录，假如当前 Loader 处理的文件是 /src/main.js，则 this.context 就等于 /src。
--  this.resource：当前处理文件的完整请求路径，包括 querystring，例如 /src/main.js?name=1。
--  this.resourcePath：当前处理文件的路径，例如 /src/main.js。
--  this.resourceQuery：当前处理文件的 querystring。
--  this.target：等于 Webpack 配置中的 Target，详情见 2-7 其它配置项-Target。
--  this.loadModule：当 Loader 在处理一个文件时，如果依赖其它文件的处理结果才能得出当前文件的结果时， 就可以通过 this.loadModule(request: string, callback: function(err, source, sourceMap, module)) 去获得 request 对应文件的处理结果。
--  this.resolve：像 require 语句一样获得指定文件的完整路径，使用方法为 resolve(context: string, request: string, callback: function(err, result: string))。
--  this.addDependency：给当前处理文件添加其依赖的文件，以便再其依赖的文件发生变化时，会重新调用 Loader 处理该文件。使用方法为 addDependency(file: string)。
--  this.addContextDependency：和 addDependency 类似，但 addContextDependency 是把整个目录加入到当前正在处理文件的依赖中。使用方法为 addContextDependency(directory: string)。
--  this.clearDependencies：清除当前正在处理文件的所有依赖，使用方法为 clearDependencies()。
--  this.emitFile：输出一个文件，使用方法为 emitFile(name: string, content: Buffer|string, sourceMap: {...})
+- this.context：当前处理文件的所在目录，假如当前 Loader 处理的文件是 /src/main.js，则 this.context 就等于 /src。
+- this.resource：当前处理文件的完整请求路径，包括 querystring，例如 /src/main.js?name=1。
+- this.resourcePath：当前处理文件的路径，例如 /src/main.js。
+- this.resourceQuery：当前处理文件的 querystring。
+- this.target：等于 Webpack 配置中的 Target，详情见 2-7 其它配置项-Target。
+- this.loadModule：当 Loader 在处理一个文件时，如果依赖其它文件的处理结果才能得出当前文件的结果时， 就可以通过 this.loadModule(request: string, callback: function(err, source, sourceMap, module)) 去获得 request 对应文件的处理结果。
+- this.resolve：像 require 语句一样获得指定文件的完整路径，使用方法为 resolve(context: string, request: string, callback: function(err, result: string))。
+- this.addDependency：给当前处理文件添加其依赖的文件，以便再其依赖的文件发生变化时，会重新调用 Loader 处理该文件。使用方法为 addDependency(file: string)。
+- this.addContextDependency：和 addDependency 类似，但 addContextDependency 是把整个目录加入到当前正在处理文件的依赖中。使用方法为 addContextDependency(directory: string)。
+- this.clearDependencies：清除当前正在处理文件的所有依赖，使用方法为 clearDependencies()。
+- this.emitFile：输出一个文件，使用方法为 emitFile(name: string, content: Buffer|string, sourceMap: {...})
 
 ## 加载本地 Loader
 
@@ -572,9 +572,9 @@ Npm link 专门用于开发和调试本地 Npm 模块，能做到在不发布模
 
 完成 Npm link 的步骤如下：
 
-1.  确保正在开发的本地 Npm 模块（也就是正在开发的 Loader）的 package.json 已经正确配置好；
-2.  在本地 Npm 模块根目录下执行 npm link，把本地模块注册到全局；
-3.  在项目根目录下执行 npm link loader-name，把第 2 步注册到全局的本地 Npm 模块链接到项目的 node_moduels 下，其中的 loader-name 是指在第 1 步中的 package.json 文件中配置的模块名称。链接好 Loader 到项目后你就可以像使用一个真正的 Npm 模块一样使用本地的 Loader 了。
+1. 确保正在开发的本地 Npm 模块（也就是正在开发的 Loader）的 package.json 已经正确配置好；
+2. 在本地 Npm 模块根目录下执行 npm link，把本地模块注册到全局；
+3. 在项目根目录下执行 npm link loader-name，把第 2 步注册到全局的本地 Npm 模块链接到项目的 node_moduels 下，其中的 loader-name 是指在第 1 步中的 package.json 文件中配置的模块名称。链接好 Loader 到项目后你就可以像使用一个真正的 Npm 模块一样使用本地的 Loader 了。
 
 ### ResolveLoader
 
@@ -677,8 +677,8 @@ Webpack 启动后，在读取配置的过程中会先执行 new BasicPlugin(opti
 
 在开发 Plugin 时最常用的两个对象就是 Compiler 和 Compilation，它们是 Plugin 和 Webpack 之间的桥梁。 Compiler 和 Compilation 的含义如下：
 
--  Compiler 对象包含了 Webpack 环境所有的的配置信息，包含 options，loaders，plugins 这些信息，这个对象在 Webpack 启动时候被实例化，它是全局唯一的，可以简单地把它理解为 Webpack 实例；
--  Compilation 对象包含了当前的模块资源、编译生成资源、变化的文件等。当 Webpack 以开发模式运行时，每当检测到一个文件变化，一次新的 Compilation 将被创建。Compilation 对象也提供了很多事件回调供插件做扩展。通过 Compilation 也能读取到 Compiler 对象。
+- Compiler 对象包含了 Webpack 环境所有的的配置信息，包含 options，loaders，plugins 这些信息，这个对象在 Webpack 启动时候被实例化，它是全局唯一的，可以简单地把它理解为 Webpack 实例；
+- Compilation 对象包含了当前的模块资源、编译生成资源、变化的文件等。当 Webpack 以开发模式运行时，每当检测到一个文件变化，一次新的 Compilation 将被创建。Compilation 对象也提供了很多事件回调供插件做扩展。通过 Compilation 也能读取到 Compiler 对象。
 
 Compiler 和 Compilation 的区别在于：Compiler 代表了整个 Webpack 从启动到关闭的生命周期，而 Compilation 只是代表了一次新的编译。
 
@@ -711,9 +711,9 @@ compiler.plugin('event-name', function(params) {});
 
 在开发插件时，还需要注意以下两点：
 
--  只要能拿到 Compiler 或 Compilation 对象，就能广播出新的事件，所以在新开发的插件中也能广播出事件，给其它插件监听使用。
--  传给每个插件的 Compiler 和 Compilation 对象都是同一个引用。也就是说在一个插件中修改了 Compiler 或 Compilation 对象上的属性，会影响到后面的插件。
--  有些事件是异步的，这些异步的事件会附带两个参数，第二个参数为回调函数，在插件处理完任务时需要调用回调函数通知 Webpack，才会进入下一处理流程。例如：
+- 只要能拿到 Compiler 或 Compilation 对象，就能广播出新的事件，所以在新开发的插件中也能广播出事件，给其它插件监听使用。
+- 传给每个插件的 Compiler 和 Compilation 对象都是同一个引用。也就是说在一个插件中修改了 Compiler 或 Compilation 对象上的属性，会影响到后面的插件。
+- 有些事件是异步的，这些异步的事件会附带两个参数，第二个参数为回调函数，在插件处理完任务时需要调用回调函数通知 Webpack，才会进入下一处理流程。例如：
 
   ```js
   compiler.plugin('emit', function(compilation, callback) {
@@ -876,8 +876,8 @@ module.exports = {
 
 要实现该插件，需要借助两个事件：
 
--  done：在成功构建并且输出了文件后，Webpack 即将退出时发生；
--  failed：在构建出现异常导致构建失败，Webpack 即将退出时发生；
+- done：在成功构建并且输出了文件后，Webpack 即将退出时发生；
+- failed：在构建出现异常导致构建失败，Webpack 即将退出时发生；
 
 实现该插件非常简单，完整代码如下：
 

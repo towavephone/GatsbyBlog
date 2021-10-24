@@ -13,10 +13,10 @@ path: /front-end-performance-optimization/
 
 前端性能的一个重要指标是页面加载时间，不仅事关用户体验，也是搜索引擎排名考虑的一个因素。
 
-> -  来自 Google 的数据表明，一个有 10 条数据 0.4 秒能加载完的页面，变成 30 条数据 0.9 秒加载完之后，流量和广告收入下降 90%。
+> - 来自 Google 的数据表明，一个有 10 条数据 0.4 秒能加载完的页面，变成 30 条数据 0.9 秒加载完之后，流量和广告收入下降 90%。
 
--  Google Map 首页文件大小从 100KB 减小到 70-80KB 后，流量在第一周涨了 10%，接下来的三周涨了 25%。
--  亚马逊的数据表明：加载时间增加 100 毫秒，销量就下降 1%。
+- Google Map 首页文件大小从 100KB 减小到 70-80KB 后，流量在第一周涨了 10%，接下来的三周涨了 25%。
+- 亚马逊的数据表明：加载时间增加 100 毫秒，销量就下降 1%。
 
 以上数据更说明「加载时间就是金钱」，前端优化主要围绕提高加载速度进行。
 
@@ -28,26 +28,26 @@ Web 前端 80% 的响应时间花在图片、样式、脚本等资源下载上�
 
 通过简洁的设计减少页面所需资源，进而减少 HTTP 请求，这是最直接的方式，前提是你的 Boss、设计师同事不打死你。所以，还是另辟蹊径吧：
 
--  合并 JavaScript、CSS 等文件；
--  服务器端（CDN）自动合并
--  基于 Node.js 的文件合并工具一抓一大把
--  使用 CSS Sprite：将背景图片合并成一个文件，通过 background-image 和 background-position 控制显示；
--  Sprite Cow
--  Spritebox
+- 合并 JavaScript、CSS 等文件；
+- 服务器端（CDN）自动合并
+- 基于 Node.js 的文件合并工具一抓一大把
+- 使用 CSS Sprite：将背景图片合并成一个文件，通过 background-image 和 background-position 控制显示；
+- Sprite Cow
+- Spritebox
 
 > 逐步被 Icon Font 和 SVG Sprite 取代。
 
--  Image Map：合并图片，然后使用坐标映射不同的区域（演示）。
+- Image Map：合并图片，然后使用坐标映射不同的区域（演示）。
 
 > 缺点：仅适用于相连的图片；设置坐标过程乏味且易出错；可访性问题。不推荐使用这种过时的技术。
 
--  Inline Assets：使用 Data URI scheme 将图片嵌入 HTML 或者 CSS 中；或者将 CSS、JS、图片直接嵌入 HTML 中。
+- Inline Assets：使用 Data URI scheme 将图片嵌入 HTML 或者 CSS 中；或者将 CSS、JS、图片直接嵌入 HTML 中。
 
 > 会增加文件大小，也可能产生浏览器兼容及其他性能问题（有待整理补充）。
 
 > 未来的趋势是使用内嵌 SVG。
 
--  内容分片，将请求划分到不同的域名上。
+- 内容分片，将请求划分到不同的域名上。
 
 > HTTP/2 通过多路复用大幅降低了多个请求的开销。通过数据分帧层，客户端和服务器之间只需要建立一个 TCP 连接，即可同时收发多个文件，而且，该连接在相当长的时间周期内保持打开（持久化），以便复用。
 
@@ -59,9 +59,9 @@ Web 前端 80% 的响应时间花在图片、样式、脚本等资源下载上�
 
 基于性能考虑，ISP、局域网、操作系统、浏览器都会有相应的 DNS 缓存机制。
 
--  IE 缓存 30 分钟，可以通过注册表中 DnsCacheTimeout 项设置；
--  Firefox 混存 1 分钟，通过 network.dnsCacheExpiration 配置；
--  （TODO：补充其他浏览器缓存信息）
+- IE 缓存 30 分钟，可以通过注册表中 DnsCacheTimeout 项设置；
+- Firefox 混存 1 分钟，通过 network.dnsCacheExpiration 配置；
+- （TODO：补充其他浏览器缓存信息）
 
 首次访问、没有相应的 DNS 缓存时，域名越多，查询时间越长。所以应尽量减少域名数量。但基于并行下载考虑，把资源分布到 2 个域名上（最多不超过 4 个）。这是减少 DNS 查询同时保证并行下载的折衷方案。
 
@@ -77,8 +77,8 @@ HTTP/1.1 301 Moved Permanently Location: http://example.com/newuri Content-Type:
 
 有时重定向无法避免，在糟糕也比抛出 404 好。虽然通过 HTML meta refresh 和 JavaScript 也能实现，但首选 HTTP 3xx 跳转，以保证浏览器「后退」功能正常工作（也利于 SEO）。
 
--  最浪费的重定向经常发生、而且很容易被忽略：URL 末尾应该添加 / 但未添加。比如，访问 `http://astrology.yahoo.com/astrology` 将被 301 重定向到 `http://astrology.yahoo.com/astrology/`（注意末尾的 /）。如果使用 Apache，可以通过 Alias 或 mod_rewrite 或 DirectorySlash 解决这个问题。
--  网站域名变更：CNAME 结合 Alias 或 mod_rewrite 或者其他服务器类似功能实现跳转。
+- 最浪费的重定向经常发生、而且很容易被忽略：URL 末尾应该添加 / 但未添加。比如，访问 `http://astrology.yahoo.com/astrology` 将被 301 重定向到 `http://astrology.yahoo.com/astrology/`（注意末尾的 /）。如果使用 Apache，可以通过 Alias 或 mod_rewrite 或 DirectorySlash 解决这个问题。
+- 网站域名变更：CNAME 结合 Alias 或 mod_rewrite 或者其他服务器类似功能实现跳转。
 
 ### 缓存 Ajax 请求
 
@@ -88,18 +88,18 @@ Ajax 可以提高用户体验。但「异步」不意味着「及时」，优化
 
 以下规则也关乎 Ajax 响应速度：
 
--  启用 Gzip
--  减少 DNS 查询
--  压缩 JavaScript 和 CSS
--  避免重定向
--  配置 Etag
+- 启用 Gzip
+- 减少 DNS 查询
+- 压缩 JavaScript 和 CSS
+- 避免重定向
+- 配置 Etag
 
 ### 延迟加载
 
 页面初始加载时哪些内容是绝对必需的？不在答案之列的资源都可以延迟加载。比如：
 
--  非首屏使用的数据、样式、脚本、图片等；
--  用户交互时才会显示的内容。
+- 非首屏使用的数据、样式、脚本、图片等；
+- 用户交互时才会显示的内容。
 
 遵循「渐进增强」理念开发的网站：JavaScript 用于增强用用户体验，但没有（不支持） JavaScript 也能正常工作，完全可以延迟加载 JavaScript。
 
@@ -111,19 +111,19 @@ Ajax 可以提高用户体验。但「异步」不意味着「及时」，优化
 
 预先加载利用浏览器空闲时间请求将来要使用的资源，以便用户访问下一页面时更快地响应。
 
--  无条件预先加载：页面加载完成（load）后，马上获取其他资源。以 google.com 为例，首页加载完成后会立即下载一个 Sprite 图片，此图首页不需要，但是搜索结果页要用到。
+- 无条件预先加载：页面加载完成（load）后，马上获取其他资源。以 google.com 为例，首页加载完成后会立即下载一个 Sprite 图片，此图首页不需要，但是搜索结果页要用到。
 
--  有条件预先加载：根据用户行为预判用户去向，预载相关资源。比如 search.yahoo.com 开始输入时会有额外的资源加载。
+- 有条件预先加载：根据用户行为预判用户去向，预载相关资源。比如 search.yahoo.com 开始输入时会有额外的资源加载。
 
 > Chrome 等浏览器的地址栏也有类似的机制。
 
--  有「阴谋」的预先加载：页面即将上线新版前预先加载新版内容。网站改版后由于缓存、使用习惯等原因，会有旧版的网站更快更流畅的反馈。为缓解这一问题，在新版上线之前，旧版可以利用空闲提前加载一些新版的资源缓存到客户端，以便新版正式上线后更快的载入（好一个「心机猿」:scream:）。
+- 有「阴谋」的预先加载：页面即将上线新版前预先加载新版内容。网站改版后由于缓存、使用习惯等原因，会有旧版的网站更快更流畅的反馈。为缓解这一问题，在新版上线之前，旧版可以利用空闲提前加载一些新版的资源缓存到客户端，以便新版正式上线后更快的载入（好一个「心机猿」:scream:）。
 
 > 「双十一」、「黑五」这类促销日来临之前，也可以预先下载一些相关资源到客户端（浏览器、App 等），有效利用浏览器缓存和本地存储，降低活动当日请求压力，提高用户体验。
 
 > TODO: Prefetch 相关细节
 
--  Resource Hints Spec
+- Resource Hints Spec
 
 ### 减少 DOM 元素数量
 
@@ -131,9 +131,9 @@ Ajax 可以提高用户体验。但「异步」不意味着「及时」，优化
 
 从以下几个角度考虑移除不必要的标记：
 
--  是否还在使用表格布局？
--  塞进去更多的 `<div>` 仅为了处理布局问题？也许有更好、更语义化的标记。
--  能通过伪元素实现的功能，就没必要添加额外元素，如清除浮动。
+- 是否还在使用表格布局？
+- 塞进去更多的 `<div>` 仅为了处理布局问题？也许有更好、更语义化的标记。
+- 能通过伪元素实现的功能，就没必要添加额外元素，如清除浮动。
 
 浏览器控制台中输入以下代码可以计算出页面中有多少 DOM 元素：
 
@@ -145,9 +145,9 @@ document.getElementsByTagName('*').length;
 
 为什么不使用表格布局？
 
--  更多的标签，增加文件大小；
--  不易维护，无法适应响应式设计；
--  性能考量，默认的表格布局算法会产生大量重绘（参见[表格布局算法](https://csspod.com/table-width-algorithms/)）。
+- 更多的标签，增加文件大小；
+- 不易维护，无法适应响应式设计；
+- 性能考量，默认的表格布局算法会产生大量重绘（参见[表格布局算法](https://csspod.com/table-width-algorithms/)）。
 
 ### 划分内容到不同域名
 
@@ -163,19 +163,19 @@ document.getElementsByTagName('*').length;
 
 `<iframe>` 优点：
 
--  可以用来加载速度较慢的第三方资源，如广告、徽章；
--  可用作安全沙箱；
--  可以并行下载脚本。
+- 可以用来加载速度较慢的第三方资源，如广告、徽章；
+- 可用作安全沙箱；
+- 可以并行下载脚本。
 
 `<iframe>` 缺点：
 
--  加载代价昂贵，即使是空的页面；
+- 加载代价昂贵，即使是空的页面；
 
--  阻塞页面 load 事件触发；
+- 阻塞页面 load 事件触发；
 
 > Iframe 完全加载以后，父页面才会触发 load 事件。 Safari、Chrome 中通过 JavaScript 动态设置 iframe src 可以避免这个问题。
 
--  缺乏语义。
+- 缺乏语义。
 
 ### 避免 404 错误
 
@@ -185,7 +185,7 @@ HTTP 请求很昂贵，返回无效的响应（如 404 未找到）完全没必�
 
 ### 补充规则
 
--  定义字符集，并放在 `<head>` 顶部。大多数浏览器会暂停页面渲染，直到找到字符集定义。
+- 定义字符集，并放在 `<head>` 顶部。大多数浏览器会暂停页面渲染，直到找到字符集定义。
 
 ## 服务器
 
@@ -201,8 +201,8 @@ HTTP 请求很昂贵，返回无效的响应（如 404 未找到）完全没必�
 
 ### 添加 Expires 或 Cache-Control 响应头
 
--  静态内容：将 Expires 响应头设置为将来很远的时间，实现「永不过期」策略；
--  动态内容：设置合适的 Cache-Control 响应头，让浏览器有条件地发起请求。
+- 静态内容：将 Expires 响应头设置为将来很远的时间，实现「永不过期」策略；
+- 动态内容：设置合适的 Cache-Control 响应头，让浏览器有条件地发起请求。
 
 > Cache-Control 头在 HTTP/1.1 规范中定义，取代了之前用来定义响应缓存策略的头（例如 Expires、Pragma）。当前的所有浏览器都支持 Cache-Control，因此，使用它就够了。
 
@@ -273,17 +273,17 @@ img.src = '';
 
 虽然 src 属性为空字符串，但浏览器仍然会向服务器发起一个 HTTP 请求：
 
--  IE 向页面所在的目录发送请求；
--  Safari、Chrome、Firefox 向页面本身发送请求；
--  Opera 不执行任何操作。
+- IE 向页面所在的目录发送请求；
+- Safari、Chrome、Firefox 向页面本身发送请求；
+- Opera 不执行任何操作。
 
 > 以上数据较老，当下主流版本可能会有改变。
 
 空 src 产生请求的后果不容小觑：
 
--  给服务器造成意外的流量负担，尤其时日 PV 较大时；
--  浪费服务器计算资源；
--  可能产生报错。
+- 给服务器造成意外的流量负担，尤其时日 PV 较大时；
+- 浪费服务器计算资源；
+- 可能产生报错。
 
 当然，浏览器如此实现也是根据 RFC 3986 - Uniform Resource Identifiers，当空字符串作为 URI 出现时，被当成相对 URI，具体算法参见规范 5.2 节。
 
@@ -299,10 +299,10 @@ img.src = '';
 
 Cookie 被用于身份认证、个性化设置等诸多用途。Cookie 通过 HTTP 头在服务器和浏览器间来回传送，减少 Cookie 大小可以降低其对响应速度的影响。
 
--  去除不必要的 Cookie；
--  尽量压缩 Cookie 大小；
--  注意设置 Cookie 的 domain 级别，如无必要，不要影响到 sub-domain；
--  设置合适的过期时间。
+- 去除不必要的 Cookie；
+- 尽量压缩 Cookie 大小；
+- 注意设置 Cookie 的 domain 级别，如无必要，不要影响到 sub-domain；
+- 设置合适的过期时间。
 
 更多细节参考 [When the Cookie Crumbles。](http://yuiblog.com/blog/2007/03/01/performance-research-part-3/)
 
@@ -348,8 +348,8 @@ AlphaImageLoader 为 IE5.5-IE8 专有的技术，和 CSS 表达式一样，放�
 
 一些特殊场景无法将脚本放到页面底部的，可以考虑`<script>` 的以下属性：
 
--  defer 属性；
--  HTML5 新增的 async 属性。
+- defer 属性；
+- HTML5 新增的 async 属性。
 
 ### 使用外部 JavaScript 和 CSS
 
@@ -373,15 +373,15 @@ JavaScript 操作 DOM 很慢，尤其是 DOM 节点很多时。
 
 使用时应该注意：
 
--  缓存已经访问过的元素；
--  使用 DocumentFragment 暂存 DOM，整理好以后再插入 DOM 树；
--  操作 className，而不是多次读写 style；
--  避免使用 JavaScript 修复布局。
+- 缓存已经访问过的元素；
+- 使用 DocumentFragment 暂存 DOM，整理好以后再插入 DOM 树；
+- 操作 className，而不是多次读写 style；
+- 避免使用 JavaScript 修复布局。
 
 ### 使用高效的事件处理
 
--  减少绑定事件监听的节点，如通过事件委托；
--  尽早处理事件，在 DOMContentLoaded 即可进行，不用等到 load 以后。
+- 减少绑定事件监听的节点，如通过事件委托；
+- 尽早处理事件，在 DOMContentLoaded 即可进行，不用等到 load 以后。
 
 > 对于 resize、scroll 等触发频率极高的事件，应该通过 debounce 等机制降低处理程序执行频率。
 
@@ -391,19 +391,19 @@ JavaScript 操作 DOM 很慢，尤其是 DOM 节点很多时。
 
 YDN 列出的相关工具 缺乏易用性，建议参考以下工具。
 
--  imagemin
--  ImageOptim
+- imagemin
+- ImageOptim
 
 > TODO:
 >
-> -  PNG 终极优化；
-> -  Webp 相关内容；
-> -  SVG 相关内容。
+> - PNG 终极优化；
+> - Webp 相关内容；
+> - SVG 相关内容。
 
 ### PNG 终极优化
 
--  Most Effective Method to Reduce and Optimize PNG Images
--  Clever PNG Optimization Techniques
+- Most Effective Method to Reduce and Optimize PNG Images
+- Clever PNG Optimization Techniques
 
 ### 优化 CSS Sprite
 
@@ -421,9 +421,9 @@ Favicon.ico 一般存放在网站根目录下，无论是否在页面中设置�
 
 所以确保这个图标：
 
--  存在（避免 404）；
--  尽量小，最好小于 1K；
--  设置较长的过期时间。
+- 存在（避免 404）；
+- 尽量小，最好小于 1K；
+- 设置较长的过期时间。
 
 > 对于较新的浏览器，可以使用 PNG 格式的 favicon。
 

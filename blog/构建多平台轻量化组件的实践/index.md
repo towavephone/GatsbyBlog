@@ -23,12 +23,12 @@ path: /building-platform-lightweight-components/
 
 # 方案调研
 
-1.  组件异步加载，减少首屏加载大小，非首屏且较大的组件预加载，这里需要 nginx 的配合
-2.  去除较大的库，改用轻量级的替代库或者不用
-3.  所有用到的组件最好都由自己编写，有利于定制化功能、减小组件大小
-4.  移动端可以和桌面端项目写在一起分开打包
-5.  代码的分层尤其是 IM 层要分离出来，便于切换不同的 IM 提供商
-6.  小程序端用 webview 加载的网页，需要注意在第三方小程序上配置 nginx
+1. 组件异步加载，减少首屏加载大小，非首屏且较大的组件预加载，这里需要 nginx 的配合
+2. 去除较大的库，改用轻量级的替代库或者不用
+3. 所有用到的组件最好都由自己编写，有利于定制化功能、减小组件大小
+4. 移动端可以和桌面端项目写在一起分开打包
+5. 代码的分层尤其是 IM 层要分离出来，便于切换不同的 IM 提供商
+6. 小程序端用 webview 加载的网页，需要注意在第三方小程序上配置 nginx
 
 # 具体实施
 
@@ -36,8 +36,8 @@ path: /building-platform-lightweight-components/
 
 需要修改 webpack 配置，由于之前是在 webpack2 上开发，不能很完美的做到异步加载。此时将框架升级到和本文 [Webpack 脚手架搭建笔记——记一次新项目搭建](/webpack-template-new-project/) 的同一版本，具体修改如下：
 
-1.  去除 mini-css-extract-plugin，防止 css 单独抽离
-2.  聚合初始加载脚本到一个文件，异步加载的在其他文件，且对异步加载的做 hash 处理
+1. 去除 mini-css-extract-plugin，防止 css 单独抽离
+2. 聚合初始加载脚本到一个文件，异步加载的在其他文件，且对异步加载的做 hash 处理
 
    boot\internals\webpack\webpack.prod.babel.js
 
@@ -136,8 +136,8 @@ package.json
 
 ### 主要变化
 
-1.  去除比较大的依赖库 antd、moment、rxjs
-2.  替换 react 为 react-lite
+1. 去除比较大的依赖库 antd、moment、rxjs
+2. 替换 react 为 react-lite
 
    其中需要对 react-lite 做下兼容处理，不影响之前依赖 react 的代码
 

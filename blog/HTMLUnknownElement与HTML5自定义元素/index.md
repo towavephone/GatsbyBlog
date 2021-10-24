@@ -74,8 +74,8 @@ document.createElement('user-name') instanceof HTMLUnknownElement; // 返回值�
 
 对于自定义元素，规范提供了一套各种 HTML 特性可继承可扩展的机制，通常使用套路如下：
 
-1.  ES6 class 继承；
-2.  customElements 定义元素；
+1. ES6 class 继承；
+2. customElements 定义元素；
 
 先说说目前支持相对较好的匿名自定义元素（Autonomous custom elements），也就是继承自 HTMElement 的用法。
 
@@ -199,9 +199,9 @@ rows 属性的表现就好像`<textarea>`元素的 rows 属性一样，修改后
 
 大致套路这样的：
 
-1.  HTML 模块注册与构建自定义元素；
-2.  母页面引入模块；
-3.  母页面自定义标签自动组件呈现；
+1. HTML 模块注册与构建自定义元素；
+2. 母页面引入模块；
+3. 母页面自定义标签自动组件呈现；
 
 例如下面 HTML：
 

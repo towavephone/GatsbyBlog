@@ -61,11 +61,11 @@ Chrome Dev Tools 非常强大，[dev-tips](https://umaar.com/dev-tips/) 列出�
 
 ## 移动端控制台
 
--  [Chrome 远程调试](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/webviews) app 支持后，连接 usb 或者局域网，即可通过 Dev Tools 调试 webview 页面。
--  [Weinre](http://people.apache.org/~pmuellr/weinre/docs/latest/Home.html) 通过页面加载脚本，与 pc 端调试器通信。
--  通过内嵌控制台解决，比如 [eruda](http://eruda.liriliri.io/) [VConsole](https://github.com/WechatFE/vConsole)
--  [Rosin](http://alloyteam.github.io/Rosin/) fiddler 的一个插件，协助移动页面调试。
--  [jsconsole](https://jsconsole.com/) 在本地部署后，手机访问对应 ip，可以测试对应浏览器的控制台。
+- [Chrome 远程调试](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/webviews) app 支持后，连接 usb 或者局域网，即可通过 Dev Tools 调试 webview 页面。
+- [Weinre](http://people.apache.org/~pmuellr/weinre/docs/latest/Home.html) 通过页面加载脚本，与 pc 端调试器通信。
+- 通过内嵌控制台解决，比如 [eruda](http://eruda.liriliri.io/) [VConsole](https://github.com/WechatFE/vConsole)
+- [Rosin](http://alloyteam.github.io/Rosin/) fiddler 的一个插件，协助移动页面调试。
+- [jsconsole](https://jsconsole.com/) 在本地部署后，手机访问对应 ip，可以测试对应浏览器的控制台。
 
 ## 请求代理
 
@@ -83,8 +83,8 @@ Chrome Dev Tools 非常强大，[dev-tips](https://umaar.com/dev-tips/) 列出�
 
 ## DOM 断点、事件断点
 
--  DOM 断点，在 dom 元素右键，选择 （Break on subtree modifications），可以在此 dom 被修改时触发断点，在不确定 dom 被哪段 js 脚本修改时可能有用。
--  Event Listener Breakpoints，神器之一，对于任何事件都能进入断点，比如 click，touch，script 事件统统能监听。
+- DOM 断点，在 dom 元素右键，选择 （Break on subtree modifications），可以在此 dom 被修改时触发断点，在不确定 dom 被哪段 js 脚本修改时可能有用。
+- Event Listener Breakpoints，神器之一，对于任何事件都能进入断点，比如 click，touch，script 事件统统能监听。
 
 ## 使用错误追踪平台
 

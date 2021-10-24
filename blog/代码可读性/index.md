@@ -253,9 +253,9 @@ var setFirstEmptyInput = function(new_alue) {
 
 以上实现有以下问题：
 
--  found 可以去除；
--  elem 作用域过大；
--  可以用 for 循环代替 while 循环；
+- found 可以去除；
+- elem 作用域过大；
+- 可以用 for 循环代替 while 循环；
 
 ```js
 var setFirstEmptyInput = function(new_value) {
@@ -338,4 +338,4 @@ public int findClostElement(int[] arr) {
 
 # 参考资料
 
--  Dustin, Boswell, Trevor, 等. 编写可读代码的艺术 [M]. 机械工业出版社, 2012.
+- Dustin, Boswell, Trevor, 等. 编写可读代码的艺术 [M]. 机械工业出版社, 2012.

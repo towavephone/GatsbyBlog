@@ -12,9 +12,9 @@ draft: true
 
 wsl1 或 2 或类 linux 环境
 
-1.  配置步骤：https://docs.microsoft.com/zh-cn/windows/wsl/setup/environment 和 https://docs.microsoft.com/zh-cn/windows/dev-environment/javascript/nodejs-on-wsl
-2.  注意 wsl2 需要项目路径为 wsl2 的路径，推荐放在 /home/用户名/project 下面；wsl1 没有这个问题，可以直接放在 window 系统，通过 /mnt 访问。原因：安装了 wsl2 之后项目文件却在 windows 系统的情况下会造成文件改动后不能热更新。建议安装 Ubuntu18.04 的 wsl2
-3.  开机启动时使用 vscode remote 连接 wsl2 有可能连接失败，可以尝试重启 wsl2，即需要打开 powershell 控制台运行以下命令
+1. 配置步骤：https://docs.microsoft.com/zh-cn/windows/wsl/setup/environment 和 https://docs.microsoft.com/zh-cn/windows/dev-environment/javascript/nodejs-on-wsl
+2. 注意 wsl2 需要项目路径为 wsl2 的路径，推荐放在 /home/用户名/project 下面；wsl1 没有这个问题，可以直接放在 window 系统，通过 /mnt 访问。原因：安装了 wsl2 之后项目文件却在 windows 系统的情况下会造成文件改动后不能热更新。建议安装 Ubuntu18.04 的 wsl2
+3. 开机启动时使用 vscode remote 连接 wsl2 有可能连接失败，可以尝试重启 wsl2，即需要打开 powershell 控制台运行以下命令
 
    ```bash
    wsl --shutdown
@@ -109,8 +109,8 @@ $ nrm use taobao # 使用 taobao 的源作为默认的 npm 源
 
 如果项目中有 sass 存在则需要 python 编译，需要以下处理
 
--  安装 `python2 sudo apt-get install python2.7`
--  在 /home/用户名/.zshrc 下添加以下脚本
+- 安装 `python2 sudo apt-get install python2.7`
+- 在 /home/用户名/.zshrc 下添加以下脚本
 
   ```bash
   alias python="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装
@@ -119,9 +119,9 @@ $ nrm use taobao # 使用 taobao 的源作为默认的 npm 源
 
 # ssh 免密登录
 
-1.  `ssh-copy-id -i /home/tubt/.ssh/id_rsa.pub 用户名@ip`
-2.  输入具体密码
-3.  `ssh 用户名@ip` 这里即可免密登录
+1. `ssh-copy-id -i /home/tubt/.ssh/id_rsa.pub 用户名@ip`
+2. 输入具体密码
+3. `ssh 用户名@ip` 这里即可免密登录
 
 # 日常工作顺序
 

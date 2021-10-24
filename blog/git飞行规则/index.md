@@ -9,8 +9,8 @@ tags: Git, git 飞行规则
 
 ## 前言
 
--  英文原版[README](https://github.com/k88hudson/git-flight-rules/blob/master/README.md)
--  翻译可能存在错误或不标准的地方，欢迎大家指正和修改，谢谢！
+- 英文原版[README](https://github.com/k88hudson/git-flight-rules/blob/master/README.md)
+- 翻译可能存在错误或不标准的地方，欢迎大家指正和修改，谢谢！
 
 ## 什么是"飞行规则"?
 
@@ -333,8 +333,8 @@ HEAD is now at a13b85e
 
 假设你有:
 
--  分支 `solution`, 拥有原型方案， 领先 `develop` 分支。
--  分支 `develop`, 在这里你应用原型方案的一些内容。
+- 分支 `solution`, 拥有原型方案， 领先 `develop` 分支。
+- 分支 `develop`, 在这里你应用原型方案的一些内容。
 
 我去可以通过把内容拿到你的分支里，来解决这个问题:
 
@@ -703,8 +703,8 @@ noop;
 
 这意味着你 rebase 的分支和当前分支在同一个提交 (commit) 上, 或者 -领先 (ahead)- 当前分支。 你可以尝试:
 
--  检查确保主 (master) 分支没有问题
--  rebase `HEAD~2` 或者更早
+- 检查确保主 (master) 分支没有问题
+- rebase `HEAD~2` 或者更早
 
 #### 有冲突的情况
 
@@ -886,29 +886,29 @@ $ git reset --hard 0254ea7
 
 ### 书 (Books)
 
--  [Pro Git](https://git-scm.com/book/en/v2) - Scott Chacon's excellent git book
--  [Git Internals](https://github.com/pluralsight/git-internals-pdf) - Scott Chacon's other excellent git book
+- [Pro Git](https://git-scm.com/book/en/v2) - Scott Chacon's excellent git book
+- [Git Internals](https://github.com/pluralsight/git-internals-pdf) - Scott Chacon's other excellent git book
 
 ### 教程 (Tutorials)
 
--  [Learn Git branching](https://learngitbranching.js.org/) 一个基于网页的交互式 branching/merging/rebasing 教程
--  [Getting solid at Git rebase vs. merge](https://medium.com/@porteneuve/getting-solid-at-git-rebase-vs-merge-4fa1a48c53aa)
--  [git-workflow](https://github.com/asmeurer/git-workflow) - [Aaron Meurer](https://github.com/asmeurer) 的怎么使用 Git 为开源仓库贡献
--  [GitHub as a workflow](http://hugogiraudel.com/2015/08/13/github-as-a-workflow/) - 使用 GitHub 做为工作流的趣事, 尤其是空 PRs
+- [Learn Git branching](https://learngitbranching.js.org/) 一个基于网页的交互式 branching/merging/rebasing 教程
+- [Getting solid at Git rebase vs. merge](https://medium.com/@porteneuve/getting-solid-at-git-rebase-vs-merge-4fa1a48c53aa)
+- [git-workflow](https://github.com/asmeurer/git-workflow) - [Aaron Meurer](https://github.com/asmeurer) 的怎么使用 Git 为开源仓库贡献
+- [GitHub as a workflow](http://hugogiraudel.com/2015/08/13/github-as-a-workflow/) - 使用 GitHub 做为工作流的趣事, 尤其是空 PRs
 
 ### 脚本和工具 (Scripts and Tools)
 
--  [firstaidgit.io](http://firstaidgit.io/) 一个可搜索的最常被问到的 Git 的问题
--  [git-extra-commands](https://github.com/unixorn/git-extra-commands) - 一堆有用的额外的 Git 脚本
--  [git-extras](https://github.com/tj/git-extras) - GIT 工具集 -- repo summary, repl, changelog population, author commit percentages and more
--  [git-fire](https://github.com/qw3rtman/git-fire) - git-fire 是一个 Git 插件，用于帮助在紧急情况下添加所有当前文件, 做提交 (committing), 和推 (push) 到一个新分支 (阻止合并冲突)。
--  [git-tips](https://github.com/git-tips/tips) - Git 小提示
+- [firstaidgit.io](http://firstaidgit.io/) 一个可搜索的最常被问到的 Git 的问题
+- [git-extra-commands](https://github.com/unixorn/git-extra-commands) - 一堆有用的额外的 Git 脚本
+- [git-extras](https://github.com/tj/git-extras) - GIT 工具集 -- repo summary, repl, changelog population, author commit percentages and more
+- [git-fire](https://github.com/qw3rtman/git-fire) - git-fire 是一个 Git 插件，用于帮助在紧急情况下添加所有当前文件, 做提交 (committing), 和推 (push) 到一个新分支 (阻止合并冲突)。
+- [git-tips](https://github.com/git-tips/tips) - Git 小提示
 
 ### GUI 客户端 (GUI Clients)
 
--  [GitKraken](https://www.gitkraken.com/) - 豪华的 Git 客户端 Windows, Mac & Linux
--  [git-cola](https://git-cola.github.io/) - 另外一个 Git 客户端 Windows & OS X
--  [GitUp](https://github.com/git-up/GitUp) - 一个新的 Git 客户端，在处理 Git 的复杂性上有自己的特点
--  [gitx-dev](https://rowanj.github.io/gitx/) - 图形化的 Git 客户端 OS X
--  [Source Tree](https://www.sourcetreeapp.com/) - 免费的图形化 Git 客户端 Windows & OS X
--  [Tower](http://www.git-tower.com/) - 图形化 Git 客户端 OS X(付费)
+- [GitKraken](https://www.gitkraken.com/) - 豪华的 Git 客户端 Windows, Mac & Linux
+- [git-cola](https://git-cola.github.io/) - 另外一个 Git 客户端 Windows & OS X
+- [GitUp](https://github.com/git-up/GitUp) - 一个新的 Git 客户端，在处理 Git 的复杂性上有自己的特点
+- [gitx-dev](https://rowanj.github.io/gitx/) - 图形化的 Git 客户端 OS X
+- [Source Tree](https://www.sourcetreeapp.com/) - 免费的图形化 Git 客户端 Windows & OS X
+- [Tower](http://www.git-tower.com/) - 图形化 Git 客户端 OS X(付费)

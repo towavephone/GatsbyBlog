@@ -82,8 +82,8 @@ window.onresize = function() {
 
 兼容原理：
 
-1.  判断版本类型
-2.  更改滚动的可视区域
+1. 判断版本类型
+2. 更改滚动的可视区域
 
 ```js
 const isWechat = window.navigator.userAgent.match(/MicroMessenger\/([\d\.]+)/i);
@@ -170,9 +170,9 @@ body {
 
 移动端触摸事件有三个，分别定义为
 
-1.  touchstart ：手指放在一个 DOM 元素上。
-2.  touchmove ：手指拖曳一个 DOM 元素。
-3.  touchend ：手指从一个 DOM 元素上移开。
+1. touchstart ：手指放在一个 DOM 元素上。
+2. touchmove ：手指拖曳一个 DOM 元素。
+3. touchend ：手指从一个 DOM 元素上移开。
 
 touchmove 事件的速度是可以实现定义的，取决于硬件性能和其他实现细节，同时 preventDefault 方法，阻止同一触点上所有默认行为，比如滚动。
 
@@ -334,9 +334,9 @@ iPhone X 以及它以上的系列，都采用刘海屏设计和全面屏手势�
 
 viewport-fit 有 3 个值分别为：
 
--  auto：此值不影响初始布局视图端口，并且整个 web 页面都是可查看的。
--  contain：视图端口按比例缩放，以适合显示内嵌的最大矩形。
--  cover：视图端口被缩放以填充设备显示。强烈建议使用 safe-area-inset 变量，以确保重要内容不会出现在显示之外。
+- auto：此值不影响初始布局视图端口，并且整个 web 页面都是可查看的。
+- contain：视图端口按比例缩放，以适合显示内嵌的最大矩形。
+- cover：视图端口被缩放以填充设备显示。强烈建议使用 safe-area-inset 变量，以确保重要内容不会出现在显示之外。
 
 #### 设置 viewport-fit 为 cover
 

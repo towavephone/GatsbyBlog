@@ -19,9 +19,9 @@ path: /micro-front-end-demo-practice/
 
 参考市面上已有的解决的方案，发现比较符合微前端框架的适用场景，于是开始用以下微前端框架来做出一个 demo 级别的应用
 
-1.  [ice-stark](https://github.com/ice-lab/icestark)
-2.  [single-spa](https://github.com/single-spa/single-spa)
-3.  [qiankun](https://github.com/umijs/qiankun)
+1. [ice-stark](https://github.com/ice-lab/icestark)
+2. [single-spa](https://github.com/single-spa/single-spa)
+3. [qiankun](https://github.com/umijs/qiankun)
 
 # 具体实施
 

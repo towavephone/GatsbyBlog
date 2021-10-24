@@ -53,8 +53,8 @@ Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 13
 ```
 
--  Sec-WebSocket-Key 是一个 Base64 encode 的值，这个是浏览器随机生成的，告诉服务器验证是不是真的是 Websocket 助理。
--  Sec_WebSocket-Protocol 是一个用户定义的字符串，用来区分同 URL 下，不同的服务所需要的协议。简单理解要服务 A 来处理，-Sec-WebSocket-Version 是告诉服务器所使用的 Websocket Draft（协议版本），然后服务器会返回下列东西，表示已经接受到请求，成功建立 Websocket！
+- Sec-WebSocket-Key 是一个 Base64 encode 的值，这个是浏览器随机生成的，告诉服务器验证是不是真的是 Websocket 助理。
+- Sec_WebSocket-Protocol 是一个用户定义的字符串，用来区分同 URL 下，不同的服务所需要的协议。简单理解要服务 A 来处理，-Sec-WebSocket-Version 是告诉服务器所使用的 Websocket Draft（协议版本），然后服务器会返回下列东西，表示已经接受到请求，成功建立 Websocket！
 
 #### 服务器响应 websocket
 
@@ -67,9 +67,9 @@ Sec-WebSocket-Accept: HSmrc0sMlYUkAGmm5OPpG2HaGWk=
 Sec-WebSocket-Protocol: chat
 ```
 
--  这里开始就是 HTTP 最后负责的区域了，告诉客户端，我已经成功切换协议~
--  Sec-WebSocket-Accept 这个则是经过服务器确认，并且加密过后的 Sec-WebSocket-Key。服务器：好啦好啦，知道啦，给你看我的 ID CARD 来证明行了吧。
--  Sec-WebSocket-Protocol 则是表示最终使用的协议。至此，HTTP 已经完成它所有工作了，接下来就是完全按照 Websocket 协议进行了。
+- 这里开始就是 HTTP 最后负责的区域了，告诉客户端，我已经成功切换协议~
+- Sec-WebSocket-Accept 这个则是经过服务器确认，并且加密过后的 Sec-WebSocket-Key。服务器：好啦好啦，知道啦，给你看我的 ID CARD 来证明行了吧。
+- Sec-WebSocket-Protocol 则是表示最终使用的协议。至此，HTTP 已经完成它所有工作了，接下来就是完全按照 Websocket 协议进行了。
 
 ```js
 Upgrade: websocket;
@@ -82,7 +82,7 @@ Connection: Upgrade;
 
 **背景技术**
 
--  ajax 轮询
+- ajax 轮询
 
   ```js
   setInterval(function() {
@@ -97,7 +97,7 @@ Connection: Upgrade;
 
   ajax 轮询的原理非常简单，让浏览器隔个几秒就发送一次请求，询问服务器是否有新信息。
 
--  long poll
+- long poll
 
   ```js
   function async() {
@@ -119,14 +119,14 @@ Connection: Upgrade;
 
 **缺点**
 
--  ajax 轮询需要服务器有很快的处理速度和资源。
--  long poll 需要有很高的并发，也就是说同时响应客户端的能力。
+- ajax 轮询需要服务器有很快的处理速度和资源。
+- long poll 需要有很高的并发，也就是说同时响应客户端的能力。
 
 #### websocket 实现原理
 
--  我们所用的程序是要经过两层代理的，即 HTTP 协议在 Nginx 等服务器的解析下，然后再传送给相应的 Handler（PHP 等）来处理。
--  简单地说，我们有一个非常快速的接线员（Nginx），他负责把问题转交给相应的客服（Handler）。本身接线员基本上速度是足够的，但是每次都卡在客服（Handler）了，老有客服处理速度太慢，导致客服不够。
--  Websocket 就解决了这样一个难题，建立后，可以直接跟接线员建立持久连接，有信息的时候客服想办法通知接线员，然后接线员在统一转交给客户。这样就可以解决客服处理速度过慢的问题了。
+- 我们所用的程序是要经过两层代理的，即 HTTP 协议在 Nginx 等服务器的解析下，然后再传送给相应的 Handler（PHP 等）来处理。
+- 简单地说，我们有一个非常快速的接线员（Nginx），他负责把问题转交给相应的客服（Handler）。本身接线员基本上速度是足够的，但是每次都卡在客服（Handler）了，老有客服处理速度太慢，导致客服不够。
+- Websocket 就解决了这样一个难题，建立后，可以直接跟接线员建立持久连接，有信息的时候客服想办法通知接线员，然后接线员在统一转交给客户。这样就可以解决客服处理速度过慢的问题了。
 
 #### js 调用代码
 
@@ -143,8 +143,8 @@ websocket.send("client to server");
 
 ### 还有什么别的方式来实现消息推送机制？
 
-1.  长链接 例如用 iframe 维护长链接开销较大，而且页面会显示一直在加载，不利于使用
-2.  flash socket 利用 flash 插件提供的 socket，需要会 flash，无法避免如安全
+1. 长链接 例如用 iframe 维护长链接开销较大，而且页面会显示一直在加载，不利于使用
+2. flash socket 利用 flash 插件提供的 socket，需要会 flash，无法避免如安全
 
 ### 双向绑定是怎么实现的？
 
@@ -156,11 +156,11 @@ websocket.send("client to server");
 
 angular.js 是通过脏值检测的方式比对数据是否有变更，来决定是否更新视图，最简单的方式就是通过 setInterval() 定时轮询检测数据变动，当然 Google 不会这么 low，angular 只有在指定的事件触发时进入脏值检测，大致如下：
 
--  DOM 事件，譬如用户输入文本，点击按钮等( ng-click )
--  XHR 响应事件 ( `$http` )
--  浏览器 Location 变更事件 ( `$location` )
--  Timer 事件( `$timeout` , `$interval` )
--  执行 `$digest()` 或 `$apply()`
+- DOM 事件，譬如用户输入文本，点击按钮等( ng-click )
+- XHR 响应事件 ( `$http` )
+- 浏览器 Location 变更事件 ( `$location` )
+- Timer 事件( `$timeout` , `$interval` )
+- 执行 `$digest()` 或 `$apply()`
 
 #### 数据劫持（vue.js）
 
@@ -170,10 +170,10 @@ vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过
 
 通过 Object.defineProperty()来实现对属性的劫持，达到监听数据变动的目的
 
-1.  实现一个数据监听器 Observer，能够对数据对象的所有属性进行监听，如有变动可拿到最新值并通知订阅者
-2.  实现一个指令解析器 Compile，对每个元素节点的指令进行扫描和解析，根据指令模板替换数据，以及绑定相应的更新函数
-3.  实现一个 Watcher，作为连接 Observer 和 Compile 的桥梁，能够订阅并收到每个属性变动的通知，执行指令绑定的相应回调函数，从而更新视图
-4.  mvvm 入口函数，整合以上三者
+1. 实现一个数据监听器 Observer，能够对数据对象的所有属性进行监听，如有变动可拿到最新值并通知订阅者
+2. 实现一个指令解析器 Compile，对每个元素节点的指令进行扫描和解析，根据指令模板替换数据，以及绑定相应的更新函数
+3. 实现一个 Watcher，作为连接 Observer 和 Compile 的桥梁，能够订阅并收到每个属性变动的通知，执行指令绑定的相应回调函数，从而更新视图
+4. mvvm 入口函数，整合以上三者
 
 ![mvvm架构](./132184689-57b310ea1804f_articlex.png)
 
@@ -189,54 +189,54 @@ vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过
 
 #### bind()
 
-1.  使用方式：`$(selector).bind(event,data,function)`；
-2.  event：必需项；添加到元素的一个或多个事件，例如 click,dblclick 等；
-3.  单事件处理：例如 `$(selector).bind("click",data,function)`；
-4.  多事件处理：
-1.  利用空格分隔多事件，例如 `$(selector).bind("click dbclick mouseout",data,function)`;
-2.  利用大括号灵活定义多事件，例如 `$(selector).bind({event1:function, event2:function, ...})`；
-3.  空格相隔方式：绑定较为死板，不能给事件单独绑定函数,适合处理多个事件调用同一函数情况；
-4.  大括号替代方式：绑定较为灵活，可以给事件单独绑定函数；
-5.  data：可选；需要传递的参数；
-6.  function：必需；当绑定事件发生时，需要执行的函数；
-7.  适用所有版本，但是根据官网解释，自从 jquery1.7 版本以后 bind()函数推荐用 on()来代替。
+1. 使用方式：`$(selector).bind(event,data,function)`；
+2. event：必需项；添加到元素的一个或多个事件，例如 click,dblclick 等；
+3. 单事件处理：例如 `$(selector).bind("click",data,function)`；
+4. 多事件处理：
+1. 利用空格分隔多事件，例如 `$(selector).bind("click dbclick mouseout",data,function)`;
+2. 利用大括号灵活定义多事件，例如 `$(selector).bind({event1:function, event2:function, ...})`；
+3. 空格相隔方式：绑定较为死板，不能给事件单独绑定函数,适合处理多个事件调用同一函数情况；
+4. 大括号替代方式：绑定较为灵活，可以给事件单独绑定函数；
+5. data：可选；需要传递的参数；
+6. function：必需；当绑定事件发生时，需要执行的函数；
+7. 适用所有版本，但是根据官网解释，自从 jquery1.7 版本以后 bind()函数推荐用 on()来代替。
 
 #### on()
 
-1.  使用方式：`$(selector).on(event,childselector,data,function)`:
-2.  event：必需项；添加到元素的一个或多个事件，例如 click,dblclick 等；
-3.  单事件处理：例如 `$(selector).on("click",childselector,data,function)`;
-4.  多事件处理：
-1.  利用空格分隔多事件，例如 `$(selector).on("click dbclick mouseout",childseletor,data,function)`;
-2.  利用大括号灵活定义多事件，例如 `$(selector).on({event1:function, event2:function, ...},childselector)`;
-3.  空格相隔方式：绑定较为死板，不能给事件单独绑定函数,适合处理多个事件调用同一函数情况；
-4.  大括号替代方式：绑定较为灵活，可以给事件单独绑定函数；
-5.  childSelector: 可选；需要添加事件处理程序的元素，一般为 selector 的子元素；
-6.  data：可选；需要传递的参数；
-7.  function：必需；当绑定事件发生时，需要执行的函数；
-8.  jquery1.7 及其以上版本；jquery1.7 版本出现之后用于替代 bind()，live()绑定事件方式；
+1. 使用方式：`$(selector).on(event,childselector,data,function)`:
+2. event：必需项；添加到元素的一个或多个事件，例如 click,dblclick 等；
+3. 单事件处理：例如 `$(selector).on("click",childselector,data,function)`;
+4. 多事件处理：
+1. 利用空格分隔多事件，例如 `$(selector).on("click dbclick mouseout",childseletor,data,function)`;
+2. 利用大括号灵活定义多事件，例如 `$(selector).on({event1:function, event2:function, ...},childselector)`;
+3. 空格相隔方式：绑定较为死板，不能给事件单独绑定函数,适合处理多个事件调用同一函数情况；
+4. 大括号替代方式：绑定较为灵活，可以给事件单独绑定函数；
+5. childSelector: 可选；需要添加事件处理程序的元素，一般为 selector 的子元素；
+6. data：可选；需要传递的参数；
+7. function：必需；当绑定事件发生时，需要执行的函数；
+8. jquery1.7 及其以上版本；jquery1.7 版本出现之后用于替代 bind()，live()绑定事件方式；
 
 #### 相同点
 
-1.  都支持单元素多事件的绑定，空格相隔方式或者大括号替代方式;
-2.  均是通过事件冒泡方式，将事件传递到 document 进行事件的响应；
+1. 都支持单元素多事件的绑定，空格相隔方式或者大括号替代方式;
+2. 均是通过事件冒泡方式，将事件传递到 document 进行事件的响应；
 
 #### 比较和联系
 
-1.  bind()函数只能针对已经存在的元素进行事件的设置；但是 live(),on(),delegate()均支持未来新添加元素的事件设置；
-2.  bind()函数在 jquery1.7 版本以前比较受推崇，1.7 版本出来之后，官方已经不推荐用 bind()，替代函数为 on()，这也是 1.7 版本新添加的函数，同样，可以用来代替 live()函数，live()函数在 1.9 版本已经删除；
-3.  live()函数和 delegate()函数两者类似，但是 live()函数在执行速度，灵活性和 CSS 选择器支持方面较 delegate()差些，想了解具体情况，[请戳这](http://kb.cnblogs.com/page/94469/)；
-4.  bind()支持 Jquery 所有版本；live()支持 jquery1.8-；delegate()支持 jquery1.4.2+；on()支持 jquery1.7+；
-5.  如果项目中引用 jquery 版本为低版本，推荐用 delegate(),高版本 jquery 可以使用 on()来代替。
+1. bind()函数只能针对已经存在的元素进行事件的设置；但是 live(),on(),delegate()均支持未来新添加元素的事件设置；
+2. bind()函数在 jquery1.7 版本以前比较受推崇，1.7 版本出来之后，官方已经不推荐用 bind()，替代函数为 on()，这也是 1.7 版本新添加的函数，同样，可以用来代替 live()函数，live()函数在 1.9 版本已经删除；
+3. live()函数和 delegate()函数两者类似，但是 live()函数在执行速度，灵活性和 CSS 选择器支持方面较 delegate()差些，想了解具体情况，[请戳这](http://kb.cnblogs.com/page/94469/)；
+4. bind()支持 Jquery 所有版本；live()支持 jquery1.8-；delegate()支持 jquery1.4.2+；on()支持 jquery1.7+；
+5. 如果项目中引用 jquery 版本为低版本，推荐用 delegate(),高版本 jquery 可以使用 on()来代替。
 
 ### react？react 虚拟 dom 算法的实现方式？虚拟 dom 是什么？
 
 #### React 定义
 
-1.  是一个用于构建用户界面的 js 库；
-2.  主要用于构建 UI，很多人认为 React 是 MVC 中的 V（视图）；
-3.  起源于 Facebook 的内部项目，用来架设 Instagram 的网站，并于 2013 年 5 月开源；
-4.  拥有较高的性能，代码逻辑非常简单，越来越多的人已开始关注和使用它。
+1. 是一个用于构建用户界面的 js 库；
+2. 主要用于构建 UI，很多人认为 React 是 MVC 中的 V（视图）；
+3. 起源于 Facebook 的内部项目，用来架设 Instagram 的网站，并于 2013 年 5 月开源；
+4. 拥有较高的性能，代码逻辑非常简单，越来越多的人已开始关注和使用它。
 
 #### react 虚拟 dom 算法
 
@@ -249,24 +249,24 @@ vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过
 
 #### 引发重排
 
-1.  添加、删除可见的 dom
-2.  元素的位置改变
-3.  元素的尺寸改变(外边距、内边距、边框厚度、宽高、等几何属性)
-4.  页面渲染初始化
-5.  浏览器窗口尺寸改变
+1. 添加、删除可见的 dom
+2. 元素的位置改变
+3. 元素的尺寸改变(外边距、内边距、边框厚度、宽高、等几何属性)
+4. 页面渲染初始化
+5. 浏览器窗口尺寸改变
 
 #### 升华版
 
-1.  dom 树的结构变化 (添加、删除 dom)
-2.  获取某些属性 offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、scrollWidth、scrollHeight、clientTop、clientLeft、clientWidth、clientHeight
+1. dom 树的结构变化 (添加、删除 dom)
+2. 获取某些属性 offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、scrollWidth、scrollHeight、clientTop、clientLeft、clientWidth、clientHeight
 
 #### 改进的方法
 
-1.  将多次 dom 修改合并成一次操作
-2.  多次重排的元素，先脱离文档流，在修改
-3.  display 属性为 none，减少重排
-4.  在需要经常获取那些引起浏览器重排的属性值时，要缓存到变量
-5.  在内存中多次操作节点，完成后再添加到文档中去（有动画效果时）
+1. 将多次 dom 修改合并成一次操作
+2. 多次重排的元素，先脱离文档流，在修改
+3. display 属性为 none，减少重排
+4. 在需要经常获取那些引起浏览器重排的属性值时，要缓存到变量
+5. 在内存中多次操作节点，完成后再添加到文档中去（有动画效果时）
 
 #### 浏览器加载文档过程
 
@@ -288,10 +288,10 @@ vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过
 
 2 级 DOM 引进了几个新 DOM 模块来处理新的接口类型：
 
--  DOM 视图：描述跟踪一个文档的各种视图（使用 CSS 样式设计文档前后）的接口；
--  DOM 事件：描述事件接口；
--  DOM 样式：描述处理基于 CSS 样式的接口；
--  DOM 遍历与范围：描述遍历和操作文档树的接口；
+- DOM 视图：描述跟踪一个文档的各种视图（使用 CSS 样式设计文档前后）的接口；
+- DOM 事件：描述事件接口；
+- DOM 样式：描述处理基于 CSS 样式的接口；
+- DOM 遍历与范围：描述遍历和操作文档树的接口；
 
 #### 3 级 DOM
 
@@ -309,27 +309,27 @@ window.postMessage() 方法被调用时，会在所有页面脚本执行完毕�
 
 > `otherWindow.postMessage(message, targetOrigin, [transfer])`;
 
--  otherWindow 其他窗口的一个引用，比如 iframe 的 contentWindow 属性、执行 window.open 返回的窗口对象、或者是命名过或数值索引的 window.frames。
--  message 将要发送到其他 window 的数据。它将会被结构化克隆算法序列化。这意味着你可以不受什么限制的将数据对象安全的传送给目标窗口而无需自己序列化。
--  targetOrigin 通过窗口的 origin 属性来指定哪些窗口能接收到消息事件，其值可以是字符串"_"（表示无限制）或者一个 URI。在发送消息的时候，如果目标窗口的协议、主机地址或端口这三者的任意一项不匹配 targetOrigin 提供的值，那么消息就不会被发送；只有三者完全匹配，消息才会被发送。这个机制用来控制消息可以发送到哪些窗口；例如，当用 postMessage 传送密码时，这个参数就显得尤为重要，必须保证它的值与这条包含密码的信息的预期接受者的 origin 属性完全一致，来防止密码被恶意的第三方截获。如果你明确的知道消息应该发送到哪个窗口，那么请始终提供一个有确切值的 targetOrigin，而不是_。不提供确切的目标将导致数据泄露到任何对数据感兴趣的恶意站点。
+- otherWindow 其他窗口的一个引用，比如 iframe 的 contentWindow 属性、执行 window.open 返回的窗口对象、或者是命名过或数值索引的 window.frames。
+- message 将要发送到其他 window 的数据。它将会被结构化克隆算法序列化。这意味着你可以不受什么限制的将数据对象安全的传送给目标窗口而无需自己序列化。
+- targetOrigin 通过窗口的 origin 属性来指定哪些窗口能接收到消息事件，其值可以是字符串"_"（表示无限制）或者一个 URI。在发送消息的时候，如果目标窗口的协议、主机地址或端口这三者的任意一项不匹配 targetOrigin 提供的值，那么消息就不会被发送；只有三者完全匹配，消息才会被发送。这个机制用来控制消息可以发送到哪些窗口；例如，当用 postMessage 传送密码时，这个参数就显得尤为重要，必须保证它的值与这条包含密码的信息的预期接受者的 origin 属性完全一致，来防止密码被恶意的第三方截获。如果你明确的知道消息应该发送到哪个窗口，那么请始终提供一个有确切值的 targetOrigin，而不是_。不提供确切的目标将导致数据泄露到任何对数据感兴趣的恶意站点。
 
 > window.addEventListener("message", function(event){}, false);
 
--  data 从其他 window 中传递过来的对象。
--  origin 调用 postMessage 时消息发送方窗口的 origin . 这个字符串由 协议、“://“、域名、“ : 端口号”拼接而成。例如 “https://example.org (隐含端口 443)”、“http://example.net (隐含端口 80)”、“http://example.com:8080”。请注意，这个origin不能保证是该窗口的当前或未来origin，因为postMessage被调用后可能被导航到不同的位置。
--  source 对发送消息的窗口对象的引用; 您可以使用此来在具有不同 origin 的两个窗口之间建立双向通信。
+- data 从其他 window 中传递过来的对象。
+- origin 调用 postMessage 时消息发送方窗口的 origin . 这个字符串由 协议、“://“、域名、“ : 端口号”拼接而成。例如 “https://example.org (隐含端口 443)”、“http://example.net (隐含端口 80)”、“http://example.com:8080”。请注意，这个origin不能保证是该窗口的当前或未来origin，因为postMessage被调用后可能被导航到不同的位置。
+- source 对发送消息的窗口对象的引用; 您可以使用此来在具有不同 origin 的两个窗口之间建立双向通信。
 
 #### 伪装域名解决？
 
--  如果您不希望从其他网站接收 message，请不要为 message 事件添加任何事件侦听器。
--  始终使用 origin 和 source 属性验证发件人的身份
--  当您使用 postMessage 将数据发送到其他窗口时，始终指定精确的目标 origin，而不是\*。
+- 如果您不希望从其他网站接收 message，请不要为 message 事件添加任何事件侦听器。
+- 始终使用 origin 和 source 属性验证发件人的身份
+- 当您使用 postMessage 将数据发送到其他窗口时，始终指定精确的目标 origin，而不是\*。
 
 #### 实现 Access-Control-Allow-Origin 的跨域
 
--  直接在浏览器地址栏中，输入某接口地址。是不会产生跨域问题的；
--  只有当在某域名的页面中，由该页面发起的接口请求。才可能会跨域；
--  nginx 就类似于这个浏览器，它接收到外部对它的请求（注意，nginx 只会接收别人对它的请求，而不会拦截浏览器的请求），再类似浏览器地址栏一样去请求某个接口，最后将请求到的内容返回回去。
+- 直接在浏览器地址栏中，输入某接口地址。是不会产生跨域问题的；
+- 只有当在某域名的页面中，由该页面发起的接口请求。才可能会跨域；
+- nginx 就类似于这个浏览器，它接收到外部对它的请求（注意，nginx 只会接收别人对它的请求，而不会拦截浏览器的请求），再类似浏览器地址栏一样去请求某个接口，最后将请求到的内容返回回去。
 
 ### 缓存的实现方式？
 
@@ -337,20 +337,20 @@ window.postMessage() 方法被调用时，会在所有页面脚本执行完毕�
 
 ##### Expires
 
--  表示存在时间，允许客户端在这个时间之前不去检查（发请求），例如：Expires: Wed, 21 Oct 2015 07:28:00 GMT
--  以上时间表示消息发送的时间，时间的描述格式由 rfc822 定义。例如，Web 服务器告诉浏览器在 2018-04-28 03:30:01 这个时间点之前，可以使用缓存文件。发送请求的时间是 2018-04-28 03:25:01，即缓存 5 分钟。
+- 表示存在时间，允许客户端在这个时间之前不去检查（发请求），例如：Expires: Wed, 21 Oct 2015 07:28:00 GMT
+- 以上时间表示消息发送的时间，时间的描述格式由 rfc822 定义。例如，Web 服务器告诉浏览器在 2018-04-28 03:30:01 这个时间点之前，可以使用缓存文件。发送请求的时间是 2018-04-28 03:25:01，即缓存 5 分钟。
 
 ##### cache-control
 
-1.  max-age
+1. max-age
 
--  “max-age”指令指定从请求的时间开始，允许获取的响应被重用的最长时间（单位：秒）。如果还有一个设置了 "max-age" 或者 "s-max-age" 指令的 Cache-Control 响应头，那么 Expires 头就会被忽略。
--  该缓存策略弊端： 当设定时间内更新文件了，浏览器并不知道。
+- “max-age”指令指定从请求的时间开始，允许获取的响应被重用的最长时间（单位：秒）。如果还有一个设置了 "max-age" 或者 "s-max-age" 指令的 Cache-Control 响应头，那么 Expires 头就会被忽略。
+- 该缓存策略弊端： 当设定时间内更新文件了，浏览器并不知道。
 
-2.  no-cache： 表示每次请求都需要与服务器确认一次，这种情况一般带有 ETag，当服务器端验证无修改时，则从缓存中取文件，服务器无需返回文件。
-3.  no-store: 表示无论如何都不允许客户端做缓存，每次都需要做一次完整的请求和完整的响应。
-4.  public：如果响应被标记为“public”，则即使它有关联的 HTTP 身份验证，甚至响应状态代码通常无法缓存，也可以缓存响应。大多数情况下，“public”不是必需的，因为明确的缓存信息（例如“max-age”）已表示响应是可以缓存的。我们有时可以在 memory,disk,路由等找到缓存就是因为这是 public 的设置。
-5.  private：不允许任何中间缓存对其进行缓存，只能最终用户做缓存。
+2. no-cache： 表示每次请求都需要与服务器确认一次，这种情况一般带有 ETag，当服务器端验证无修改时，则从缓存中取文件，服务器无需返回文件。
+3. no-store: 表示无论如何都不允许客户端做缓存，每次都需要做一次完整的请求和完整的响应。
+4. public：如果响应被标记为“public”，则即使它有关联的 HTTP 身份验证，甚至响应状态代码通常无法缓存，也可以缓存响应。大多数情况下，“public”不是必需的，因为明确的缓存信息（例如“max-age”）已表示响应是可以缓存的。我们有时可以在 memory,disk,路由等找到缓存就是因为这是 public 的设置。
+5. private：不允许任何中间缓存对其进行缓存，只能最终用户做缓存。
 
 ##### 例子
 
@@ -390,35 +390,35 @@ window.postMessage() 方法被调用时，会在所有页面脚本执行完毕�
 
 #### 知识点
 
-1.  hosts 文件：以静态映射的方式提供 IP 地址与主机名的对照表，类似 ARP 表
-2.  域：abc.com 是一个域，它可以划分为多个区域，如 abc.com 和 xyz.abc.com
+1. hosts 文件：以静态映射的方式提供 IP 地址与主机名的对照表，类似 ARP 表
+2. 域：abc.com 是一个域，它可以划分为多个区域，如 abc.com 和 xyz.abc.com
 
 #### 步骤
 
 ##### 递归查询
 
-1.  在 hosts 静态文件、DNS 解析器缓存中查找某主机的 ip 地址
-2.  上一步无法找到，去 DNS 本地服务器（即域服务器）查找，其本质是去区域服务器、服务器缓存中查找
-3.  本地 DNS 服务器查不到就根据‘根提示文件’向负责顶级域‘.com’的 DNS 服务器查询
-4.  ‘根 DNS 服务器’根据查询域名中的‘xyz.com’，再向 xyz.com 的区域服务器查询
-5.  www.xyz.abc.com 的 DNS 服务器直接解析该域名，将查询到的 ip 再原路返回给请求查询的主机
+1. 在 hosts 静态文件、DNS 解析器缓存中查找某主机的 ip 地址
+2. 上一步无法找到，去 DNS 本地服务器（即域服务器）查找，其本质是去区域服务器、服务器缓存中查找
+3. 本地 DNS 服务器查不到就根据‘根提示文件’向负责顶级域‘.com’的 DNS 服务器查询
+4. ‘根 DNS 服务器’根据查询域名中的‘xyz.com’，再向 xyz.com 的区域服务器查询
+5. www.xyz.abc.com 的 DNS 服务器直接解析该域名，将查询到的 ip 再原路返回给请求查询的主机
 
 ##### 迭代查询
 
-1.  在 hosts 静态文件、DNS 解析器缓存中查找某主机的 ip 地址
-2.  上一步无法找到，在 DNS 本地服务器（即域服务器）查找所有本层次的区域服务器
-3.  本地 DNS 服务器查不到就查询上一层次的所有区域服务器，以此类推直至根域名 DNS 服务器‘.’
-4.  到达根域名服务器后又向下查询，直至查到结果为止。
+1. 在 hosts 静态文件、DNS 解析器缓存中查找某主机的 ip 地址
+2. 上一步无法找到，在 DNS 本地服务器（即域服务器）查找所有本层次的区域服务器
+3. 本地 DNS 服务器查不到就查询上一层次的所有区域服务器，以此类推直至根域名 DNS 服务器‘.’
+4. 到达根域名服务器后又向下查询，直至查到结果为止。
 
 ##### 迭代查询与递归查询结合
 
 递归查询需要经过逐层查询才能获得查询结果，当查询具有许多层次的 DNS 结构时效率很低，所以一般采用两者相结合的查询方式。
 
-1.  在 hosts 静态文件、DNS 解析器缓存中查找某主机的 ip 地址
-2.  上一步无法找到，去 DNS 本地服务器（即域服务器）查找，其本质是去区域服务器、服务器缓存中查找
-3.  本地 DNS 服务器查不到就根据‘根提示文件’向负责顶级域‘.com’的根 DNS 服务器查询
-4.  根 DNS 服务器直接将其区域 DNS 服务器的 ip 地址返回给本地服务器，而不用再向 xyz.com 的区域服务器查询。
-5.  本地 DNS 服务器将结果返回给请求的主机
+1. 在 hosts 静态文件、DNS 解析器缓存中查找某主机的 ip 地址
+2. 上一步无法找到，去 DNS 本地服务器（即域服务器）查找，其本质是去区域服务器、服务器缓存中查找
+3. 本地 DNS 服务器查不到就根据‘根提示文件’向负责顶级域‘.com’的根 DNS 服务器查询
+4. 根 DNS 服务器直接将其区域 DNS 服务器的 ip 地址返回给本地服务器，而不用再向 xyz.com 的区域服务器查询。
+5. 本地 DNS 服务器将结果返回给请求的主机
 
 ![](./1126944-20170315222838041-2095036367.jpg)
 
@@ -428,13 +428,13 @@ window.postMessage() 方法被调用时，会在所有页面脚本执行完毕�
 
 ### react v15 与 v16 的主要变化？
 
-1.  render 函数支持返回数组和字符串
-2.  更好的异常处理，可在其子组件树的任何位置捕获 JavaScript 错误并显示后备 UI，而不是崩溃的组件树
-3.  新的组件类型 portals，将子树声明渲染到另一个 DOM 节点中 ReactDOM.createPortal()
-4.  更好的服务端渲染，使用 ReactDOMServer.renderToNodeStream() 和启用服务器端渲染的流模式 ReactDOMServer.renderToStaticNodeStream()
-5.  支持自定义 DOM 元素，新版本将不会再抛出不支持的 DOM 元素错误，而是将所有开发者自定义的 DOM 元素都传递到相应的 DOM 节点上。
-6.  更小的打包大小，总体体积减少 30%
-7.  新的核心架构 Fiber，正是得益于 FIber，上述提到的支持返回数据及错误边界等功能才变得可能。Fiber 相较于之前最大的不同是它可以支持异步渲染（async rendering），这意味着 React 可以在更细的粒度上控制组件的绘制过程，从最终的用户体验来讲，用户可以体验到更流畅交互及动画体验。而因为异步渲染涉及到 React 的方方面面甚至未来，在 16.0 版本中 React 还暂时没有启用，并将在未来几个月陆续推出。
+1. render 函数支持返回数组和字符串
+2. 更好的异常处理，可在其子组件树的任何位置捕获 JavaScript 错误并显示后备 UI，而不是崩溃的组件树
+3. 新的组件类型 portals，将子树声明渲染到另一个 DOM 节点中 ReactDOM.createPortal()
+4. 更好的服务端渲染，使用 ReactDOMServer.renderToNodeStream() 和启用服务器端渲染的流模式 ReactDOMServer.renderToStaticNodeStream()
+5. 支持自定义 DOM 元素，新版本将不会再抛出不支持的 DOM 元素错误，而是将所有开发者自定义的 DOM 元素都传递到相应的 DOM 节点上。
+6. 更小的打包大小，总体体积减少 30%
+7. 新的核心架构 Fiber，正是得益于 FIber，上述提到的支持返回数据及错误边界等功能才变得可能。Fiber 相较于之前最大的不同是它可以支持异步渲染（async rendering），这意味着 React 可以在更细的粒度上控制组件的绘制过程，从最终的用户体验来讲，用户可以体验到更流畅交互及动画体验。而因为异步渲染涉及到 React 的方方面面甚至未来，在 16.0 版本中 React 还暂时没有启用，并将在未来几个月陆续推出。
 
 见文章 [React16 新特性](/react-16-new-feature/)
 
@@ -442,12 +442,12 @@ window.postMessage() 方法被调用时，会在所有页面脚本执行完毕�
 
 缺点：
 
-1.  新的 Context API 通过创建一个 Context 对象来完成，在实际项目中，Provider 和 Consumer 往往都存在于不同的源代码文件中，在一个文件中定义 Context 对象，然后，这个文件被被其他文件来 import，老的 Context API 并不需要共同依赖一个什么对象
-2.  引入新的问题——如何管理 Context 对象
+1. 新的 Context API 通过创建一个 Context 对象来完成，在实际项目中，Provider 和 Consumer 往往都存在于不同的源代码文件中，在一个文件中定义 Context 对象，然后，这个文件被被其他文件来 import，老的 Context API 并不需要共同依赖一个什么对象
+2. 引入新的问题——如何管理 Context 对象
 
 优点：
 
-1.  新的 Context 有一个明显实用好处，可以很清晰地让多个 Context 交叉使用，比如组件树上可以有两个 Context Provider，而 Consumer 总是可以区分开哪个 Context 是哪个。
+1. 新的 Context 有一个明显实用好处，可以很清晰地让多个 Context 交叉使用，比如组件树上可以有两个 Context Provider，而 Consumer 总是可以区分开哪个 Context 是哪个。
 
 ### redux 与 mobx 的优缺点？
 
@@ -455,35 +455,35 @@ window.postMessage() 方法被调用时，会在所有页面脚本执行完毕�
 
 redux
 
--  store - view - action 的闭环
--  Redux 颗粒度更细, 相对更安全
+- store - view - action 的闭环
+- Redux 颗粒度更细, 相对更安全
 
 mobx
 
--  store - view 的闭环
--  使用了类双向绑定的思维
+- store - view 的闭环
+- 使用了类双向绑定的思维
 
 从目前经验来看，我建议前端数据流不太复杂的情况使用 Mobx，因为更加清晰，也便于维护；如果前端数据流极度复杂，建议谨慎使用 Redux，通过中间件减缓巨大业务复杂度，但还是要做到对开发人员尽量透明，如果可以建议使用 typescript 辅助。
 
 Redux 的优缺点：
 
--  数据流流动很自然，因为任何 dispatch 都会导致广播，需要依据对象引用是否变化来控制更新粒度。
--  如果充分利用时间回溯的特征，可以增强业务的可预测性与错误定位能力。
--  时间回溯代价很高，因为每次都要更新引用，除非增加代码复杂度，或使用 immutable。
--  时间回溯的另一个代价是 action 与 reducer 完全脱节，数据流过程需要自行脑补，原因是可回溯必然不能保证引用关系。
--  引入中间件，其实主要为了解决异步带来的副作用，业务逻辑或多或少参杂着 magic。
--  但是灵活利用中间件，可以通过约定完成许多复杂的工作。
--  对 typescript 支持困难。
+- 数据流流动很自然，因为任何 dispatch 都会导致广播，需要依据对象引用是否变化来控制更新粒度。
+- 如果充分利用时间回溯的特征，可以增强业务的可预测性与错误定位能力。
+- 时间回溯代价很高，因为每次都要更新引用，除非增加代码复杂度，或使用 immutable。
+- 时间回溯的另一个代价是 action 与 reducer 完全脱节，数据流过程需要自行脑补，原因是可回溯必然不能保证引用关系。
+- 引入中间件，其实主要为了解决异步带来的副作用，业务逻辑或多或少参杂着 magic。
+- 但是灵活利用中间件，可以通过约定完成许多复杂的工作。
+- 对 typescript 支持困难。
 
 Mobx 的优缺点：
 
--  数据流流动不自然，只有用到的数据才会引发绑定，局部精确更新，但免去了粒度控制烦恼。
--  没有时间回溯能力，因为数据只有一份引用。
--  自始至终一份引用，不需要 immutable，也没有复制对象的额外开销。
--  没有这样的烦恼，数据流动由函数调用一气呵成，便于调试。
--  业务开发不是脑力活，而是体力活，少一些 magic，多一些效率。
--  由于没有 magic，所以没有中间件机制，没法通过 magic 加快工作效率（这里 magic 是指 action 分发到 reducer 的过程）。
--  完美支持 typescript。
+- 数据流流动不自然，只有用到的数据才会引发绑定，局部精确更新，但免去了粒度控制烦恼。
+- 没有时间回溯能力，因为数据只有一份引用。
+- 自始至终一份引用，不需要 immutable，也没有复制对象的额外开销。
+- 没有这样的烦恼，数据流动由函数调用一气呵成，便于调试。
+- 业务开发不是脑力活，而是体力活，少一些 magic，多一些效率。
+- 由于没有 magic，所以没有中间件机制，没法通过 magic 加快工作效率（这里 magic 是指 action 分发到 reducer 的过程）。
+- 完美支持 typescript。
 
 ### 组件怎么做性能优化？
 
@@ -507,10 +507,10 @@ style-components
 
 如何防止不必要的渲染是解决问题的关键。
 
-1.  尽量多使用无状态函数构建组件
-2.  拆分组件为子组件，对组件做更细粒度的控制
-3.  减少 render 的次数，类组件可以使用 shouldComponentUpdate 或 PureComponent，函数组件可以利用高级组件的特性或者 React.memo
-4.  Immutable 实现的原理是持久化的数据结构，即使用旧数据创建新数据时，保证新旧数据同时可用且不变。同时为了避免深拷贝带来的性能损耗，Immutable 使用了结构共享(structural sharing)，即如果对象树中一个节点发生变化，只修改这个节点和受它影响的父节点，其他节点则进行共享。
+1. 尽量多使用无状态函数构建组件
+2. 拆分组件为子组件，对组件做更细粒度的控制
+3. 减少 render 的次数，类组件可以使用 shouldComponentUpdate 或 PureComponent，函数组件可以利用高级组件的特性或者 React.memo
+4. Immutable 实现的原理是持久化的数据结构，即使用旧数据创建新数据时，保证新旧数据同时可用且不变。同时为了避免深拷贝带来的性能损耗，Immutable 使用了结构共享(structural sharing)，即如果对象树中一个节点发生变化，只修改这个节点和受它影响的父节点，其他节点则进行共享。
 
 ### 面试需要几轮？
 
@@ -554,9 +554,9 @@ style-components
 
 因为三次握手刚好完成了两次一问一答的通信。说明可以建立全双工的通信了。
 
-1.  如果一次就建立连接：那么客户端怎么知道服务端接收到了呢？
-2.  由于网路阻塞，客户端第一次发送的连接没有及时到达，然后重新发送报文，然后建立通信，然后通信结束，然后第一次发送的报文到达了。然后服务端无端端的又激活了，但是客户端已经不需要在和服务端通信了。这种情况是不是浪费服务端资源？所以两次也不可靠，为什么不是两次的原因下面的参考连接也有说。
-3.  如果是四次握手：仔细看看第四次要做的是不是和第二次很像？其实非要说四次行不行？我觉得是行的，但是四次就冗余了，所以其实 4 次、5 次、6 次都是可以的，为了兼顾性能和可靠性三次就够了。第四次以后的握手已经可以用来传输数据了
+1. 如果一次就建立连接：那么客户端怎么知道服务端接收到了呢？
+2. 由于网路阻塞，客户端第一次发送的连接没有及时到达，然后重新发送报文，然后建立通信，然后通信结束，然后第一次发送的报文到达了。然后服务端无端端的又激活了，但是客户端已经不需要在和服务端通信了。这种情况是不是浪费服务端资源？所以两次也不可靠，为什么不是两次的原因下面的参考连接也有说。
+3. 如果是四次握手：仔细看看第四次要做的是不是和第二次很像？其实非要说四次行不行？我觉得是行的，但是四次就冗余了，所以其实 4 次、5 次、6 次都是可以的，为了兼顾性能和可靠性三次就够了。第四次以后的握手已经可以用来传输数据了
 
 ### TCP 断开时为什么四次挥手
 
@@ -586,28 +586,28 @@ style-components
 
 webpack 4 与 2 区别：
 
-1.  webpack 4 更快（速度提升 98%），多项性能改进，尤其是更快的增量重建；UglifyJs 现在默认情况下会缓存并进行参数化；RemoveParentModulesPlugin 的性能改进
-2.  Mode 配置，零配置以及默认值
-3.  CommonsChunkPlugin -> optimization.splitChunks，optimization.runtimeChunk
-4.  WebAssembly 支持
-5.  模块类型以及 .mjs 支持
-6.  NoEmitOnErrorsPlugin -> optimization.noEmitOnErrors，ModuleConcatenationPlugin-> optimization.concatenateModules，NamedModulesPlugin-> optimization.namedModules
-7.  可以本地处理 JSON
-8.  sideEffects: false 现在在 package.json 中受支持
+1. webpack 4 更快（速度提升 98%），多项性能改进，尤其是更快的增量重建；UglifyJs 现在默认情况下会缓存并进行参数化；RemoveParentModulesPlugin 的性能改进
+2. Mode 配置，零配置以及默认值
+3. CommonsChunkPlugin -> optimization.splitChunks，optimization.runtimeChunk
+4. WebAssembly 支持
+5. 模块类型以及 .mjs 支持
+6. NoEmitOnErrorsPlugin -> optimization.noEmitOnErrors，ModuleConcatenationPlugin-> optimization.concatenateModules，NamedModulesPlugin-> optimization.namedModules
+7. 可以本地处理 JSON
+8. sideEffects: false 现在在 package.json 中受支持
 
 webpack 5 新特性：
 
-1.  优化持久缓存：v5 中缓存默认是 memory，你可以修改设置写入硬盘。之前版本的替代者是 cache-loader 和 babel-loader 中的 cacheDirectory 选项。缓存（内存 / 磁盘两种形式）中的主要内容是 module objects，在编译的时候会将 graph 以二进制或者 json 文件存储在硬盘上。每当代码变化、模块之间依赖关系改变导致 graph 改变时，Webpack 会读取记录做增量编译。
-2.  优化长期缓存：针对 moduleId 和 chunkId 的计算方式进行了优化，增加确定性的 moduleId 和 chunkId 的生成策略。moduleId 根据上下文模块路径，chunkId 根据 chunk 内容计算，最后为 moduleId 和 chunkId 生成 3 - 4 位的数字 id，实现长期缓存，生产环境下默认开启。
-1.  原来的 moduleId 默认值自增 id，容易导致文件缓存失效。在 v4 之前，可以安装 HashedModuleIdsPlugin 插件覆盖默认的 moduleId 规则， 它会使用模块路径生成的 hash 作为 moduleId。在 v4 中，可以配置 optimization.moduleIds = 'hashed'
-2.  原来的 chunkId 默认值自增 id。比如这样的配置下，如果有新的 entry 增加，chunk 数量也会跟着增加，chunkId 也会递增。之前可以安装 NamedChunksPlugin 插件来稳定 chunkId；或者配置 optimization.chunkIds = 'named'
-3.  NodeJS 的 polyfill 脚本被移除
-4.  更好的 TreeShaking：在 v5 中会分析模块 export 与 import 之间的依赖关系，最终的代码生成非常简洁
-5.  Module Federation：让 Webpack 达到了线上 runtime 的效果，让代码直接在独立应用间利用 CDN 直接共享，不再需要本地安装 NPM 包、构建再发布了！之前代码共享一般通过 NPM、UMD、微前端
-6.  Top Level Await
-7.  SplitChunks 支持更灵活的资源拆分
-8.  不包含 JS 代码的 Chunk 将不再生成 JS 文件
-9.  Output 默认生成 ES6 规范代码，也支持配置为 5 - 11
+1. 优化持久缓存：v5 中缓存默认是 memory，你可以修改设置写入硬盘。之前版本的替代者是 cache-loader 和 babel-loader 中的 cacheDirectory 选项。缓存（内存 / 磁盘两种形式）中的主要内容是 module objects，在编译的时候会将 graph 以二进制或者 json 文件存储在硬盘上。每当代码变化、模块之间依赖关系改变导致 graph 改变时，Webpack 会读取记录做增量编译。
+2. 优化长期缓存：针对 moduleId 和 chunkId 的计算方式进行了优化，增加确定性的 moduleId 和 chunkId 的生成策略。moduleId 根据上下文模块路径，chunkId 根据 chunk 内容计算，最后为 moduleId 和 chunkId 生成 3 - 4 位的数字 id，实现长期缓存，生产环境下默认开启。
+1. 原来的 moduleId 默认值自增 id，容易导致文件缓存失效。在 v4 之前，可以安装 HashedModuleIdsPlugin 插件覆盖默认的 moduleId 规则， 它会使用模块路径生成的 hash 作为 moduleId。在 v4 中，可以配置 optimization.moduleIds = 'hashed'
+2. 原来的 chunkId 默认值自增 id。比如这样的配置下，如果有新的 entry 增加，chunk 数量也会跟着增加，chunkId 也会递增。之前可以安装 NamedChunksPlugin 插件来稳定 chunkId；或者配置 optimization.chunkIds = 'named'
+3. NodeJS 的 polyfill 脚本被移除
+4. 更好的 TreeShaking：在 v5 中会分析模块 export 与 import 之间的依赖关系，最终的代码生成非常简洁
+5. Module Federation：让 Webpack 达到了线上 runtime 的效果，让代码直接在独立应用间利用 CDN 直接共享，不再需要本地安装 NPM 包、构建再发布了！之前代码共享一般通过 NPM、UMD、微前端
+6. Top Level Await
+7. SplitChunks 支持更灵活的资源拆分
+8. 不包含 JS 代码的 Chunk 将不再生成 JS 文件
+9. Output 默认生成 ES6 规范代码，也支持配置为 5 - 11
 
 [Webpack5 新特性](/webpack-v5-new-feature/)
 
@@ -661,7 +661,7 @@ webpack 5 新特性：
 
 一个服务器与浏览器之间的中间人角色，如果网站中注册了 service worker 那么它可以拦截当前网站所有的请求，进行判断（需要编写相应的判断程序），如果需要向服务器发起请求的就转给服务器，如果可以直接使用缓存的就直接返回缓存不再转给服务器。从而大大提高浏览体验。
 
-1.  注册 Service worker 在你的 index.html 加入以下内容
+1. 注册 Service worker 在你的 index.html 加入以下内容
 
 ```js
 /* 判断当前浏览器是否支持serviceWorker */
@@ -682,7 +682,7 @@ if ('serviceWorker' in navigator) {
 }
 ```
 
-2.  安装 worker：在我们指定的处理程序 serviceWorker.js 中书写对应的安装及拦截逻辑
+2. 安装 worker：在我们指定的处理程序 serviceWorker.js 中书写对应的安装及拦截逻辑
 
 ```js
 /* 监听安装事件，install 事件一般是被用来设置你的浏览器的离线缓存逻辑 */
@@ -854,20 +854,20 @@ var longestCommonPrefix = function(strs) {
 
 不稳定：
 
-1.  选择排序 (selection sort) — O(n2)
-2.  快速排序 (quicksort) — O(nlogn) 平均时间, O(n2) 最坏情况; 对于大的、乱序串列一般认为是最快的已知排序
-3.  堆排序 (heapsort) — O(nlogn)
-4.  希尔排序 (shell sort) — O(nlogn)
-5.  基数排序 (radix sort) — O(n·k); 需要 O(n) 额外存储空间 （K 为特征个数）
+1. 选择排序 (selection sort) — O(n2)
+2. 快速排序 (quicksort) — O(nlogn) 平均时间, O(n2) 最坏情况; 对于大的、乱序串列一般认为是最快的已知排序
+3. 堆排序 (heapsort) — O(nlogn)
+4. 希尔排序 (shell sort) — O(nlogn)
+5. 基数排序 (radix sort) — O(n·k); 需要 O(n) 额外存储空间 （K 为特征个数）
 
 稳定：
 
-1.  插入排序（insertion sort) — O(n2)
-2.  冒泡排序（bubble sort) — O(n2)
-3.  归并排序 （merge sort) — O(nlogn); 需要 O(n) 额外存储空间
-4.  二叉树排序（Binary tree sort) — O(nlogn); 需要 O(n) 额外存储空间
-5.  计数排序 (counting sort) — O(n+k); 需要 O(n+k) 额外存储空间，k 为序列中 Max-Min+1
-6.  桶排序 (bucket sort)— O(n); 需要 O(k) 额外存储空间
+1. 插入排序（insertion sort) — O(n2)
+2. 冒泡排序（bubble sort) — O(n2)
+3. 归并排序 （merge sort) — O(nlogn); 需要 O(n) 额外存储空间
+4. 二叉树排序（Binary tree sort) — O(nlogn); 需要 O(n) 额外存储空间
+5. 计数排序 (counting sort) — O(n+k); 需要 O(n+k) 额外存储空间，k 为序列中 Max-Min+1
+6. 桶排序 (bucket sort)— O(n); 需要 O(k) 额外存储空间
 
 ### BFC 与 IFC？
 
@@ -899,17 +899,17 @@ var longestCommonPrefix = function(strs) {
 
 资源优化上，我们总的方向是围绕更小的资源包上，比如常见的：压缩、减包、拆包、动态加载包及图片优化上。html 渲染上总的方向是更快的展示内容，比如通过 cdn 分发、dns 解析、http 缓存、数据预请求，数据缓存及首屏优化大杀器——直出等。
 
--  直出 + 离线包缓存：通过 webview 统一拦截 url，将资源映射到本地离线包，更新的时候对版本资源检测，下载和维护本地缓存目录中的资源，比如腾讯的 webso 和 Alloykit 的离线包方案
--  客户端代理的 VasSonic：webview 初始化和通过客户端代理资源请求并行、流式拦截请求，边加载边渲染、实现了动态缓存和增量更新（定义了一套 html 注释标记规则，通过标签划分哪些是动态数据，后端根据传过来的页面内容的 ID 来判断是否更新，然后进行 html 拼接返回给前端）。
--  PWA+直出+预加载：对于直出 html，我们可以配合 pwa，将从后台直出的文件，缓存到 cacheStorage，在下一次请求时，优先从本地缓存中获取，同时发起网络请求更新本地 html 文件；但是在 hybrid 的 h5 应用，第一次启动的加载资源仍然费时，我们可以通过 app 端上支持预加载一个 javascript 脚本，拉取需要 PWA 缓存的页面，可以提前完成缓存。
--  NSR 渲染：前端版本的 SSR，借助浏览器启用一个 JS-Runtime，提前将下载好的 html 模板及预取的 feed 流数据进行渲染，然后将 html 设置到内存级别的 MemoryCache 中，从而达到点开即看的效果。
--  客户端 PWA：service-worker 在 webview 实现性能并没有想象中好。在某项目下掉 sw 后，整体大盘访问速度整体反而提升上升了大概 300ms，需要自行实现。
--  小程序化：通过在架构上对开发进行规范化和约束化，小程序内部将 webview 渲染和 js 执行分离开来，然后通过离线包，页面拆分，预加载页面等一系列优化手段，让小程序天然具备了大量的 H5 优化后的效果，其代价是牺牲了 web 的灵活性。
+- 直出 + 离线包缓存：通过 webview 统一拦截 url，将资源映射到本地离线包，更新的时候对版本资源检测，下载和维护本地缓存目录中的资源，比如腾讯的 webso 和 Alloykit 的离线包方案
+- 客户端代理的 VasSonic：webview 初始化和通过客户端代理资源请求并行、流式拦截请求，边加载边渲染、实现了动态缓存和增量更新（定义了一套 html 注释标记规则，通过标签划分哪些是动态数据，后端根据传过来的页面内容的 ID 来判断是否更新，然后进行 html 拼接返回给前端）。
+- PWA+直出+预加载：对于直出 html，我们可以配合 pwa，将从后台直出的文件，缓存到 cacheStorage，在下一次请求时，优先从本地缓存中获取，同时发起网络请求更新本地 html 文件；但是在 hybrid 的 h5 应用，第一次启动的加载资源仍然费时，我们可以通过 app 端上支持预加载一个 javascript 脚本，拉取需要 PWA 缓存的页面，可以提前完成缓存。
+- NSR 渲染：前端版本的 SSR，借助浏览器启用一个 JS-Runtime，提前将下载好的 html 模板及预取的 feed 流数据进行渲染，然后将 html 设置到内存级别的 MemoryCache 中，从而达到点开即看的效果。
+- 客户端 PWA：service-worker 在 webview 实现性能并没有想象中好。在某项目下掉 sw 后，整体大盘访问速度整体反而提升上升了大概 300ms，需要自行实现。
+- 小程序化：通过在架构上对开发进行规范化和约束化，小程序内部将 webview 渲染和 js 执行分离开来，然后通过离线包，页面拆分，预加载页面等一系列优化手段，让小程序天然具备了大量的 H5 优化后的效果，其代价是牺牲了 web 的灵活性。
 
 总的思路是
 
--  在整个链路中减少中间环节。比如将串行改并行，包括小程序内部执行机制。
--  尽可能的预加载、预执行。比如从数据预取，到页面预取渲染等。
+- 在整个链路中减少中间环节。比如将串行改并行，包括小程序内部执行机制。
+- 尽可能的预加载、预执行。比如从数据预取，到页面预取渲染等。
 
 以上方案仍有两种无法尽善尽美的地方：其一是短暂的白屏现象不可避免，其二是对于超大型 web 应用难以做到秒开
 
@@ -919,17 +919,17 @@ var longestCommonPrefix = function(strs) {
 
 支持容器化的前提是：需要对代码改造成可支持数据组装和销毁。
 
--  依赖倒置：越稳定不变逻辑，应该是越底层，越接近用户交互，容易变化的部分是上层。具体层级划分需要分析应用的结构和依赖关系，良好划分层级的应用是容器化改造的前提
--  职责链模式：职责链模式是指每个对象都有接受请求的可能，这些对象连接成一条链，请求沿着这条链的传递，直到有对象处理，这样做的好处是减少接受者和发送者直接的耦合。比如在一个页面加载生命周期中，我们可以让内部模块到外部模块都实现相应的生命周期职责，应用启动和销毁的过程，请求沿着指定链条从外到内传递，也可以按需指定跳跃某个模块，这样大大降低了模块之间的耦合，从而更好的管理代码。
--  依赖注入：作为参数传入 A 对象中。这样做的好处是当 B 模块的初始化等条件发生变化时，不必在 A 对象中进行重复的修改。
+- 依赖倒置：越稳定不变逻辑，应该是越底层，越接近用户交互，容易变化的部分是上层。具体层级划分需要分析应用的结构和依赖关系，良好划分层级的应用是容器化改造的前提
+- 职责链模式：职责链模式是指每个对象都有接受请求的可能，这些对象连接成一条链，请求沿着这条链的传递，直到有对象处理，这样做的好处是减少接受者和发送者直接的耦合。比如在一个页面加载生命周期中，我们可以让内部模块到外部模块都实现相应的生命周期职责，应用启动和销毁的过程，请求沿着指定链条从外到内传递，也可以按需指定跳跃某个模块，这样大大降低了模块之间的耦合，从而更好的管理代码。
+- 依赖注入：作为参数传入 A 对象中。这样做的好处是当 B 模块的初始化等条件发生变化时，不必在 A 对象中进行重复的修改。
 
 数据预拉服务：容器是否会命中依赖两个条件，其一对应离线包代码是否下载好；其二对应版本的数据是否已经预拉缓存完毕。
 
 用户进入文档管理首页，首先会去拉取列表索引数据，然后通过列表数据 id 进行文档内容数据做预拉，储存在本地数据库，本地数据库的存储可以参考前端离线化探索。
 
--  webview service：在整个数据预拉的过程，我们是通过一套独立的客户端后台 webview 服务执行具体任务
--  数据快照：对于纯 dom 结构的文档型品类，我们会在打开文档，解析数据后，把生成的 html 缓存在本地数据库一张快照表里。下一次切换容器时，在取本地数据去解析的同时，会判断对应 id 在快照表是否存在缓存，如果有，直接取出来，覆盖在 html 上，用户可以提前看到上一次渲染的数据，等本地数据真正解析完，再展示可交互界面。解析数据准备渲染也是需要一个上百毫秒的过程，这一策略可以让用户提前看到内容。
--  预创建：有了极致的打开速度，如何优化新建速度呢。正常的新建流程是这样的，用户点击新建按钮，前端请求创建 cgi, 等待后台创建成功返回新文档 url，前端再新开 webview，加载展示页面。我们可以看，由于需要等待创建接口返回的原因，到新建的过程比正常打开一个文档还要更久。
+- webview service：在整个数据预拉的过程，我们是通过一套独立的客户端后台 webview 服务执行具体任务
+- 数据快照：对于纯 dom 结构的文档型品类，我们会在打开文档，解析数据后，把生成的 html 缓存在本地数据库一张快照表里。下一次切换容器时，在取本地数据去解析的同时，会判断对应 id 在快照表是否存在缓存，如果有，直接取出来，覆盖在 html 上，用户可以提前看到上一次渲染的数据，等本地数据真正解析完，再展示可交互界面。解析数据准备渲染也是需要一个上百毫秒的过程，这一策略可以让用户提前看到内容。
+- 预创建：有了极致的打开速度，如何优化新建速度呢。正常的新建流程是这样的，用户点击新建按钮，前端请求创建 cgi, 等待后台创建成功返回新文档 url，前端再新开 webview，加载展示页面。我们可以看，由于需要等待创建接口返回的原因，到新建的过程比正常打开一个文档还要更久。
 
 怎么样才能让新建也做到秒开呢？思路和数据预拉取一样，在用户进入文档首页的同时，我们会提前预请求一批创建 id，然后缓存到本地，同时根据创建 id 生成一篇空白文档数据，储存在本地，标示状态为未使用。用户点击新建按钮，本质上是从本地取一个未使用的文档 url，直接用容器切换打开，然后再和后台进行同步。
 
@@ -941,22 +941,22 @@ CDN 是将源站内容分发至最接近用户的节点，使用户可就近取�
 
 最简单的 CDN 网络由一个 DNS 服务器和几台缓存服务器组成：
 
--  当用户点击网站页面上的内容 URL，经过本地 DNS 系统解析，DNS 系统会最终将域名的解析权交给 CNAME 指向的 CDN 专用 DNS 服务器。
--  CDN 的 DNS 服务器将 CDN 的全局负载均衡设备 IP 地址返回用户。
--  用户向 CDN 的全局负载均衡设备发起内容 URL 访问请求。
--  CDN 全局负载均衡设备根据用户 IP 地址，以及用户请求的内容 URL，选择一台用户所属区域的区域负载均衡设备，告诉用户向这台设备发起请求。
--  区域负载均衡设备会为用户选择一台合适的缓存服务器提供服务，选择的依据包括：根据用户 IP 地址，判断哪一台服务器距用户最近；根据用户所请求的 URL 中携带的内容名称，判断哪一台服务器上有用户所需内容；查询各个服务器当前的负载情况，判断哪一台服务器尚有服务能力。基于以上这些条件的综合分析之后，区域负载均衡设备会向全局负载均衡设备返回一台缓存服务器的 IP 地址。
--  全局负载均衡设备把服务器的 IP 地址返回给用户。
--  用户向缓存服务器发起请求，缓存服务器响应用户请求，将用户所需内容传送到用户终端。如果这台缓存服务器上并没有用户想要的内容，而区域均衡设备依然将它分配给了用户，那么这台服务器就要向它的上一级缓存服务器请求内容，直至追溯到网站的源服务器将内容拉到本地。
+- 当用户点击网站页面上的内容 URL，经过本地 DNS 系统解析，DNS 系统会最终将域名的解析权交给 CNAME 指向的 CDN 专用 DNS 服务器。
+- CDN 的 DNS 服务器将 CDN 的全局负载均衡设备 IP 地址返回用户。
+- 用户向 CDN 的全局负载均衡设备发起内容 URL 访问请求。
+- CDN 全局负载均衡设备根据用户 IP 地址，以及用户请求的内容 URL，选择一台用户所属区域的区域负载均衡设备，告诉用户向这台设备发起请求。
+- 区域负载均衡设备会为用户选择一台合适的缓存服务器提供服务，选择的依据包括：根据用户 IP 地址，判断哪一台服务器距用户最近；根据用户所请求的 URL 中携带的内容名称，判断哪一台服务器上有用户所需内容；查询各个服务器当前的负载情况，判断哪一台服务器尚有服务能力。基于以上这些条件的综合分析之后，区域负载均衡设备会向全局负载均衡设备返回一台缓存服务器的 IP 地址。
+- 全局负载均衡设备把服务器的 IP 地址返回给用户。
+- 用户向缓存服务器发起请求，缓存服务器响应用户请求，将用户所需内容传送到用户终端。如果这台缓存服务器上并没有用户想要的内容，而区域均衡设备依然将它分配给了用户，那么这台服务器就要向它的上一级缓存服务器请求内容，直至追溯到网站的源服务器将内容拉到本地。
 
 cdn 解决的问题：
 
--  加速网站的访问
--  实现跨运营商、跨地域的全网覆盖
--  保障你的网站安全
--  异地备援
--  节约成本投入
--  让你更专注业务本身
+- 加速网站的访问
+- 实现跨运营商、跨地域的全网覆盖
+- 保障你的网站安全
+- 异地备援
+- 节约成本投入
+- 让你更专注业务本身
 
 # 青鹿教育
 
@@ -1260,19 +1260,19 @@ webpack 的事件机制是基于 tapable 这个库实现的，tapable 的具体�
 
 ### react-lite 少了什么东西？
 
--  所有 React.PropTypes 方法都是 no-op（空函数）
--  在服务器端渲染中使用 React，在浏览器中使用 React-lite
--  react-lite 将用新的 dom 树替换 dom 树
--  您最好避免 script|head|link 在客户端标记
--  不能使用 react-dev-tool inspect react-lite，应该切换到常规的 react 进行调试
--  react-lite 仅适用于 JSX 工具链（问题）
--  与 react 不同，eventreact-lite 中的对象始终是持久性的，并且 event.persist 设置为 no-op 以避免抛出错误。
--  react-lite 无法使用 react-tap-event-plugin，请用 fastclick 代替，或添加别名'react-tap-event-plugin': 'react-lite/lib/react-tap-event-plugin'，就像这里不能使用 transform-react-inline-elements，您将获得包含 react 和捆绑包 react-lite。
--  react-lite 只遵循 React 最佳实践。
+- 所有 React.PropTypes 方法都是 no-op（空函数）
+- 在服务器端渲染中使用 React，在浏览器中使用 React-lite
+- react-lite 将用新的 dom 树替换 dom 树
+- 您最好避免 script|head|link 在客户端标记
+- 不能使用 react-dev-tool inspect react-lite，应该切换到常规的 react 进行调试
+- react-lite 仅适用于 JSX 工具链（问题）
+- 与 react 不同，eventreact-lite 中的对象始终是持久性的，并且 event.persist 设置为 no-op 以避免抛出错误。
+- react-lite 无法使用 react-tap-event-plugin，请用 fastclick 代替，或添加别名'react-tap-event-plugin': 'react-lite/lib/react-tap-event-plugin'，就像这里不能使用 transform-react-inline-elements，您将获得包含 react 和捆绑包 react-lite。
+- react-lite 只遵循 React 最佳实践。
 
 ### react hooks 原理
 
--  React 中是通过类似单链表的形式来代替数组的，通过 next 按顺序串联所有的 hook。
+- React 中是通过类似单链表的形式来代替数组的，通过 next 按顺序串联所有的 hook。
 
 ```js
 type Hooks = {
@@ -1292,7 +1292,7 @@ type Effect = {
 };
 ```
 
--  memoizedState，cursor 是存在哪里的？如何和每个函数组件一一对应的？
+- memoizedState，cursor 是存在哪里的？如何和每个函数组件一一对应的？
 
 我们知道，react 会生成一棵组件树（或 Fiber 单链表），树中每个节点对应了一个组件，hooks 的数据就作为组件的一个信息，存储在这些节点上，伴随组件一起出生，一起死亡。
 
@@ -1330,9 +1330,9 @@ es 模块可以使用
 
 ### 一个嵌在 app 内，背景图为视频不支持苹果端怎么办？gif 图片过大，怎么提高首页加载速度？怎么监听 gif 图片加载完成？
 
--  gif 或者由 canvas 组成图片播放
--  给一个占位图，即刚进页面先放一个占位符，等 gif 在后台加载完成后再进行替换
--  onload 事件
+- gif 或者由 canvas 组成图片播放
+- 给一个占位图，即刚进页面先放一个占位符，等 gif 在后台加载完成后再进行替换
+- onload 事件
 
 ### 中台是否有做过？
 
@@ -1381,23 +1381,23 @@ ActiveX HTMLFile (IE)
 
 ### qiankun 切换页面时怎么保存原来的状态？
 
-1.  vuex，redux，sessionStorage 等可以本地存储的能力
-2.  Vue 中 keep-alive，React 中 react-activation
+1. vuex，redux，sessionStorage 等可以本地存储的能力
+2. Vue 中 keep-alive，React 中 react-activation
 
 ### 如何更简单的实现表单？表单间的联动怎么处理？
 
-1.  XRender、react-jsonschema-form、vue-json-schema-form、form-generator
-2.  使用基于 JSON Schema 规范的方案处理联动
+1. XRender、react-jsonschema-form、vue-json-schema-form、form-generator
+2. 使用基于 JSON Schema 规范的方案处理联动
 
--  JSON Schema anyOf 配置（适用于根据类型选择然后使用不同的数据结构或 ui 样式）
--  object dependencies 实现联动（适用于根据需要根据值是否为空或 undefined 来做联动设置）
--  通过 if else 实现联动（适用于根据值等于一个常量时来做联动）
+- JSON Schema anyOf 配置（适用于根据类型选择然后使用不同的数据结构或 ui 样式）
+- object dependencies 实现联动（适用于根据需要根据值是否为空或 undefined 来做联动设置）
+- 通过 if else 实现联动（适用于根据值等于一个常量时来做联动）
 
-3.  通过 UI 配置的方式：
+3. 通过 UI 配置的方式：
 
--  通过 ui-schema 配置表达式（通过对 ui-schema ui:hidden 配置表达式）
--  自定义 ui:field 使用已有联级组件（适用于通过配置一个已有的自定义组件来渲染一些复杂的联动场景）
--  ui-schema 动态样式（可以通过计算属性返回 ui-schema，配置 ui:widget:HiddenWidget、ui:field:null、ui:fieldStyle 等都可以实现样式联动）
+- 通过 ui-schema 配置表达式（通过对 ui-schema ui:hidden 配置表达式）
+- 自定义 ui:field 使用已有联级组件（适用于通过配置一个已有的自定义组件来渲染一些复杂的联动场景）
+- ui-schema 动态样式（可以通过计算属性返回 ui-schema，配置 ui:widget:HiddenWidget、ui:field:null、ui:fieldStyle 等都可以实现样式联动）
 
 具体见[数据联动](https://vue-json-schema-form.lljj.me/zh/guide/data-linkage.html)
 

@@ -17,24 +17,24 @@ qiankun（乾坤）就是一款由蚂蚁金服推出的比较成熟的微前端�
 
 # 目的
 
-1.  js 沙箱：子应用之间互不影响
-2.  css 隔离：子应用之间样式互不影响，切换时加载与卸载
-3.  HTML Entry: Config Entry 的进阶版，简化开发者使用，但是把解析消耗留给了用户
-4.  Config Entry: 配置每个子应用的 js 和 css，包含内联的部分
-5.  按需加载：切换页面才加载相应的 html、css、js
-6.  公共依赖加载: 大部分公共的依赖加载
-7.  预加载: 空闲时加载子应用资源，需要用户行为数据支持
-8.  父子应用通讯: 子应用如何调用父应用方法，父应用如何下发状态
-9.  子应用嵌套: 微前端如何嵌套微前端
-10.  子应用并行: 多个微前端同时存在
+1. js 沙箱：子应用之间互不影响
+2. css 隔离：子应用之间样式互不影响，切换时加载与卸载
+3. HTML Entry: Config Entry 的进阶版，简化开发者使用，但是把解析消耗留给了用户
+4. Config Entry: 配置每个子应用的 js 和 css，包含内联的部分
+5. 按需加载：切换页面才加载相应的 html、css、js
+6. 公共依赖加载: 大部分公共的依赖加载
+7. 预加载: 空闲时加载子应用资源，需要用户行为数据支持
+8. 父子应用通讯: 子应用如何调用父应用方法，父应用如何下发状态
+9. 子应用嵌套: 微前端如何嵌套微前端
+10. 子应用并行: 多个微前端同时存在
 
 # 核心
 
-1.  js 沙箱
-2.  css 样式隔离
-3.  应用 html 入口接入
-4.  应用通信
-5.  应用路由
+1. js 沙箱
+2. css 样式隔离
+3. 应用 html 入口接入
+4. 应用通信
+5. 应用路由
 
 # 技术介绍
 
@@ -70,8 +70,8 @@ Proxy 对象用于创建一个对象的代理，从而实现基本操作的拦�
 
 Object.defineProperty 也能实现基本操作的拦截和自定义，那为什么用 Proxy 呢？因为 Proxy 能解决以下问题：
 
--  删除或者增加对象属性无法监听到
--  数组的变化无法监听到（vue2 正是使用的 Object.defineProperty 劫持属性，watch 中无法检测数组改变）
+- 删除或者增加对象属性无法监听到
+- 数组的变化无法监听到（vue2 正是使用的 Object.defineProperty 劫持属性，watch 中无法检测数组改变）
 
 #### 实现
 
@@ -81,13 +81,13 @@ Object.defineProperty 也能实现基本操作的拦截和自定义，那为什�
 
 #### 优点
 
--  可同时运行多个沙箱
--  不会污染 window 环境
+- 可同时运行多个沙箱
+- 不会污染 window 环境
 
 #### 缺点
 
--  不兼容 ie
--  在全局作用域上通过 var 或 function 声明的变量和函数无法被代理沙箱劫持，因为代理对象 Proxy 只能识别在该对象上存在的属性，通过 var 或 function 声明声明的变量是开辟了新的地址，自然无法被 Proxy 劫持，比如
+- 不兼容 ie
+- 在全局作用域上通过 var 或 function 声明的变量和函数无法被代理沙箱劫持，因为代理对象 Proxy 只能识别在该对象上存在的属性，通过 var 或 function 声明声明的变量是开辟了新的地址，自然无法被 Proxy 劫持，比如
 
   ```js
   const proxy1 = new CreateProxySandbox({});
@@ -162,8 +162,8 @@ Shadow DOM 允许将隐藏的 DOM 树附加到常规的 DOM 树中——它以 s
 
 #### 优点
 
--  支持大部分样式隔离需求
--  解决了 Shadow DOM 方案导致的丢失根节点问题
+- 支持大部分样式隔离需求
+- 解决了 Shadow DOM 方案导致的丢失根节点问题
 
 #### 缺点
 
@@ -177,10 +177,10 @@ Shadow DOM 允许将隐藏的 DOM 树附加到常规的 DOM 树中——它以 s
 
 拿到 html 字符串后，会调用 [processTpl](https://github.com/kuitos/import-html-entry/blob/76df4b3737d54112f6bf2dfabcd01709079468e4/src/process-tpl.js#L58) 方法通过一大堆正则去匹配获取 html 中对应的 js（内联、外联）、css（内联、外联）、注释、入口脚本 entry 等等。processTpl 方法会返回我们加载子应用所需要的四个组成部分：
 
--  template：html 模板;
--  script：js 脚本（内联、外联）;
--  styles：css 样式表（内联、外联）;
--  entry：子应用入口 js 脚本文件，如果没有默认以解析后的最后一个 js 脚本代替;
+- template：html 模板;
+- script：js 脚本（内联、外联）;
+- styles：css 样式表（内联、外联）;
+- entry：子应用入口 js 脚本文件，如果没有默认以解析后的最后一个 js 脚本代替;
 
 ```js
 export default function processTpl(tpl, baseURI) {

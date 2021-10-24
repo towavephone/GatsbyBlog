@@ -15,15 +15,15 @@ tags: 前端, 前端模块化
 
 ## 什么是模块?
 
--  将一个复杂的程序依据一定的规则(规范)封装成几个块(文件)，并组合在一起
--  块的内部数据与实现是私有的，只是向外部暴露一些接口(方法)与外部其它模块通信
+- 将一个复杂的程序依据一定的规则(规范)封装成几个块(文件)，并组合在一起
+- 块的内部数据与实现是私有的，只是向外部暴露一些接口(方法)与外部其它模块通信
 
 ## 模块化的进化过程
 
 ### 全局 function 模式: 将不同的功能封装成不同的全局函数
 
--  编码: 将不同的功能封装成不同的全局函数
--  问题: 污染全局命名空间, 容易引起命名冲突或数据不安全，而且模块成员之间看不出直接关系
+- 编码: 将不同的功能封装成不同的全局函数
+- 问题: 污染全局命名空间, 容易引起命名冲突或数据不安全，而且模块成员之间看不出直接关系
 
 ```js
 function m1() {
@@ -36,8 +36,8 @@ function m2() {
 
 ### namespace 模式: 简单对象封装
 
--  作用: 减少了全局变量，解决命名冲突
--  问题: 数据不安全(外部可以直接修改模块内部的数据)
+- 作用: 减少了全局变量，解决命名冲突
+- 问题: 数据不安全(外部可以直接修改模块内部的数据)
 
 ```js
 let myModule = {
@@ -57,9 +57,9 @@ myModule.foo(); // foo() other data
 
 ### IIFE 模式：匿名函数自调用(闭包)
 
--  作用: 数据是私有的，外部只能通过暴露的方法操作
--  编码: 将数据和行为封装到一个函数内部，通过给 window 添加属性来向外暴露接口
--  问题: 如果当前这个模块依赖另一个模块怎么办?
+- 作用: 数据是私有的，外部只能通过暴露的方法操作
+- 编码: 将数据和行为封装到一个函数内部，通过给 window 添加属性来向外暴露接口
+- 问题: 如果当前这个模块依赖另一个模块怎么办?
 
 ```html
 <!-- index.html 文件 -->
@@ -148,10 +148,10 @@ foo() www.baidu.com
 
 ## 模块化的好处
 
--  避免命名冲突(减少命名空间污染)
--  更好的分离，按需加载
--  更高复用性
--  高可维护性
+- 避免命名冲突(减少命名空间污染)
+- 更好的分离，按需加载
+- 更高复用性
+- 高可维护性
 
 ## 引入多个 script 后出现出现问题
 
@@ -179,14 +179,14 @@ Node 应用由模块组成，采用 CommonJS 模块规范。每个文件就是�
 
 ### 特点
 
--  所有代码都运行在模块作用域，不会污染全局作用域。
--  模块可以多次加载，但是只会在第一次加载时运行一次，然后运行结果就被缓存了，以后再加载，就直接读取缓存结果。要想让模块再次运行，必须清除缓存。
--  模块加载的顺序，按照其在代码中出现的顺序。
+- 所有代码都运行在模块作用域，不会污染全局作用域。
+- 模块可以多次加载，但是只会在第一次加载时运行一次，然后运行结果就被缓存了，以后再加载，就直接读取缓存结果。要想让模块再次运行，必须清除缓存。
+- 模块加载的顺序，按照其在代码中出现的顺序。
 
 ### 基本语法
 
--  暴露模块：`module.exports = value` 或 `exports.xxx = value`
--  引入模块：`require(xxx)`，如果是第三方模块，xxx 为模块名；如果是自定义模块，xxx 为模块文件路径
+- 暴露模块：`module.exports = value` 或 `exports.xxx = value`
+- 引入模块：`require(xxx)`，如果是第三方模块，xxx 为模块名；如果是自定义模块，xxx 为模块文件路径
 
 此处我们有个疑问：CommonJS 暴露的模块到底是什么?
 
@@ -244,8 +244,8 @@ console.log(counter); // 3
 
 ### 服务器端实现
 
-1.  下载安装 node.js
-2.  创建项目结构
+1. 下载安装 node.js
+2. 创建项目结构
 
    注意：用 npm init 自动生成 package.json 时，package name(包名)不能有中文和大写
 
@@ -262,13 +262,13 @@ console.log(counter); // 3
      }
    ```
 
-3.  下载第三方模块
+3. 下载第三方模块
 
    ```bash
    npm install uniq --save // 用于数组去重
    ```
 
-4.  定义模块代码
+4. 定义模块代码
 
    ```js
    // module1.js
@@ -303,13 +303,13 @@ console.log(counter); // 3
    console.log(uniq(module3.arr)); //[ 1, 2, 3 ]
    ```
 
-5.  通过 node 运行 app.js
+5. 通过 node 运行 app.js
 
    命令行输入 `node app.js`，运行 JS 文件
 
 ### 浏览器端实现(借助 Browserify)
 
-1.  创建项目结构
+1. 创建项目结构
 
    ```
    |-js
@@ -327,20 +327,20 @@ console.log(counter); // 3
      }
    ```
 
-2.  下载 browserify
+2. 下载 browserify
 
--  全局: `npm install browserify -g`
--  局部: `npm install browserify --save-dev`
+- 全局: `npm install browserify -g`
+- 局部: `npm install browserify --save-dev`
 
-3.  定义模块代码(同服务器端)
+3. 定义模块代码(同服务器端)
 
    注意：index.html 文件要运行在浏览器上，需要借助 browserify 将 app.js 文件打包编译，如果直接在 index.html 引入 app.js 就会报错！
 
-4.  打包处理 js
+4. 打包处理 js
 
    根目录下运行 `browserify js/src/app.js -o js/dist/bundle.js`
 
-5.  页面使用引入
+5. 页面使用引入
 
    在 index.html 文件中引入 `<script type="text/javascript" src="js/dist/bundle.js"></script>`
 
@@ -423,14 +423,14 @@ RequireJS 是一个工具库，主要用于客户端的模块管理。它的模�
 
 接下来介绍 AMD 规范在浏览器实现的步骤：
 
-1.  下载 require.js, 并引入
+1. 下载 require.js, 并引入
 
--  官网: http://www.requirejs.cn/
--  github : https://github.com/requirejs/requirejs
+- 官网: http://www.requirejs.cn/
+- github : https://github.com/requirejs/requirejs
 
    然后将 require.js 导入项目: js/libs/require.js
 
-2.  创建项目结构
+2. 创建项目结构
 
    ```
    |-js
@@ -443,7 +443,7 @@ RequireJS 是一个工具库，主要用于客户端的模块管理。它的模�
    |-index.html
    ```
 
-3.  定义 require.js 的模块代码
+3. 定义 require.js 的模块代码
 
    ```js
    // dataService.js文件
@@ -497,7 +497,7 @@ RequireJS 是一个工具库，主要用于客户端的模块管理。它的模�
    </html>
    ```
 
-4.  页面引入 require.js 模块
+4. 页面引入 require.js 模块
 
    在 index.html 引入 `<script data-main="js/main" src="js/libs/require.js"></script>`
 
@@ -578,14 +578,14 @@ define(function(require) {
 
 ### sea.js 简单使用教程
 
-1.  下载 sea.js, 并引入
+1. 下载 sea.js, 并引入
 
--  官网: http://seajs.org/
--  github : https://github.com/seajs/seajs
+- 官网: http://seajs.org/
+- github : https://github.com/seajs/seajs
 
    然后将 sea.js 导入项目: js/libs/sea.js
 
-2.  创建项目结构
+2. 创建项目结构
 
    ```
    |-js
@@ -600,7 +600,7 @@ define(function(require) {
    |-index.html
    ```
 
-3.  定义 sea.js 的模块代码
+3. 定义 sea.js 的模块代码
 
    ```js
    // module1.js文件
@@ -651,7 +651,7 @@ define(function(require) {
    });
    ```
 
-4.  在 index.html 中引入
+4. 在 index.html 中引入
 
    ```html
    <script type="text/javascript" src="js/libs/sea.js"></script>
@@ -710,9 +710,9 @@ customName(); // 'foo'
 
 它们有两个重大差异：
 
-1.  CommonJS 模块输出的是一个值的拷贝，ES6 模块输出的是值的引用。
+1. CommonJS 模块输出的是一个值的拷贝，ES6 模块输出的是值的引用。
 
-2.  CommonJS 模块是运行时加载，ES6 模块是编译时输出接口。
+2. CommonJS 模块是运行时加载，ES6 模块是编译时输出接口。
 
 第二个差异是因为 CommonJS 加载的是一个对象（即 module.exports 属性），该对象只有在脚本运行完才会生成。而 ES6 模块不是对象，它的对外接口只是一种静态定义，在代码静态解析阶段就会生成。
 
@@ -737,7 +737,7 @@ ES6 模块的运行机制与 CommonJS 不一样。ES6 模块是动态引用，�
 
 简单来说就一句话：使用 Babel 将 ES6 编译为 ES5 代码，使用 Browserify 编译打包 js。
 
-1.  定义 package.json 文件
+1. 定义 package.json 文件
 
    ```json
    {
@@ -746,13 +746,13 @@ ES6 模块的运行机制与 CommonJS 不一样。ES6 模块是动态引用，�
    }
    ```
 
-2.  安装 babel-cli, babel-preset-es2015 和 browserify
+2. 安装 babel-cli, babel-preset-es2015 和 browserify
 
--  `npm install babel-cli browserify -g`
--  `npm install babel-preset-es2015 --save-dev`
--  preset 预设(将 es6 转换成 es5 的所有插件打包)
+- `npm install babel-cli browserify -g`
+- `npm install babel-preset-es2015 --save-dev`
+- preset 预设(将 es6 转换成 es5 的所有插件打包)
 
-3.  定义.babelrc 文件
+3. 定义.babelrc 文件
 
    ```
    {
@@ -760,7 +760,7 @@ ES6 模块的运行机制与 CommonJS 不一样。ES6 模块是动态引用，�
    }
    ```
 
-4.  定义模块代码
+4. 定义模块代码
 
    ```js
    // module1.js 文件
@@ -799,10 +799,10 @@ ES6 模块的运行机制与 CommonJS 不一样。ES6 模块是动态引用，�
    module3();
    ```
 
-5.  编译并在 index.html 中引入
+5. 编译并在 index.html 中引入
 
--  使用 Babel 将 ES6 编译为 ES5 代码(但包含 CommonJS 语法)：`babel js/src -d js/lib`
--  使用 Browserify 编译 js：`browserify js/lib/app.js -o js/lib/bundle.js`，然后在 index.html 文件中引入
+- 使用 Babel 将 ES6 编译为 ES5 代码(但包含 CommonJS 语法)：`babel js/src -d js/lib`
+- 使用 Browserify 编译 js：`browserify js/lib/app.js -o js/lib/bundle.js`，然后在 index.html 文件中引入
 
    然后在 index.html 文件中引入
 
@@ -841,7 +841,7 @@ ES6 模块的运行机制与 CommonJS 不一样。ES6 模块是动态引用，�
 
 # 总结
 
--  CommonJS 规范主要用于服务端编程，加载模块是同步的，这并不适合在浏览器环境，因为同步意味着阻塞加载，浏览器资源是异步加载的，因此有了 AMD、CMD 解决方案。
--  AMD 规范在浏览器环境中异步加载模块，而且可以并行加载多个模块。不过，AMD 规范开发成本高，代码的阅读和书写比较困难，模块定义方式的语义不顺畅。
--  CMD 规范与 AMD 规范很相似，都用于浏览器编程，依赖就近，延迟执行，可以很容易在 Node.js 中运行。不过，依赖 SPM 打包，模块的加载逻辑偏重
--  ES6 在语言标准的层面上，实现了模块功能，而且实现得相当简单，完全可以取代 CommonJS 和 AMD 规范，成为浏览器和服务器通用的模块解决方案。
+- CommonJS 规范主要用于服务端编程，加载模块是同步的，这并不适合在浏览器环境，因为同步意味着阻塞加载，浏览器资源是异步加载的，因此有了 AMD、CMD 解决方案。
+- AMD 规范在浏览器环境中异步加载模块，而且可以并行加载多个模块。不过，AMD 规范开发成本高，代码的阅读和书写比较困难，模块定义方式的语义不顺畅。
+- CMD 规范与 AMD 规范很相似，都用于浏览器编程，依赖就近，延迟执行，可以很容易在 Node.js 中运行。不过，依赖 SPM 打包，模块的加载逻辑偏重
+- ES6 在语言标准的层面上，实现了模块功能，而且实现得相当简单，完全可以取代 CommonJS 和 AMD 规范，成为浏览器和服务器通用的模块解决方案。

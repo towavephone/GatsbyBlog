@@ -19,11 +19,11 @@ var state = document.readyState;
 
 其中 state 值包含下面三个值：
 
--  loading  
+- loading  
   表示文档正在加载中。
--  interactive  
+- interactive  
   表示文档已完成加载，文档已被解析，但图像、样式表和框架等子资源仍在加载。
--  complete  
+- complete  
   表示文档和所有子资源已完成加载。如果状态变成这个，表明 load 事件即将触发。
 
 # DOM 事件绑定没必要等 domready

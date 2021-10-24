@@ -110,8 +110,8 @@ export function* helloSaga() {
 
 为了运行我们的 Saga，我们需要：
 
--  创建一个 Saga middleware 和要运行的 Sagas（目前我们只有一个 helloSaga）
--  将这个 Saga middleware 连接至 Redux store
+- 创建一个 Saga middleware 和要运行的 Sagas（目前我们只有一个 helloSaga）
+- 将这个 Saga middleware 连接至 Redux store
 
 我们修改一下 main.js：
 

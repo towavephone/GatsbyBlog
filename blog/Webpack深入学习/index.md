@@ -76,8 +76,8 @@ Tree-Shaking 的原理可以参考[这篇文章](https://juejin.cn/post/68449035
 
 归纳起来就是
 
-> 1.  ES6 的模块引入是静态分析的，故而可以在编译时正确判断到底加载了什么代码。
-> 2.  分析程序流，判断哪些变量未被使用、引用，进而删除此代码
+> 1. ES6 的模块引入是静态分析的，故而可以在编译时正确判断到底加载了什么代码。
+> 2. 分析程序流，判断哪些变量未被使用、引用，进而删除此代码
 
 [Tree-Shaking 不起作用，代码没有被删？](https://segmentfault.com/a/1190000012794598)
 
@@ -211,9 +211,9 @@ webpack4 的代码分割插件。
 
 webpack4 中支持了零配置的特性，同时对块打包也做了优化，CommonsChunkPlugin 已经被移除了，现在是使用 optimization.splitChunks 代替。SplitChunksPlugin 的配置有几个需要比较关注一下
 
--  async: 默认值， 将按需引用的模块打包
--  initial: 分开优化打包异步和非异步模块
--  all: all 会把异步和非异步同时进行优化打包。也就是说 moduleA 在 indexA 中异步引入，indexB 中同步引入，initial 下 moduleA 会出现在两个打包块中，而 all 只会出现一个。
+- async: 默认值， 将按需引用的模块打包
+- initial: 分开优化打包异步和非异步模块
+- all: all 会把异步和非异步同时进行优化打包。也就是说 moduleA 在 indexA 中异步引入，indexB 中同步引入，initial 下 moduleA 会出现在两个打包块中，而 all 只会出现一个。
 
 使用 cacheGroups 可以自定义配置打包块。
 
@@ -221,8 +221,8 @@ webpack4 中支持了零配置的特性，同时对块打包也做了优化，Co
 
 利用动态引入的文件打包成另一个包并懒加载它，其与 SplitChunksPlugin 的 cacheGroups 区别：
 
--  Bundle splitting：实际上就是创建多个更小的文件，并行加载，以获得更好的缓存效果；主要的作用就是使浏览器并行下载，提高下载速度。并且运用浏览器缓存，只有代码被修改，文件名中的哈希值改变了才会去再次加载
--  Code splitting：只加载用户最需要的部分，其余的代码都遵从懒加载的策略；主要的作用就是加快页面加载速度，不加载不必要加载的东西。
+- Bundle splitting：实际上就是创建多个更小的文件，并行加载，以获得更好的缓存效果；主要的作用就是使浏览器并行下载，提高下载速度。并且运用浏览器缓存，只有代码被修改，文件名中的哈希值改变了才会去再次加载
+- Code splitting：只加载用户最需要的部分，其余的代码都遵从懒加载的策略；主要的作用就是加快页面加载速度，不加载不必要加载的东西。
 
 参考代码：
 
@@ -260,8 +260,8 @@ document.body.appendChild(component());
 
 因为 webpack 会把运行时代码放到最后的一个 bundle 中，所以即使我们修改了其他文件的代码，最后的一个 bundle 的 hash 也会改变，runtimeChunk 是把运行时代码单独提取出来的配置。这样就有利于我们和后端配合缓存文件。
 
--  single: 所有入口共享一个生成的 runtimeChunk
--  true/mutiple: 每个入口生成一个单独的 runtimeChunk
+- single: 所有入口共享一个生成的 runtimeChunk
+- true/mutiple: 每个入口生成一个单独的 runtimeChunk
 
 ### 模块标识符
 
@@ -295,9 +295,9 @@ import Print from './print';
 
 根据这个配置，preset-env 或者 postcss 等会根据你的参数支持不同的 polyfills，具体的参数配置参考该[文章](https://juejin.cn/post/6844903669524086797)
 
--  babel-polyfill 只需要引入一次，但会重写一些原生的已支持的方法，而且体积很大。
--  transform-runtime 是利用 plugin 自动识别并替换代码中的新特性，你不需要再引入，只需要装好 babel-runtime 和 配好 plugin 就可以了。好处是按需替换，检测到你需要哪个，就引入哪个 polyfill，值得注意的是，instance 上新添加的一些方法，babel-plugin-transform-runtime 是没有做处理的，比如 数组的 includes, filter, fill 等
--  babel-preset-env 根据当前的运行环境，自动确定你需要的 plugins 和 polyfills。通过各个 es 标准 feature 在不同浏览器以及 node 版本的支持情况，再去维护一个 feature 跟 plugins 之间的映射关系，最终确定需要的 plugins。
+- babel-polyfill 只需要引入一次，但会重写一些原生的已支持的方法，而且体积很大。
+- transform-runtime 是利用 plugin 自动识别并替换代码中的新特性，你不需要再引入，只需要装好 babel-runtime 和 配好 plugin 就可以了。好处是按需替换，检测到你需要哪个，就引入哪个 polyfill，值得注意的是，instance 上新添加的一些方法，babel-plugin-transform-runtime 是没有做处理的，比如 数组的 includes, filter, fill 等
+- babel-preset-env 根据当前的运行环境，自动确定你需要的 plugins 和 polyfills。通过各个 es 标准 feature 在不同浏览器以及 node 版本的支持情况，再去维护一个 feature 跟 plugins 之间的映射关系，最终确定需要的 plugins。
 
 ### 后编译
 
@@ -319,13 +319,13 @@ webpack --env.NODE_ENV=local --env.production --progress
 
 ### 其他插件
 
--  CompressionWebpackPlugin 将文件压缩 文件大小减小很多 需要后端协助配置
--  mini-css-extract-plugin 将 CSS 分离出来
--  wbepack.IgnorePlugin 忽略匹配的模块
--  uglifyjs-webpack-plugin 代码丑化，webpack4 的 mode（product）自动配置
--  optimize-css-assets-webpack-plugincss 压缩
--  webpack-md5-hash 使你的 chunk 根据内容生成 md5，用这个 md5 取代 webpack chunkhash。
--  dllPlugin 提高构建速度
+- CompressionWebpackPlugin 将文件压缩 文件大小减小很多 需要后端协助配置
+- mini-css-extract-plugin 将 CSS 分离出来
+- wbepack.IgnorePlugin 忽略匹配的模块
+- uglifyjs-webpack-plugin 代码丑化，webpack4 的 mode（product）自动配置
+- optimize-css-assets-webpack-plugincss 压缩
+- webpack-md5-hash 使你的 chunk 根据内容生成 md5，用这个 md5 取代 webpack chunkhash。
+- dllPlugin 提高构建速度
 
 # 插件机制
 
@@ -882,13 +882,13 @@ class MyExampleWebpackPlugin {
 
 ## 调试
 
-1.  使用以下命令运行项目，./scripts/build.js 是你想要开始调试的地方
+1. 使用以下命令运行项目，./scripts/build.js 是你想要开始调试的地方
 
-```bash
-node --inspect-brk ./scripts/build.js --inline --progress
-```
+   ```bash
+   node --inspect-brk ./scripts/build.js --inline --progress
+   ```
 
-2.  打开 chrome://inspect/#devices 即可调试
+2. 打开 chrome://inspect/#devices 即可调试
 
 ## 流程图
 
@@ -1350,10 +1350,10 @@ function seal(callback) {
 
 每个 chunk 的生成就是找到需要包含的 modules。这里大致描述一下 chunk 的生成算法：
 
-1.  webpack 先将 entry 中对应的 module 都生成一个新的 chunk
-2.  遍历 module 的依赖列表，将依赖的 module 也加入到 chunk 中
-3.  如果一个依赖 module 是动态引入的模块，那么就会根据这个 module 创建一个新的 chunk，继续遍历依赖
-4.  重复上面的过程，直至得到所有的 chunks
+1. webpack 先将 entry 中对应的 module 都生成一个新的 chunk
+2. 遍历 module 的依赖列表，将依赖的 module 也加入到 chunk 中
+3. 如果一个依赖 module 是动态引入的模块，那么就会根据这个 module 创建一个新的 chunk，继续遍历依赖
+4. 重复上面的过程，直至得到所有的 chunks
 
 chunk 属性图
 
@@ -1406,10 +1406,10 @@ function createChunkAssets() {
 
 createChunkAssets 会生成文件名和对应的文件内容，并放入 Compilation.assets 对象， 这里有四个 Template 的子类，分别是 MainTemplate.js、ChunkTemplate.js、ModuleTemplate.js、HotUpdateChunkTemplate.js
 
--  MainTemplate.js: 对应了在 entry 配置的入口 chunk 的渲染模板
--  ChunkTemplate: 动态引入的非入口 chunk 的渲染模板
--  ModuleTemplate.js: chunk 中的 module 的渲染模板
--  HotUpdateChunkTemplate.js: 对热替换模块的一个处理。
+- MainTemplate.js: 对应了在 entry 配置的入口 chunk 的渲染模板
+- ChunkTemplate: 动态引入的非入口 chunk 的渲染模板
+- ModuleTemplate.js: chunk 中的 module 的渲染模板
+- HotUpdateChunkTemplate.js: 对热替换模块的一个处理。
 
 模块在封装的时候和它在构建时一样，都是调用各模块类中的方法。封装通过调用 module.source() 来进行各操作，比如说 require() 的替换。
 

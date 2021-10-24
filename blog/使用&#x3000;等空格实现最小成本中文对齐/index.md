@@ -18,8 +18,8 @@ path: /tips-blank-character-chinese-align/
 
 其中的`&ensp;`和`&emsp;`，由于具有某一超赞的特性，使其可以登上 web 届的舞台！什么特性呢？如上表加粗展示，
 
-1.  透明；
-2.  宽度正好跟中文正好是 1:2 和 1:1 的关系
+1. 透明；
+2. 宽度正好跟中文正好是 1:2 和 1:1 的关系
 
 于是，一些中文排版对齐什么的，直接就可以使用这两个空格调节，如：
 
@@ -33,15 +33,15 @@ path: /tips-blank-character-chinese-align/
 
 当中文和英文混杂的时候，使用`&ensp;`, `&emsp;`等空格实现冒号的完美对齐还是有些困难的，除非英文使用的是等宽字体，于是乎，我们就可以使用普通的`&nbsp;`空格做英文字符的宽度调节。
 
-1.  HTML 中字符输出使用&#x 配上 charCode 值；
-2.  在 JavaScript 文件中为防止乱码转义，则是\u 配上 charCode 值；
-3.  而在 CSS 文件中，如 CSS 伪元素的 content 属性，直接使用\配上 charCode 值。
+1. HTML 中字符输出使用&#x 配上 charCode 值；
+2. 在 JavaScript 文件中为防止乱码转义，则是\u 配上 charCode 值；
+3. 而在 CSS 文件中，如 CSS 伪元素的 content 属性，直接使用\配上 charCode 值。
 
 因此，想在 HTML/JS/CSS 中转义“我”这个汉字，分别是：
 
-1.  `&#x6211`;
-2.  \u6211, 如`console.log('\u6211')`;
-3.  \6211, 如`.xxx:before { content: '\6211'; }`
+1. `&#x6211`;
+2. \u6211, 如`console.log('\u6211')`;
+3. \6211, 如`.xxx:before { content: '\6211'; }`
 
 考虑到直接`&#x3000;`这种形式暴露在 HTML 中，可能会让屏幕阅读器等辅助设备读取，从而影响正常阅读流，因此，我们可以进一步优化下，使用标签，利用伪元素，例如：
 

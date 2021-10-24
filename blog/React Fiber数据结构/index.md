@@ -52,9 +52,9 @@ function walk(instance) {
 
 ![](2020-05-28-14-52-10.png)
 
-1.  父节点到子节点(红色虚线)
-2.  同层节点(黄色虚线)
-3.  子节点到父节点(蓝色虚线)
+1. 父节点到子节点(红色虚线)
+2. 同层节点(黄色虚线)
+3. 子节点到父节点(蓝色虚线)
 
 > 父节点指向第一个子节点, 每个子节点都指向父节点，同层节点间是单向链表。
 
@@ -147,20 +147,20 @@ goWalk(new FiberNode(a1));
 
 `Fiber` 在一个节点上的执行流程总结如下:
 
--  在当前节点下寻找是否有子节点
-   -  若有, 则进入子节点
-   -  若没有, 则在当前节点下寻找是否有下一个相邻节点
-      -  若有, 则进入下一个相邻节点
-      -  若没有, 则返回它的父节点
+- 在当前节点下寻找是否有子节点
+   - 若有, 则进入子节点
+   - 若没有, 则在当前节点下寻找是否有下一个相邻节点
+      - 若有, 则进入下一个相邻节点
+      - 若没有, 则返回它的父节点
 
 # Fiber Reconciler 的优势
 
 通过分析上述两种数据结构实现的代码，可以得出下面结论:
 
--  基于树的深度遍历实现的 Reconciler: 一旦进入调用栈便无法暂停;
--  基于链表实现的 Reconciler: 在 `while(true) {}` 的循环中, 可以通过 `currentNode` 的赋值重新得到需要操作的节点，而在赋值之前便可以'暂停'来执行其它逻辑, 这也是 `requestIdleCallback` 能得以在 `Fiber Reconciler` 的原因。
+- 基于树的深度遍历实现的 Reconciler: 一旦进入调用栈便无法暂停;
+- 基于链表实现的 Reconciler: 在 `while(true) {}` 的循环中, 可以通过 `currentNode` 的赋值重新得到需要操作的节点，而在赋值之前便可以'暂停'来执行其它逻辑, 这也是 `requestIdleCallback` 能得以在 `Fiber Reconciler` 的原因。
 
 # 相关链接
 
--  [The how and why on React’s usage of linked list in Fiber to walk the component’s tree](https://medium.com/react-in-depth/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-67f1014d0eb7)
--  [Fiber Principles: Contributing To Fiber](https://github.com/facebook/react/issues/7942): Fiber 设计思想相关 issue, 推荐。
+- [The how and why on React’s usage of linked list in Fiber to walk the component’s tree](https://medium.com/react-in-depth/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-67f1014d0eb7)
+- [Fiber Principles: Contributing To Fiber](https://github.com/facebook/react/issues/7942): Fiber 设计思想相关 issue, 推荐。

@@ -7,8 +7,8 @@ tags: 前端, TypeScript, ts
 
 # 背景知识
 
--  [TypeScript Handbook 入门教程](https://zhongsp.gitbooks.io/typescript-handbook/content/)
--  [深入理解 TypeScript](https://jkchao.github.io/typescript-book-chinese/)
+- [TypeScript Handbook 入门教程](https://zhongsp.gitbooks.io/typescript-handbook/content/)
+- [深入理解 TypeScript](https://jkchao.github.io/typescript-book-chinese/)
 
 # React 中的用法
 
@@ -124,9 +124,9 @@ export default App;
 
 使用 React.FC 声明函数组件和普通声明的区别如下：
 
--  React.FC 显式地定义了返回类型，其他方式是隐式推导的；
--  React.FC 对静态属性：displayName、propTypes、defaultProps 提供了类型检查和自动补全；
--  React.FC 为 children 提供了隐式的类型（ReactElement | null）。
+- React.FC 显式地定义了返回类型，其他方式是隐式推导的；
+- React.FC 对静态属性：displayName、propTypes、defaultProps 提供了类型检查和自动补全；
+- React.FC 为 children 提供了隐式的类型（ReactElement | null）。
 
 那如果我们在定义组件时不知道 props 的类型，只有调用时才知道，那就还是用泛型来定义 props 的类型。对于使用 function 定义的函数组件：
 
@@ -686,17 +686,17 @@ const reducer: React.Reducer<State, ActionType> = (state, action) => {
 
 常见的 Event 事件对象如下：
 
--  剪切板事件对象：`ClipboardEvent<T = Element>`
--  拖拽事件对象：`DragEvent<T = Element>`
--  焦点事件对象：`FocusEvent<T = Element>`
--  表单事件对象：`FormEvent<T = Element>`
--  Change 事件对象：`ChangeEvent<T = Element>`
--  键盘事件对象：`KeyboardEvent<T = Element>`
--  鼠标事件对象：`MouseEvent<T = Element, E = NativeMouseEvent>`
--  触摸事件对象：`TouchEvent<T = Element>`
--  滚轮事件对象：`WheelEvent<T = Element>`
--  动画事件对象：`AnimationEvent<T = Element>`
--  过渡事件对象：`TransitionEvent<T = Element>`
+- 剪切板事件对象：`ClipboardEvent<T = Element>`
+- 拖拽事件对象：`DragEvent<T = Element>`
+- 焦点事件对象：`FocusEvent<T = Element>`
+- 表单事件对象：`FormEvent<T = Element>`
+- Change 事件对象：`ChangeEvent<T = Element>`
+- 键盘事件对象：`KeyboardEvent<T = Element>`
+- 鼠标事件对象：`MouseEvent<T = Element, E = NativeMouseEvent>`
+- 触摸事件对象：`TouchEvent<T = Element>`
+- 滚轮事件对象：`WheelEvent<T = Element>`
+- 动画事件对象：`AnimationEvent<T = Element>`
+- 过渡事件对象：`TransitionEvent<T = Element>`
 
 ```tsx
 type State = {
@@ -957,19 +957,19 @@ interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
 
 如果我们需要直接操作 DOM，就可能会用到元素属性类型，常见的元素属性类型如下：
 
--  HTML 属性类型：HTMLAttributes
--  按钮属性类型：ButtonHTMLAttributes
--  表单属性类型：FormHTMLAttributes
--  图片属性类型：ImgHTMLAttributes
--  输入框属性类型：InputHTMLAttributes
--  链接属性类型：LinkHTMLAttributes
--  meta 属性类型：MetaHTMLAttributes
--  选择框属性类型：SelectHTMLAttributes
--  表格属性类型：TableHTMLAttributes
--  输入区属性类型：TextareaHTMLAttributes
--  视频属性类型：VideoHTMLAttributes
--  SVG 属性类型：SVGAttributes
--  WebView 属性类型：WebViewHTMLAttributes
+- HTML 属性类型：HTMLAttributes
+- 按钮属性类型：ButtonHTMLAttributes
+- 表单属性类型：FormHTMLAttributes
+- 图片属性类型：ImgHTMLAttributes
+- 输入框属性类型：InputHTMLAttributes
+- 链接属性类型：LinkHTMLAttributes
+- meta 属性类型：MetaHTMLAttributes
+- 选择框属性类型：SelectHTMLAttributes
+- 表格属性类型：TableHTMLAttributes
+- 输入区属性类型：TextareaHTMLAttributes
+- 视频属性类型：VideoHTMLAttributes
+- SVG 属性类型：SVGAttributes
+- WebView 属性类型：WebViewHTMLAttributes
 
 一般情况下，我们是很少需要在项目中显式的去定义标签属性的类型。如果子级去封装组件库的话，这些属性就能发挥它们的作用了：
 
@@ -1722,7 +1722,7 @@ x.mixinMethod3(); // Error
 
 这有一些偏方，能让你顺利从 JavaScript 迁移至 TypeScript：
 
--  显式赋值断言修饰符，即是在类里，明确说明某些属性存在于类上：
+- 显式赋值断言修饰符，即是在类里，明确说明某些属性存在于类上：
 
    ```ts
    function testAble(): ClassDecorator {
@@ -1740,7 +1740,7 @@ x.mixinMethod3(); // Error
    someClass.someValue; // true
    ```
 
--  采用声明合并形式，单独定义一个 interface，把用 Decorator 扩展的属性的类型，放入 interface 中：
+- 采用声明合并形式，单独定义一个 interface，把用 Decorator 扩展的属性的类型，放入 interface 中：
 
    ```ts
    interface SomeClass {
@@ -1764,8 +1764,8 @@ x.mixinMethod3(); // Error
 
 Reflect Metadata 是 ES7 的一个提案，它主要用来在声明的时候添加和读取元数据。TypeScript 在 1.5+ 的版本已经支持它，你只需要：
 
--  npm i reflect-metadata --save。
--  在 tsconfig.json 里配置 emitDecoratorMetadata 选项。
+- npm i reflect-metadata --save。
+- 在 tsconfig.json 里配置 emitDecoratorMetadata 选项。
 
 它具有诸多使用场景。
 
@@ -1997,10 +1997,7 @@ interface B {
    age: number;
 }
 
-const [{ data: a }, { data: b }] = await Promise.all([
-   axios.get < A > 'http://some.1',
-   axios.get < B > 'http://some.2'
-]);
+const [{ data: a }, { data: b }] = await Promise.all([axios.get<A>('http://some.1'), axios.get<B>('http://some.2')]);
 ```
 
 此时，TypeScript 能推出 a 的类型是 A, b 的类型是 B。
@@ -2016,7 +2013,7 @@ if (flag) {
 const [{ data: a }, response] = await Promise.all(requestList);
 ```
 
-我们期望它会如预想时那样工作，可是事与愿违，Promise.all(requestList)，会出现类型兼容性的报错，在这个 Issues 里，描述了相同的问题。
+我们期望它会如预想时那样工作，可是事与愿违 Promise.all(requestList) 会出现类型兼容性的报错，在这个 Issues 里，描述了相同的问题。
 
 现在，你可以通过断言的方式，来让程序正常运作：
 
@@ -2054,6 +2051,7 @@ a = 'world'; // Error
 interface A {
    name: string;
 }
+
 interface B {
    name: string;
    age: number;
@@ -2076,7 +2074,7 @@ let otherThing = { name: 'hello', age: 123 };
 someThing = otherThing; // ok
 ```
 
-TypeScript 认为创建的每个对象字面量都是 `fresh` 状态；当一个 `fresh` 对象字面量赋值给一个变量时，如果对象的类型与变量类型不兼容时，会出现报错（如上例子中 someThine = { name: 'hello', age: 123 }; 的错误）；当对象字面量的类型变宽，对象字面量的 `fresh` 状态会消失（如上例子中 someThing = otherThing; ，赋值以后，someThing 的类型变宽）。
+TypeScript 认为创建的每个对象字面量都是 `fresh` 状态；当一个 `fresh` 对象字面量赋值给一个变量时，如果对象的类型与变量类型不兼容时，会出现报错（如上例子中 `someThine = { name: 'hello', age: 123 };` 的错误）；当对象字面量的类型变宽，对象字面量的 `fresh` 状态会消失（如上例子中 `someThing = otherThing;` 赋值以后 someThing 的类型变宽）。
 
 一个更实际的用例如下：
 
@@ -2096,7 +2094,7 @@ logName({ nama: 'matt' }); // Error: nama 属性在 { name: string } 属性中�
 logName({ name: 'matt', job: 'being awesome' }); // Error: 对象字面量只能指定已知属性，`job` 属性在这里并不存在。
 ```
 
-基本原理与上文中相似，当想用更严格的类型检查时，可以传一个具有 fresh 状态的对象字面量（如 logName({ name: 'matt', job: 'being awesome' });）。当你想多传一些属性至函数，可以将对象字面量赋值至一个新变量，然后再传至函数（如 logName(obj)）。或者你也可以通过给函数形参添加多余类型的方式 function logName(someThing: { name: string; [key: string]: string })。
+基本原理与上文中相似，当想用更严格的类型检查时，可以传一个具有 fresh 状态的对象字面量（如 `logName({ name: 'matt', job: 'being awesome' });`）。当你想多传一些属性至函数，可以将对象字面量赋值至一个新变量，然后再传至函数（如 `logName(obj)`）。或者你也可以通过给函数形参添加多余类型的方式 `function logName(someThing: { name: string; [key: string]: string })`。
 
 ## 用 Decorator 限制类型
 
@@ -2145,7 +2143,7 @@ class Test {
 ```ts
 declare function fn<T>(arg: T): T; // 定义一个泛型函数
 
-const fn1 = fn < string > 'hello'; // 第一种方式，传入泛型类型 string
+const fn1 = fn<string>('hello'); // 第一种方式，传入泛型类型 string
 const fn2 = fn(1); // 第二种方式，从参数 arg 传入的类型 number，来推断出泛型 T 的类型是 number
 ```
 
@@ -2425,7 +2423,7 @@ type AA = ParamType<string>; // string
 
 在 2.8 版本中，TypeScript 内置了一些与 infer 有关的映射类型：
 
--  用于提取函数类型的返回值类型：
+- 用于提取函数类型的返回值类型：
 
 ```ts
 type ReturnType<T> = T extends (...args: any[]) => infer P ? P : any;
@@ -2438,7 +2436,7 @@ type Func = () => User;
 type Test = ReturnType<Func>; // Test = User
 ```
 
--  用于提取构造函数中参数（实例）类型：
+- 用于提取构造函数中参数（实例）类型：
 
 一个构造函数可以使用 new 来实例化，因此它的类型通常表示如下：
 
@@ -2470,7 +2468,7 @@ type Instance = InstanceType<typeof TestClass>; // TestClass
 
 至此，相信你已经对 infer 已有基本了解，我们来看看一些使用它的「骚操作」：
 
--  tuple 转 union ，如：`[string, number] -> string | number`
+- tuple 转 union ，如：`[string, number] -> string | number`
 
 解答之前，我们需要了解 tuple 类型在一定条件下，是可以赋值给数组类型：
 
@@ -2499,7 +2497,7 @@ type TTuple = [string, number];
 type Res = TTuple[number]; // string | number
 ```
 
--  union 转 intersection，如：`string | number -> string & number`
+- union 转 intersection，如：`string | number -> string & number`
 
 这个可能要稍微麻烦一点，需要 infer 配合 `Distributive conditional types` 使用。
 
@@ -2523,13 +2521,13 @@ type Result = UnionToIntersection<string | number>; // string & number
 
 当传入 `string | number` 时：
 
--  第一步：`(U extends any ? (k: U) => void : never)` 会把 union 拆分成 `(string extends any ? (k: string) => void : never) | (number extends any ? (k: number)=> void : never)`，即是得到 `(k: string) => void | (k: number) => void`；
+- 第一步：`(U extends any ? (k: U) => void : never)` 会把 union 拆分成 `(string extends any ? (k: string) => void : never) | (number extends any ? (k: number)=> void : never)`，即是得到 `(k: string) => void | (k: number) => void`；
 
--  第二步：`(k: string) => void | (k: number) => void extends ((k: infer I) => void) ? I : never`，根据上文，可以推断出 I 为 string & number。
+- 第二步：`(k: string) => void | (k: number) => void extends ((k: infer I) => void) ? I : never`，根据上文可以推断出 I 为 string & number。
 
 ### LeetCode 的一道 TypeScript 面试题
 
-前段时间，在 GitHub 上，发现一道来自 LeetCode TypeScript 的面试题，比较有意思，题目的大致意思是：
+前段时间在 GitHub 上发现一道来自 LeetCode TypeScript 的面试题，比较有意思，题目的大致意思是：
 
 假设有一个这样的类型（原题中给出的是类，这里简化为 interface）：
 
@@ -2562,8 +2560,8 @@ interface Action<T> {
 
 这里主要考察两点
 
--  挑选出函数
--  条件类型 + 此篇文章所提及的 infer
+- 挑选出函数
+- 条件类型 + 此篇文章所提及的 infer
 
 接下来就比较简单了，主要是利用条件类型 + infer，如果函数可以赋值给 `asyncMethod<T, U>(input: Promise<T>): Promise<Action<U>>`，则取值为 `asyncMethod<T, U>(input: T): Action<U>`
 
@@ -3016,7 +3014,7 @@ type Copy = {
 
 ### infer
 
-这是一个比较难的点，文档中对它的描述是 条件类型中的类型推断。
+这是一个比较难的点，文档中对它的描述是条件类型中的类型推断。
 
 它的出现使得 ReturnType、 Parameters 等一众工具类型的支持都成为可能，是 TypeScript 进阶必须掌握的一个知识点了。
 

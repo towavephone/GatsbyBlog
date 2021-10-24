@@ -11,14 +11,14 @@ tags: 前端, CSS, CSS世界
 
 ### 替换元素
 
--  根据外在盒子是内联还是块级，元素分为内联元素和块级元素，而根据是否具有可替换内容，我们也可以把元素分为替换元素和非替换元素
--  通过修改某个属性值呈现的内容就可以被替换的元素称为替换元素，例如 img、object、video、iframe 或者表单元素 textarea、input
+- 根据外在盒子是内联还是块级，元素分为内联元素和块级元素，而根据是否具有可替换内容，我们也可以把元素分为替换元素和非替换元素
+- 通过修改某个属性值呈现的内容就可以被替换的元素称为替换元素，例如 img、object、video、iframe 或者表单元素 textarea、input
 
 #### 特性
 
-1.  内容外观不受页面上 CSS 的影响，需要类似 appearance 属性或者浏览器暴露的一些样式接口
-2.  有自己的尺寸，在没有明确规定尺寸的情况下，video、iframe、canvas 默认尺寸是 300\*150，img 默认为 0，表单元素尺寸则和浏览器有关，无统一标准
-3.  在很多 CSS 属性上有自己的一套表现规则，比如 vertical-align 在非替换元素里是基线（字符 x 的下边缘），而替换元素中被定义成下边缘
+1. 内容外观不受页面上 CSS 的影响，需要类似 appearance 属性或者浏览器暴露的一些样式接口
+2. 有自己的尺寸，在没有明确规定尺寸的情况下，video、iframe、canvas 默认尺寸是 300\*150，img 默认为 0，表单元素尺寸则和浏览器有关，无统一标准
+3. 在很多 CSS 属性上有自己的一套表现规则，比如 vertical-align 在非替换元素里是基线（字符 x 的下边缘），而替换元素中被定义成下边缘
 
 ### 替换元素默认 display 值
 
@@ -38,9 +38,9 @@ tags: 前端, CSS, CSS世界
 
 ### 替换元素的尺寸计算规则
 
-1.  固有尺寸：替换元素原本的尺寸
-2.  HTML 尺寸：HTML 原生属性，包括 img 的 width 和 height、input 的 size、textarea 的 cols 和 rows
-3.  CSS 尺寸：width 和 height 或者 max-height/min-height 和 max-width/min-width 设置的尺寸，对应盒尺寸的 content-box
+1. 固有尺寸：替换元素原本的尺寸
+2. HTML 尺寸：HTML 原生属性，包括 img 的 width 和 height、input 的 size、textarea 的 cols 和 rows
+3. CSS 尺寸：width 和 height 或者 max-height/min-height 和 max-width/min-width 设置的尺寸，对应盒尺寸的 content-box
 
 优先级：CSS 尺寸>HTML 尺寸>固有尺寸
 
@@ -96,10 +96,10 @@ Firefox 下的`<img>`、chrome 下`<img alt="任意值">`是一个普通的内�
 
 基于伪元素的图片内容生成技术
 
-1.  不能有 src 属性（证明观点的关键所在）
-2.  不能使用 content 属性生成图片（针对 chrome）
-3.  需要有 alt 属性并有值（针对 chrome）
-4.  Firefox 下::before 伪元素的 content 值会被无视，::after 无此问题，应该与 Firefox 自己占用了有关
+1. 不能有 src 属性（证明观点的关键所在）
+2. 不能使用 content 属性生成图片（针对 chrome）
+3. 需要有 alt 属性并有值（针对 chrome）
+4. Firefox 下::before 伪元素的 content 值会被无视，::after 无此问题，应该与 Firefox 自己占用了有关
 
 <iframe src="/examples/image-alt-show.html" width="400" height="100"></iframe>
 
@@ -129,9 +129,9 @@ content 属性生成的对象称为"匿名替换元素"，也就是生成的替�
 
 表现的特征为：
 
-1.  content 生成的文本是无法选中、无法复制的、无法 SEO，仅用来生成一些无关紧要的内容，如装饰性图形或序号之类
-2.  :empty 伪类忽略 content 生成的内容
-3.  content 动态生成值无法获取
+1. content 生成的文本是无法选中、无法复制的、无法 SEO，仅用来生成一些无关紧要的内容，如装饰性图形或序号之类
+2. :empty 伪类忽略 content 生成的内容
+3. content 动态生成值无法获取
 
 <iframe src="/examples/content-empty-class.html" width="400" height="100"></iframe>
 
@@ -192,21 +192,21 @@ IE 浏览器仅支持单冒号的伪元素，为了兼容性，下面内容全�
 
 `embed:content-LF-loading.html`
 
-1.  为什么使用 dot 这个元素
+1. 为什么使用 dot 这个元素
 
--  dot 是自定义的一个标签元素，除了简约，语义化明显之外，更重要的是方便向下兼容，IE8 不认识此标签，因此会只显示默认的 3 个点，对 CSS 代码完全忽略
+- dot 是自定义的一个标签元素，除了简约，语义化明显之外，更重要的是方便向下兼容，IE8 不认识此标签，因此会只显示默认的 3 个点，对 CSS 代码完全忽略
 
-2.  为什么使用::before，不用::after
+2. 为什么使用::before，不用::after
 
--  伪元素使用 before 同时 display 设置 block，是为了在高版本浏览器下原来的 3 个点推到最下面，不会影响 content 的 3 行内容显示，如果使用 after 很难实现
+- 伪元素使用 before 同时 display 设置 block，是为了在高版本浏览器下原来的 3 个点推到最下面，不会影响 content 的 3 行内容显示，如果使用 after 很难实现
 
-3.  为什么 3 个点在第一行
+3. 为什么 3 个点在第一行
 
--  第 3 个点在第一行的目的在于兼容 IE9 浏览器，因为 IE9 浏览器认识 dot 以及 before，但是不支持 animation 属性，所以为了 IE9 能正常显示，把 3 个点放在第一行
+- 第 3 个点在第一行的目的在于兼容 IE9 浏览器，因为 IE9 浏览器认识 dot 以及 before，但是不支持 animation 属性，所以为了 IE9 能正常显示，把 3 个点放在第一行
 
-4.  white-space 为何使用的是 pre-wrap
+4. white-space 为何使用的是 pre-wrap
 
--  效果相同，不必深究，后面会介绍
+- 效果相同，不必深究，后面会介绍
 
 ### content 图片生成
 
@@ -350,10 +350,10 @@ content 生成图片的意义在于 base64 位图片，由于它内联在 CSS �
 
 #### counter()/counters()
 
--  counter(name,style)，style 有许多值，可以支持英文字母或罗马数字（lower-roman）
--  一个 content 可以有多个 counter 方法
--  counters(name,string,style)嵌套计数专用，比如子序号 1.1、1.2、1.3，见打开的文章目录，就是应用此技术
--  显示 cotent 计数值的 DOM 元素一定要在 counter-increment 后面，否则没有计数效果
+- counter(name,style)，style 有许多值，可以支持英文字母或罗马数字（lower-roman）
+- 一个 content 可以有多个 counter 方法
+- counters(name,string,style)嵌套计数专用，比如子序号 1.1、1.2、1.3，见打开的文章目录，就是应用此技术
+- 显示 cotent 计数值的 DOM 元素一定要在 counter-increment 后面，否则没有计数效果
 
 <iframe src="/examples/content-counters-catalog.html" width="400" height="100"></iframe>
 
@@ -411,8 +411,8 @@ q:before {
 
 层叠分为两类
 
-1.  纯视觉层叠，不影响外部尺寸
-2.  会影响外部尺寸
+1. 纯视觉层叠，不影响外部尺寸
+2. 会影响外部尺寸
 
 box-shadow 以及 outline 属于前者，而这里的 inline 元素的 padding 层叠属于后者；区分方式很简单，如果父容器 overflow:auto，层叠区域超出父容器的时候没有滚动条出现，则是纯视觉的；反之则会影响尺寸，影响布局
 
@@ -468,8 +468,8 @@ box-shadow 以及 outline 属于前者，而这里的 inline 元素的 padding �
 
 ## padding 的百分比值
 
-1.  padding 属性不支持负值，margin 支持
-2.  支持百分比值，无论在水平还是垂直方向都是相对于宽度计算的，与 height 等属性的计算规则不同
+1. padding 属性不支持负值，margin 支持
+2. 支持百分比值，无论在水平还是垂直方向都是相对于宽度计算的，与 height 等属性的计算规则不同
 
 > 可能要按照高度计算的话大多数情况为 0，还不如按相对宽度计算，因为 CSS 默认的是水平流，计算值会一直有效
 
@@ -507,9 +507,9 @@ div {
 
 以上百分比值是应用在具有块状特性的元素上的，如果是内联元素则表现为
 
--  同样对于宽度计算
--  默认的高度与宽度细节有差异
--  padding 会断行
+- 同样对于宽度计算
+- 默认的高度与宽度细节有差异
+- padding 会断行
 
 ### 内联元素的 padding 断行
 
@@ -534,10 +534,10 @@ div {
 
 效果如上图所示，诡异之处有：
 
-1.  内字不见了
-2.  有文字若居右显示
-3.  背景区域非矩形，右下角缺了一块
-4.  背景色宽度与外部容器宽度不一致
+1. 内字不见了
+2. 有文字若居右显示
+3. 背景区域非矩形，右下角缺了一块
+4. 背景色宽度与外部容器宽度不一致
 
 对于内联元素，其 padding 是会断行的，也就是 padding 区域是跟着内联盒模型中的行框盒子走的，上面的例子由于文字比较多，一行显示不了，于是干字换到下一行，于是原本的 padding 区域也跟着一起掉下来，根据后来居上的层叠规则，内字正好被覆盖，于是看不见了；同时，规则的矩形区域因为换行，也变成了五条边；至于宽度和外部容器盒子不一样宽，因为有 6 个字实际宽度是容器宽度和这 6 个字的总和，换行后的宽度和容器宽度一样的概率很小。
 
@@ -575,17 +575,17 @@ span {
 
 ## 标签元素内置的 padding
 
-1.  ol、ul 列表内置 padding-left 单位是 px 不是 em，导致字体比较大时项目符号可能跑到 ol、ul 外面，当然用 content 计数器模拟是更好的选择
-2.  很多表单元素都内置 padding
+1. ol、ul 列表内置 padding-left 单位是 px 不是 em，导致字体比较大时项目符号可能跑到 ol、ul 外面，当然用 content 计数器模拟是更好的选择
+2. 很多表单元素都内置 padding
 
--  所有浏览器 input、textarea 输入框内置 padding
--  所有浏览器 button 按钮内置 padding
--  部分浏览器 select 下拉内置 padding
--  所有浏览器 redio、checkbox 单复选框无内置 padding
--  button 按钮元素的 padding 最难控制
+- 所有浏览器 input、textarea 输入框内置 padding
+- 所有浏览器 button 按钮内置 padding
+- 部分浏览器 select 下拉内置 padding
+- 所有浏览器 redio、checkbox 单复选框无内置 padding
+- button 按钮元素的 padding 最难控制
 
-1.  设置 padding: 0 不同浏览器下不同
-2.  按钮 padding 与高度计算不同浏览器下千差万别，这使得很少用原生的 button
+1. 设置 padding: 0 不同浏览器下不同
+2. 按钮 padding 与高度计算不同浏览器下千差万别，这使得很少用原生的 button
 
 有一个可以保留良好的语义，同时 UI 效果兼容性效果好的实现小技巧，那就是 label 元素
 
@@ -650,9 +650,9 @@ padding 性格温和，负责内间距；而 margin 则比较激进，负责外�
 
 ### 元素尺寸的相关概念
 
--  元素尺寸: 对应 jQuery 中的 `$().width()` 和 `$().height()` 方法，包括 padding 和 border，也就是元素的 border box 的尺寸。在原生的 DOM API 中写作 offsetWidth 和 offsetHeight，所以，有时候也成为“元素偏移尺寸”。
--  元素内部尺寸：对应 jQuery 中的 `$().innerWidth()` 和 `$().innerHeight()` 方法，表示元素的内部区域尺寸，包括 padding 但不包括 border，也就是元素的 paddingbox 的尺寸。在原生的 DOM API 中写作 clientWidth 和 clientHeight，所以，有时候也称为“元素可视尺寸”。
--  元素外部尺寸：对应 jQuery 中的 `$().outerWidth(true)` 和 `$().outerHeight(true)` 方法，表示元素的外部尺寸，不仅包括 padding 和 border，还包括 margin，也就是元素的 margin box 的尺寸。没有相对应的原生的 DOM API
+- 元素尺寸: 对应 jQuery 中的 `$().width()` 和 `$().height()` 方法，包括 padding 和 border，也就是元素的 border box 的尺寸。在原生的 DOM API 中写作 offsetWidth 和 offsetHeight，所以，有时候也成为“元素偏移尺寸”。
+- 元素内部尺寸：对应 jQuery 中的 `$().innerWidth()` 和 `$().innerHeight()` 方法，表示元素的内部区域尺寸，包括 padding 但不包括 border，也就是元素的 paddingbox 的尺寸。在原生的 DOM API 中写作 clientWidth 和 clientHeight，所以，有时候也称为“元素可视尺寸”。
+- 元素外部尺寸：对应 jQuery 中的 `$().outerWidth(true)` 和 `$().outerHeight(true)` 方法，表示元素的外部尺寸，不仅包括 padding 和 border，还包括 margin，也就是元素的 margin box 的尺寸。没有相对应的原生的 DOM API
 
 “外部尺寸”有个很不一样的特性，就是尺寸的大小有可能是负数。
 
@@ -757,7 +757,7 @@ li {
 
 解决办法：
 
--  不考虑 IE8，我们可以使用 CSS3 的 nth-of-type 选择器：
+- 不考虑 IE8，我们可以使用 CSS3 的 nth-of-type 选择器：
 
 ```css
 li:nth-of-type(3n) {
@@ -765,7 +765,7 @@ li:nth-of-type(3n) {
 }
 ```
 
--  考虑 IE8，给父容器添加 margin 属性，增加容器的可用宽度来实现
+- 考虑 IE8，给父容器添加 margin 属性，增加容器的可用宽度来实现
 
 ```css
 ul {
@@ -830,8 +830,8 @@ padding 也有兼容性问题，如果容器可以滚动，在 IE 和 Firefox �
 
 不足之处：
 
-1.  如果需要有子元素定位到容器之外，父级的 overflow:hidden 是一个棘手的限制
-2.  当触发锚点定位或者使用 DOM.scrollIntoview()方法的时候，可能就会出现奇怪的定位问题
+1. 如果需要有子元素定位到容器之外，父级的 overflow:hidden 是一个棘手的限制
+2. 当触发锚点定位或者使用 DOM.scrollIntoview()方法的时候，可能就会出现奇怪的定位问题
 
 使用 border 和 table-cell 实现等高布局的优缺点：
 
@@ -841,8 +841,8 @@ padding 也有兼容性问题，如果容器可以滚动，在 IE 和 Firefox �
 
 ## margin 的百分比值
 
-1.  和 padding 属性一样，margin 的百分比值无论是水平方向还是垂直方向都是相对于宽度计算的
-2.  相对于 padding，margin 的百分比值的应用价值就低了一截：元素设置 margin 在垂直方向上无法改变元素自身的内部尺寸，往往需要父元素作为载体，由于 margin 合并的存在，垂直方向往往需要双倍尺寸才能和 padding 表现一致
+1. 和 padding 属性一样，margin 的百分比值无论是水平方向还是垂直方向都是相对于宽度计算的
+2. 相对于 padding，margin 的百分比值的应用价值就低了一截：元素设置 margin 在垂直方向上无法改变元素自身的内部尺寸，往往需要父元素作为载体，由于 margin 合并的存在，垂直方向往往需要双倍尺寸才能和 padding 表现一致
 
 ```html
 <style>
@@ -868,8 +868,8 @@ padding 也有兼容性问题，如果容器可以滚动，在 IE 和 Firefox �
 
 块级元素的上外边距（margin-top）与下外边距（margin-bottom）有时会合并为单个外边距，这样的现象称为“margin 合并”
 
-1.  块级元素，但不包括浮动和绝对定位元素，尽管浮动和绝对定位可以让元素块状化
-2.  只发生在垂直方向，需要注意的是，这种说法在不考虑 writing-mode 的情况下才是正确的，严格来讲，应该是只发生在和当前文档流方向的相垂直的方向上。由于默认文档流是水平流，因此发生 margin 合并的就是垂直方向
+1. 块级元素，但不包括浮动和绝对定位元素，尽管浮动和绝对定位可以让元素块状化
+2. 只发生在垂直方向，需要注意的是，这种说法在不考虑 writing-mode 的情况下才是正确的，严格来讲，应该是只发生在和当前文档流方向的相垂直的方向上。由于默认文档流是水平流，因此发生 margin 合并的就是垂直方向
 
 ### margin 合并的 3 种场景
 
@@ -911,18 +911,18 @@ padding 也有兼容性问题，如果容器可以滚动，在 IE 和 Firefox �
 
 那该如何阻止这里 margin 合并的发生呢？对于 margin-top 合并，可以进行如下操作（满足一个条件即可）：
 
--  父元素设置为块状格式化上下文元素；
--  父元素设置 border-top 值；
--  父元素设置 padding-top 值；
--  父元素和第一个子元素之间添加内联元素进行分隔。
+- 父元素设置为块状格式化上下文元素；
+- 父元素设置 border-top 值；
+- 父元素设置 padding-top 值；
+- 父元素和第一个子元素之间添加内联元素进行分隔。
 
 对于 margin-bottom 合并，可以进行如下操作（满足一个条件即可）：
 
--  父元素设置为块状格式化上下文元素；
--  父元素设置 border-bottom 值；
--  父元素设置 padding-bottom 值；
--  父元素和最后一个子元素之间添加内联元素进行分隔；
--  父元素设置 height、min-height 或 max-height。
+- 父元素设置为块状格式化上下文元素；
+- 父元素设置 border-bottom 值；
+- 父元素设置 padding-bottom 值；
+- 父元素和最后一个子元素之间添加内联元素进行分隔；
+- 父元素设置 height、min-height 或 max-height。
 
 jQuery 中有个 `$().slideUp()` / `$().slideDown()` 方法，如果在使用这个动画效果的时候，发现这内容在动画开始或结束的时候会跳一下，那八九不离十就是布局存在 margin 合并。跳动之所以产生，就是因为 jQuery 的 slideUp 和 slideDown 方法在执行的时候会被对象元素添加 overflow:hidden 设置，而 overflow: hidden 会阻止 margin 合并，于是一瞬间间距变大，产生了跳动。
 
@@ -949,9 +949,9 @@ jQuery 中有个 `$().slideUp()` / `$().slideDown()` 方法，如果在使用这
 
 ### margin 合并的计算规则
 
-1.  正正取大值
-2.  正负值相加
-3.  负负最负值
+1. 正正取大值
+2. 正负值相加
+3. 负负最负值
 
 #### margin 合并的意义
 
@@ -1001,13 +1001,13 @@ HTML 标签默认内置的 CSS 属性值完全就是为了更好地进行图文�
 
 margin:auto 的作用机制举例：
 
--  有时候元素就算没有设置 width 或 height，也会自动填充。
+- 有时候元素就算没有设置 width 或 height，也会自动填充。
 
 ```html
 <div></div>
 ```
 
--  有时候元素就算没有设置 width 或 height，也会自动填充对应的方位
+- 有时候元素就算没有设置 width 或 height，也会自动填充对应的方位
 
 ```css
 div {
@@ -1021,8 +1021,8 @@ div {
 
 margin:auto 的填充规则如下。
 
-1.  如果一侧定值，一侧 auto，则 auto 为剩余空间大小。
-2.  如果两侧均是 auto，则平分剩余空间。
+1. 如果一侧定值，一侧 auto，则 auto 为剩余空间大小。
+2. 如果两侧均是 auto，则平分剩余空间。
 
 ```css
 .father {
@@ -1069,7 +1069,7 @@ margin 属性的 auto 计算就是为块级元素左中右对齐而设计的，�
 
 垂直方向 margin 实现居中
 
--  使用 writing-mode 改变文档流的方向：
+- 使用 writing-mode 改变文档流的方向：
 
 ```css
 .father {
@@ -1085,7 +1085,7 @@ margin 属性的 auto 计算就是为块级元素左中右对齐而设计的，�
 
 此时.son 就是垂直居中对齐的，但是这也带来另外的问题，就是水平方向无法 auto 居中了。
 
--  绝对定位元素的 margin:auto 居中
+- 绝对定位元素的 margin:auto 居中
 
 ```css
 .father {
@@ -1136,10 +1136,10 @@ margin 属性的 auto 计算就是为块级元素左中右对齐而设计的，�
 
 ## margin 无效情形解析
 
--  display 计算值 inline 的非替换元素的垂直 margin 是无效的，虽然规范提到有渲染，但浏览器表现却未寻得一点踪迹，这和 padding 是有明显区别的。对于内联替换元素，垂直 margin 有效，并且没有 margin 合并的问题，所以图片永远不会发生 margin 合并
--  表格中的`<tr>`和`<td>`元素或者设置 display 计算值是 table-cell 或 table-row 的元素的 margin 都是无效的。但是，如果计算值是 table-caption、table 或者 inline-table 则没有此问题，可以通过 margin 控制外间距，甚至 ::first-letter 伪元素也可以解析 margin
--  margin 合并的时候，更改 margin 值可能是没有效果的。以父子 margin 重叠为例，假设父元素设置有 margin-top:50px，则此时子元素设置 margin-top:30px 就没有任何效果表现，除非大小比 50px 大，或者是负值
--  绝对定位元素非定位方位的 margin 值“无效”。什么意思呢？很多时候，我们对元素进行绝对定位的时候，只会设置 1 ～ 2 个相邻方位。例如：
+- display 计算值 inline 的非替换元素的垂直 margin 是无效的，虽然规范提到有渲染，但浏览器表现却未寻得一点踪迹，这和 padding 是有明显区别的。对于内联替换元素，垂直 margin 有效，并且没有 margin 合并的问题，所以图片永远不会发生 margin 合并
+- 表格中的`<tr>`和`<td>`元素或者设置 display 计算值是 table-cell 或 table-row 的元素的 margin 都是无效的。但是，如果计算值是 table-caption、table 或者 inline-table 则没有此问题，可以通过 margin 控制外间距，甚至 ::first-letter 伪元素也可以解析 margin
+- margin 合并的时候，更改 margin 值可能是没有效果的。以父子 margin 重叠为例，假设父元素设置有 margin-top:50px，则此时子元素设置 margin-top:30px 就没有任何效果表现，除非大小比 50px 大，或者是负值
+- 绝对定位元素非定位方位的 margin 值“无效”。什么意思呢？很多时候，我们对元素进行绝对定位的时候，只会设置 1 ～ 2 个相邻方位。例如：
 
 ```css
 img {
@@ -1162,7 +1162,7 @@ img {
 
 那为什么一般情况下没有效果呢？主要是因为绝对定位元素的渲染是独立的，普通元素和兄弟元素是心连心，你动我也动，但是绝对定位元素由于独立渲染无法和兄弟元素插科打诨，因此，margin 无法影响兄弟元素定位，所以看上去就“无效”。
 
--  定高容器的子元素的 margin-bottom 或者宽度定死的子元素的 margin-right 的定位“失效”。
+- 定高容器的子元素的 margin-bottom 或者宽度定死的子元素的 margin-right 的定位“失效”。
 
 我们先看例子：
 
@@ -1201,7 +1201,7 @@ img {
 
 在本例中，父容器只有一个子元素，因此没有影响兄弟元素的说法，加上要么定宽要么定高，右侧和底部无 margin 重叠，因此外部的元素也不会有任何布局上的影响，因此就给人“无效”的错觉，实际上是 margin 自身的特性导致，有渲染只是你看不到变化而已。
 
--  鞭长莫及导致的 margin 无效。我们直接看下面这个例子：
+- 鞭长莫及导致的 margin 无效。我们直接看下面这个例子：
 
 ```html
 <div class="box">
@@ -1223,7 +1223,7 @@ img {
 
 其中的 margin-left:200px 是无效的，准确地讲，此时的`<p>`的 margin-left 从负无穷到 256px 都是没有任何效果的。要解释这里为何会无效，需要对 float 和 overflow 深入理解，而这两个属性都是后面的内容
 
--  内联特性导致的 margin 无效。我们直接看下面这个例子：
+- 内联特性导致的 margin 无效。我们直接看下面这个例子：
 
 ```html
 <div class="box">

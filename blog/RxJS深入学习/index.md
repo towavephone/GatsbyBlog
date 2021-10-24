@@ -21,19 +21,19 @@ const obs = [ob1, ob2...];
 // 分别创建对应的HTTP请求。
 ```
 
--  N 个请求按顺序串行发出（前一个结束再发下一个）
+- N 个请求按顺序串行发出（前一个结束再发下一个）
 
 ```js
 Observable.concat(...obs).subscribe((detail) => console.log('每个请求都触发回调'));
 ```
 
--  N 个请求同时并行发出，对于每一个到达就触发一次回调
+- N 个请求同时并行发出，对于每一个到达就触发一次回调
 
 ```js
 Observable.merge(...obs).subscribe((detail) => console.log('每个请求都触发回调'));
 ```
 
--  N 个请求同时发出并且要求全部到达后合并为数组，触发一次回调
+- N 个请求同时发出并且要求全部到达后合并为数组，触发一次回调
 
 ```js
 Observable.forkJoin(...obs).subscribe((detailArray) => console.log('触发一次回调'));
