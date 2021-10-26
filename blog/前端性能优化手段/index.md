@@ -1590,7 +1590,7 @@ img.src = '/static/img/prefetch.jpg';
       .then((data) => {
         const sourceBuffer = mediaSource.sourceBuffers[0];
         sourceBuffer.appendBuffer(data);
-        // TODO: Fetch further segment and append it.
+        // Fetch further segment and append it.
       });
   }
 </script>
