@@ -540,7 +540,7 @@ function drawScene() {
 
 然后在我们的顶点着色器中定义一个 varying（可变量）用来给片断着色器传值。
 
-```js
+```cpp{10}
 varying vec4 v_color;
 // ...
 void main() {
@@ -556,7 +556,7 @@ void main() {
 
 在片断着色器中定义同名 varying 变量。
 
-```cpp
+```cpp{3,6}
 precision mediump float;
 
 varying vec4 v_color;
@@ -568,6 +568,6 @@ void main() {
 
 WebGL 会将同名的可变量从顶点着色器输入到片断着色器中。
 
-下面是运行结果。
+下面是运行结果
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-how-it-works.html
