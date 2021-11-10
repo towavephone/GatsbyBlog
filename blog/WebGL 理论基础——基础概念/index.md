@@ -570,4 +570,6 @@ WebGL 会将同名的可变量从顶点着色器输入到片断着色器中。
 
 下面是运行结果
 
+[hello world example](embedded-codesandbox://webgl-fundamental-base-concept/draw-colorful-triangle)
+
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-how-it-works.html

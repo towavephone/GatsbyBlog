@@ -84,6 +84,7 @@ module.exports = {
           `gatsby-remark-autolink-headers`,
           `gatsby-remark-emoji`,
           `gatsby-remark-katex`,
+          `gatsby-remark-smartypants`,
           {
             resolve: `gatsby-remark-responsive-iframe`,
             options: {
@@ -137,7 +138,35 @@ module.exports = {
               showLineNumbers: true
             }
           },
-          `gatsby-remark-smartypants`
+          {
+            resolve: 'gatsby-remark-embedded-codesandbox',
+            options: {
+              // Required:
+
+              // Example code folders are relative to this dir.
+              // eg src/_examples/some-example-folder
+              directory: `${__dirname}/static/examples/`,
+
+              // Optional:
+
+              // Custom protocol for parsing the embedding link
+              protocol: 'embedded-codesandbox://',
+
+              // Customise CodeSandbox embedding options:
+              // https://codesandbox.io/docs/embedding#embed-options
+              embedOptions: {
+                view: 'split',
+                hidenavigation: 1,
+                theme: 'light',
+                codemirror: 1
+              },
+
+              // Customise the embedding iframe given the generated url
+              // default:
+              getIframe: (url) =>
+                `<iframe src="${url}" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>`
+            }
+          }
         ]
       }
     },
