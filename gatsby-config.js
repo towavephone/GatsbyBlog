@@ -139,7 +139,7 @@ module.exports = {
             }
           },
           {
-            resolve: 'gatsby-remark-embedded-codesandbox',
+            resolve: 'gatsby-remark-embedded-codesandbox-towavephone',
             options: {
               // Required:
 
@@ -164,7 +164,11 @@ module.exports = {
               // Customise the embedding iframe given the generated url
               // default:
               getIframe: (url) =>
-                `<iframe src="${url}" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>`
+                `<iframe src="${url}" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>`,
+
+              // Customise the ignored file / folder names
+              // default:
+              ignoredFiles: ['node_modules', 'yarn.lock', 'package-lock.json']
             }
           }
         ]
