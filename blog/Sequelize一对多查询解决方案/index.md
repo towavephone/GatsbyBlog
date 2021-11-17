@@ -25,3 +25,5 @@ tags: 后端, nodejs, Sequelize, SQL
 2. 根据以上的 sql 语句利用 Sequelize 去关联
 
 最终为了实现上的简便，直接使用方案 1
+
+// TODO 多对多方案也需要延伸下

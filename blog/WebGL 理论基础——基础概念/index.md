@@ -876,3 +876,5 @@ function setColors(gl) {
 ```
 
 [webgl-2d-rectangle-with-2-byte-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-byte-colors)
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-shaders-and-glsl.html
