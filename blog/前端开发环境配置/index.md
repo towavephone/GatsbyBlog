@@ -5,7 +5,6 @@ categories:
   - 前端
 tags: 前端, 开发环境
 path: /frontend-devlopment-environment-setting/
-draft: true
 ---
 
 # wsl

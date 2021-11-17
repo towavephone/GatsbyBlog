@@ -5,7 +5,6 @@ categories:
 path: /code-generation-scaffolding/
 tags: 前端, 前端工程化, 预研
 date: 2021-11-15 11:43:19
-draft: true
 ---
 
 # 需求背景

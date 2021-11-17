@@ -800,7 +800,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, someBuffer); // 这个命令是将缓冲绑定到
 gl.vertexAttribPointer(location, numComponents, typeOfData, normalizeFlag, strideToNextPieceOfData, offsetIntoBuffer);
 ```
 
-最后一条命令告诉 WebGL 从 ARRAY_BUFFER 绑定点当前绑定的缓冲获取数据。每个顶点有几个单位的数据(1 - 4)，单位数据类型是什么(BYTE, FLOAT, INT, UNSIGNED_SHORT, 等等...)，stride 是从一个数据到下一个数据要跳过多少位，最后是数据在缓冲的什么位置。
+最后一条命令告诉 WebGL 从 `ARRAY_BUFFER` 绑定点当前绑定的缓冲获取数据。每个顶点有几个单位的数据(1 - 4)，单位数据类型是什么(BYTE, FLOAT, INT, `UNSIGNED_SHORT`, 等等...)，stride 是从一个数据到下一个数据要跳过多少位，最后是数据在缓冲的什么位置。
 
 单位个数永远是 1 到 4 之间。
 

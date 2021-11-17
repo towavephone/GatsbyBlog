@@ -1,9 +1,205 @@
 ---
 title: gatsby插件改造
 categories:
-  - 前端
+   - 前端
 path: /gatsby-plugin-transformation/
 tags: 前端, 动效, 源码优化, 预研
 date: 2021-11-15 11:52:04
-draft: true
 ---
+
+# 需求背景
+
+针对现有的 Gatsby 框架实现代码复制、代码实时查看编辑的功能
+
+# 技术选型
+
+以下都是采用最后一种方案，对其源码做出改动
+
+## 代码复制
+
+| 选型 | 优点 | 缺点 |
+| :-- | :-- | :-- |
+| 项目代码自实现 | 定制化程度高 | 实现难度大；拓展较差 |
+| [gatsby-remark-code-buttons](https://github.com/iamskok/gatsby-remark-code-buttons) | 已具有代码复制功能 | 有多复制一行的 bug；UI 不符合博客主题 |
+
+## 代码实时查看编辑
+
+| 选型 | 优点 | 缺点 | 样例页面 |
+| :-- | :-- | :-- | :-- |
+| iframe + [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-remark-embed-snippet) | 实现最为简单，容易出效果 | 没有实时编辑功能；嵌入的代码往往需要将其写成一个 html 文件且一般情况下只支持静态页面的展示；需要 iframe、embed 标签声明两次 | [下雪特效](/snow-css/) |
+| iframe + code-editor.html 传参 | 基本实现代码的实时查看编辑 | 嵌入的代码只支持静态的 html 页面；需要明确拆分出 js、css、html 三个结构；嵌入的 js、css、html 分别需要手动 escape 加密 | [CSS 世界四大盒尺寸](/css-world-four-kinds-of-box/#border-等高布局技术) |
+| [gatsby-remark-embedded-codesandbox](https://github.com/elboman/gatsby-remark-embedded-codesandbox) | 借助 codesandbox 实现了较为丰富的代码实时查看编辑功能 | 借助第三方实现的功能，不够稳定；不支持带目录的文件夹；单次请求过大（即上传代码过多）会报请求体过大错误；会上传 node_modules 等等大文件 | 需实现 |
+
+# 核心逻辑
+
+## 代码复制
+
+### 修复复制多一行 bug
+
+代码在[这里](https://github.com/towavephone/gatsby-remark-code-buttons/commit/d95bb194d74182a3c5b8118102b3826695c2ff6d)
+
+src/gatsby-browser.js
+
+```diff
+@@ -7,19 +7,9 @@ exports.onClientEntry = () => {
+    el.innerHTML = str;
+    document.body.appendChild(el);
+
+-   const range = document.createRange();
+-   range.selectNode(el);
+-   window.getSelection().removeAllRanges();
+-   window.getSelection().addRange(range);
+-   document.execCommand(`copy`);
+-   document.activeElement.blur();
+-   setTimeout(() => {
+-     document.getSelection().removeAllRanges();
+-     document.body.removeChild(el);
+-   }, 100);
++   el.select();
++   document.execCommand("copy");
++   document.body.removeChild(el);
+    if (toasterId) {
+      window.showClipboardToaster(toasterId);
+    }
+```
+
+### 增加显示语言类型的功能；改变按钮文本显示逻辑；任何语言都可以显示复制按钮
+
+代码在[这里](https://github.com/towavephone/gatsby-remark-code-buttons/commit/90094cd1c6a4a6fa7253f61e898f8a832173d6a9)
+
+src/index.js
+
+```diff
+@@ -21,10 +21,6 @@ module.exports = function gatsbyRemarkCodeButtons(
+    const actions = qs.parse(params);
+    const { clipboard } = actions;
+
+-   if (!language) {
+-     return;
+-   }
+-
+    if (clipboard === 'false') {
+      delete actions['clipboard'];
+    } else {
+@@ -57,12 +53,12 @@ module.exports = function gatsbyRemarkCodeButtons(
+            >
+              <div
+                class="${buttonClass}"
+-               data-tooltip="${tooltipText}"
++               ${tooltipText ? `data-tooltip="${tooltipText}"` : ''}
+              >
+-               ${buttonText}${svgIcon}
++               ${[language, buttonText || svgIcon].filter((item) => item).join(' ')}
+              </div>
+            </div>
+-           `.trim()
++         `.trim()
+      };
+
+      parent.children.splice(index, 0, buttonNode);
+```
+
+### 实现效果
+
+见本博客代码展示的代码复制功能
+
+## 代码实时查看编辑
+
+代码在[这里](https://github.com/towavephone/gatsby-remark-embedded-codesandbox/commit/6a1947c22566c6ad5baae33dabf99edd16f4c8eb)
+
+### 递归遍历文件夹；增加忽略文件功能
+
+```js
+const DEFAULT_IGNORED_FILES = ['node_modules', 'package-lock.json', 'yarn.lock'];
+
+const ignoredFilesSet = new Set(ignoredFiles);
+
+const getAllFiles = (dirPath) =>
+   fs.readdirSync(dirPath).reduce((acc, file) => {
+      // 过滤文件立即跳出下一个
+      if (ignoredFilesSet.has(file)) return acc;
+      const relativePath = path.join(dirPath, file);
+      const isDirectory = fs.statSync(relativePath).isDirectory();
+      // 判断是目录继续递归遍历
+      const additions = isDirectory ? getAllFiles(relativePath) : [relativePath.replace(`${directory}/`, '')];
+      return [...acc, ...additions];
+   }, []);
+```
+
+### 默认模式为静态服务器
+
+```js
+const getFileExist = (fileList, filename = 'package.json') => {
+   const found = fileList.filter((name) => name === filename);
+   return found.length > null;
+};
+
+if (!getFileExist(folderFiles, 'sandbox.config.json')) {
+   sandboxFiles.push({
+      name: 'sandbox.config.json',
+      content: '{ "template": "static" }'
+   });
+}
+```
+
+### codesandbox 请求方式改为 post 逻辑异步化
+
+```js
+const convertNodeToEmbedded = async (node, params, options = {}) => {
+   delete node.children;
+   delete node.position;
+   delete node.title;
+   delete node.url;
+
+   // merge the overriding options with the plugin one
+   const mergedOptions = { ...embedOptions, ...options };
+   const encodedEmbedOptions = queryString.stringify(mergedOptions);
+
+   const { sandbox_id } = await fetch('https://codesandbox.io/api/v1/sandboxes/define?json=1', {
+      method: 'POST',
+      headers: {
+         'Content-Type': 'application/json',
+         Accept: 'application/json'
+      },
+      body: params
+   }).then((x) => x.json());
+
+   const sandboxUrl = `https://codesandbox.io/embed/${sandbox_id}?${encodedEmbedOptions}`;
+   const embedded = getIframe(sandboxUrl);
+   node.type = 'html';
+   node.value = embedded;
+
+   return node;
+};
+
+const nodes = [];
+map(markdownAST, (node, index, parent) => {
+   if (node.type === 'link' && node.url.startsWith(protocol)) {
+      // split the url in base and query to allow user
+      // to customise embedding options on a per-node basis
+      const url = getUrlParts(node.url);
+      // get all files in the folder and generate
+      // the embeddeing parameters
+      const dir = getDirectoryPath(url.base);
+      const files = getFilesList(dir);
+      const params = createParams(files);
+      convertNodeToEmbedded(node, params, url.query);
+      const currentNode = convertNodeToEmbedded(node, params, url.query);
+      nodes.push(currentNode);
+   }
+
+   return node;
+});
+
+// 注意这里的异步化，必须等所有的请求成功响应才可继续遍历
+await Promise.all(nodes);
+```
+
+### 实现效果
+
+[甘特图组件源码优化](/gantt-component-optimization/#实现效果)
+
+# 总结
+
+1. 复制需考虑兼容性、复制性能，可参考[JS 复制文字到剪切板的极简实现及扩展](https://www.zhangxinxu.com/wordpress/2021/10/js-copy-paste-clipboard/)
+2. 代码实时查看编辑借助于第三方服务不够稳定，可自行搭建第三方服务或者参照 [live-editor](https://github.com/gfxfundamentals/live-editor) 自建本地编辑器，必要时可分享

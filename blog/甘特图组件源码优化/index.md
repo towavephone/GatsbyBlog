@@ -5,7 +5,6 @@ categories:
 path: /gantt-component-optimization/
 tags: 前端, 源码优化, 预研
 date: 2021-11-15 11:48:33
-draft: true
 ---
 
 # 需求背景
@@ -41,7 +40,7 @@ draft: true
 
 ### 表头渲染
 
-含有的功能为：
+主要功能如下：
 
 1. 表头的宽度
 2. 标题渲染
@@ -131,7 +130,7 @@ export const TaskListHeaderDefault: React.FC<{
 
 ### 列表内容渲染
 
-含有的功能为：
+主要功能如下：
 
 1. 表格宽度
 2. 列表内容渲染
@@ -386,7 +385,7 @@ export const TaskListTableDefault: React.FC<{
 
 ## 样式属性暴露
 
-含有的功能为：
+主要功能如下：
 
 1. 行级斑马线显示
 2. 日期分隔线显示
