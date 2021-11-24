@@ -9,6 +9,7 @@ tags: 前端, TypeScript, ts
 
 - [TypeScript Handbook 入门教程](https://zhongsp.gitbooks.io/typescript-handbook/content/)
 - [深入理解 TypeScript](https://jkchao.github.io/typescript-book-chinese/)
+- [一份不可多得的 TS 学习指南](https://juejin.cn/post/6872111128135073806)
 
 # React 中的用法
 
@@ -1041,6 +1042,33 @@ Button.defaultProps = {
 };
 
 export default Button;
+```
+
+## 高阶组件
+
+### 类组件
+
+```tsx
+interface WithLoadingProps {
+   loading: boolean;
+}
+
+const withLoading = <P extends object>(Component: React.ComponentType<P>) =>
+   class WithLoading extends React.Component<P & WithLoadingProps> {
+      render() {
+         const { loading, ...props } = this.props;
+         return loading ? <LoadingSpinner /> : <Component {...(props as P)} />;
+      }
+   };
+```
+
+### 函数组件
+
+```tsx
+const withLoading = <P extends object>(Component: React.ComponentType<P>): React.FC<P & WithLoadingProps> => ({
+   loading,
+   ...props
+}: WithLoadingProps) => (loading ? <LoadingSpinner /> : <Component {...(props as P)} />);
 ```
 
 # 工具泛型的实现
@@ -2600,6 +2628,375 @@ type Connect = (
 ) => {
    [T in ModuleMethods]: ModuleMethodsConnect<Module[T]>;
 };
+```
+
+# 类型编程
+
+## 泛型
+
+### 写法
+
+```ts
+function foo<T>(arg: T): T {
+   return arg;
+}
+
+// 箭头函数下的书写
+const foo = <T>(arg: T) => arg;
+
+// tsx 文件下的书写
+const foo = <T extends {}>(arg: T) => arg;
+
+class Foo<T, U> {
+   constructor(public arg1: T, public arg2: U) {}
+
+   public method(): T {
+      return this.arg1;
+   }
+}
+```
+
+### 函数泛型取对象的值
+
+```ts
+// 函数泛型取对象的值，第一种形式
+function pickSingleValue<T>(obj: T, key: keyof T): T[keyof T] {
+   return obj[key];
+}
+
+// 针对第一种形式的缺点：keyof 出现了两次，泛型 T 应该被限制为对象类型
+function pickSingleValue<T extends object, U extends keyof T>(obj: T, key: U): T[U] {
+   return obj[key];
+}
+
+// 换一个功能：取出一系列值
+function pick<T extends object, U extends keyof T>(obj: T, keys: U[]): T[U][] {
+   return keys.map((key) => obj[key]);
+}
+
+// const fooObj = { a: 1, b: "1" };
+// pick(fooObj, ['a', 'b']) // (string | number)[]
+```
+
+## 索引类型
+
+```ts
+interface Foo {
+   [keys: string]: string;
+}
+
+// 由于 JS 可以同时通过数字与字符串访问对象属性，因此 keyof Foo 的结果会是 string | number
+const o: Foo = {
+   1: '芜湖！'
+};
+
+o[1] === o['1'];
+```
+
+## 映射类型
+
+```ts
+interface A {
+   a: boolean;
+   b: string;
+   c: number;
+   d: () => void;
+}
+
+type StringifyA<T> = {
+   [K in keyof T]: string;
+};
+
+type Clone<T> = {
+   [K in keyof T]: T[K];
+};
+```
+
+## 条件类型
+
+### 写法
+
+```ts
+// 在这种情况下，条件类型的推导就会被延迟
+declare function strOrnum<T extends boolean>(x: T): T extends true ? string : number;
+
+type TypeName<T> = T extends string
+   ? 'string'
+   : T extends number
+   ? 'number'
+   : T extends boolean
+   ? 'boolean'
+   : T extends undefined
+   ? 'undefined'
+   : T extends Function
+   ? 'function'
+   : 'object';
+```
+
+### 分布式条件类型
+
+```ts
+// 对于属于裸类型参数的检查类型，条件类型会在实例化时自动分发到联合类型上
+// 使用上面的TypeName类型别名
+type T1 = TypeName<string | (() => void)>; // "string" | "function"
+
+type T2 = TypeName<string | string[]>; // "string" | "object"
+
+type T3 = TypeName<string[] | number[]>; // "object"
+
+type Naked<T> = T extends boolean ? 'Y' : 'N';
+type Wrapped<T> = [T] extends [boolean] ? 'Y' : 'N';
+
+/*
+ * 先分发到 Naked<number> | Naked<boolean>
+ * 然后到 "N" | "Y"
+ */
+type Distributed = Naked<number | boolean>;
+
+/*
+ * 不会分发，因为这里不是裸类型参数，直接是 [number | boolean] extends [boolean]
+ * 然后是 "N"
+ */
+type NotDistributed = Wrapped<number | boolean>;
+```
+
+没有被额外包装的联合类型参数，在条件类型进行判定时会将联合类型分发，分别进行判断。
+
+## infer
+
+```ts
+const foo = (): string => {
+   return 'linbudu';
+};
+
+// string
+type FooReturnType = ReturnType<typeof foo>;
+
+type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
+
+type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
+```
+
+类型系统在获得足够的信息后，就能将 infer 后跟随的类型参数推导出来
+
+## 类型守卫
+
+### 写法
+
+```ts
+// numOrStrProp: number | string;
+export const isString = (arg: unknown): boolean => typeof arg === 'string';
+
+function useIt(numOrStr: number | string) {
+   if (isString(numOrStr)) {
+      console.log(numOrStr.length); // 这里类型推断依然为 number | string，并没有起到缩小类型范围的作用
+   }
+}
+
+// 改进，使用 is 关键字，起作用了
+export const isString = (arg: unknown): arg is string => typeof arg === 'string';
+
+// 例子
+export type Falsy = false | '' | 0 | null | undefined;
+
+export const isFalsy = (val: unknown): val is Falsy => !val;
+```
+
+### 如何将 A | B 联合类型缩小到 A
+
+```ts
+class A {
+   public a() {}
+
+   public useA() {
+      return 'A';
+   }
+}
+
+class B {
+   public b() {}
+
+   public useB() {
+      return 'B';
+   }
+}
+
+function useIt(arg: A | B): void {
+   if ('a' in arg) {
+      arg.useA();
+   } else {
+      arg.useB();
+   }
+}
+```
+
+### 字面量类型作为类型守卫
+
+```ts
+interface IBoy {
+   name: 'mike';
+   gf: string;
+}
+
+interface IGirl {
+   name: 'sofia';
+   bf: string;
+}
+
+function getLover(child: IBoy | IGirl): string {
+   if (child.name === 'mike') {
+      return child.gf;
+   } else {
+      return child.bf;
+   }
+}
+
+// 不同状态下的接口，这里不好判断
+interface IUserProps {
+   isLogin: boolean;
+   name: string; // 用户名称仅在登录时有
+   from: string; // 用户来源（一般用于埋点），仅在未登录时有
+}
+
+// 分割接口
+interface IUnLogin {
+   isLogin: false;
+   from: string; // 用户来源（一般用于埋点），仅在未登录时有
+}
+
+interface ILogined {
+   isLogin: true;
+   name: string; // 用户名称仅在登录时有
+}
+
+function getUserInfo(user: IUnLogin | ILogined): string {
+   return user.isLogin === true ? user.name : user.from;
+}
+```
+
+## 工具类型
+
+以上重复的工具类型不再说明，以下只说明自定义的工具类型，大部分工具类型都来自于 [utility-types](https://github.com/piotrwitek/utility-types) 三方库
+
+### 提取 Promise 的类型
+
+```ts
+const foo = (): Promise<string> => {
+   return new Promise((resolve, reject) => {
+      resolve('linbudu');
+   });
+};
+
+type FooReturnType = ReturnType<typeof foo>; // Promise<string>
+
+// 使用 infer R 来等待类型系统推导出 R 的具体类型。
+type PromiseType<T extends Promise<any>> = T extends Promise<infer R> ? R : never;
+
+type NakedFooReturnType = PromiseType<FooReturnType>; // string
+```
+
+### 递归的工具类型
+
+```ts
+type DeepPartial<T> = {
+   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+```
+
+### 返回键名的工具类型
+
+利用 `{ [K in keyof T]: ... }[keyof T]` 形式返回键名
+
+```ts
+type FunctTypeKeys<T extends object> = {
+   [K in keyof T]-?: T[K] extends Function ? K : never;
+}[keyof T];
+
+interface IWithFuncKeys {
+   a: string;
+   b: number;
+   c: boolean;
+   d: () => void;
+}
+
+type WTFIsThis<T extends object> = {
+   [K in keyof T]-?: T[K] extends Function ? K : never;
+};
+
+type FunctTypeKeys<T extends object> = {
+   [K in keyof T]-?: T[K] extends Function ? K : never;
+}[keyof T];
+
+type UseIt1 = WTFIsThis<IWithFuncKeys>;
+// {
+//     a: never;
+//     b: never;
+//     c: never;
+//     d: "d";
+// }
+
+type UseIt2 = FunctTypeKeys<IWithFuncKeys>; // d
+```
+
+#### 可选字段
+
+```ts
+type WTFAMI1 = {} extends { prop: number } ? 'Y' : 'N';
+type WTFAMI2 = {} extends { prop?: number } ? 'Y' : 'N';
+```
+
+这里的 `{} extends K`，只有 K 是可选的情况下才成立，使用如下
+
+```ts
+export type RequiredKeys<T> = {
+   [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
+}[keyof T];
+
+export type OptionalKeys<T> = {
+   [K in keyof T]-?: {} extends Pick<T, K> ? K : never;
+}[keyof T];
+```
+
+#### 可变、不可变
+
+```ts
+/**
+ * @desc 一个辅助类型，判断 X 和 Y 是否类型相同，
+ * @returns 是则返回 A，否则返回 B
+ */
+type Equal<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B;
+
+export type MutableKeys<T extends object> = {
+   [P in keyof T]-?: Equal<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P, never>;
+}[keyof T];
+
+export type IMmutableKeys<T extends object> = {
+   [P in keyof T]-?: Equals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, never, P>;
+}[keyof T];
+
+interface IWithFuncKeys {
+   a: string;
+   b?: number;
+   readonly c: boolean[];
+   d?: () => void;
+}
+
+type b = MutableKeys<IWithFuncKeys>; // "a" | "b" | "d"
+type a = IMmutableKeys<IWithFuncKeys>; // "c"
+```
+
+## 基于值类型的 Pick 与 Omit
+
+```ts
+export type PickByValueType<T, ValueType> = Pick<
+   T,
+   { [Key in keyof T]-?: T[Key] extends ValueType ? Key : never }[keyof T]
+>;
+
+export type OmitByValueType<T, ValueType> = Pick<
+   T,
+   { [Key in keyof T]-?: T[Key] extends ValueType ? never : Key }[keyof T]
+>;
 ```
 
 # 实战
