@@ -288,7 +288,6 @@ type SomeRequired = SetRequired<Foo, 'b' | 'c'>;
 ## 最佳解答
 
 ```ts
-// 这里必须要加，因为
 type Simplify<T> = {
    [P in keyof T]: T[P];
 };
@@ -368,6 +367,273 @@ type ConditionalPick<T, U> = {
 // 测试用例：
 type StringKeysOnly = ConditionalPick<Example, string>;
 //=> {a: string}
+```
+
+# 测试五
+
+定义一个工具类型 AppendArgument，为已有的函数类型增加指定类型的参数，新增的参数名是 x，将作为新函数类型的第一个参数。具体的使用示例如下所示：
+
+```ts
+type Fn = (a: number, b: string) => number
+type AppendArgument<F, A> = // 你的实现代码
+
+type FinalFn = AppendArgument<Fn, boolean>
+// (x: boolean, a: number, b: string) => number
+```
+
+## 我的解答
+
+工具类型
+
+```ts
+type Fn = (a: number, b: string) => number;
+type AppendArgument<F extends (...args: any) => any, A> = (x: A, ...args: Parameters<F>) => ReturnType<F>;
+
+type FinalFn = AppendArgument<Fn, boolean>;
+// (x: boolean, a: number, b: string) => number
+```
+
+## 最佳解答
+
+infer 推断
+
+```ts
+type Fn = (a: number, b: string) => number;
+type AppendArgument<F extends (...args: any) => any, A> = F extends (...args: infer T) => infer U
+   ? (x: A, ...args: T) => U
+   : never;
+
+type FinalFn = AppendArgument<Fn, boolean>;
+// (x: boolean, a: number, b: string) => number
+```
+
+# 测试六
+
+定义一个 NativeFlat 工具类型，支持把数组类型拍平（扁平化）。具体的使用示例如下所示：
+
+```ts
+type NaiveFlat<T extends any[]> = // 你的实现代码
+
+// 测试用例：
+type NaiveResult = NaiveFlat<[['a'], ['b', 'c'], ['d']]>
+// NaiveResult 的结果： "a" | "b" | "c" | "d"
+```
+
+在完成 NaiveFlat 工具类型之后，在继续实现 DeepFlat 工具类型，以支持多维数组类型：
+
+```ts
+type DeepFlat<T extends any[]> = unknown; // 你的实现代码
+
+// 测试用例
+type Deep = [['a'], ['b', 'c'], [['d']], [[[['e']]]]];
+type DeepTestResult = DeepFlat<Deep>;
+// DeepTestResult: "a" | "b" | "c" | "d" | "e"
+```
+
+## 最佳解答一
+
+递归 + number 循环
+
+```ts{3,13}
+// T[P][number] 对数组里每个 index 进行循环，将 index 转换成key
+type NaiveFlat<T extends any[]> = {
+   [P in keyof T]: T[P] extends any[] ? T[P][number] : T[P];
+}[number];
+
+// 测试用例：
+type NaiveResult = NaiveFlat<[['a'], ['b', 'c'], ['d']]>;
+// NaiveResult 的结果： "a" | "b" | "c" | "d"
+
+type Deep = [['a'], ['b', 'c'], [['d']], [[[['e']]]]];
+
+type DeepFlat<T extends any[]> = {
+   [K in keyof T]: T[K] extends any[] ? DeepFlat<T[K]> : T[K];
+}[number];
+
+type DeepTestResult = DeepFlat<Deep>;
+// DeepTestResult: "a" | "b" | "c" | "d" | "e"
+```
+
+## 最佳解答二
+
+infer 推断，这里的 `T[number] extends infer U` 可等价替换为 `T extends (infer U)[]`
+
+```ts
+type NaiveFlat<T extends any[]> = T[number] extends infer U // 你的实现代码
+   ? U extends any[]
+      ? U[number]
+      : U
+   : never;
+
+// 测试用例：
+type NaiveResult = NaiveFlat<[['a'], ['b', 'c'], ['d']]>;
+// NaiveResult 的结果： "a" | "b" | "c" | "d"
+
+type DeepFlat<T extends any[]> = T[number] extends infer U // 你的实现代码
+   ? U extends any[]
+      ? DeepFlat<U>
+      : U
+   : never;
+
+// 测试用例
+type Deep = [['a'], ['b', 'c'], [['d']], [[[['e']]]]];
+type DeepTestResult = DeepFlat<Deep>;
+// DeepTestResult: "a" | "b" | "c" | "d" | "e"
+```
+
+# 测试七
+
+使用类型别名定义一个 EmptyObject 类型，使得该类型只允许空对象赋值：
+
+```ts
+type EmptyObject = {};
+
+// 测试用例
+const shouldPass: EmptyObject = {}; // 可以正常赋值
+const shouldFail: EmptyObject = {
+   // 将出现编译错误
+   prop: 'TS'
+};
+```
+
+在通过 EmptyObject 类型的测试用例检测后，我们来更改以下 takeSomeTypeOnly 函数的类型定义，让它的参数只允许严格 SomeType 类型的值。具体的使用示例如下所示：
+
+```ts
+type SomeType = {
+   prop: string;
+};
+
+// 更改以下函数的类型定义，让它的参数只允许严格SomeType类型的值
+function takeSomeTypeOnly(x: SomeType) {
+   return x;
+}
+
+// 测试用例：
+const x = { prop: 'a' };
+takeSomeTypeOnly(x); // 可以正常调用
+
+const y = { prop: 'a', addditionalProp: 'x' };
+takeSomeTypeOnly(y); // 将出现编译错误
+```
+
+## 最佳解答
+
+```ts
+type EmptyObject = {
+   [P in PropertyKey]: never;
+};
+
+// 测试用例
+const shouldPass: EmptyObject = {}; // 可以正常赋值
+const shouldFail: EmptyObject = {
+   // 将出现编译错误
+   prop: 'TS'
+};
+
+type SomeType = {
+   prop: string;
+};
+
+// T2 的 key 必须存在于 T1 里面，且 T2 是 T1 的一部分
+type StrictType<T1 extends T2, T2> = {
+   [P in keyof T1]: P extends keyof T2 ? T1[P] : never;
+};
+
+// 更改以下函数的类型定义，让它的参数只允许严格 SomeType 类型的值
+function takeSomeTypeOnly<T extends SomeType>(x: StrictType<T, SomeType>) {
+   return x;
+}
+
+// 测试用例：
+const x = { prop: 'a' };
+takeSomeTypeOnly(x); // 可以正常调用
+
+const y = { prop: 'a', addditionalProp: 'x' };
+takeSomeTypeOnly(y); // 将出现编译错误
+```
+
+# 测试八
+
+定义 NonEmptyArray 工具类型，用于确保数据非空数组。
+
+```ts
+type NonEmptyArray<T> = // 你的实现代码
+
+const a: NonEmptyArray<string> = [] // 将出现编译错误
+const b: NonEmptyArray<string> = ['Hello TS'] // 非空数据，正常使用
+```
+
+## 最佳解答一
+
+```ts
+type NonEmptyArray<T> = [T, ...T[]];
+```
+
+## 最佳解答二
+
+```ts
+type NonEmptyArray<T> = T[] & { 0: T };
+```
+
+# 测试九
+
+定义一个 JoinStrArray 工具类型，用于根据指定的 Separator 分隔符，对字符串数组类型进行拼接。具体的使用示例如下所示：
+
+```ts
+type JoinStrArray<Arr extends string[], Separator extends string, Result extends string = ""> = // 你的实现代码
+
+// 测试用例
+type Names = ["Sem", "Lolo", "Kaquko"]
+type NamesComma = JoinStrArray<Names, ","> // "Sem,Lolo,Kaquko"
+type NamesSpace = JoinStrArray<Names, " "> // "Sem Lolo Kaquko"
+type NamesStars = JoinStrArray<Names, "⭐️"> // "Sem⭐️Lolo⭐️Kaquko"
+```
+
+## 最佳解答
+
+```ts
+type JoinStrArray<
+  Arr extends string[],
+  Separator extends string
+> = Arr extends [infer A, ...infer B]
+  ? `${A extends string ? A : ''}${B extends [string, ...string[]]
+      ? `${Separator}${JoinStrArray<B, Separator>}`
+      : ''}`
+  : '';
+
+// 测试用例
+type Names = ["Sem", "Lolo", "Kaquko"];
+type NamesComma = JoinStrArray<Names, ",">; // "Sem,Lolo,Kaquko"
+type NamesSpace = JoinStrArray<Names, " ">; // "Sem Lolo Kaquko"
+type NamesStars = JoinStrArray<Names, "⭐️">; // "Sem⭐️Lolo⭐️Kaquko"
+```
+
+# 测试十
+
+实现一个 Trim 工具类型，用于对字符串字面量类型进行去空格处理。具体的使用示例如下所示：
+
+```ts
+type Trim<V extends string> = // 你的实现代码
+   // 测试用例
+   Trim<' semlinker '>;
+//=> 'semlinker'
+```
+
+提示：可以考虑先定义 TrimLeft 和 TrimRight 工具类型，再组合成 Trim 工具类型。
+
+## 最佳解答
+
+infer + 递归
+
+```ts
+// 实现一个 Trim 工具类型，用于对字符串字面量类型进行去空格处理。具体的使用示例如下所示：
+type TrimLeft<V extends string> = V extends ` ${infer U}` ? TrimLeft<U> : V;
+type TrimRight<V extends string> = V extends `${infer U} ` ? TrimRight<U> : V;
+type Trim<V extends string> = TrimLeft<TrimRight<V>>
+
+// 测试用例
+type T3 = Trim<'             semlinker              '>
+//=> 'semlinker'
 ```
 
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc

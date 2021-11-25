@@ -126,6 +126,11 @@
       display: block;
       overflow: auto;
       max-height: 500px;
+      thead {
+        position: sticky;
+        top: 0;
+        background: #fff;
+      }
       thead,
       tbody {
         display: table;
@@ -134,6 +139,7 @@
       }
       th,
       td {
+        width: 200px;
         padding: 10px;
         border: solid $text-color 1px;
       }
@@ -429,7 +435,7 @@ code[class*='language-'] {
   z-index: 1;
 }
 
-.gatsby-highlight pre[class*="language-"].line-numbers {
+.gatsby-highlight pre[class*='language-'].line-numbers {
   padding-left: 2.8em;
 }
 
@@ -438,7 +444,7 @@ code[class*='language-'] {
   text-align: center;
 }
 
-pre[class*="language-"] {
+pre[class*='language-'] {
   padding: 1.4em 0.8em;
 }
 
