@@ -636,4 +636,138 @@ type T3 = Trim<'             semlinker              '>
 //=> 'semlinker'
 ```
 
+# 测试十一
+
+实现一个 IsEqual 工具类型，用于比较两个类型是否相等。具体的使用示例如下所示：
+
+```ts
+type IsEqual<A, B> = // 你的实现代码
+
+// 测试用例
+type E0 = IsEqual<1, 2>; // false
+type E1 = IsEqual<{ a: 1 }, { a: 1 }> // true
+type E2 = IsEqual<[1], []>; // false
+```
+
+## 我的解答
+
+```ts
+type IsEqual<A, B> = A extends B ? (B extends A ? true : false) : false;
+
+// 测试用例
+type E0 = IsEqual<1, 2>; // false
+type E1 = IsEqual<{ a: 1 }, { a: 1 }>; // true
+type E2 = IsEqual<[1], []>; // false
+```
+
+## 最佳解答
+
+```ts
+type IsEqual<A, B> = A extends B ? (B extends A ? true : false) : false;
+
+// 测试用例
+type A6 = IsEqual<true, boolean>; // boolean
+type A7 = IsEqual<1 | 2, 1>; // boolean
+```
+
+对于这 2 个例子，以上我的解答是不对的，这是由于 泛型和 extends 两者结合产生的 `distributive conditional types（分布式条件类型）` 导致的，这里的 `boolean` 和 `true | false` 等价，即 2 个条件都走了
+
+给泛型套上一个 `[]`，就可以解决这个问题
+
+```ts
+type IsEqual<A, B> = [A, B] extends [B, A] ? true : false;
+
+// 测试用例
+type A6 = IsEqual<true, boolean>; // boolean
+type A7 = IsEqual<1 | 2, 1>; // boolean
+```
+
+但是针对 any 还是不行，以下是最终解决方案，具体可参考 [issue](https://github.com/microsoft/TypeScript/issues/27024#issuecomment-510924206)
+
+// TODO IsEqual 具体原理
+
+```ts
+type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends (<G>() => G extends U ? 1 : 2) ? true : false;
+
+// 测试用例
+type E0 = IsEqual<1, 2>; // false
+type E1 = IsEqual<{ a: 1 }, { a: 1 }>; // true
+type E2 = IsEqual<[1], []>; // false
+
+// 这里考虑了边缘情况
+type X = IsEqual<{ x: any }, { x: number }>; // false
+type A6 = IsEqual<true, boolean>; // false
+type A7 = IsEqual<1 | 2, 1>; // false
+```
+
+# 测试十二
+
+实现一个 Head 工具类型，用于获取数组类型的第一个类型。具体的使用示例如下所示：
+
+```ts
+type Head<T extends Array<any>> = // 你的实现代码
+
+// 测试用例
+type H0 = Head<[]> // never
+type H1 = Head<[1]> // 1
+type H2 = Head<[3, 2]> // 3
+```
+
+## 我的解答
+
+```ts
+type Head<T extends Array<any>> = T[0];
+
+// 测试用例
+type H0 = Head<[]>; // never
+type H1 = Head<[1]>; // 1
+type H2 = Head<[3, 2]>; // 3
+```
+
+## 最佳解答
+
+```ts
+type Head<T extends Array<any>> = T extends [] ? never : T[0];
+
+// 测试用例
+type H0 = Head<[]>; // never
+type H1 = Head<[1]>; // 1
+type H2 = Head<[3, 2]>; // 3
+```
+
+# 测试十三
+
+实现一个 Tail 工具类型，用于获取数组类型除了第一个类型外，剩余的类型。具体的使用示例如下所示：
+
+```ts
+type Tail<T extends Array<any>> =  // 你的实现代码
+
+// 测试用例
+type T0 = Tail<[]> // []
+type T1 = Tail<[1, 2]> // [2]
+type T2 = Tail<[1, 2, 3, 4, 5]> // [2, 3, 4, 5]
+```
+
+## 我的解答
+
+```ts
+type Tail<T extends Array<any>> = T extends [a: any, ...rest: infer K] ? K : never
+
+// 测试用例
+type T0 = Tail<[]> // []
+type T1 = Tail<[1, 2]> // [2]
+type T2 = Tail<[1, 2, 3, 4, 5]> // [2, 3, 4, 5]
+```
+
+## 最佳解答
+
+```ts
+type Tail<T extends Array<any>> = T extends [] ? [] : (T extends [any, ...infer K] ? K : never);
+
+// 测试用例
+type T0 = Tail<[]>; // []
+type T1 = Tail<[1, 2]>; // [2]
+type T2 = Tail<[1, 2, 3, 4, 5]>; // [2, 3, 4, 5]
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
