@@ -770,4 +770,78 @@ type T1 = Tail<[1, 2]>; // [2]
 type T2 = Tail<[1, 2, 3, 4, 5]>; // [2, 3, 4, 5]
 ```
 
+# 测试十四
+
+实现一个 Unshift 工具类型，用于把指定类型 E 作为第一个元素添加到 T 数组类型中。具体的使用示例如下所示：
+
+```ts
+type Unshift<T extends any[], E> =  // 你的实现代码
+
+// 测试用例
+type Arr0 = Unshift<[], 1>; // [1]
+type Arr1 = Unshift<[1, 2, 3], 0>; // [0, 1, 2, 3]
+```
+
+## 我的解答
+
+```ts
+type Unshift<T extends any[], E> = [E, ...T] extends infer K ? K : never;
+
+// 测试用例
+type Arr0 = Unshift<[], 1>; // [1]
+type Arr1 = Unshift<[1, 2, 3], 0>; // [0, 1, 2, 3]
+```
+
+```ts
+type Unshift<T extends any[], E> = [E, ...T];
+
+// 测试用例
+type Arr0 = Unshift<[], 1>; // [1]
+type Arr1 = Unshift<[1, 2, 3], 0>; // [0, 1, 2, 3]
+```
+
+# 测试十五
+
+实现一个 Shift 工具类型，用于移除 T 数组类型中的第一个类型。具体的使用示例如下所示：
+
+```ts
+type Shift<T extends any[]> = // 你的实现代码
+
+// 测试用例
+type S0 = Shift<[1, 2, 3]>
+type S1 = Shift<[string,number,boolean]>
+```
+
+## 我的解答
+
+```ts
+type Shift<T extends any[]> = T extends [any, ...(infer R)] ? R : [];
+
+// 测试用例
+type S0 = Shift<[1, 2, 3]>;
+type S1 = Shift<[string, number, boolean]>;
+```
+
+# 测试十六
+
+实现一个 Push 工具类型，用于把指定类型 E 作为最后一个元素添加到 T 数组类型中。具体的使用示例如下所示：
+
+```ts
+type Push<T extends any[], V> = // 你的实现代码
+
+// 测试用例
+type Arr0 = Push<[], 1> // [1]
+type Arr1 = Push<[1, 2, 3], 4> // [1, 2, 3, 4]
+```
+
+## 我的解答
+
+```ts
+type Push<T extends any[], V> = [...T, V];
+
+// 测试用例
+type Arr0 = Push<[], 1>; // [1]
+type Arr1 = Push<[1, 2, 3], 4>; // [1, 2, 3, 4]
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc

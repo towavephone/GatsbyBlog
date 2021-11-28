@@ -1,34 +1,34 @@
 ---
-title: gatsby插件改造
+title: 博客 Gatsby 插件改造
 categories:
    - 前端
 path: /gatsby-plugin-transformation/
-tags: 前端, 动效, 源码优化, 预研
+tags: 前端, 源码优化, 预研
 date: 2021-11-15 11:52:04
 ---
 
 # 需求背景
 
-针对现有的 Gatsby 框架实现代码复制、代码实时查看编辑的功能
+针对本博客现有的 Gatsby 框架实现代码复制、代码实时查看编辑的功能
 
 # 技术选型
 
-以下都是采用最后一种方案，对其源码做出改动
+以下都是采用最后一种方案，由于插件功能不满足，所以对其源码做出改动
 
 ## 代码复制
 
-| 选型 | 优点 | 缺点 |
-| :-- | :-- | :-- |
-| 项目代码自实现 | 定制化程度高 | 实现难度大；拓展较差 |
-| [gatsby-remark-code-buttons](https://github.com/iamskok/gatsby-remark-code-buttons) | 已具有代码复制功能 | 有多复制一行的 bug；UI 不符合博客主题 |
+| 技术选型 | 语法 | 优点 | 缺点 |
+| :-- | :-- | :-- | :-- |
+| 项目代码自实现 | 未实现 | 定制化程度高 | 实现难度大；拓展较差 |
+| [gatsby-remark-code-buttons](https://github.com/iamskok/gatsby-remark-code-buttons) | 不需特定语法，只要是代码块默认具有复制功能 | 已具有代码复制功能 | 有多复制一行的 bug；UI 不符合博客主题 |
 
 ## 代码实时查看编辑
 
-| 选型 | 优点 | 缺点 | 样例页面 |
-| :-- | :-- | :-- | :-- |
-| iframe + [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-remark-embed-snippet) | 实现最为简单，容易出效果 | 没有实时编辑功能；嵌入的代码往往需要将其写成一个 html 文件且一般情况下只支持静态页面的展示；需要 iframe、embed 标签声明两次 | [下雪特效](/snow-css/) |
-| iframe + code-editor.html 传参 | 基本实现代码的实时查看编辑 | 嵌入的代码只支持静态的 html 页面；需要明确拆分出 js、css、html 三个结构；嵌入的 js、css、html 分别需要手动 escape 加密 | [CSS 世界四大盒尺寸](/css-world-four-kinds-of-box/#border-等高布局技术) |
-| [gatsby-remark-embedded-codesandbox](https://github.com/elboman/gatsby-remark-embedded-codesandbox) | 借助 codesandbox 实现了较为丰富的代码实时查看编辑功能 | 借助第三方实现的功能，不够稳定；不支持带目录的文件夹；单次请求过大（即上传代码过多）会报请求体过大错误；会上传 node_modules 等等大文件 | 需实现 |
+| 技术选型 | 语法 | 优点 | 缺点 | 样例页面 |
+| :-- | :-- | :-- | :-- | --- |
+| iframe + [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-remark-embed-snippet) | `<iframe src="/examples/snow.html" width="800" height="400"></iframe>` <br /> `` `embed:snow.html` `` | 实现最为简单，容易出效果 | 没有实时编辑功能；嵌入的代码往往需要将其写成一个 html 文件且一般情况下只支持静态页面的展示；需要 iframe、embed 标签声明两次 | [下雪特效](/snow-css/) |
+| iframe + code-editor.html 传参 | `<iframe src="/examples/code-editor.html?html=转义字符串&css=转义字符串&js=转义字符串` | 基本实现代码的实时查看编辑 | 嵌入的代码只支持静态的 html 页面；需要明确拆分出 js、css、html 三个结构；嵌入的 js、css、html 分别需要手动 escape 加密 | [CSS 世界四大盒尺寸](/css-world-four-kinds-of-box/#border-等高布局技术) |
+| [gatsby-remark-embedded-codesandbox](https://github.com/elboman/gatsby-remark-embedded-codesandbox) | `[pms-example](embedded-codesandbox://gantt-component-optimization/pms-example)` | 借助 codesandbox 实现了较为丰富的代码实时查看编辑功能 | 借助第三方实现的功能，不够稳定；不支持带目录的文件夹；单次请求过大（即上传代码过多）会报请求体过大错误；会上传 node_modules 等等大文件 | 需实现 |
 
 # 核心逻辑
 
@@ -65,7 +65,7 @@ src/gatsby-browser.js
 
 ### 增加显示语言类型的功能；改变按钮文本显示逻辑；任何语言都可以显示复制按钮
 
-代码在[这里](https://github.com/towavephone/gatsby-remark-code-buttons/commit/90094cd1c6a4a6fa7253f61e898f8a832173d6a9)
+主要针对原插件做出的一些 UI、功能上的适配，代码在[这里](https://github.com/towavephone/gatsby-remark-code-buttons/commit/90094cd1c6a4a6fa7253f61e898f8a832173d6a9)
 
 src/index.js
 
@@ -101,13 +101,17 @@ src/index.js
 
 ### 实现效果
 
-见本博客代码展示的代码复制功能
+```js
+// 测试代码复制功能，这个代码块应该具有复制代码功能
+```
 
 ## 代码实时查看编辑
 
 代码在[这里](https://github.com/towavephone/gatsby-remark-embedded-codesandbox/commit/6a1947c22566c6ad5baae33dabf99edd16f4c8eb)
 
 ### 递归遍历文件夹；增加忽略文件功能
+
+原插件不支持目录的读取，这里拓展了目录下也能递归读取的功能，同时也实现了默认忽略文件的功能
 
 ```js
 const DEFAULT_IGNORED_FILES = ['node_modules', 'package-lock.json', 'yarn.lock'];
@@ -128,6 +132,8 @@ const getAllFiles = (dirPath) =>
 
 ### 默认模式为静态服务器
 
+因为 codesandbox 需要明确模板类型，这里默认为静态模板，否则静态文件不能正常运行
+
 ```js
 const getFileExist = (fileList, filename = 'package.json') => {
    const found = fileList.filter((name) => name === filename);
@@ -142,7 +148,9 @@ if (!getFileExist(folderFiles, 'sandbox.config.json')) {
 }
 ```
 
-### codesandbox 请求方式改为 post 逻辑异步化
+### codesandbox 请求方式改为 post 异步化
+
+原插件是基于 get 请求的，一旦上传文件过多就会报错，这里改为 post 请求就不再有请求体大小的限制，同时也要注意 post 的异步
 
 ```js
 const convertNodeToEmbedded = async (node, params, options = {}) => {
@@ -201,5 +209,5 @@ await Promise.all(nodes);
 
 # 总结
 
-1. 复制需考虑兼容性、复制性能，可参考[JS 复制文字到剪切板的极简实现及扩展](https://www.zhangxinxu.com/wordpress/2021/10/js-copy-paste-clipboard/)
-2. 代码实时查看编辑借助于第三方服务不够稳定，可自行搭建第三方服务或者参照 [live-editor](https://github.com/gfxfundamentals/live-editor) 自建本地编辑器，必要时可分享
+1. 复制功能需考虑兼容性、复制性能，可参考[JS 复制文字到剪切板的极简实现及扩展](https://www.zhangxinxu.com/wordpress/2021/10/js-copy-paste-clipboard/)
+2. 代码实时查看编辑借助于第三方服务不够稳定，可自行搭建第三方服务或者参照 [live-editor](https://github.com/gfxfundamentals/live-editor) 自建本地编辑器，必要时具有分享功能
