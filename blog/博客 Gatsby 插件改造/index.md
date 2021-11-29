@@ -19,16 +19,16 @@ date: 2021-11-15 11:52:04
 
 | 技术选型 | 语法 | 优点 | 缺点 |
 | :-- | :-- | :-- | :-- |
-| 项目代码自实现 | 未实现 | 定制化程度高 | 实现难度大；拓展较差 |
-| [gatsby-remark-code-buttons](https://github.com/iamskok/gatsby-remark-code-buttons) | 不需特定语法，只要是代码块默认具有复制功能 | 已具有代码复制功能 | 有多复制一行的 bug；UI 不符合博客主题 |
+| 项目代码自实现 | 未实现 | 定制化程度高 | <ol><li>实现难度大；</li><li>拓展较差</li></ol> |
+| [gatsby-remark-code-buttons](https://github.com/iamskok/gatsby-remark-code-buttons) | 不需特定语法，只要是代码块默认具有复制功能 | 已具有代码复制功能 | <ol><li>有多复制一行的 bug；</li><li>UI 不符合博客主题</li></ol> |
 
 ## 代码实时查看编辑
 
 | 技术选型 | 语法 | 优点 | 缺点 | 样例页面 |
 | :-- | :-- | :-- | :-- | --- |
-| iframe + [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-remark-embed-snippet) | `<iframe src="/examples/snow.html" width="800" height="400"></iframe>` <br /> `` `embed:snow.html` `` | 实现最为简单，容易出效果 | 没有实时编辑功能；嵌入的代码往往需要将其写成一个 html 文件且一般情况下只支持静态页面的展示；需要 iframe、embed 标签声明两次 | [下雪特效](/snow-css/) |
-| iframe + code-editor.html 传参 | `<iframe src="/examples/code-editor.html?html=转义字符串&css=转义字符串&js=转义字符串` | 基本实现代码的实时查看编辑 | 嵌入的代码只支持静态的 html 页面；需要明确拆分出 js、css、html 三个结构；嵌入的 js、css、html 分别需要手动 escape 加密 | [CSS 世界四大盒尺寸](/css-world-four-kinds-of-box/#border-等高布局技术) |
-| [gatsby-remark-embedded-codesandbox](https://github.com/elboman/gatsby-remark-embedded-codesandbox) | `[pms-example](embedded-codesandbox://gantt-component-optimization/pms-example)` | 借助 codesandbox 实现了较为丰富的代码实时查看编辑功能 | 借助第三方实现的功能，不够稳定；不支持带目录的文件夹；单次请求过大（即上传代码过多）会报请求体过大错误；会上传 node_modules 等等大文件 | 需实现 |
+| iframe + [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-remark-embed-snippet) | `<iframe src="/examples/snow.html" width="800" height="400"></iframe>` <br /> `` `embed:snow.html` `` | 实现最为简单，容易出效果 | <ol><li>没有实时编辑功能；<li>嵌入的代码往往需要将其写成一个 html 文件且一般情况下只支持静态页面的展示；</li><li>需要 iframe、embed 标签声明两次</li></ol> | [下雪特效](/snow-css/) |
+| iframe + code-editor.html 传参 | `<iframe src="/examples/code-editor.html?html=转义字符串&css=转义字符串&js=转义字符串` | 基本实现代码的实时查看编辑 | <ol><li>嵌入的代码只支持静态的 html 页面；</li><li>需要明确拆分出 js、css、html 三个结构；</li><li>嵌入的 js、css、html 分别需要手动 escape 加密</li></ol> | [CSS 世界四大盒尺寸](/css-world-four-kinds-of-box/#border-等高布局技术) |
+| [gatsby-remark-embedded-codesandbox](https://github.com/elboman/gatsby-remark-embedded-codesandbox) | `[pms-example](embedded-codesandbox://gantt-component-optimization/pms-example)` | 借助 codesandbox 实现了较为丰富的代码实时查看编辑功能 | <ol><li>借助第三方实现的功能，不够稳定；</li><li>不支持带目录的文件夹；</li><li>单次请求过大（即上传代码过多）会报请求体过大错误；</li><li>会上传 node_modules 等等大文件</li></ol> | 需实现 |
 
 # 核心逻辑
 
