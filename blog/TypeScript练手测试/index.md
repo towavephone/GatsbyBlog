@@ -844,4 +844,108 @@ type Arr0 = Push<[], 1>; // [1]
 type Arr1 = Push<[1, 2, 3], 4>; // [1, 2, 3, 4]
 ```
 
+# 测试十七
+
+实现一个 Includes 工具类型，用于判断指定的类型 E 是否包含在 T 数组类型中。具体的使用示例如下所示：
+
+```ts
+type Includes<T extends Array<any>, E> = // 你的实现代码
+
+type I0 = Includes<[], 1> // false
+type I1 = Includes<[2, 2, 3, 1], 2> // true
+type I2 = Includes<[2, 3, 3, 1], 1> // true
+```
+
+## 我的解答
+
+```ts
+type Includes<T extends Array<any>, E> = E extends T[keyof T] ? true : false;
+// 或 type Includes<T extends Array<any>, E> = E extends T[number] ? true : false
+
+type I0 = Includes<[], 1>; // false
+type I1 = Includes<[2, 2, 3, 1], 2>; // true
+type I2 = Includes<[2, 3, 3, 1], 1>; // true
+```
+
+## 最佳解答
+
+需结合 isEqual 方法
+
+```ts
+// 实现一个 Includes 工具类型，用于判断指定的类型 E 是否包含在 T 数组类型中。具体的使用示例如下所示：
+type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
+
+type Includes<T extends Array<any>, E> = T extends [infer A, ...infer B]
+   ? (IsEqual<A, E> extends true ? true : Includes<B, E>)
+   : false;
+
+type I0 = Includes<[], 1>; // false
+type I1 = Includes<[2, 2, 3, 1], 2>; // true
+type I2 = Includes<[2, 3, 3, 1], 1>; // true
+type I3 = Includes<[2 | 3, 3, 3, 1], 2 | 3 | 4>; // false
+type I4 = Includes<[2 | 3, 3, 3, 1], 2 | 3>; // true
+type I5 = Includes<[never, 3, 3, 1], never>; // true
+type I6 = Includes<[never, 3, 3, 1], any>; // false
+```
+
+# 测试十八
+
+实现一个 UnionToIntersection 工具类型，用于把联合类型转换为交叉类型。具体的使用示例如下所示：
+
+```ts
+type UnionToIntersection<U> = // 你的实现代码
+
+// 测试用例
+type U0 = UnionToIntersection<string | number> // never
+type U1 = UnionToIntersection<{ name: string } | { age: number }> // { name: string; } & { age: number; }
+```
+
+## 我的解答
+
+分布式条件类型 + 条件类型推断
+
+```ts
+// https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html#type-inference-in-conditional-types
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer K) => void ? K : never;
+
+// 测试用例
+type U0 = UnionToIntersection<string | number>; // never
+type U1 = UnionToIntersection<{ name: string } | { age: number }>; // { name: string; } & { age: number; }
+```
+
+# 测试十九
+
+实现一个 OptionalKeys 工具类型，用来获取对象类型中声明的可选属性。具体的使用示例如下所示：
+
+```ts
+type Person = {
+  id: string;
+  name: string;
+  age: number;
+  from?: string;
+  speak?: string;
+};
+
+type OptionalKeys<T> = // 你的实现代码
+type PersonOptionalKeys = OptionalKeys<Person> // "from" | "speak"
+```
+
+## 我的解答
+
+```ts
+type Person = {
+   id: string;
+   name: string;
+   age: number;
+   from?: string;
+   speak?: string;
+};
+
+type OptionalKeys<T> = {
+   [K in keyof T]: {} extends Pick<T, K> ? K : never;
+}[keyof T];
+
+type PersonOptionalKeys = OptionalKeys<Person>; // "from" | "speak"
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
