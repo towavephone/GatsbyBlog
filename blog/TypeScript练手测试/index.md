@@ -948,4 +948,142 @@ type OptionalKeys<T> = {
 type PersonOptionalKeys = OptionalKeys<Person>; // "from" | "speak"
 ```
 
+# 测试二十
+
+实现一个 Curry 工具类型，用来实现函数类型的柯里化处理。具体的使用示例如下所示：
+
+```ts
+type Curry<
+  F extends (...args: any[]) => any,
+  P extends any[] = Parameters<F>,
+  R = ReturnType<F>
+> = // 你的实现代码
+
+type F0 = Curry<() => Date>; // () => Date
+type F1 = Curry<(a: number) => Date>; // (arg: number) => Date
+type F2 = Curry<(a: number, b: string) => Date>; //  (arg_0: number) => (b: string) => Date
+```
+
+## 最佳解答
+
+```ts
+type FirstAsArray<T extends any[]> = T extends [...infer A, infer B, infer C]
+   ? A extends []
+      ? T extends [...infer A, infer B]
+         ? A
+         : never
+      : T extends [...infer A, infer B]
+      ? FirstAsArray<A>
+      : never
+   : T;
+
+type Curry<F extends (...args: any[]) => any, P extends any[] = Parameters<F>, R = ReturnType<F>> = P extends [
+   infer A,
+   infer B,
+   ...infer C
+]
+   ? P extends [infer A, ...infer B]
+      ? Curry<F, FirstAsArray<P>, Curry<F, B, R>>
+      : never
+   : (...args: P) => R;
+
+type F0 = Curry<() => Date>; // () => Date
+type F1 = Curry<(a: number) => Date>; // (a: number) => Date
+type F2 = Curry<(a: number, b: string) => Date>; // (a: number) => (b: string) => Date
+type F3 = Curry<(a: number, b: string, c: boolean) => Date>; // (a: number) => (b: string) => (c: boolean) => Date
+```
+
+# 测试二十一
+
+实现一个 Merge 工具类型，用于把两个类型合并成一个新的类型。第二种类型（SecondType）的 Keys 将会覆盖第一种类型（FirstType）的 Keys。具体的使用示例如下所示：
+
+```ts
+type Foo = {
+   a: number;
+   b: string;
+};
+
+type Bar = {
+   b: number;
+};
+
+type Merge<FirstType, SecondType> = // 你的实现代码
+
+const ab: Merge<Foo, Bar> = { a: 1, b: 2 };
+```
+
+## 我的解答
+
+```ts
+type ExtractKeys<T> = {
+   [K in keyof T]: K;
+}[keyof T];
+
+type Merge<FirstType, SecondType> = {
+   [K in keyof FirstType]: K extends ExtractKeys<SecondType> ? SecondType[K] : FirstType[K];
+} &
+   SecondType;
+```
+
+## 最佳解答一
+
+```ts
+type Merge<FirstType, SecondType> = Omit<FirstType, keyof SecondType> & SecondType;
+```
+
+## 最佳解答二
+
+```ts
+type Merge<FirstType, SecondType> = {
+   [K in keyof (FirstType & SecondType)]: K extends keyof SecondType
+      ? SecondType[K]
+      : K extends keyof FirstType
+      ? FirstType[K]
+      : never;
+};
+```
+
+# 测试二十二
+
+实现一个 RequireAtLeastOne 工具类型，它将创建至少含有一个给定 Keys 的类型，其余的 Keys 保持原样。具体的使用示例如下所示：
+
+```ts
+type Responder = {
+   text?: () => string;
+   json?: () => string;
+   secure?: boolean;
+};
+
+type RequireAtLeastOne<
+    ObjectType,
+    KeysType extends keyof ObjectType = keyof ObjectType,
+> = // 你的实现代码
+
+// 表示当前类型至少包含 'text' 或 'json' 键
+const responder: RequireAtLeastOne<Responder, 'text' | 'json'> = {
+    json: () => '{"message": "ok"}',
+    secure: true
+};
+```
+
+## 最佳解答一
+
+```ts
+// 这里利用了联合类型作为泛型是 extends 会分发处理的特性，之后将去掉某个属性的类型与只有某个属性，且必填的类型做交叉合并
+type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof ObjectType> = KeysType extends string
+   ? Omit<ObjectType, KeysType> & Required<Pick<ObjectType, KeysType>>
+   : never;
+```
+
+## 最佳解答二
+
+`{[k in KeysType]: ...}[KeysType]` 具体的作用是取出具体的键值，也就是 `Required<Pick<ObjectType, k>>` 部分
+
+```ts
+type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof ObjectType> = Omit<ObjectType, KeysType> &
+   {
+      [K in KeysType]: Required<Pick<ObjectType, K>>;
+   }[KeysType];
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc

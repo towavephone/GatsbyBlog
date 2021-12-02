@@ -18,3 +18,6 @@ draft: true
 - 懒加载实现、封装类似 react-spring 的 lazyloader，动态监听 src/srcSet 实现同步
 - 编译原理相关：利用 ts-morph、ts-morpher 自动导入 lazyloader 的 lazyElement 的 div、video、img 组件
 - useModal、useImgAndTextDisplayer 封装
+- lazyloader 循环引用导致的报错、检测
+
+// TODO 待写作

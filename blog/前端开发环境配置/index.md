@@ -122,127 +122,107 @@ $ nrm use taobao # 使用 taobao 的源作为默认的 npm 源
 2. 输入具体密码
 3. `ssh 用户名@ip` 这里即可免密登录
 
-# 日常工作顺序
+# 命令行打开程序
 
-`ctrl + shift + t`（打开 window terminal）+ `j hub`（使用 autojump 的 j 命令快速跳转到 github 目录）+ `yarn start`（执行脚本）+ `ctrl + shift + d`（复制已有的命令行 tab） + `code .`（在 vscode 打开） + `f11`（窗口全屏）
+## xdg-open
 
-> 注：`ctrl + shift + t` 需要将 window terminal 快捷方式拖到桌面并设置此快捷键，否则按下没反应
-
-# 完整的 .zshrc 配置
+命令行打开文件、目录、网址等等，但是打开文件时没有使用 windows 的默认打开方式
 
 ```bash
-# If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:$PATH
-
-# Path to your oh-my-zsh installation.
-export ZSH=$HOME/.oh-my-zsh
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="lukerandall"
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# Caution: this setting can cause issues with multiline prompts (zsh 5.7.1 and newer seem to work)
-# See https://github.com/ohmyzsh/ohmyzsh/issues/5765
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git autojump zsh-syntax-highlighting zsh-autosuggestions)
-
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-alias python="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
-alias python2="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
-
-CODE_PATH=`which code`
+# 安装 xdg-utils 工具包
+sudo apt-get install xdg-utils
+# 打开目录
+xdg-open .
+# 打开文件（这里没有调用 windows 的记事本打开）
+xdg-open example.txt
+# 打开网址
+xdg-open https://baidu.com
 ```
 
-# git 快捷命令
+以下使用 wsl-open 可以做到用 windows 的默认方式打开
+
+## wsl-open
+
+用 windows 的默认方式打开
+
+```bash
+# 安装 wsl-open
+npm install -g wsl-open
+# 打开目录
+wsl-open .
+# 打开文件
+wsl-open example.txt
+wsl-open example.png
+# 打开网址
+wsl-open https://baidu.com
+```
+
+可以在 .zshrc 设置如下一行，直接使用 `open` 命令
+
+```bash
+alias open='wsl-open'
+```
+
+# 外网访问 wsl
+
+## 设置端口转发到 wsl
+
+需要在 windows 上做端口转发，否则同一局域网内不能访问到 wsl，以下使用 powershell 命令
+
+首先在 wsl 查看 ip
+
+```bash
+# 查看 wsl2 ip
+ifconfig eth0 | grep 'inet' | awk '{print $2}'
+```
+
+然后在 powershell 命令行上操作
+
+```ps
+# powershell 新窗口打开提升管理员权限
+powershell start-process cmd -verb runas
+# 端口转发，这样设置后就能通过访问 http://{windows的ip}:3000 进而访问 wsl，当然端口号不一定要一样，你也可以用 7101 转发 7001
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=3000 connectaddress=wsl的ip connectport=3000
+# 显示所有转发端口
+netsh interface portproxy show all
+# 如果要删除某一条规则，命令如下
+netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=14000
+# 如果要清空列表，使用以下命令
+netsh interface portproxy reset
+```
+
+如果此时还不能访问，还需要注意的步骤有（以下假设需要用手机去访问同一局域网的电脑）
+
+1. 关闭 windows 防火墙
+2. 手机，电脑在同一局域网
+
+## 移动端真机调试
+
+### 背景
+
+wsl2 运行 spy-debugger 命令后，windows 上的浏览器却打不开调试界面
+
+## 产生原因
+
+经分析是 spy-debugger 在 windows 上访问了 `127.0.0.1` 网址，而这个网址是不能访问到 wsl2 的
+
+## 解决方案
+
+针对 wsl2 运行 spy-debugger 却不能代理的问题，直接在 windows 上运行 spy-debugger 来代替（这里同样需要配置端口转发，因为项目是跑在 wsl2 上）
+
+# 快捷键
+
+## window terminal
+
+- `ctrl + shift + t`：打开 window terminal（快捷方式自定义命令）
+- `ctrl + tab`：切换命令行 tab
+- `ctrl + shift + d`：复制已有的命令行 tab
+- `ctrl + shift + 1/4`：打开新的 powershell/wsl 命令行 tab
+- `ctrl + shift + w`：关闭当前命令行 tab
+
+## git
+
+以下是 zsh 的 git 插件提供的快捷命令
 
 ```bash
 alias g='git'
@@ -399,4 +379,125 @@ alias glum='git pull upstream master'
 
 alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify -m "--wip-- [skip ci]"'
+```
+
+# 日常工作顺序
+
+`ctrl + shift + t`（打开 window terminal）+ `j hub`（使用 autojump 的 j 命令快速跳转到 github 目录）+ `yarn start`（执行脚本）+ `ctrl + shift + d`（复制已有的命令行 tab） + `code .`（在 vscode 打开） + `f11`（窗口全屏）
+
+> 注：`ctrl + shift + t` 需要将 window terminal 快捷方式拖到桌面并设置此快捷键，否则按下没反应
+
+# 完整的 .zshrc 配置
+
+```bash
+# If you come from bash you might have to change your $PATH.
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# Path to your oh-my-zsh installation.
+export ZSH=$HOME/.oh-my-zsh
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Set name of the theme to load --- if set to "random", it will
+# load a random theme each time oh-my-zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="lukerandall"
+
+# Set list of themes to pick from when loading at random
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to automatically update without prompting.
+# DISABLE_UPDATE_PROMPT="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# Caution: this setting can cause issues with multiline prompts (zsh 5.7.1 and newer seem to work)
+# See https://github.com/ohmyzsh/ohmyzsh/issues/5765
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git autojump zsh-syntax-highlighting zsh-autosuggestions)
+
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+alias python="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
+alias python2="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
+
+CODE_PATH=`which code`
+alias open='wsl-open'
 ```
