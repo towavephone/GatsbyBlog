@@ -1086,4 +1086,119 @@ type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof Obj
    }[KeysType];
 ```
 
+# 测试二十三
+
+实现一个 RemoveIndexSignature 工具类型，用于移除已有类型中的索引签名。具体的使用示例如下所示：
+
+```ts
+interface Foo {
+  [key: string]: any;
+  [key: number]: any;
+  bar(): void;
+}
+
+type RemoveIndexSignature<T> = // 你的实现代码
+
+type FooWithOnlyBar = RemoveIndexSignature<Foo>; //{ bar: () => void; }
+```
+
+## 最佳解答
+
+这里利用的是 `[k in as]` 的用法。as 过的语法可以直接实现对 k 的判断过滤，基于`'a' extends string` 但 string 没有 `extends 'a'`。
+
+```ts
+type b = "a" extends string ? true : false; // true
+type c = string extends "a" ? true : false; // false
+type d = string extends string ? true : false; // true
+
+interface Foo {
+  [key: string]: any;
+  [key: number]: any;
+  [key: symbol]: any;
+  bar(): void;
+  bar1: 1;
+}
+
+type RemoveIndexSignature<T> = {
+  [K in keyof T as string extends K
+    ? never
+    : number extends K
+    ? never
+    : symbol extends K
+    ? never
+    : K]: T[K];
+};
+
+type FooWithOnlyBar = RemoveIndexSignature<Foo>; //{ bar: () => void; }
+
+```
+
+# 测试二十四
+
+实现一个 Mutable 工具类型，用于移除对象类型上所有属性或部分属性的 readonly 修饰符。具体的使用示例如下所示：
+
+```ts
+type Foo = {
+  readonly a: number;
+  readonly b: string;
+  readonly c: boolean;
+};
+
+type Mutable<T, Keys extends keyof T = keyof T> = // 你的实现代码
+
+const mutableFoo: Mutable<Foo, 'a'> = { a: 1, b: '2', c: true };
+
+mutableFoo.a = 3; // OK
+mutableFoo.b = '6'; // Cannot assign to 'b' because it is a read-only property.
+```
+
+## 最佳解答
+
+```ts
+type Foo = {
+   readonly a: number;
+   readonly b: string;
+   readonly c: boolean;
+};
+
+type Mutable<T, Keys extends keyof T = keyof T> = {
+   -readonly [K in Keys]: T[K];
+} &
+   Omit<T, Keys>;
+
+const mutableFoo: Mutable<Foo, 'a'> = { a: 1, b: '2', c: true };
+
+mutableFoo.a = 3; // OK
+mutableFoo.b = '6'; // Cannot assign to 'b' because it is a read-only property.
+```
+
+# 测试二十五
+
+实现一个 IsUnion 工具类型，判断指定的类型是否为联合类型。具体的使用示例如下所示：
+
+```ts
+type IsUnion<T, U = T> = // 你的实现代码
+
+type I0 = IsUnion<string|number> // true
+type I1 = IsUnion<string|never> // false
+type I2 =IsUnion<string|unknown> // false
+```
+
+## 最佳解答
+
+1. 联合类型作为泛型的时候 extends 会触发分发执行
+2. 联合类型 T 写成 `[T]` 就变成了普通类型，extends 的时候不会分发执行
+
+这里第一步的 T extends any 肯定为真，这个其实就是利用其分发的特性，后面的 `[T]` 就是一个联合类型拆开后的某一个，因此如果是联合类型的话 `[U] extends [T]` 一定为否
+
+```ts
+type a = string | number extends string ? true : false; // false
+
+type IsUnion<T, U = T> = T extends any ? ([U] extends [T] ? false : true) : never;
+
+type I0 = IsUnion<string | number>; // true
+type I1 = IsUnion<string | never>; // false
+type I2 = IsUnion<string | unknown>; // false
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
