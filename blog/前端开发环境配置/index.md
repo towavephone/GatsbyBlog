@@ -64,6 +64,10 @@ $ d # 会列出你曾经进入过的目录，输入前面的序号可以直接�
 
 它能够根据你的命令历史记录即时提示，安装步骤：https://github.com/zsh-users/zsh-autosuggestions/blob/master/INSTALL.md
 
+## powerlevel10k
+
+高性能 zsh 主题，安装步骤：https://github.com/romkatv/powerlevel10k
+
 # vs code
 
 主要是 vs code remote 的安装（连接到 wsl2 开发）
@@ -92,6 +96,22 @@ $ nvm ls # 列出本地已安装的 Node.js 版本
 $ nvm install 11.5.0 # 安装指定的 Node.js 版本
 $ nvm alias default 11 # 设置默认使用的版本
 ```
+
+## 针对 zsh 启动性能的优化
+
+由于 nvm 以上脚本导致在启动 zsh 时延时较高，所以优化脚本如下
+
+```bash
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  export NVM_DIR="$HOME/.nvm"
+  nvm_cmds=(nvm node npm yarn)
+  for cmd in $nvm_cmds ; do
+    alias $cmd="unalias $nvm_cmds && unset nvm_cmds && . $NVM_DIR/nvm.sh && $cmd"
+  done
+fi
+```
+
+大致原理就是在运行 `nvm/node/npm/yarn` 相关命令时触发 nvm 的初始化
 
 # nrm
 
@@ -167,27 +187,56 @@ alias open='wsl-open'
 
 ## 设置端口转发到 wsl
 
+### 查看、复制 ip
+
 需要在 windows 上做端口转发，否则同一局域网内不能访问到 wsl，以下使用 powershell 命令
 
 首先在 wsl 查看 ip
 
 ```bash
-# 查看 wsl2 ip
-ifconfig eth0 | grep 'inet' | awk '{print $2}'
+hostname -I | awk '{print $1}'
 ```
 
-然后在 powershell 命令行上操作
+同样也可以在 .zshrc 中配置别名，这里顺便把获取 windows 的地址配置了，也实现了复制 ip 的功能
 
-```ps
-# powershell 新窗口打开提升管理员权限
+```bash
+alias wsl_ip="hostname -I | awk '{print $1}'"
+alias windows_ip="cat /etc/resolv.conf | grep nameserver | cut -d ' ' -f 2"
+alias copy_wsl_ip="wsl_ip | clip.exe"
+alias copy_windows_ip="windows_ip | clip.exe"
+alias cwsl="copy_wsl_ip"
+alias cwin="copy_windows_ip"
+```
+
+### 设置端口转发
+
+在 powershell 命令行上操作，powershell 新窗口打开提升管理员权限
+
+```powershell
 powershell start-process cmd -verb runas
-# 端口转发，这样设置后就能通过访问 http://{windows的ip}:3000 进而访问 wsl，当然端口号不一定要一样，你也可以用 7101 转发 7001
+```
+
+端口转发，这样设置后就能通过访问 `http://{windows的ip}:3000` 进而访问 wsl，当然端口号不一定要一样，你也可以用 7101 转发 7001
+
+```powershell
 netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=3000 connectaddress=wsl的ip connectport=3000
-# 显示所有转发端口
+```
+
+显示所有转发端口
+
+```powershell
 netsh interface portproxy show all
-# 如果要删除某一条规则，命令如下
+```
+
+如果要删除某一条规则，命令如下
+
+```powershell
 netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=14000
-# 如果要清空列表，使用以下命令
+```
+
+如果要清空列表，使用以下命令
+
+```powershell
 netsh interface portproxy reset
 ```
 
@@ -202,11 +251,11 @@ netsh interface portproxy reset
 
 wsl2 运行 spy-debugger 命令后，windows 上的浏览器却打不开调试界面
 
-## 产生原因
+### 产生原因
 
 经分析是 spy-debugger 在 windows 上访问了 `127.0.0.1` 网址，而这个网址是不能访问到 wsl2 的
 
-## 解决方案
+### 解决方案
 
 针对 wsl2 运行 spy-debugger 却不能代理的问题，直接在 windows 上运行 spy-debugger 来代替（这里同样需要配置端口转发，因为项目是跑在 wsl2 上）
 
@@ -390,114 +439,49 @@ alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commi
 # 完整的 .zshrc 配置
 
 ```bash
-# If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+# 开启 powerlevel10k 主题的即时提示功能
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
-# Path to your oh-my-zsh installation.
+# ZSH 安装路径
 export ZSH=$HOME/.oh-my-zsh
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# nvm 初始化脚本（延时触发）
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  export NVM_DIR="$HOME/.nvm"
+  nvm_cmds=(nvm node npm yarn)
+  for cmd in $nvm_cmds ; do
+    alias $cmd="unalias $nvm_cmds && unset nvm_cmds && . $NVM_DIR/nvm.sh && $cmd"
+  done
+fi
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="lukerandall"
+# 主题设置为 powerlevel10k
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# Caution: this setting can cause issues with multiline prompts (zsh 5.7.1 and newer seem to work)
-# See https://github.com/ohmyzsh/ohmyzsh/issues/5765
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
+# 插件列表
 plugins=(git autojump zsh-syntax-highlighting zsh-autosuggestions)
 
+# 运行 zsh 配置
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
+# 别名设置
 
-# export MANPATH="/usr/local/man:$MANPATH"
+# 解决 sass 编译问题，需提前安装 python2
+alias python="/usr/bin/python2.7"
+# 解决 sass 编译问题，需提前安装 python2
+alias python2="/usr/bin/python2.7"
+# 打开方式别名
+alias open="wsl-open"
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+# ip 命令别名
+alias wsl_ip="hostname -I | awk '{print $1}'"
+alias windows_ip="cat /etc/resolv.conf | grep nameserver | cut -d ' ' -f 2"
+alias copy_wsl_ip="wsl_ip | clip.exe"
+alias copy_windows_ip="windows_ip | clip.exe"
+alias cwsl="copy_wsl_ip"
+alias cwin="copy_windows_ip"
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-alias python="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
-alias python2="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
-
-CODE_PATH=`which code`
-alias open='wsl-open'
+# 运行 powerlevel10k 主题配置
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 ```

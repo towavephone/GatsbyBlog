@@ -1181,7 +1181,7 @@ type IsUnion<T, U = T> = // 你的实现代码
 
 type I0 = IsUnion<string|number> // true
 type I1 = IsUnion<string|never> // false
-type I2 =IsUnion<string|unknown> // false
+type I2 = IsUnion<string|unknown> // false
 ```
 
 ## 最佳解答
