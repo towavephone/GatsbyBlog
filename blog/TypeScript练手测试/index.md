@@ -1116,7 +1116,6 @@ interface Foo {
   [key: number]: any;
   [key: symbol]: any;
   bar(): void;
-  bar1: 1;
 }
 
 type RemoveIndexSignature<T> = {
@@ -1130,7 +1129,6 @@ type RemoveIndexSignature<T> = {
 };
 
 type FooWithOnlyBar = RemoveIndexSignature<Foo>; //{ bar: () => void; }
-
 ```
 
 # 测试二十四
@@ -1199,6 +1197,101 @@ type IsUnion<T, U = T> = T extends any ? ([U] extends [T] ? false : true) : neve
 type I0 = IsUnion<string | number>; // true
 type I1 = IsUnion<string | never>; // false
 type I2 = IsUnion<string | unknown>; // false
+```
+
+# 测试二十六
+
+实现一个 IsNever 工具类型，判断指定的类型是否为 never 类型。具体的使用示例如下所示：
+
+```ts
+type I0 = IsNever<never>; // true
+type I1 = IsNever<never | string>; // false
+type I2 = IsNever<null>; // false
+```
+
+## 我的解答
+
+```ts
+type IsNever<T> = [T] extends [never] ? true : false;
+type I0 = IsNever<never>; // true
+type I1 = IsNever<never | string>; // false
+type I2 = IsNever<null>; // false
+```
+
+## 最佳解答
+
+利用 isEqual
+
+```ts
+type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends (<G>() => G extends U ? 1 : 2) ? true : false;
+type IsNever<T> = IsEqual<T, never>;
+type I0 = IsNever<never>; // true
+type I1 = IsNever<never | string>; // false
+type I2 = IsNever<null>; // false
+```
+
+# 测试二十七
+
+实现一个 Reverse 工具类型，用于对元组类型中元素的位置颠倒，并返回该数组。元组的第一个元素会变成最后一个，最后一个元素变成第一个。
+
+```ts
+type Reverse<
+  T extends Array<any>,
+  R extends Array<any> = []
+> = // 你的实现代码
+
+type R0 = Reverse<[]> // []
+type R1 = Reverse<[1, 2, 3]> // [3, 2, 1]
+```
+
+## 最佳解答一
+
+```ts
+type Reverse<T extends Array<any>, R extends Array<any> = []> = T extends [infer First, ...infer Rest]
+   ? Reverse<Rest, [First, ...R]>
+   : R;
+
+type R0 = Reverse<[]>; // []
+type R1 = Reverse<[1, 2, 3]>; // [3, 2, 1]
+```
+
+## 最佳解答二
+
+```ts
+type Reverse<T extends Array<any>, R extends Array<any> = []> = T extends [infer First, ...infer Rest]
+   ? [...Reverse<Rest>, First]
+   : [];
+
+type R0 = Reverse<[]>; // []
+type R1 = Reverse<[1, 2, 3]>; // [3, 2, 1]
+```
+
+# 测试二十八
+
+实现一个 Split 工具类型，根据给定的分隔符（Delimiter）对包含分隔符的字符串进行切割。可用于定义 String.prototype.split 方法的返回值类型。具体的使用示例如下所示：
+
+```ts
+type Item = 'semlinker,lolo,kakuqo';
+
+type Split<
+   S extends string,
+   Delimiter extends string,
+> = // 你的实现代码
+
+type ElementType = Split<Item, ','>; // ["semlinker", "lolo", "kakuqo"]
+```
+
+## 我的解答
+
+```ts
+type Item = 'semlinker,lolo,kakuqo';
+
+type Split<
+   S extends string,
+   Delimiter extends string,
+> = S extends `${infer A}${Delimiter}${infer B}` ? [A, ...Split<B, Delimiter>] : [S]
+
+type ElementType = Split<Item, ','>; // ["semlinker", "lolo", "kakuqo"]
 ```
 
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
