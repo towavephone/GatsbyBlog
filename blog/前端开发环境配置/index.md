@@ -104,14 +104,14 @@ $ nvm alias default 11 # 设置默认使用的版本
 ```bash
 if [ -s "$HOME/.nvm/nvm.sh" ]; then
   export NVM_DIR="$HOME/.nvm"
-  nvm_cmds=(nvm node npm yarn)
+  nvm_cmds=(nvm node npm yarn wsl-open)
   for cmd in $nvm_cmds ; do
     alias $cmd="unalias $nvm_cmds && unset nvm_cmds && . $NVM_DIR/nvm.sh && $cmd"
   done
 fi
 ```
 
-大致原理就是在运行 `nvm/node/npm/yarn` 相关命令时触发 nvm 的初始化
+大致原理就是在运行 `nvm/node/npm/yarn/wsl-open` 相关命令时触发 nvm 的初始化
 
 # nrm
 

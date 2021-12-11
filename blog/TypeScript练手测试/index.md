@@ -407,6 +407,28 @@ type FinalFn = AppendArgument<Fn, boolean>;
 // (x: boolean, a: number, b: string) => number
 ```
 
+## 拓展
+
+类似的实现 PushArgument
+
+```ts
+type Fn = (a: number, b?: string) => number;
+type PushArgument<F, A> =
+
+type FinalFn = PushArgument<Fn, boolean>;
+// (a: number, b?: string, x?: boolean) => number
+```
+
+## 最佳解答
+
+```ts
+type Fn = (a: number, b?: string) => number;
+type PushArgument<F extends Function, A, S extends any[] = [x?: A]> = F extends (...args: infer R) => infer R2 ? (...args: [...R, ...S]) => R2 : never
+
+type FinalFn = PushArgument<Fn, boolean>;
+// (a: number, b?: string, x?: boolean) => number
+```
+
 # 测试六
 
 定义一个 NativeFlat 工具类型，支持把数组类型拍平（扁平化）。具体的使用示例如下所示：
