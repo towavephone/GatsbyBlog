@@ -1316,4 +1316,108 @@ type Split<
 type ElementType = Split<Item, ','>; // ["semlinker", "lolo", "kakuqo"]
 ```
 
+# 测试二十九
+
+实现一个 ToPath 工具类型，用于把属性访问（. 或 []）路径转换为元组的形式。具体的使用示例如下所示：
+
+```ts
+type ToPath<S extends string> = // 你的实现代码
+
+ToPath<'foo.bar.baz'> //=> ['foo', 'bar', 'baz']
+ToPath<'foo[0].bar.baz'> //=> ['foo', '0', 'bar', 'baz']
+```
+
+## 我的解答
+
+```ts
+type ToPath<S extends string> = S extends `${infer A}.${infer B}`
+  ? [...ToPath<A>, ...ToPath<B>]
+  : S extends `${infer A}[${infer B}]`
+  ? [...ToPath<A>, ...ToPath<B>]
+  : [S];
+
+type a = ToPath<"foo.bar.baz">; //=> ['foo', 'bar', 'baz']
+type b = ToPath<"foo[0].bar.baz">; //=> ['foo', '0', 'bar', 'baz']
+```
+
+# 测试三十
+
+完善 Chainable 类型的定义，使得 TS 能成功推断出 result 变量的类型。调用 option 方法之后会不断扩展当前对象的类型，使得调用 get 方法后能获取正确的类型。
+
+```ts
+declare const config: Chainable;
+
+type Chainable = {
+   option(key: string, value: any): any;
+   get(): any;
+};
+
+const result = config
+   .option('age', 7)
+   .option('name', 'lolo')
+   .option('address', { value: 'XiaMen' })
+   .get();
+
+type ResultType = typeof result;
+// 期望 ResultType 的类型是：
+// {
+//   age: number
+//   name: string
+//   address: {
+//     value: string
+//   }
+// }
+```
+
+## 最佳解答
+
+```ts
+declare const config: Chainable;
+
+type Chainable<T0 = {}> = {
+   option<T, U>(key: keyof T, value: U): Chainable<T0 & { [P in keyof T]: U }>;
+   get(): T0;
+};
+
+const result = config
+   .option('age', 7)
+   .option('name', 'lolo')
+   .option('address', { value: 'XiaMen' })
+   .get();
+
+type ResultType = typeof result;
+// 期望 ResultType 的类型是：
+// {
+//   age: number
+//   name: string
+//   address: {
+//     value: string
+//   }
+// }
+```
+
+# 测试三十一
+
+实现一个 Repeat 工具类型，用于根据类型变量 C 的值，重复 T 类型并以元组的形式返回新的类型。具体的使用示例如下所示：
+
+```ts
+type Repeat<T, C extends number> = // 你的实现代码
+
+type R0 = Repeat<0, 0>; // []
+type R1 = Repeat<1, 1>; // [1]
+type R2 = Repeat<number, 2>; // [number, number]
+```
+
+## 最佳解答
+
+和 PushArgument 的实现类似
+
+```ts
+type Repeat<T, C extends number, U extends any[] = []> = U['length'] extends C ? U : Repeat<T, C, [...U, T]>;
+
+type R0 = Repeat<0, 0>; // []
+type R1 = Repeat<1, 1>; // [1]
+type R2 = Repeat<number, 2>; // [number, number]
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc

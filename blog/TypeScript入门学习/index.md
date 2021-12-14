@@ -7,6 +7,7 @@ tags: 前端, TypeScript, ts
 
 # 背景知识
 
+- [TypeScript 入门教程](https://ts.xcatliu.com/)
 - [深入理解 TypeScript](https://jkchao.github.io/typescript-book-chinese/)
 - [一份不可多得的 TS 学习指南](https://juejin.cn/post/6872111128135073806)
 
