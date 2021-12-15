@@ -1420,4 +1420,97 @@ type R1 = Repeat<1, 1>; // [1]
 type R2 = Repeat<number, 2>; // [number, number]
 ```
 
-// TODO https://github.com/semlinker/awesome-typescript/issues?page=1&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
+# 测试三十二
+
+实现一个 RepeatString 工具类型，用于根据类型变量 C 的值，重复 T 类型并以字符串的形式返回新的类型。具体的使用示例如下所示：
+
+```ts
+type RepeatString<
+  T extends string,
+  C extends number,
+> = // 你的实现代码
+
+type S0 = RepeatString<"a", 0>; // ''
+type S1 = RepeatString<"a", 2>; // 'aa'
+type S2 = RepeatString<"ab", 3>; // 'ababab'
+```
+
+## 最佳解答
+
+数字的比较只能利用数组的 length 属性来实现，字符串的 length 属性在 tsc 阶段无法获取到真实长度，只能得到 number 类型。
+
+```ts
+type RepeatString<
+  T extends string,
+  C extends number,
+  U extends string = '',
+  V extends any[] = []
+> = V['length'] extends C ? U : RepeatString<T, C, `${U}${T}`, [T, ...V]>
+
+type S0 = RepeatString<"a", 0>; // ''
+type S1 = RepeatString<"a", 2>; // 'aa'
+type S2 = RepeatString<"ab", 3>; // 'ababab'
+```
+
+# 测试三十三
+
+实现一个 ToNumber 工具类型，用于实现把数值字符串类型转换为数值类型。具体的使用示例如下所示：
+
+```ts
+type ToNumber<T extends string> = // 你的实现代码
+
+type T0 = ToNumber<"0">; // 0
+type T1 = ToNumber<"10">; // 10
+type T2 = ToNumber<"20">; // 20
+```
+
+## 最佳解答
+
+首先利用 TS 模板字符串把默认数组 S 的长度转为字符串，之后那这个字符串和 T 比较，若相等，表示当前 S 的长度和传入的字符串所对应的数值相等 (如，"15" --> 15)，否则增加 S 的长度，进行下一次 ToNumber 判断
+
+不过这种方式可能会出现一个警告：`Type instantiation is excessively deep and possibly infinite. ts(2589)`，因为字符串过大时，可能会导致递归次数变多，个人认为可以忽略此错误
+
+基本上，这种和数组有关系的类型，都需要构建一个辅助数组来进行判断
+
+```ts
+type ToNumber<T extends string, S extends any[] = [], L extends number = S['length']> =
+  `${L}` extends T ? L : ToNumber<T, [...S, 1]>
+
+type T0 = ToNumber<"0">; // 0
+type T1 = ToNumber<"10">; // 10
+type T2 = ToNumber<"20">; // 20
+```
+
+# 测试三十四
+
+实现一个 SmallerThan 工具类型，用于比较数值类型的大小。具体的使用示例如下所示：
+
+```ts
+type SmallerThan<
+  N extends number,
+  M extends number,
+> = // 你的实现代码
+
+type S0 = SmallerThan<0, 1>; // true
+type S1 = SmallerThan<2, 0>; // false
+type S2 = SmallerThan<8, 10>; // true
+```
+
+## 最佳解答
+
+依然是利用构造数组的长度来判断，体用递归逐步迭代，先和哪个数匹配上，哪个数就小，注意边界问题。这里要求的是第一个数小，如果相等，返回自然是 false
+
+```ts
+type SmallerThan<N extends number, M extends number, A extends any[] = []> = A['length'] extends M
+   ? false
+   : A['length'] extends N
+   ? true
+   : SmallerThan<N, M, [...A, '']>;
+
+type S0 = SmallerThan<0, 1>; // true
+type S1 = SmallerThan<2, 0>; // false
+type S2 = SmallerThan<8, 10>; // true
+type S3 = SmallerThan<8, 8>; // false
+```
+
+// TODO https://github.com/semlinker/awesome-typescript/issues?page=2&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
