@@ -1474,7 +1474,7 @@ type T2 = ToNumber<"20">; // 20
 
 ```ts
 type ToNumber<T extends string, S extends any[] = [], L extends number = S['length']> =
-  `${L}` extends T ? L : ToNumber<T, [...S, 1]>
+  `${L}` extends T ? L : ToNumber<T, [...S, any]>
 
 type T0 = ToNumber<"0">; // 0
 type T1 = ToNumber<"10">; // 10
@@ -1505,12 +1505,89 @@ type SmallerThan<N extends number, M extends number, A extends any[] = []> = A['
    ? false
    : A['length'] extends N
    ? true
-   : SmallerThan<N, M, [...A, '']>;
+   : SmallerThan<N, M, [...A, any]>;
 
 type S0 = SmallerThan<0, 1>; // true
 type S1 = SmallerThan<2, 0>; // false
 type S2 = SmallerThan<8, 10>; // true
 type S3 = SmallerThan<8, 8>; // false
+```
+
+# 测试三十五
+
+实现一个 Add 工具类型，用于实现对数值类型对应的数值进行加法运算。具体的使用示例如下所示：
+
+```ts
+type Add<T, R> = // 你的实现代码
+
+type A0 = Add<5, 5>; // 10
+type A1 = Add<8, 20> // 28
+type A2 = Add<10, 30>; // 40
+```
+
+## 最佳解答
+
+```ts
+type Repeat<T, C extends number, U extends any[] = []> = U['length'] extends C ? U : Repeat<T, C, [...U, T]>;
+
+type Add<T extends number, R extends number> = [...Repeat<any, T>, ...Repeat<any, R>]['length'];
+
+type A0 = Add<5, 5>; // 10
+type A1 = Add<8, 20>; // 28
+type A2 = Add<10, 30>; // 40
+```
+
+# 测试三十六
+
+实现一个 Filter 工具类型，用于根据类型变量 F 的值进行类型过滤。具体的使用示例如下所示：
+
+```ts
+type Filter<T extends any[], F> = // 你的实现代码
+
+type F0 = Filter<[6, "lolo", 7, "semlinker", false], number>; // [6, 7]
+type F1 = Filter<["kakuqo", 2, ["ts"], "lolo"], string>; // ["kakuqo", "lolo"]
+type F2 = Filter<[0, true, any, "abao"], string>; // [any, "abao"]
+```
+
+## 最佳解答
+
+```ts
+type Filter<T extends any[], F> = T extends [infer A, ...infer B]
+   ? [A] extends [F]
+      ? [A, ...Filter<B, F>]
+      : Filter<B, F>
+   : [];
+
+type F0 = Filter<[6, 'lolo', 7, 'semlinker', false], number>; // [6, 7]
+type F1 = Filter<['kakuqo', 2, ['ts'], 'lolo'], string>; // ["kakuqo", "lolo"]
+type F2 = Filter<[0, true, any, 'abao'], string>; // [any, "abao"]
+type F3 = Filter<[never, number | string, any, 'abao'], string>; // [never, any, "abao"]
+```
+
+# 测试三十七
+
+实现一个 Flat 工具类型，支持把数组类型拍平（扁平化）。具体的使用示例如下所示：
+
+```ts
+type Flat<T extends any[]> = // 你的实现代码
+
+type F0 = Flat<[]> // []
+type F1 = Flat<['a', 'b', 'c']> // ["a", "b", "c"]
+type F2 = Flat<['a', ['b', 'c'], ['d', ['e', ['f']]]]> // ["a", "b", "c", "d", "e", "f"]
+```
+
+## 最佳解答
+
+```ts
+type Flat<T extends any[]> = T extends [infer U, ...infer V]
+   ? U extends any[]
+      ? [...Flat<U>, ...Flat<V>]
+      : [U, ...Flat<V>]
+   : [];
+
+type F0 = Flat<[]>; // []
+type F1 = Flat<['a', 'b', 'c']>; // ["a", "b", "c"]
+type F2 = Flat<['a', ['b', 'c'], ['d', ['e', ['f']]]]>; // ["a", "b", "c", "d", "e", "f"]
 ```
 
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=2&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
