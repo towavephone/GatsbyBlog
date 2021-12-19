@@ -7,7 +7,7 @@ tags: 前端, CSS, CSS世界
 
 # line-height 的另外一个朋友 font-size
 
-第 5 章介绍过 line-height 和 vertical-align 的好朋友关系，实际上，font-size 也和 line-height 是好朋友，同样也无处不在，并且纸面上 line-height 的数值属性值和百分比值属性值都是相对于 font-size 计算的，其关系可谓不言而喻。
+第 5 章介绍过 line-height 和 vertical-align 的好朋友关系，实际上 font-size 也和 line-height 是好朋友，同样也无处不在，并且纸面上 line-height 的数值属性值和百分比值属性值都是相对于 font-size 计算的，其关系可谓不言而喻。
 
 ## font-size 和 vertical-align 的隐秘故事
 
@@ -253,7 +253,7 @@ html {
 
 因此，我的建议是仍基于浏览器默认的字号进行相对计算，也就是 medium 对应的 16px，16 这个数字是一定可以整除的，因此计算成本还行，或者使用 Sass 或 Less 之类的工具辅助计算。
 
-还是回到字号限制的问题。实际上，并不是所有小于 12px 的 font-size 都会被当作 12px 处理，有一个值例外，那就是 0，也就是说，如果 font-size:0 的字号表现就是 0，那么文字会直接被隐藏掉，并且只能是 `font-size: 0`，哪怕设置成 font-size:0.0000001px，都还是会被当作 12px 处理的。
+还是回到字号限制的问题。实际上，并不是所有小于 12px 的 font-size 都会被当作 12px 处理，有一个值例外，那就是 0，也就是说，如果 font-size:0 的字号表现就是 0，那么文字会直接被隐藏掉，并且只能是 `font-size: 0`，哪怕设置成 font-size: 0.0000001px，都还是会被当作 12px 处理的。
 
 因此，如果希望隐藏 logo 对应元素内的文字，除了 text-indent 缩进隐藏外，还可以试试下面这种方法：
 
@@ -373,25 +373,25 @@ MMMMMM
 
 1. 等宽字体与代码呈现
 
-首先等宽字体利于代码呈现。对于写代码的人来说，无论是什么语言，易读是第一位，使用等宽字体，我们阅读起来会更轻松舒服。因此，一般编辑器使用的字体或者 Web 上需要呈现源代码的字体都是等宽字体。例如，即将出现的演示页面的源代码如图 8-8 所示。
+   首先等宽字体利于代码呈现。对于写代码的人来说，无论是什么语言，易读是第一位，使用等宽字体，我们阅读起来会更轻松舒服。因此，一般编辑器使用的字体或者 Web 上需要呈现源代码的字体都是等宽字体。例如，即将出现的演示页面的源代码如图 8-8 所示。
 
-![](res/2021-12-15-11-30-20.png)
+   ![](res/2021-12-15-11-30-20.png)
 
 2. 等宽字体与图形呈现案例一则
 
-假设某工具有这么一个功能：通过下拉选择，可以改变元素的边框样式，也就是 borderStyle 在 solid/dashed/dotted 间切换。
+   假设某工具有这么一个功能：通过下拉选择，可以改变元素的边框样式，也就是 borderStyle 在 solid/dashed/dotted 间切换。
 
-大家都知道，原生的 `<select>` 的 `<option>` 元素的 innerHTML 只能是纯 text 字符，不能有 html，也不支持伪元素，因此，要模拟 solid、dashed 和 dotted，只能使用字符，而字符有长有短，可以模拟成像样的规整的图形吗？
+   大家都知道，原生的 `<select>` 的 `<option>` 元素的 innerHTML 只能是纯 text 字符，不能有 html，也不支持伪元素，因此，要模拟 solid、dashed 和 dotted，只能使用字符，而字符有长有短，可以模拟成像样的规整的图形吗？
 
-可以的，试试使用等宽字体。
+   可以的，试试使用等宽字体。
 
-[equal-width-font-performance](embedded-codesandbox://css-world-text-processing/equal-width-font-performance)
+   [equal-width-font-performance](embedded-codesandbox://css-world-text-processing/equal-width-font-performance)
 
 3. ch 单位与等宽字体布局
 
-ch 和 em、rem、ex 一样，是 CSS 中和字符相关的相对单位。和 ch 相关的字符是 0，没错，就是阿拉伯数字 0。1ch 表示一个 0 字符的宽度，所以 6 个 0 所占据的宽度就是 6ch。
+   ch 和 em、rem、ex 一样，是 CSS 中和字符相关的相对单位。和 ch 相关的字符是 0，没错，就是阿拉伯数字 0。1ch 表示一个 0 字符的宽度，所以 6 个 0 所占据的宽度就是 6ch。
 
-由于 ch 是个 CSS3 单位，且 IE9 浏览器的宽度和其他浏览器明显不一样，因此此处不展开，但可以提一提一些不错的应用场景。例如，有些输入框是输入手机号的，在中国，手机号是 11 位，因此我们可以设置该输入框宽度为 11ch，同时让字体等宽，则用户一眼就能看出自己是否少输入或者多输入了 1 位数字。又如，我们想实现一个屏幕上代码一个一个出现的动效，如果代码是等宽字体，此时使用 ch 单位来控制宽度，配合 overflow 属性和 CSS animation 就能在完全不使用 JavaScript 的情况下将此效果模拟出来。当然，还有其他一些应用场景，不一一说明。
+   由于 ch 是个 CSS3 单位，且 IE9 浏览器的宽度和其他浏览器明显不一样，因此此处不展开，但可以提一提一些不错的应用场景。例如，有些输入框是输入手机号的，在中国，手机号是 11 位，因此我们可以设置该输入框宽度为 11ch，同时让字体等宽，则用户一眼就能看出自己是否少输入或者多输入了 1 位数字。又如，我们想实现一个屏幕上代码一个一个出现的动效，如果代码是等宽字体，此时使用 ch 单位来控制宽度，配合 overflow 属性和 CSS animation 就能在完全不使用 JavaScript 的情况下将此效果模拟出来。当然，还有其他一些应用场景，不一一说明。
 
 ## 中文字体和英文名称
 
@@ -415,5 +415,376 @@ ch 和 em、rem、ex 一样，是 CSS 中和字符相关的相对单位。和 ch
 我们平常所说的“宋体”，指的都是“中易宋体”，英文名称 SimSun，“黑体”类似的是“中易黑体”。在 OS X 常见内置中文字体中我罗列了一个“宋体-简”，需要注意的是，这个“宋体- 简”和我们平常所说的“宋体”并不是同一个字体，其英文名称是“Songti SC”，字形表现也有差异。
 
 OS X 也就是苹果操作系统的字体名称中经常会出现“SC”，这个“SC”指的是“简体” （simplified chinese）的意思，相对应的还有“TC”，指的是“繁体”（traditional chinese）的意思。
+
+# 字体家族其他成员
+
+## 貌似粗犷、实则精细无比的 font-weight
+
+font-weight 都支持哪些属性值。具体如下
+
+```css
+/* 平常用的最多的 */
+font-weight: normal;
+font-weight: bold;
+/* 相对于父级元素 */
+font-weight: lighter;
+font-weight: bolder;
+/* 字重的精细控制 */
+font-weight: 100;
+font-weight: 200;
+font-weight: 300;
+font-weight: 400;
+font-weight: 500;
+font-weight: 600;
+font-weight: 700;
+font-weight: 800;
+font-weight: 900;
+```
+
+如果使用数值作为 font-weight 属性值，必须是 100 ～ 900 的整百数。这里的数值关键字和字母关键字之间是有对应关系的，例如，font-weight:400 实际上等同于 font-weight: normal，font-weight:700 等同于 font-weight:bold。
+
+因此 400 和 700 是文字粗细与否的重要临界点，加上最小的 100 和最大的 900，就构成了 font-weight 完整的字重临界点。知道这个有什么意义呢？意义就在于 lighter 和 bolder 这两个具有相对特定的关键字就是基于这 4 个临界点进行解析和渲染的。
+
+以下是 lighter 和 bolder 解析规则表
+
+| 继承的值 | bolder | lighter |
+| :------: | :----: | :-----: |
+|   100    |  400   |   100   |
+|   200    |  400   |   100   |
+|   300    |  400   |   100   |
+|   400    |  700   |   100   |
+|   500    |  700   |   100   |
+|   600    |  900   |   400   |
+|   700    |  900   |   400   |
+|   800    |  900   |   700   |
+|   900    |  900   |   700   |
+
+然而很多人发现 font-weight 无论是设置 300、400、500 还是 600，文字的粗细都没有任何变化，只有到 700 的时候才会加粗一下，感觉浏览器好像不支持这些数值，那么搞这么多档位不就是多余的吗？
+
+实际上，所有这些数值关键字浏览器都是支持的，之所以没有看到任何粗细的变化，是因为我们的系统里面缺乏对应粗细的字体。尤其我们做桌面端项目时，大部分用户都是使用 Windows 系统，而 Windows 系统中的中文字体粗细就一个型号，如“宋体”，或者说“微软雅黑”，因此，最终的效果就是 CSS 层面的“加粗”和“正常尺寸” 两种表现。
+
+假如我们的操作系统安装了该字体家族全部的字重字体，则设置 300、400、500 时，彼此之间就能看出明显的变化了。例如，OS X 系统中的“苹方”，又如我这里即将要演示的“思源黑体”。“思源黑体”是一款免费的开源字体，我自己电脑上的版本有 7 个字重，如图 8-14 所示。
+
+![](2021-12-19-22-39-31.png)
+
+此时，应用如下 HTML 和 CSS 代码：
+
+```html
+<p class="f100">轻如鸿毛，重如泰山</p>
+<p class="f200">轻如鸿毛，重如泰山</p>
+<p class="f300">轻如鸿毛，重如泰山</p>
+<p class="f400">轻如鸿毛，重如泰山</p>
+<p class="f500">轻如鸿毛，重如泰山</p>
+<p class="f600">轻如鸿毛，重如泰山</p>
+<p class="f700">轻如鸿毛，重如泰山</p>
+<p class="f800">轻如鸿毛，重如泰山</p>
+<p class="f900">轻如鸿毛，重如泰山</p>
+<style>
+   p {
+      font-family: 'Source Han Sans CN';
+   }
+   .f100 {
+      font-weight: 100;
+   }
+   .f200 {
+      font-weight: 200;
+   }
+   .f300 {
+      font-weight: 300;
+   }
+   .f400 {
+      font-weight: 400;
+   }
+   .f500 {
+      font-weight: 500;
+   }
+   .f600 {
+      font-weight: 600;
+   }
+   .f700 {
+      font-weight: 700;
+   }
+   .f800 {
+      font-weight: 800;
+   }
+   .f900 {
+      font-weight: 900;
+   }
+</style>
+```
+
+结果可以看到明显的字重变化，而不是单纯的加粗和正常两种形态，如图 8-15 所示。
+
+![](2021-12-19-22-41-24.png)
+
+也就是说，font-weight 要想真正发挥潜力，问题不在于 CSS 的支持，而在于是否存在对应的字体文件。如果没有对应的字体文件，我又想有多档字重效果，该怎么办呢？可以试试看看之后的 font-face 章节
+
+## 具有近似姐妹花属性值的 font-style
+
+font-style 表示文字造型是斜还是正，与 font-weight 相比，其属性值就要少很多，如下：
+
+```css
+font-style: normal;
+font-style: italic;
+font-style: oblique;
+```
+
+italic 和 oblique 这两个关键字都表示“斜体”的意思，差别在于：italic 是使用当前字体的斜体字体，而 oblique 只是单纯地让文字倾斜。如果当前字体没有对应的斜体字体，则退而求其次，解析为 oblique，也就是单纯形状倾斜。
+
+我们平常在 Web 上使用比较多的中文字体，如“宋体”“微软雅黑”等，是没有专门的倾斜字体的，因此，从最终表现上来看 font-style:italic 和 font-style:oblique 是没有区别的。但是，对于一些英文字体，如“Georgia”，情况就不一样了，因为“Georgia”有一个专门设计的斜体字体文件。
+
+```html
+<p class="i">Georgia italic</p>
+<p class="o">Georgia oblique</p>
+<p>Georgia normal</p>
+<style>
+   p {
+      font-size: 50px;
+      font-family: Georgia;
+   }
+   .i {
+      font-style: italic;
+   }
+   .o {
+      font-style: oblique;
+   }
+</style>
+```
+
+结果可以看出，两个“倾斜”有着明显的不同，例如非常明显的字母 g，属性值为 italic 时长得像鱼钩，而为 oblique 时长得像糖葫芦，如图 8-16 所示。
+
+![](2021-12-19-22-47-44.png)
+
+之所以会专门为一个字体设计倾斜字体，就是因为单纯倾斜的时候不好看，比方说上面的 “Georgia” 字体，当字号比较小同时文字倾斜的时候，字符会挤作一团，疏密不规则，可读性比较糟糕。相比之下，专门设计的“Georgia”斜体阅读体验就要好很多。再加上没有斜体字体时 italic 表现会和 oblique 一致，因此，我们在实际开发的时候，几乎没有任何理由需要使用 font-style: oblique。
+
+## 不适合国情的 font-variant
+
+font-variant 是一个从 IE6 时代就过来的 CSS 属性，实现小体型大写字母，两个属性值要么 normal，要么 small-caps，font-variant: small-caps 就是可以让英文字符表现为小体型大写字母。
+
+代码示意如下：
+
+```html
+http://www.<span style="font-variant:small-caps">css-world.com</span>/
+```
+
+![](2021-12-19-22-51-50.png)
+
+也就是大小跟小写字母一样，但样式是大写。
+
+# font 属性
+
+## 作为缩写的 font 属性
+
+如果在一段 CSS 代码中发现了 font 属性，八九不离十就是利用 font 属性进行文本相关样式的缩写。可以缩写在 font 属性中的属性非常多，包括 font-style、font-variant、 font-weight、font-size、line-height、font-family 等。完整语法为：
+
+```css
+font: [ [ font-style || font-variant || font-weight ]? font-size [ / line-height ]? font-family ];
+```
+
+|| 表示或，? 和正则表达式中的 ? 的含义一致，表示 0 个或 1 个。仔细观察上面的语法，会发现 font-size 和 font-family 后面没有问号，也就是说是必需的，是不可以省略的。这和 background 属性不一样，background 属性虽然也支持缩写，但是并没有需要两个属性值同时存在的限制。
+
+因此，如果你的 font 属性缩写无效，检查一下 font-size 和 font-family 这两个属性是否同时存在。例如，下面 CSS 语句看上去写了很多属性，实际却是无效的，因为缺字体：
+
+```css
+.font {
+   font: normal 700 14px/20px;
+}
+```
+
+而下面这个反而是有效的：
+
+```css
+.font {
+   font: 14px '☺';
+}
+```
+
+需要注意的是，font 缩写会破坏部分属性的继承性。举个简单的例子，假设你的页面行高是 20px，当你使用了下面的 CSS 后：
+
+```css
+.font {
+   font: 400 30px 'Microsoft Yahei';
+}
+```
+
+.font 元素的行高 line-height 属性值就被重置为了 normal，而不同浏览器上 line-height: normal 是不一样的，因此，在使用 font 缩写的时候，如果不设定行高值，一定会出现不兼容的问题。换句话说，如果你的 CSS 代码原本就没有 line-height 属性，使用 font 缩写反而是不推荐的。
+
+另外，还有一个令人很头疼的问题，就是 font 缩写必须要带上 font-family，然而，原本真实继承的 font-family 属性值可能会很长，每次 font 缩写后面都挂一个长长的字体列表，有什么小技巧可以避免吗？
+
+这里有两个方法。
+
+1. 我们可以随便找一个系统根本不存在的字体名占位，如字母 a，或者特殊一点，用笑脸表情 ☺，然后再设置 font-family: inherit 来重置这个占位字体。例如，我们想把字号和行高合并缩写，就可以这样：
+
+   ```css
+   .font {
+      font: 30px/30px '☺';
+      font-family: inherit;
+   }
+   ```
+
+   是不是有点拆东墙补西墙的感觉？这么做主要是因为 font 缩写不能使用 inherit 等全局关键字。
+
+2. 利用 @font-face 规则将我们的字体列表重定义为一个字体，这是兼容性很好、效益很高的一种解决方法，会在之后详细介绍
+
+## 使用关键字值的 font 属性
+
+font 属性除了缩写用法，还支持关键字属性值，这个怕是很多人都不知道的。其语法如下：
+
+```css
+font: caption | icon | menu | message-box | small-caption | status-bar;
+```
+
+如果将 font 属性设置为上面的一个值，就等同于设置 font 为操作系统该部件对应的 font，也就是说直接使用系统字体。
+
+根据 W3C 官方维基的解释，以及我自己在 Windows 系统下的测试，各个关键字的含义如下。
+
+- caption：活动窗口标题栏使用的字体。
+- icon：包含图标内容所使用的字体，如所有文件夹名称、文件名称、磁盘名称，甚至浏览器窗口标题所使用的字体。
+- menu：菜单使用的字体，如文件夹菜单。
+- message-box：消息盒里面使用的字体。
+- small-caption：调色板标题所使用的字体。
+- status-bar：窗体状态栏使用的字体
+
+使用示例：
+
+```css
+.menu {
+   font: menu;
+}
+```
+
+需要注意的是，使用关键字作为属性值的时候必须是独立的，不能添加 font-family 或者 font-size 之类的，这和 font 属性缩写不是一个路子。如果混用，例如：
+
+```css
+.menu {
+   font: 14px menu;
+}
+```
+
+则此时的 menu 是作为自定义的字体名称存在的，而不是表示系统的 menu 菜单字体。
+
+实际上，font 关键字属性值本质上也是一种缩写，里面已经包含了诸如 font-size 等信息，如图 8-17、图 8-19 所示。
+
+![](2021-12-19-23-10-10.png)
+
+![](2021-12-19-23-11-15.png)
+
+这 3 张图透露出不少重要的信息。从 Windows 下 Chrome 和 IE 浏览器部分关键字的字体和字号表现不一样可以看出，同一系统下浏览器的表现是有差异的。既然 font 关键字属性值的样式表现是跟着系统走的，那为何同一系统下不同浏览器的表现会不一样呢？
+
+显然是某个浏览器出现了问题。后来，通过设置修改 Windows 系统相关控件的默认字体我发现，这次是 Chrome 浏览器拖了后腿。caption、icon、message-box 这 3 个关键字在 Windows 系统下的 Chrome 浏览器中似乎是无效的，并不会实时跟着系统字体走。
+
+而所有这些问题在 Firefox 和 IE 浏览器中一个都没有，表现非常一致，非常符合预期，例如，修改“图标”字体为“思源黑体”，如图 8-20 所示，则所有文件名称全部变成了“思源黑体”，同时 font: icon 所在元素 font-family 计算值也成了“思源黑体”，如图 8-21 所示。
+
+![](2021-12-19-23-14-51.png)
+
+考虑到 Chrome 浏览器的市场占有率，我们在使用 font 属性的时候，要避开 caption、icon 和 message-box 这 3 个关键字。
+
+对于不同的操作系统，字体表现不一样，这是预料之中的，毕竟使用系统字体，而不同系统默认字体肯定是不一样的；然后字体大小也不一样。例如，在 Windows 下 Chrome 的 caption 字体大小 16px，而在 OS X 下却只有 13px。因此，在实际使用时，我们还需要在下面再设定一下 font-size 大小来保证一致性。照理讲，直接这样设置就可以了：
+
+```css
+html {
+   font: menu;
+   font-size: 16px;
+}
+```
+
+但是，实际上 IE8 浏览器会莫名其妙地忽略这里的 font-size: 16px，因此，一般都是下面这样处理：
+
+```css
+html {
+   font: menu;
+}
+body {
+   font-size: 16px;
+}
+```
+
+除了 caption、icon、menu、message-box、small-caption 和 status-bar，还有很多其他非标准的关键字，如 button、checkbox、checkbox-group、combo-box、desktop、dialog、document、field、hyperlink、list-menu、menu-item、menubar、outline-tree、password、pop-up-menu、 pull-down-menu、push-button、radio-button、radio-group、range、signature、tab、tooltip、window 和 workspace。不过，这些关键字浏览器大多不支持，尽管 Firefox 浏览器支持一部分，但是需要添加私有前缀 -moz-。例如：
+
+```css
+font: -moz-button;
+```
+
+因此，它们的实际应用价值不大。另外，WebKit 浏览器还支持其他关键字，如 font: -webkit-control，如下图所示。
+
+![](2021-12-19-23-20-00.png)
+
+## font 关键字属性值的应用价值
+
+font 关键字属性值的价值如何呢？有没有合适的使用场景呢？有，并且相当适合！
+
+目前，非常多网站的通用 font-family 直接就是：
+
+```css
+html {
+   font-family: 'Microsoft YaHei';
+}
+```
+
+知道问题在哪里吗？这样一设置，就意味着所有操作系统下的所有浏览器都要使用“微软雅黑”字体。假如说用户的 iMac 或者 macbook 因为某些原因安装了“微软雅黑”字体，那岂不是这些系统原本更加漂亮的中文字体就不能使用了？
+
+于是，人们就会有这样的需求：希望非 Windows 系统下不要使用“微软雅黑”字体，而是使用其系统字体。怎么处理呢？
+
+一种方法是可以试试使用非标准的 -apple-system 等关键字字体，具体方法如下：
+
+```css
+html {
+   font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei';
+}
+```
+
+这能够一定程度上满足我们的需求，但是毕竟是非标准的属性值，说不定哪天就被浏览器舍弃了，因此若非迫不得已，还是少用为妙。
+
+顺便多说两句，实际上还真有标准的系统字体关键字，叫作 system-ui，使用示例如下：
+
+```css
+html {
+   font-family: system-ui;
+}
+```
+
+在我写这段内容的时候，仅 Chrome 浏览器支持它（从版本 56 开始），并且，根据我的在 Windows 电脑上的测试，Chrome 浏览器的 system-ui 指的就是“调色板标题”对应关键字 small-caption 使用的字体，有点儿出乎我的意料。
+
+显然还有个更好的方法就是使用这里的 font 关键字，这是标准属性，10 年前浏览器就支持了，可以放心使用。CSS 代码如下（三选一即可）：
+
+```css
+html {
+   font: menu;
+}
+body {
+   font-size: 16px;
+}
+
+html {
+   font: small-caption;
+}
+body {
+   font-size: 16px;
+}
+
+html {
+   font: status-bar;
+}
+body {
+   font-size: 16px;
+}
+```
+
+这几个声明就可以让各个系统使用各自引以为傲的字体，推荐最短的：
+
+```css
+html {
+   font: menu;
+}
+body {
+   font-size: 16px;
+}
+```
+
+最后，我要对 font 关键字属性值的用法做一个点评。
+
+让网页的字体跟系统走，对设计师而言，其实是一个比较冒险的做法，因为最终呈现的字体是不可控的。举个例子，某女生非常喜欢可爱风格，于是就把她的电脑主题变成了非常可爱的风格，菜单栏的字体全部变成那种很可爱的字体，此时，font: menu 所呈现的就不是“微软雅黑”，而是这个用户定义的“可爱字体”，这可能不是设计师想看到的，因为往往会跟自己的网页设计风格不一致。但是，转念一想，万一这是用户想看到的呢？既然用户把自己的主题设为该字体，那就说明这个用户对这个字体并不排斥，而是喜欢。当她浏览网页的时候，发现就你的网站呈现出了她喜欢的那种字体，你说会不会给用户一种“你懂我的心”的感觉呢？对用户而言，反而成了一种情感化的设计！
+
+另外，让网页的字体跟系统走，还有一个更加长远的好处。随着软件的不断发展，我们的操作系统的默认中文字体一定是越来越好看，如果网页的 font-family 定死为某个字体，用户就无法及时享受到新系统新字体带来的愉悦的视觉感受。举个例子，OS X 的默认中文字体其实已经变过好多次了，例如，你今天写了个页面，字体设置为很潮的“苹方”，过两年说不定会出来更好的名叫“梨方”的字体，我打包票，网站绝对是不会跟进的，因为大多数的线上项目维护都不会管 font-family 这种边边角角的事情，因此，就算很多年过去了，网站使用的依然是老字体。但是，如果使用的是 font 关键字属性值，就完全不会有这样的问题，网站字体能时时刻刻与时俱进。
 
 // TODO CSS 世界读书笔记待完成
