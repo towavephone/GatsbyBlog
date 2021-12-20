@@ -1590,4 +1590,111 @@ type F1 = Flat<['a', 'b', 'c']>; // ["a", "b", "c"]
 type F2 = Flat<['a', ['b', 'c'], ['d', ['e', ['f']]]]>; // ["a", "b", "c", "d", "e", "f"]
 ```
 
+# 测试三十八
+
+实现 StartsWith 工具类型，判断字符串字面量类型 T 是否以给定的字符串字面量类型 U 开头，并根据判断结果返回布尔值。具体的使用示例如下所示：
+
+```ts
+type StartsWith<T extends string, U extends string> = // 你的实现代码
+
+type S0 = StartsWith<'123', '12'> // true
+type S1 = StartsWith<'123', '13'> // false
+type S2 = StartsWith<'123', '1234'> // false
+```
+
+此外，继续实现 EndsWith 工具类型，判断字符串字面量类型 T 是否以给定的字符串字面量类型 U 结尾，并根据判断结果返回布尔值。具体的使用示例如下所示：
+
+```ts
+type EndsWith<T extends string, U extends string> = // 你的实现代码
+
+type E0 = EndsWith<'123', '23'> // true
+type E1 = EndsWith<'123', '13'> // false
+type E2 = EndsWith<'123', '123'> // true
+```
+
+## 我的解答
+
+```ts
+type StartsWith<T extends string, U extends string> = T extends `${U}${string}`
+  ? true
+  : false;
+
+type S0 = StartsWith<"123", "12">; // true
+type S1 = StartsWith<"123", "13">; // false
+type S2 = StartsWith<"123", "1234">; // false
+
+type EndsWith<T extends string, U extends string> = T extends `${string}${U}`
+  ? true
+  : false;
+
+type E0 = EndsWith<"123", "23">; // true
+type E1 = EndsWith<"123", "13">; // false
+type E2 = EndsWith<"123", "123">; // true
+```
+
+# 测试三十九
+
+实现 IsAny 工具类型，用于判断类型 T 是否为 any 类型。具体的使用示例如下所示：
+
+```ts
+type IsAny<T> = // 你的实现代码
+
+type I0 = IsAny<never> // false
+type I1 = IsAny<unknown> // false
+type I2 = IsAny<any> // true
+```
+
+## 最佳解答一
+
+利用任何类型和 any 交叉都等于 any 来实现。
+
+```ts
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+type I0 = IsAny<never>; // false
+type I1 = IsAny<unknown>; // false
+type I2 = IsAny<any>; // true
+```
+
+## 最佳解答二
+
+unknown 只能赋给 unknown 或者 any
+
+```ts
+type IsAny<T> = [unknown] extends [T] ? ([T] extends [string] ? true : false) : false;
+
+type I0 = IsAny<never>; // false
+type I1 = IsAny<unknown>; // false
+type I2 = IsAny<any>; // true
+```
+
+# 测试四十
+
+实现 AnyOf 工具类型，只要数组中任意元素的类型非 Falsy 类型、 {} 类型或 [] 类型，则返回 true，否则返回 false。如果数组为空的话，则返回 false。具体的使用示例如下所示：
+
+```ts
+type AnyOf<T extends any[]> = // 你的实现代码
+
+type A0 = AnyOf<[]>; // false
+type A1 = AnyOf<[0, "", false, [], {}]> // false
+type A2 = AnyOf<[1, "", false, [], {}]> // true
+```
+
+## 最佳解答
+
+```ts
+type NotEmptyObject<T> = T extends {} ? ({} extends T ? false : true) : true;
+type Flasy = 0 | '' | false | [];
+type AnyOf<T extends any[]> = T extends [infer First, ...infer Rest]
+   ? [First] extends [Flasy]
+      ? AnyOf<Rest>
+      : NotEmptyObject<First>
+   : false;
+
+type A0 = AnyOf<[]>; // false
+type A1 = AnyOf<[0, '', false, [], {}]>; // false
+type A2 = AnyOf<[1, '', false, [], {}]>; // true
+type A3 = AnyOf<[0, '' | 2, false, [], {}]>; // true
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=2&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc

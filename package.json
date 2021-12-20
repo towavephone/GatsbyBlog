@@ -30,7 +30,9 @@
     "fix": "yarn fix:markdown",
     "fix:markdown": "markdownlint --fix ./blog/**/*.md",
     "precommit": "yarn lint:markdown",
-    "cleanup": "rimraf -rf node_modules/gh-pages/.cache"
+    "cleanup": "rimraf -rf node_modules/gh-pages/.cache",
+    "preinstall": "node ./scripts/nodecheckversion.js",
+    "prestart": "node ./scripts/nodecheckversion.js"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
