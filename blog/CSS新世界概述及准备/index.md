@@ -289,11 +289,12 @@ CSS 语法中的符号分为字面符号、组合符号和数量符号这 3 类�
 |         | 无数量符号 | 恰好出现一次                                                   |
 | `*`     | 星号       | 可以出现任意次数                                               |
 | `+`     | 加号       | 可以出现一次或多次                                             |
+| `?`     | 问号       | 可以出现零次或一次，即为可选                                   |
 | `{A,B}` | 花括号     | 出现最少 A 次，最多 B 次                                       |
 | `#`     | 井号       | 可以出现一次或多次，但多次出现时必须以逗号分隔                 |
 | `!`     | 叹号       | 表示当前分组必须产生一个值，该符号多出现在组合符号方括号的后面 |
 
-有了表 2-1～表 2-3，理解 CSS 属性值定义语法就变得很容易了。例如，线性渐变的语法解析如图 2-1 的标注说明所示。
+有了表 2-1 ～ 表 2-3，理解 CSS 属性值定义语法就变得很容易了。例如，线性渐变的语法解析如图 2-1 的标注说明所示。
 
 ![](res/2021-12-20-11-41-27.png)
 
@@ -446,5 +447,247 @@ rgba(255 0 0 / .5);
 ```css
 rgba(<number>#{3}, <alpha-value>?)
 ```
+
+## 了解 CSS 全局关键字属性值
+
+inherit、initial、unset 和 revert 都是 CSS 全局关键字属性值，也就是说所有 CSS 属性都可以使用这几个关键字作为属性值。
+
+我根据实用性和兼容性整理了一个全局关键字属性值评价表，如表 2-4 所示。
+
+| 关键字属性值 | 使用性 | 兼容性 | 整体评价 |
+| :----------- | :----- | :----- | :------- |
+| inherit      | A      | A+     | A+       |
+| initial      | B      | B+     | B        |
+| unset        | B-     | B-     | B-       |
+| revert       | B      | C      | B-       |
+
+### 用过都说好的继承关键字 inherit
+
+inherit 这个关键字是继承的意思。IE 浏览器从 IE8（标准版）开始就已经支持该关键字了，而不是从 IE9 浏览器开始支持的。请记住，不是从 IE9 开始支持的，网络上的某些在线文档是错误的。
+
+是一个实用性和兼容性俱佳的 CSS 属性值，例如我比较喜欢使用 inherit 关键字重置输入框的内置字体：
+
+```css
+input,
+textarea {
+   font-family: inherit;
+}
+```
+
+又如，子元素设置 height: inherit 实现高度继承，或者子元素设置 background-image: inherit 实现背景图像继承等，这些都是非常实用的场景。
+
+大家一定要养成使用 inherit 关键字的好习惯，这可以有效地降低开发和维护成本，谁用谁说好。
+
+### 可以一用的初始值关键字 initial
+
+initial 是初始值关键字，可以把当前的 CSS 属性的计算值还原成 CSS 语法中规定的初始值。
+
+下面我们就通过一个简单的案例快速了解一下这个 CSS 关键字。
+
+例如，下面这段 HTML 表示的是一个热门话题列表：
+
+```html
+<ul class="initial-ul">
+   <li>#追梦人# <small>1亿</small></li>
+   <li>#票房# <small>3亿</small></li>
+   <li>#醉拳舞# <small>1亿</small></li>
+   <li>#余年MV# <small>2亿</small></li>
+   <li>#CSS新世界# <small>666</small></li>
+</ul>
+```
+
+然后，我们给最后一行列表设置 font-size: initial，CSS 代码如下：
+
+```css
+.initial-ul {
+   font-size: 13px;
+}
+
+.initial-ul li:last-child {
+   font-size: initial;
+}
+```
+
+结果如图 2-2 所示。
+
+![](res/2021-12-21-10-58-13.png)
+
+从图 2-2 中可以看到最后一行 `#CSS 新世界#` 这几个文字的字号明显比上面几行文字的字号大了一些。这是因为最后一个 `<li>` 列表项设置了 `font-size: initial`，这就意味着最后一个 `<li>` 列表项的字号大小使用的是 CSS 规范中定义的初始值，这个初始值就是 medium 关键字。如果用户没有修改过浏览器中的默认字号设置，则 medium 关键字的计算值是 16px。
+
+因此在本案例中，前几行的字号大小是 13px，最后一项的字号大小是 16px。
+
+[initial-demo](embedded-codesandbox://css-new-world-overview-prepare/initial-demo)
+
+initial 关键字适合用在需要重置某些 CSS 样式，但又不记得初始值的场景。initial 关键字还可以帮助我们了解 CSS 属性的初始值。例如，display 属性的初始值是什么 MDN 文档就没有明说，那我们就可以设置 display: initial 看一下效果：
+
+```css
+p {
+   display: initial;
+}
+```
+
+结果 `<p>` 元素垂直方向的 margin 和 text-indent 属性都失效了，这些失效现象是典型的内联元素特性，因此，display 属性的初始值是 inline。
+
+#### 可能的误区
+
+很多人有这样一个误区：把 initial 关键字理解为浏览器设置的元素的初始值。实际上两者是不一样的。
+
+举个例子，实际开发的时候，`<ul>` 元素或 `<ol>` 元素默认的 list-style-type 样式会被 CSS 重置。但是可能会遇到这样的场景，即某些区域需要增加一些描述信息，因此需要重新使用 list-style-type 样式（小圆点或者数字），此时有些开发者就会使用 initial 关键字对该样式进行还原：
+
+```css
+ol {
+   padding: initial;
+   list-style-type: initial;
+}
+```
+
+但是没有用！因为上面的 CSS 设置等同于下面的设置：
+
+```css
+ol {
+   padding: 0;
+   list-style-type: disc;
+}
+```
+
+而不是预想的：
+
+```css
+ol {
+   padding: 0 0 0 40px;
+   list-style-type: decimal;
+}
+```
+
+此时需要的全局关键字属性值其实是 revert，而不是 initial。
+
+#### 兼容性
+
+initial 关键字属性值的兼容性如表 2-5 所示。
+
+![](res/2021-12-21-11-08-59.png)
+
+除 IE 浏览器之外，其他浏览器都很早就支持了 initial，因此，至少在移动端项目（包括微信小程序）中大家可以百分之百放心使用这个关键字属性值。
+
+### 了解一下不固定值关键字 unset
+
+unset 是不固定值关键字，其特性如下：如果当前使用的 CSS 属性是具有继承特性的，如 color 属性，则等同于使用 inherit 关键字；如果当前使用的 CSS 属性是没有继承特性的，如 background-color，则等同于使用 initial 关键字。
+
+unset 这个关键字只有配合 all 属性使用才有意义，因为对于某个具体的 CSS 属性，想要继承某个属性，那就使用 inherit 关键字；想要使用初始值，那就使用 initial 关键字，没有任何理由使用 unset 关键字。
+
+举个例子，Chrome 浏览器支持 HTML 5.1 规范中的 `<dialog>` 元素，我们自然会想到借助这个 `<dialog>` 元素实现语义更好的弹框组件。然而有一个小问题，这个 `<dialog>` 元素内置了很多我们不需要的样式，内容如下（来自 Chrome 79）：
+
+```css
+dialog {
+   display: block;
+   position: absolute;
+   left: 0px;
+   right: 0px;
+   width: -webkit-fit-content;
+   height: -webkit-fit-content;
+   color: black;
+   margin: auto;
+   border-width: initial;
+   border-style: solid;
+   border-color: initial;
+   border-image: initial;
+   padding: 1em;
+   background: white;
+}
+```
+
+可以看到 `<dialog>` 元素默认有黑色边框和 padding 内间距，还有纯白色的背景颜色和纯黑色的文字颜色，因此下面这段 HTML 就会有图 2-3 所示的效果：
+
+```html
+<dialog open>CSS新世界</dialog>
+```
+
+![](res/2021-12-21-11-17-36.png)
+
+这个粗糙的效果显然不是我们想要的，但是我们又不想一个属性接一个属性地进行重置，怎么办呢？此时就可以先使用 all: unset 进行批量重置，再设置我们需要的 CSS 属性：
+
+```css
+dialog {
+   all: unset;
+   /* ... */
+}
+```
+
+这样，无论当前浏览器是否支持 `<dialog>` 元素，最终渲染出来的样式效果都是一致的。因为不支持 `<dialog>` 元素的浏览器会把 `<dialog>` 元素按照 `<span>` 这个内联元素渲染，这就和设置了 all:unset 的效果一模一样。
+
+#### 兼容性
+
+unset 关键字属性值的兼容性要比 initial 差一些，主要是因为被浏览器支持的时间晚了一点，具体如表 2-6 所示。
+
+![](res/2021-12-21-11-23-03.png)
+
+虽然兼容性逊色了一点，但并不影响 unset 的使用，主要有以下两方面的原因。
+
+1. 需要使用 unset 的场景非常有限，既然使用的机会很少，那么兼容性问题就不是问题。
+2. `<dialog>` 元素的样式重置是很难得的 unset 使用场景，由于支持 `<dialog>` 元素的浏览器一定支持 unset，因此也不用担心兼容性的问题。
+
+### 我个人很喜欢的恢复关键字 revert
+
+revert 关键字可以让当前元素的样式还原成浏览器内置的样式。例如：
+
+```css
+ol {
+   padding: revert;
+   list-style-type: revert;
+}
+```
+
+那么 `<ol>` 中的每一个 `<li>` 项都会有数字效果呈现，当然，前提是你没有对子元素 `<li>` 的 list-style-type 属性做过样式重置。
+
+这里有必要插一句，请记住：没有任何理由对 `<li>` 元素进行任何样式重置。因为所有浏览器的 `<li>` 元素默认都没有 margin 外间距，也没有 padding 内间距，list-style-type 也是继承 `<ul>` 或 `<ol>` 元素，所以对 `<li>` 元素进行任何样式重置，既浪费 CSS 代码，也不利于列表序号的样式设置。此刻，你就可以看看手中的项目中的代码有没有对 `<li>` 元素做过样式重置，如果有，赶快删掉：
+
+```css
+/* 删除以下代码 */
+li {
+   padding: 0;
+   margin: 0;
+   list-style-type: none;
+}
+```
+
+我们来看一下实际效果，如图 2-4 所示（截自 Firefox 浏览器）。
+
+完整的测试代码如下：
+
+```html
+<ol class="revert-ol">
+   <li>inherit关键字实用</li>
+   <li>initial关键字可用</li>
+   <li>unset关键字配合all使用</li>
+   <li>revert关键字有用</li>
+</ol>
+
+<style>
+   .revert-ol {
+      list-style: none;
+   }
+
+   @supports (padding: revert) {
+      .revert-ol {
+         padding: revert;
+         list-style-type: revert;
+      }
+   }
+</style>
+```
+
+对于不支持 revert 关键字的浏览器，如 Chrome 79，则看不到前面的数字序号，如图 2-5 所示。
+
+![](res/2021-12-21-11-31-14.png)
+
+[revert-demo](embedded-codesandbox://css-new-world-overview-prepare/revert-demo)
+
+#### 兼容性
+
+revert 关键字属性值的兼容性具体信息如表 2-7 所示，可以看到 Chrome84 版本已经支持 revert 关键字属性值。
+
+![](res/2021-12-21-11-32-29.png)
+
+移动端的支持稍微滞后了一点，不过 revert 在实际项目中应用的时机估计也快到了。
 
 // TODO CSS 新世界概述
