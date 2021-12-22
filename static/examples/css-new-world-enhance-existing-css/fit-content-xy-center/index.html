@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .text {
+        width: 200px;
+        height: 200px;
+      }
+
+      .cw-dialog {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        border: solid;
+        z-index: 19;
+        background: #fff;
+        box-shadow: 5px 5px 5px #888;
+      }
+
+      .cw-dialog:not([open]) {
+        display: none;
+      }
+
+      @supports (height: fit-content) {
+        .cw-dialog {
+          width: fit-content;
+          height: fit-content;
+          left: 0;
+          top: 1em;
+          right: 0;
+          bottom: 1em;
+          margin: auto;
+          animation: tinyUp 0.2s both;
+        }
+      }
+
+      @keyframes tinyUp {
+        from {
+          transform: translateY(5px);
+        }
+
+        to {
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <button id="button">点击我出现弹框</button>
+      <div id="dialog" class="cw-dialog">
+        <div class="text">
+          过大嘎发哈弗卡拉发哈客户发货福利卡会返回伏拉夫发哈弗哈卡洪范法发见附件阿发快恢复
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('click', function(event) {
+        if (event.target && event.target.id == 'button') {
+          /* 这里是 html5 的新特性，可以通过 id 直接访问 dom 元素 */
+          dialog.setAttribute('open', '');
+        } else {
+          dialog.removeAttribute('open');
+        }
+      });
+    </script>
+  </body>
+</html>

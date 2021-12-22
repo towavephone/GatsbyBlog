@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .cw-box {
+        padding: 1em;
+        margin: 0.5em 0;
+        background-color: deepskyblue;
+        color: #fff;
+      }
+
+      .cw-content-1 {
+        display: table;
+        margin: auto;
+      }
+
+      .cw-content-2 {
+        width: -moz-fit-content;
+        width: fit-content;
+        margin: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>display: table 方法，IE8+</h4>
+      <div class="cw-box">
+        <div class="cw-content-1">谢谢大家。</div>
+      </div>
+      <div class="cw-box">
+        <div class="cw-content-1">谢谢大家购买我的书籍，如果你觉得内容还不错，欢迎推荐给同事或朋友。</div>
+      </div>
+      <h4>fit-content 方法，现代浏览器</h4>
+      <div class="cw-box">
+        <div class="cw-content-2">谢谢大家。</div>
+      </div>
+      <div class="cw-box">
+        <div class="cw-content-2">谢谢大家购买我的书籍，如果你觉得内容还不错，欢迎推荐给同事或朋友。</div>
+      </div>
+    </div>
+  </body>
+</html>

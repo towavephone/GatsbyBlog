@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      table {
+        border-spacing: 0;
+      }
+
+      th {
+        padding: 10px 0;
+        border: none;
+        background: #f0f3f9;
+        text-align: center;
+      }
+
+      td {
+        padding: 10px 0;
+        border: none;
+        background: #fff;
+      }
+
+      tr:hover {
+        opacity: 1;
+      }
+
+      caption {
+        margin-bottom: 10px;
+      }
+
+      .red {
+        color: red;
+      }
+
+      .green {
+        color: green;
+      }
+
+      table {
+        width: calc(100% - 32px);
+        width: -webkit-fill-available;
+        /* firefox 存在下面的属性时，反而渲染不对，只能依赖 width  */
+        /* width: -moz-available; */
+        width: stretch;
+        margin-left: 15px;
+        margin-right: 15px;
+        border: 1px solid lightgray;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <table>
+        <caption>
+          Intrinsic &amp; Extrinsic Sizing 兼容性（数据源自 Caniuse）
+        </caption>
+        <thead>
+          <tr>
+            <th>IE</th>
+            <th>Edge</th>
+            <th>Firefox</th>
+            <th>Chrome</th>
+            <th>Safari</th>
+            <th>iOS<br />Safari</th>
+            <th>Android<br />Browser</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr align="center">
+            <td><span class="red">✘</span></td>
+            <td><span class="red">✘</span></td>
+            <td>3+ <span class="green">✔</span></td>
+            <td>22+ <span class="green">✔</span></td>
+            <td>6.1+ <span class="green">✔</span></td>
+            <td>7+ <span class="green">✔</span></td>
+            <td>4.4+ <span class="green">✔</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
