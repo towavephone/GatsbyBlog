@@ -690,4 +690,120 @@ revert 关键字属性值的兼容性具体信息如表 2-7 所示，可以看�
 
 移动端的支持稍微滞后了一点，不过 revert 在实际项目中应用的时机估计也快到了。
 
+## 指代所有 CSS 属性的 all 属性
+
+all 属性可以重置除 unicode-bidi、direction 以及 CSS 自定义属性以外的所有 CSS 属性。例如：
+
+```css
+input {
+   all: inherit;
+}
+```
+
+该段代码表示 `<input>` 元素中所有 CSS 属性都使用 inherit 关键字作为属性值。all 属性的语法如下：
+
+```css
+all: initial | inherit | unset | revert;
+```
+
+从 all 的语法中可看出，只能使用 inherit、initial、unset 和 revert 中的一个值作为属性值。
+
+all: inherit 没有任何实用价值，all: initial 也没有任何实用价值。有实用价值的是 all: unset 和 all: revert。all: unset 可以让任意一个元素样式表现和 `<span>` 元素一样。all: revert 可以让元素恢复成浏览器默认的样式，也是很有用的。例如 `<progress>` 进度条效果在 iOS 端很好看，很有质感，那么无须对其自定义样式，我们就可以使用 all: revert 将进度条一键还原成系统默认的样式：
+
+```ts
+/* 仅 iOS Safari 有效 */
+@supports (-webkit-overflow-scrolling: touch) {
+   progress {
+      all: revert;
+   }
+}
+```
+
+最后讲讲为什么 unicode-bidi 和 direction 这两个 CSS 属性不受 all 属性影响。
+
+我们不妨反问一下，如果 unicode-bidi 和 direction 这两个 CSS 属性会受到 all 属性影响，那会出现什么问题呢？阿拉伯文的呈现形式是从右往左的，但是 direction 属性的初始值却是 ltr，即从左往右。如果 all 属性可以影响 direction 属性，那么执行 all: initial 的时候，这些阿拉伯文的网页文字全部都会变成从左往右呈现。大家可以想象一下我们的中文网页上的中文内容全部从右往左显示是什么样的，我敢保证，使用阿拉伯文的前端开发者绝对不会使用这个 all 属性的，all 属性在阿拉伯文中从此名存实亡。
+
+于是答案就出来了，之所以 direction 属性不受 all 影响，是因为当年 direction 属性设计失误，将其初始值设为了 ltr，而不是 auto。现在为了照顾从右往左阅读的场景，direction 属性就被设计成不受 all 属性影响。
+
+unicode-bidi 属性是 direction 属性的“跟屁虫”，而且它的功能还挺强大的，可以精确控制每一个文字的呈现方向，只是离开了 direction 属性就没用。既然这两个 CSS 属性形影不离，那就把 unicode-bidi 属性加入不会受 all 属性影响的属性队列吧。
+
+## CSS 新特性的渐进增强处理技巧
+
+在 CSS2 时代，浏览器层出不穷的奇怪 bug 让 CSS Hack 技巧一度盛行，例如：
+
+```css
+/* IE8+ */
+display: table-cell;
+/* IE7 */
+*display: inline-block;
+/* IE6 */
+_display: inline;
+```
+
+这种利用语法错误实现浏览器判别的做法可以说是 CSS 历史上的一道奇观了，直到现在，还有很多开发者在区分更高版本的 IE 浏览器的时候，使用在 CSS 属性值后面加 \0 或者加 \9 的方法。现在的 CSS 世界已不同于过去，CSS 特性的问题已经不在于渲染 bug，更多的是浏览器支持与不支持的问题，所以上面这些做法已经过时，且没有意义，请不要再使用了。
+
+如果你想渐进增强使用某些 CSS 新特性，可以看看本节介绍的几个技巧，它们足以应付各种各样的场景。在开始之前，为了让我的表述更简洁，有一些名词所表示的含义需要提前和大家说明。
+
+- IE 浏览器：一直到 IE11 版本的所有 IE 浏览器。
+- Edge 浏览器：专指 Edge12 ～ Edge18 版本的浏览器。
+- Chromium Edge 浏览器：使用 Chromium 作为核心的 Edge 浏览器，并且是 Edge18 之后的版本，版本号从 76 开始。
+- 现代浏览器：使用 Web 标准渲染网站，不需要使用 CSS Hack，拥有高性能，同时和 CSS 新特性与时俱进的浏览器。在本书中专指 Chrome 浏览器、Safari 浏览器、Firefox 浏览器、Opera 浏览器和 ChromiumEdge 浏览器
+- IE9+ 浏览器：特指 IE9 及其以上版本的 IE 浏览器，以及所有 Edge 版本浏览器和所有现代浏览器。以此类推，IE10+ 浏览器、IE11+ 浏览器、Edge12+ 浏览器这些名词的含义也是类似的。
+- webkit 浏览器：特指以 webkit 为渲染引擎，或者前身是 webkit 渲染引擎的浏览器。特指 Chrome 浏览器、Safari 浏览器、Opera 浏览器和 Chromium Edge 浏览器。
+
+### 直接使用 CSS 新特性
+
+有很多 CSS 新特性是对现有 Web 特性的体验升级，我们直接使用这些 CSS 新特性就好了，不要担心兼容性问题。因为在支持的浏览器中体验更好，在不支持的浏览器中也就是保持原来的样子而已。例如很常见的 border-radius、box-shadow、text-shadow、filter 等与视觉表现相关的 CSS 属性，或者 scroll-behavior、overscroll-behavior 等交互体验增强的 CSS 属性，还有 will-change 等性能增强的 CSS 属性，都是可以直接使用的。
+
+用常见的 border-radius 属性举例。我们经常会把用户头像设置成圆的，代码很简单：
+
+```css
+img {
+   border-radius: 50%;
+}
+```
+
+对于不支持的浏览器怎么办呢？不需要做什么，放着就好了，矩形也挺好看的。
+
+记住，做 Web 开发是没有必要让所有浏览器都显示得一模一样的，好的浏览器有更好的显示，糟糕的浏览器就只有普通的显示，这才是对用户更负责任的做法。
+
+### 利用属性值的语法差异实现兼容
+
+有时候我们想要渐进增强使用某些新特性，则可以在属性值语法上做文章，借助全新的属性值语法有效区分新旧浏览器。
+
+举个例子，IE10+ 浏览器支持 CSS 动画属性 animation，我们要实现加载效果就可以使用一个很小的 PNG 图片，再借助旋转动画。这个方法的优点是资源占用少，动画效果细腻。于是，我们的需求来了，IE9 及其以下版本浏览器还是使用传统的 GIF 动图作为背景，IE10+浏览器则使用 PNG 背景图外加 animation 属性实现加载效果。这个需求的难点在于我们该如何区分 IE9 和 IE10 浏览器。大家千万不要再去找什么 CSS Hack 了，我们可以利用属性值的语法差异实现渐进增强效果。例如：
+
+```css{8}
+.icon-loading {
+   display: inline-block;
+   width: 30px;
+   height: 30px;
+   /* 所有浏览器识别 */
+   background: url(./loading.gif)
+   /* IE10+ 浏览器识别，覆盖上一行的 background 声明 */
+   background: url(./loading.png), linear-gradient(transparent, transparent);
+   animation: spin 1s linear infinite;
+}
+
+@keyframe spin {
+   from {
+      transform: rotate(360deg);
+   }
+
+   to {
+      transform: rotate(0deg);
+   }
+}
+```
+
+关键的 CSS 代码就是上面高亮的部分。由于线性渐变函数 linear-gradient() 需要 IE10+ 浏览器支持，因此，高亮的这行 CSS 声明在 IE9 浏览器中是无法识别的，IE9 浏览器下的 GIF 背景图不会被 PNG 背景图覆盖。图 2-6 所示就是 IE9 模式下 CSS 样式的应用细节，可以看到 background 属性值和 animation 属性下方都有红色波浪线，这是无法识别的意思。
+
+![](res/2021-12-23-13-55-17.png)
+
+图 2-7 所示则是 IE9 浏览器中的实时加载效果。
+
+![](res/2021-12-23-13-55-55.png)
+
+[loading-enhance](embedded-codesandbox://css-new-world-overview-prepare/loading-enhance)
+
 // TODO CSS 新世界概述

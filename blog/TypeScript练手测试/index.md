@@ -1697,4 +1697,118 @@ type A2 = AnyOf<[1, '', false, [], {}]>; // true
 type A3 = AnyOf<[0, '' | 2, false, [], {}]>; // true
 ```
 
+# 测试四十一
+
+实现 Replace 工具类型，用于实现字符串类型的替换操作。具体的使用示例如下所示：
+
+```ts
+type Replace<
+  S extends string,
+  From extends string,
+  To extends string
+> = // 你的实现代码
+
+type R0 = Replace<'', '', ''> // ''
+type R1 = Replace<'foobar', 'bar', 'foo'> // "foofoo"
+type R2 = Replace<'foobarbar', 'bar', 'foo'> // "foofoobar"
+```
+
+此外，继续实现 ReplaceAll 工具类型，用于实现替换所有满足条件的子串。具体的使用示例如下所示：
+
+```ts
+type ReplaceAll<
+  S extends string,
+  From extends string,
+  To extends string
+> = // 你的实现代码
+
+type R0 = ReplaceAll<'', '', ''> // ''
+type R1 = ReplaceAll<'barfoo', 'bar', 'foo'> // "foofoo"
+type R2 = ReplaceAll<'foobarbar', 'bar', 'foo'> // "foofoofoo"
+type R3 = ReplaceAll<'foobarfoobar', 'ob', 'b'> // "fobarfobar"
+```
+
+## 我的解答
+
+```ts
+type Replace<
+  S extends string,
+  From extends string,
+  To extends string
+> = S extends `${infer Head}${From}${infer Tail}` ? `${Head}${To}${Tail}` : S;
+
+type R0 = Replace<"", "", "">; // ''
+type R1 = Replace<"foobar", "bar", "foo">; // "foofoo"
+type R2 = Replace<"foobarbar", "bar", "foo">; // "foofoobar"
+
+type ReplaceAll<
+  S extends string,
+  From extends string,
+  To extends string
+> = S extends `${infer Head}${From}${infer Tail}`
+  ? `${ReplaceAll<Head, From, To>}${To}${ReplaceAll<Tail, From, To>}`
+  : S;
+
+type R0 = ReplaceAll<"", "", "">; // ''
+type R1 = ReplaceAll<"barfoo", "bar", "foo">; // "foofoo"
+type R2 = ReplaceAll<"foobarbar", "bar", "foo">; // "foofoofoo"
+type R3 = ReplaceAll<"foobarfoobar", "ob", "b">; // "fobarfobar"
+```
+
+# 测试四十二
+
+实现 IndexOf 工具类型，用于获取数组类型中指定项的索引值。若不存在的话，则返回 -1 字面量类型。具体的使用示例如下所示：
+
+```ts
+type IndexOf<A extends any[], Item> = // 你的实现代码
+
+type Arr = [1, 2, 3, 4, 5]
+type I0 = IndexOf<Arr, 0> // -1
+type I1 = IndexOf<Arr, 1> // 0
+type I2 = IndexOf<Arr, 3> // 2
+```
+
+## 我的解答
+
+```ts
+type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
+
+type IndexOf<A extends any[], Item, U extends any[] = []> = A extends [infer First, ...infer Rest]
+   ? IsEqual<First, Item> extends true
+      ? U['length']
+      : IndexOf<Rest, Item, [...U, First]>
+   : -1;
+
+type Arr = [1, 2, 3, 4, 5];
+type I0 = IndexOf<Arr, 0>; // -1
+type I1 = IndexOf<Arr, 1>; // 0
+type I2 = IndexOf<Arr, 3>; // 2
+```
+
+# 测试四十三
+
+实现一个 Permutation 工具类型，当输入一个联合类型时，返回一个包含该联合类型的全排列类型数组。具体的使用示例如下所示：
+
+```ts
+type Permutation<T, K=T> = // 你的实现代码
+
+// ["a", "b"] | ["b", "a"]
+type P0 = Permutation<'a' | 'b'>  // ['a', 'b'] | ['b' | 'a']
+// type P1 = ["a", "b", "c"] | ["a", "c", "b"] | ["b", "a", "c"]
+// | ["b", "c", "a"] | ["c", "a", "b"] | ["c", "b", "a"]
+type P1 = Permutation<'a' | 'b' | 'c'>
+```
+
+## 最佳答案
+
+```ts
+type Permutation<T, K = T> = [T] extends [never] ? [] : K extends K ? [K, ...Permutation<Exclude<T, K>>] : never;
+
+// ["a", "b"] | ["b", "a"]
+type P0 = Permutation<'a' | 'b'>; // ['a', 'b'] | ['b' | 'a']
+// type P1 = ["a", "b", "c"] | ["a", "c", "b"] | ["b", "a", "c"]
+// | ["b", "c", "a"] | ["c", "a", "b"] | ["c", "b", "a"]
+type P1 = Permutation<'a' | 'b' | 'c'>;
+```
+
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=2&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc
