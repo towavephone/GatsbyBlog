@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .supports-match {
+        padding: 5px;
+        border: 1px solid;
+      }
+
+      @supports (display: flex) {
+        /* 支持内嵌媒体查询语法 */
+        @media screen and (max-width: 9999px) {
+          .supports-match {
+            color: #fff;
+          }
+        }
+
+        /* 支持内嵌 @supports 语法 */
+        @supports (animation: none) {
+          .supports-match {
+            animation: colorful 1s linear alternate infinite;
+          }
+        }
+
+        /* 支持内嵌 @keyframes 语法 */
+        @keyframes colorful {
+          from {
+            background-color: deepskyblue;
+          }
+
+          to {
+            background-color: deeppink;
+          }
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <span class="supports-match">如果背景色有动画，则是匹配</span>
+    </div>
+  </body>
+</html>

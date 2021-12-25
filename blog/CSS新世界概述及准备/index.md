@@ -806,4 +806,445 @@ img {
 
 [loading-enhance](embedded-codesandbox://css-new-world-overview-prepare/loading-enhance)
 
-// TODO CSS 新世界概述
+类似的例子还有很多，例如，下拉浮层效果通过在 IE9+ 浏览器中使用 box-shadow 盒阴影、在 IE8 等浏览器中使用 border 边框来实现：
+
+```css
+.panel-x {
+   /* 所有浏览器识别 */
+   border: 1px solid #ddd;
+   /* rgba() IE9+ 识别，覆盖上一行 border 声明 */
+   border: 1px solid rgba(0, 0, 0, 0);
+   box-shadow: 2px 2px;
+}
+```
+
+又如，下面这段代码既可以去除 inline-block 元素间的空白间隙，又能保持空格特性：
+
+```css
+.space-size-zero {
+   font-size: 0.1px;
+   font-size: -webkit-calc(1px - 1px);
+}
+```
+
+理论上讲，直接使用 font-size: 0 就可以实现想要的效果，但是在 IE 浏览器中直接设置 font-size: 0 会失去空格特性，如无法实现两端对齐效果等，因此只能设置成 font-size: 0.1px，此时字号大小按照 0px 渲染，空格特性也保留了。但是，这种做法又带来另外一个问题，由于 Chrome 浏览器有一个 12px 的最小字号限制规则，因此 font-size: .1px 会按照 font-size: 12px 渲染，怎么办呢？我们使用一个 IE 浏览器无法识别的语法就可以了，这里就使用了 -webkit-calc(1px - 1px)。
+
+又如，我们可以使用 background-blend-mode 属性让背景纹理更好看，但是 IE/Edge 浏览器均不支持这个 CSS 属性，那就退而求其次，使用资源开销较大的背景图片代替。技术方案有了，那如何区分 IE/Edge 浏览器呢？可以试试使用 #RRGGBBAA 色值（下面 CSS 代码中高亮的部分）：
+
+```css{3}
+.background-pattern {
+   background: url(./pattern.png);
+   background: repeating-linear-gradient(...), repeating-linear-gradient(...), #00000000;
+   background-blend-mode: multiply;
+}
+```
+
+`#00000000` 指透明度为 0 的黑色，也就是纯透明颜色。其不影响视觉表现，作用是让 IE/Edge 浏览器无法识别这行 CSS 声明，因为 IE/Edge 浏览器并不支持 #RRGGBBAA 色值语法。于是，IE/Edge 浏览器会加载并渲染 pattern.png，而其余浏览器则使用纯 CSS 绘制的带有混合模式效果的很美的纹理背景。
+
+[background-pattern](embedded-codesandbox://css-new-world-overview-prepare/background-pattern)
+
+大家在实际开发的时候，要是遇到类似的场景，可以想一想是不是可以借助属性值语法巧妙地解决浏览器的兼容性问题。
+
+### 借助伪类或伪元素区分浏览器的技巧
+
+利用属性值的语法差异渐进增强使用 CSS 新特性固然精妙，但并不是所有 CSS 属性都可以这样使用。我们可以试试借助伪类或伪元素区分浏览器，其优点是可以一次性区分多个 CSS 属性，同时不会影响选择器的优先级。
+
+#### IE 浏览器、Edge 浏览器和其他浏览器的区分
+
+想要区分 IE9+ 浏览器，可以使用 IE9 浏览器才开始支持的伪类或伪元素。例如，使用下面几个伪元素：
+
+```css
+/* IE9+ 浏览器识别 */
+_::before,
+.some-class {
+}
+/* 或者 */
+_::after,
+.some-class {
+}
+/* 或者 */
+_::selection,
+.some-class {
+}
+```
+
+或者下面几个伪类：
+
+```css
+_:checked,
+.some-class {
+}
+/* 或者 */
+_:disabled,
+.some-class {
+}
+```
+
+之所以上面的写法可以有效地区分不同版本的浏览器，是因为 `CSS 选择器语句中如果存在浏览器无法识别的伪类或伪元素，整个 CSS 规则集都会被忽略`。
+
+可能有开发者会对 `_::before` 或者 `_::selection` 前面的下划线的作用感到好奇。这个下划线是作为一个标签选择器用来占位的，本身不会产生任何匹配，因为我们的页面中没有标签名为下划线的元素。这里换成 some-tag-hahaha::before 或者 some-tag-hahaha::selection，效果也是一样的，之所以使用下划线是因为可以节省字符数量，下划线只需要占用一个字符。
+
+要想区分 IE10+ 浏览器，可以使用从 IE10 才开始支持的与表单验证相关的伪类，比如 :required、:optional、:valid 和 :invalid。由于 animation 属性也是从 IE10 浏览器才开始支持的，因此前面出现的加载的例子的 CSS 代码也可以这么写：
+
+```css
+.icon-loading {
+   display: inline-block;
+   width: 30px;
+   height: 30px;
+   background: url(./loading.gif);
+}
+
+/* IE10+ 浏览器识别 */
+_:valid,
+.icon-loading {
+   background: url(./loading.png);
+   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+   from {
+      transform: rotate(360deg);
+   }
+
+   to {
+      transform: rotate(0deg);
+   }
+}
+```
+
+区分 IE11+ 浏览器可以使用 ::-ms-backdrop 伪元素。::backdrop 是一个从 IE11 开始支持的伪元素，可以控制全屏元素或者元素全屏时候的背景层的样式。在 IE11 浏览器中使用该元素时需要加 -ms- 私有前缀，在 Edge 等其他的浏览器中使用则不需要加私有前缀，加了反而无法识别。
+
+因此，最终的 CSS 代码会有冗余，.some-class 下的 CSS 样式需要写两遍：
+
+```css
+/* IE11+ 浏览器识别 */
+_::-ms-backdrop,
+.some-class {
+   @supports (display: none) {
+      .some-class {
+      }
+   }
+}
+```
+
+区分 Edge12+浏览器可以使用 @supports 规则，区分 Edge13+ 浏览器可以使用 :in-range 或者 :out-of-range 伪类，示例如下：
+
+```css
+/* Edge13+ 浏览器识别 */
+_:in-range,
+.some-class {
+}
+
+_:out-of-range,
+.some-class {
+}
+```
+
+再往后的 Edge 版本区分就没什么意义了，也不会有这样的需求场景，我们无须关心。
+
+#### 浏览器类型的区分
+
+若只想让 Firefox 浏览器识别，可以使用一个带有 -moz- 私有前缀的伪类或伪元素，示例如下：
+
+```css
+/* Firefox only */
+_::moz-progress-bar,
+.some-class {
+}
+```
+
+若只想让现代浏览器识别，可用以下语句
+
+```css
+/* 现代浏览器 */
+_:default,
+.some-class {
+}
+```
+
+若只想让 webkit 浏览器识别，则只能使用带有 -webkit- 前缀的伪类，而不能使用带有 -webkit- 前缀的伪元素，因为 Firefox 浏览器会认为带有 -webkit- 前缀的伪元素语法是合法的：
+
+```css
+/* webkit 浏览器 */
+:webkit-any(_),
+.some-class {
+}
+```
+
+若只想让 Chromium Edge 浏览器识别，可以用如下语句：
+
+```css
+/* Chromium Edge only */
+_::ms-any,
+.some-class {
+}
+```
+
+Chromium Edge 浏览器会把任意带有 -ms- 前缀的伪元素都认为是合法的，这应该是借鉴了 Firefox、Chrome、Safari 等浏览器认为带有-webkit-前缀的伪元素是合法的这一做法。
+
+当然，使用伪类或伪元素处理浏览器的兼容性也是有风险的，说不定哪一天浏览器就改变规则了。例如，浏览器突然不支持某个伪类了，-webkit-any() 伪类就有不被浏览器支持的风险；或者哪天 Firefox 浏览器也支持使用带有 -moz- 和 -webkit- 前缀的伪类了，就像 Chromium Edge 浏览器一样。
+
+因此，本节所提供的技巧，尤其是浏览器类型的区分，只能用在一些特殊场合，解决特殊问题，切不可当作金科玉律或者炫技的资本。
+
+### @supports 规则下的渐进增强处理
+
+@supports 是 CSS 中的常见的 @ 规则，可以用来检测当前浏览器是否支持某个 CSS 新特性，这是最规范、最正统的 CSS 渐进增强处理方法，尤其适合多个 CSS 属性需要同时处理的场景。
+
+@supports 规则的设计初衷非常好，理论上应该很常用才对，毕竟 IE 浏览器的兼容性问题非常严重。但是在实际开发的时候，@supports 规则并没有在 IE 浏览器的兼容性问题上做出什么大的贡献。原因很简单，@supports 规则的支持是从 Edge12 浏览器开始的，根本就没有 IE 浏览器什么事情。
+
+如果非要强制使用 @supports 规则，则要牺牲 IE 浏览器的部分体验。用上面加载效果实现来举例，如果我们用 @supports 规则书写代码则是下面这样的：
+
+```css
+.icon-loading {
+   display: inline-block;
+   width: 30px;
+   height: 30px;
+   background: url(./loading.gif);
+}
+
+/* Edge12+ 浏览器识别 */
+@supports (animation: none) {
+   .icon-loading {
+      background: url(./loading.png);
+      animation: spin 1s linear infinite;
+   }
+}
+
+@keyframes spin {
+   from {
+      transform: rotate(360deg);
+   }
+
+   to {
+      transform: rotate(0deg);
+   }
+}
+```
+
+此时，明明 IE10 和 IE11 浏览器都支持 animation 属性，却使用了 GIF 动图作为背景，这是因为 IE10 和 IE11 浏览器不支持 @supports 规则。
+
+对追求极致用户体验的开发者而言，这种做法显然是无法容忍的，于是他们就会放弃使用 @supports 规则，转而使用其他的技巧。不过，随着浏览器的不断发展，IE10 和 IE11 浏览器用户的占比一定会越来越小，我相信这个比例很快就会小于 1%。这个时候，牺牲小部分 IE10 和 IE11 浏览器用户的体验，换来代码层面的稳健，权衡来看，也是可以接受的。
+
+因此，在我看来，@supports 规则的应用前景一定会越来越好，对于这个 CSS 规则，我是极力推荐大家学习的。当你在实际项目中使用 @supports 规则应用了一个很帅气的 CSS 新特性的时候，那种愉悦的感觉会让你终生难忘。
+
+#### 从 @supports 规则常用的语法说起
+
+所有开发者都能轻易掌握@supports 规则最基本的用法，例如：
+
+```css
+@supports (display: flex) {
+   .item {
+      flex: 1;
+   }
+}
+```
+
+这段代码的意思很明了，如果浏览器支持 display:flex，则匹配.item 类名的元素就设置 flex: 1。
+
+@supports 规则还支持使用操作符进行判断，这些操作符是 not、and 和 or，分别表示“否定”“并且”“或者”。利用这些操作符实现简单的逻辑判断也没什么问题，例如：
+
+```css
+@supports (display: flex) {
+}
+@supports not (display: flex) {
+}
+@supports (display: flex) and (display: grid) {
+}
+@supports (display: flex) or (display: grid) {
+}
+```
+
+甚至连续判断 3 个以上的 CSS 声明也没问题：
+
+```css
+/* 合法 */
+@supports (display: flex) and (display: grid) and (gap: 0) {
+}
+
+@supports (display: flex) or (display: grid) or (gap: 0) {
+}
+```
+
+但是，一旦遇到复杂逻辑判断，运行会出现问题，语法怎么写都写不对。
+
+例如，写一个判断当前浏览器支持弹性布局，但不支持网格布局的@support 语句，很多人按照自己的想法就会写成下面这样，结果语法错误，最后只能找别人已经写好的复杂语法例子去套用，这哪是学习呢？这是应付工作！实际上，稍微多花一点点功夫，就能完全学会 @supports 的条件判断语法，级联、嵌套，都完全不在话下。
+
+```css
+/* 不合法 */
+@supports (display: flex) and not (display: grid) {
+}
+@supports not (display: grid) and (display: flex) {
+}
+```
+
+接下来的内容会用到 CSS 属性值定义语法，我现在就认定你已经掌握了这方面的知识。
+
+我们先随便定义一个数据类型，将其命名为 `<var>`，用于表示括号里面的东西，然后我们依葫芦画瓢：
+
+```css
+(display: flex)
+not (display: flex)
+(display: flex) and (display: grid) and (gap: 0)
+(display: flex) or (display: grid) or (gap: 0)
+```
+
+上面这些条件判断语句可以抽象成下面这样的正式语法：
+
+```css
+<supports-condition> = (<var>) | not (<var>) | (<var>)[ and (<var>)]+ | (<var>)[or (<var>)]+
+```
+
+最重点的部分来了！这个自定义的 `<var>` 的语法很神奇、很有趣：
+
+```css
+<var> = <declaration> | <supports-condition>
+```
+
+居然在 CSS 语法中看到了递归——`<supports-condition>`嵌套`<supports-condition>`数据类型。原来 @supports 规则的复杂条件判断就是把合法的逻辑语句放在括号里不断嵌套！
+
+此刻才发现，“判断当前浏览器支持弹性布局，但不支持网格布局”这样的问题实在是太简单了，先把基础语法写好：
+
+```css
+@supports (display: flex) and (不支持网格布局) {
+}
+```
+
+然后“不支持网格布局”的基础语法是 not (display: grid)，将语法嵌套一下，就可以得到正确的写法：
+
+```css
+@supoorts (display: flex) and (not (display: grid)) {
+}
+```
+
+Edge12 ～ Edge15 浏览器正好是符合上面的条件判断的，我们不妨验证一下：
+
+```html
+<span class="supports-match">如果有背景色，则是匹配</span>
+<style>
+   .supports-match {
+      padding: 5px;
+      border: 1px solid;
+   }
+
+   @supports (display: flex) and (not (display: grid)) {
+      .supports-match {
+         background-color: #333;
+         color: #fff;
+      }
+   }
+</style>
+```
+
+在 Edge14 浏览器中的效果有背景色，但是在 Chrome 浏览器中则只有边框。
+
+[supports-match](embedded-codesandbox://css-new-world-overview-prepare/supports-match)
+
+#### @supports 规则完整语法和细节
+
+至此，是时候看一下 @supports 规则的正式语法了，如下所示：
+
+```css
+@supports <supports-condition> {
+   /* CSS 规则集 */
+}
+```
+
+其中，`<supports-condition>` 就是前面不断出现的 `<supports-condition>`，之前对它的常规用法已经讲得很详细了，这里再说说它的其他用法，也就是 @supports 规则支持 CSS 自定义属性的检测和 CSS 选择器语法的检测。例如：
+
+```
+/* 这里不能使用 css 语法高亮，否则会格式化到 :default */
+@supports (--var: blue) {
+}
+@supports selector(:default) {
+}
+```
+
+其中，CSS 自定义属性的检测没有任何实用价值，本书不展开讲解；而 CSS 选择器语法的检测属于 CSS Conditional Rules Module Level 4 规范中的内容，目前浏览器尚未大规模支持，暂时没有实用价值，因此本书暂不讲解。
+
+我们现在先把条件判断的语法放一边，来看几个你可能不知道但很有用的关于 @supports 规则的细节知识。
+
+1. 在现代浏览器中，每一个逻辑判断的语法的合法性是独立的。例如：
+
+   ```css
+   @supports (display: flex) or (anything;) {
+   }
+   ```
+
+   但 Edge 浏览器会认为上面的语句是不合法的，会忽略整行语句，我认为这是 Edge 浏览器的 bug。因此 Edge12 ～ Edge14 浏览器虽然不支持 CSS 自定义属性，但无法使用 @supports 规则检测出来：
+
+   ```css
+   /* Edge12 ~ Edge14 忽略以下语句 */
+   @supports not (--var: blue) {
+   }
+   ```
+
+2. 浏览器还提供了 CSS.supports() 接口，让我们可以在 JavaScript 代码中检测当前浏览器是否支持某个 CSS 特性，语法如下：
+
+```js
+CSS.supports(propertyName, value);
+CSS.supports(supportCondition);
+```
+
+3. @supports 规则的花括号可以包含其他任意 @ 规则，甚至是包含 @supports 规则自身。例如：
+
+```css
+@supports (display: flex) {
+   /* 支持内嵌媒体查询语法 */
+   @media screen and (max-width: 9999px) {
+      .supports-match {
+         color: #fff;
+      }
+   }
+   /* 支持内嵌 @supports 语法 */
+   @supports (animation: none) {
+      .supports-match {
+         animation: colorful 1s linear alternate infinite;
+      }
+   }
+
+   /* 支持内嵌 @keyframes 语法 */
+   @keyframe colorful {
+      from {
+         background-color: deepskyblue;
+      }
+      to {
+         background-color: deeppink;
+      }
+   }
+}
+```
+
+此时，在现代浏览器中可以看到文字背景色不停变化的动画效果。
+
+[supports-nested](embedded-codesandbox://css-new-world-overview-prepare/supports-nested)
+
+#### @supports 规则与渐进增强案例
+
+@supports 规则使用案例在后续章节会多次出现，到时候大家可以仔细研究，这里就先不展示了。
+
+### 对 CSS 新特性渐进增强处理的总结
+
+接下来将陆续介绍上百个 CSS 新特性，其中很多新特性都存在兼容性的问题，主要是 IE 浏览器不支持。现在移动端用户的浏览器都是现代浏览器，80%～ 90% 桌面端用户的浏览器也都是现代浏览器，如果我们因为占比很少的低版本浏览器用户，而放弃使用这些让用户体验更好的 CSS 新特性，那将是一件非常遗憾的事情。身为前端开发者，如果没能在用户体验上创造更大的价值，总是使用传统的技术做一些重复性的工作，那么我们的工作激情很快就会被消磨掉，我们的竞争优势也会在日复一日的重复劳动中逐渐丧失。
+
+因此，我觉得大家在日常工作中，应该大胆使用 CSS 新特性，同时再多花一点额外的时间对这些新特性做一些兼容性方面的工作。这绝对是一件非常划算的事情，无论是对用户还是对自身的成长都非常有帮助。
+
+当然，虽然本节介绍了多个 CSS 新特性兼容处理的技巧，但是在实际开发的时候还是会遇到很多单纯使用 CSS 无法搞定的情况，此时就需要借助 JavaScript 代码和 DOM API 来实现兼容，即如果出现 CSS 无法做到兼容，或者低版本浏览器希望有近似的交互体验效果的情况，就需要 JavaScript 代码的处理。例如使用 position: sticky 实现滚动粘滞效果，传统方法都是使用 JavaScript 脚本来实现的，但现在大部分浏览器已经支持这个特性，我们可以让传统浏览器继续使用传统的 JavaScript 方法，现代浏览器则单纯使用 CSS 方法以得到更好的交互体验。
+
+千万不要觉得麻烦，说什么“所有浏览器都直接使用 JavaScript 实现就好啦”。所谓技术成就人生，如果完成需求的心态都是为了应付工作，哪里来的足以成就人生的技术呢？要知道，你所获得的报酬是跟你创造的价值成正比的，如果你想获得超出常人的报酬，那你就需要比那些普通开发者创造的价值更高，而这些价值的差异往往就源自对这些技术细节的处理，日积月累之后就会有明显的差异。
+
+这额外的一点兼容性处理工作其实也花不了你什么时间，例如：
+
+```css
+.adsense {
+   position: relative;
+   position: sticky;
+}
+```
+
+JavaScript 代码中就多一行判断代码而已：
+
+```js
+if (!window.CSS || !CSS.supports || !CSS.supports('position', 'sticky')) {
+   // 传统的 js 调用
+}
+```

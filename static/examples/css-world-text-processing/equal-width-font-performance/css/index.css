@@ -82,6 +82,8 @@ select[hidden] + .ui-select {
   position: absolute;
   width: 20px;
   height: 20px;
+  background: url(/GATSBY_PUBLIC_DIR/images/icon-arrow.png) no-repeat center;
+  background: url(/GATSBY_PUBLIC_DIR/images/icon-arrow.svg) no-repeat center, none;
   background-size: 20px 20px;
   right: 7px;
   top: 10px;

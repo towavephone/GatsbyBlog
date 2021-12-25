@@ -168,7 +168,12 @@ module.exports = {
 
               // Customise the ignored file / folder names
               // default:
-              ignoredFiles: ['node_modules', 'yarn.lock', 'package-lock.json']
+              ignoredFiles: ['node_modules', 'yarn.lock', 'package-lock.json'],
+
+              // 静态资源替换网址
+              siteUrl: `https://blog.towavephone.com`,
+              // 占位符正则式，识别后替换
+              gatsbyPublicDirRegex: /\/GATSBY_PUBLIC_DIR/g
             }
           }
         ]

@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="./demo.css">
-  <style>
-    .icon-loading {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      background: url(/gatsby-dir/images/loading.gif);
-      background: url(/gatsby-dir/images/loading.png), linear-gradient(transparent, transparent);
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from {
-        transform: rotate(360deg);
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .icon-loading {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background: url(/GATSBY_PUBLIC_DIR/images/loading.gif);
+        background: url(/GATSBY_PUBLIC_DIR/images/loading.png), linear-gradient(transparent, transparent);
+        animation: spin 1s linear infinite;
       }
 
-      to {
-        transform: rotate(0deg);
+      @keyframes spin {
+        from {
+          transform: rotate(360deg);
+        }
+
+        to {
+          transform: rotate(0deg);
+        }
       }
-    }
-  </style>
-  </style>
-</head>
+    </style>
+  </head>
 
-<body>
-  <div class="demo">
-    <i class="icon-loading"></i>
-  </div>
-</body>
-
+  <body>
+    <div class="demo">
+      <i class="icon-loading"></i>
+    </div>
+  </body>
 </html>
