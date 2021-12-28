@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        max-width: 414px;
+        margin: auto;
+      }
+
+      h4 {
+        text-align: left;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .reverse {
+        flex-direction: row-reverse;
+      }
+
+      .item {
+        flex: 1;
+        padding: 40px;
+        border-inline-start: 1rem solid deepskyblue;
+        background-color: azure;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>1. 从左往右 row</h4>
+      <div class="flex">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+      </div>
+      <h4>2. 从右往左 row-reverse</h4>
+      <div class="flex reverse">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+      </div>
+    </div>
+  </body>
+</html>

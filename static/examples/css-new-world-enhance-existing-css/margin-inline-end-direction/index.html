@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: initial;
+      }
+
+      .demo p {
+        background-color: deepskyblue;
+      }
+
+      p + p {
+        position: relative;
+        direction: rtl;
+      }
+
+      .demo p + p::before {
+        content: 'direction:rtl';
+        position: absolute;
+        color: #fff;
+        left: 5px;
+        font-size: 12px;
+        line-height: 24px;
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.05);
+      }
+
+      .cw-right button {
+        margin-right: 10px;
+      }
+
+      .cw-end button {
+        margin-inline-end: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>1. 设置 margin-right: 10px;</h4>
+      <p class="cw-right"><button>确定</button><button>取消</button></p>
+      <p class="cw-right"><button>确定</button><button>取消</button></p>
+      <h4>2. 设置 margin-inline-end: 10px</h4>
+      <p class="cw-end"><button>确定</button><button>取消</button></p>
+      <p class="cw-end"><button>确定</button><button>取消</button></p>
+    </div>
+  </body>
+</html>
