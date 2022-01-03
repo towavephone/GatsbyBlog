@@ -1180,43 +1180,43 @@ Edge12 ～ Edge15 浏览器正好是符合上面的条件判断的，我们不�
 
 2. 浏览器还提供了 CSS.supports() 接口，让我们可以在 JavaScript 代码中检测当前浏览器是否支持某个 CSS 特性，语法如下：
 
-```js
-CSS.supports(propertyName, value);
-CSS.supports(supportCondition);
-```
+   ```js
+   CSS.supports(propertyName, value);
+   CSS.supports(supportCondition);
+   ```
 
 3. @supports 规则的花括号可以包含其他任意 @ 规则，甚至是包含 @supports 规则自身。例如：
 
-```css
-@supports (display: flex) {
-   /* 支持内嵌媒体查询语法 */
-   @media screen and (max-width: 9999px) {
-      .supports-match {
-         color: #fff;
+   ```css
+   @supports (display: flex) {
+      /* 支持内嵌媒体查询语法 */
+      @media screen and (max-width: 9999px) {
+         .supports-match {
+            color: #fff;
+         }
+      }
+      /* 支持内嵌 @supports 语法 */
+      @supports (animation: none) {
+         .supports-match {
+            animation: colorful 1s linear alternate infinite;
+         }
+      }
+
+      /* 支持内嵌 @keyframes 语法 */
+      @keyframe colorful {
+         from {
+            background-color: deepskyblue;
+         }
+         to {
+            background-color: deeppink;
+         }
       }
    }
-   /* 支持内嵌 @supports 语法 */
-   @supports (animation: none) {
-      .supports-match {
-         animation: colorful 1s linear alternate infinite;
-      }
-   }
+   ```
 
-   /* 支持内嵌 @keyframes 语法 */
-   @keyframe colorful {
-      from {
-         background-color: deepskyblue;
-      }
-      to {
-         background-color: deeppink;
-      }
-   }
-}
-```
+   此时，在现代浏览器中可以看到文字背景色不停变化的动画效果。
 
-此时，在现代浏览器中可以看到文字背景色不停变化的动画效果。
-
-[supports-nested](embedded-codesandbox://css-new-world-overview-prepare/supports-nested)
+   [supports-nested](embedded-codesandbox://css-new-world-overview-prepare/supports-nested)
 
 #### @supports 规则与渐进增强案例
 

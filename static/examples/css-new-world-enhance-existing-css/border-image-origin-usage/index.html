@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .demo img {
+        vertical-align: middle;
+      }
+
+      .border-tab {
+        display: inline-block;
+        padding: 0 10px 5px;
+        border-style: solid;
+        border-width: 5px 5px 0px;
+        border-image: url(/GATSBY_PUBLIC_DIR/images/border-tab.png) 5 5 0 fill;
+      }
+
+      .border-arc,
+      .border-arc-fill {
+        display: inline-block;
+        padding: 0 10px;
+        border: 10px double gray;
+        border-image: url(/GATSBY_PUBLIC_DIR/images/border-arc.png) 20;
+      }
+
+      .border-arc-fill {
+        color: #fff;
+        border-image-slice: 20 fill;
+      }
+
+      .border-round {
+        display: inline-block;
+        padding: 0 10px;
+        border: 16px double gray;
+        border-image: url(/GATSBY_PUBLIC_DIR/images/border-round.png) 16;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>1. 选项卡效果</h4>
+      <p>源素材：<img src="/GATSBY_PUBLIC_DIR/images/border-tab.png" /></p>
+      <div class="border-tab">选项卡</div>
+      <div class="border-tab">选项卡文字多</div>
+
+      <h4>2. 圆角边框效果</h4>
+      <p>源素材：<img src="/GATSBY_PUBLIC_DIR/images/border-arc.png" /></p>
+      <div class="border-arc">不填充</div>
+      <div class="border-arc-fill">颜色填充</div>
+
+      <h4>3. 多边框效果</h4>
+      <p>源素材：<img src="/GATSBY_PUBLIC_DIR/images/border-round.png" /></p>
+      <div class="border-round">文字少</div>
+      <div class="border-round">文字较多</div>
+    </div>
+  </body>
+</html>

@@ -332,11 +332,11 @@ table {
 
 此时，无论 `<table>` 元素的 width、margin 或者 border 如何变化，`<table>` 元素的宽度永远自适应外部容器。图 3-4 展示的就是上述代码在 375px 宽度屏幕下的运行效果，可以看到 `<table>` 元素的尺寸正好自适应屏幕尺寸。
 
-![](2021-12-23-01-10-13.png)
+![](res/2021-12-23-01-10-13.png)
 
 但是，如果打开 Firefox 浏览器的开发者工具，取消将 width: -moz-available 当作注释，就会发现 `<table>` 元素的宽度超出了屏幕的尺寸，如图 3-5 所示。
 
-![](2021-12-23-01-11-00.png)
+![](res/2021-12-23-01-11-00.png)
 
 [stretch-firefox-table](embedded-codesandbox://css-new-world-enhance-existing-css/stretch-firefox-table)
 
@@ -869,5 +869,468 @@ text-align 支持 start 和 end 属性值的兼容性如表 3-3 所示。
 不同数量的值所表示的方位和 margin、padding 等属性一样，这里不再赘述。
 
 虽然前面几节列举了很多 CSS 逻辑属性，但是这不是全部，还有很多其他 CSS 逻辑属性或者 CSS 逻辑属性值，如 scroll-margin、scroll-padding，以及它们衍生出的十几个 CSS 逻辑属性，以及 float 属性和 clear 属性支持的 inline-start 和 inline-end 逻辑属性值等。CSS 逻辑属性大同小异，这里就不一一展开说明了。
+
+# 在 CSS 边框上做文章
+
+一个图形元素的装饰部件主要是边框和背景。在 CSS2.1 时代，边框只能是纯色的，效果太单调了。于是 CSS 规范制定者就开始琢磨，是不是可以在 CSS 边框上做文章，通过支持图片显示来增强边框的表现力呢？
+
+## 昙花一现的 CSS 多边框
+
+浏览器对多边框曾经支持过一段时间，语法示意如下：
+
+```css
+.example {
+   border-right: 8px solid;
+   border-right-colors: #555 #666 #777 #888 #999 #aaa #bbb #ccc;
+}
+```
+
+这样一条渐变边框效果就出来了。可能是因为这一功能不实用，它已经从规范中被剔除了，现在没有任何浏览器支持这种语法。想要实现类似的效果，可以使用 box-shadow 或者 border-image 属性。
+
+## 独一无二的 border-image 属性
+
+所有与装饰有关的 CSS 属性都能从其他设计软件中找到对应的功能，如背景、描边、阴影，甚至滤镜和混合模式，但是唯独 border-image 属性是 CSS 这门语言独有的，就算其他软件有边框装饰，也不是 border-image 这种表现机制。
+
+这看起来是件好事情，你瞧，border-image 多么与众不同！但实际上，border-image 属性很少出现在项目代码中，其中重要的原因之一就是 border-image 属性过于特殊。
+
+1. 对开发者而言，border-image 属性怪异的渲染机制，导致学习成本较高，掌握 border-image 属性的人并不多。而且很多时候该属性对源图像的规格和比例也有要求，这导致使用成本也比较高。
+2. 对设计师而言，border-image 属性的视觉表现和现实认知是不一致的，而设计师的视觉设计多基于现实认知，因此，设计师无法为 border-image 属性量身定制图形表现。另外，当下的设计趋势是扁平化而非拟物化，边框装饰通常在项目中不会出现。
+3. border-image 属性怪异的渲染机制导致元素的 4 个边角成了 4 个尴尬的地方，实现的边框效果往往不符合预期，最终导致开发者放弃使用 border-image 属性。
+
+至于 border-image 属性这么渲染的原因和 border-image 属性很少使用的另外一个重要原因将在之后介绍。
+
+总而言之，border-image 属性是一个颇有故事的 CSS 属性，我对 border-image 属性的感情也颇为复杂，恨铁不成钢，内心十分矛盾，既希望人人都熟练掌握这个很酷的 CSS 属性，又担心带大家入坑后发现它无用武之地。
+
+因此，大家接下来学习 border-image 属性的时候，就保持一个从容的心态，看懂了自然最好，看不懂也没关系。大家只需要知道 border-image 属性大致是怎么回事，可以用在什么场景，等哪天遇到了类似的场景，能够条件反射般想到使用 border-image 属性来实现就可以了。当然，我也会尽量以最简单的语言把 border-image 属性讲清楚，方便大家一遍就看懂。
+
+为了方便接下来的学习，我们约定后续所有 .example 元素都包含下面的公共 CSS 代码：
+
+```css
+.example {
+   width: 80px;
+   height: 80px;
+   border: 40px solid deepskyblue;
+}
+```
+
+### 九宫格
+
+border-image 属性的基本表现并不难理解，大家记住一个关键数字“9”即可。
+
+假设一个 `<div>` 元素就是 .example 元素，我们沿着这个 `<div>` 元素的 content-box 的边缘画 4 条线，则这个 `<div>` 元素就被划分成了 9 份，形成了 1 个九宫格，如图 3-17 所示。
+
+![](res/2022-01-03-14-25-45.png)
+
+border-image 属性的作用过程就是把图片划分为图 3-17 所示的 9 个区域的过程。所以，学习 border-image 属性其实很简单，记住两个点：一是源图像的划分，二是九宫格尺寸的控制。“九宫格尺寸的控制”放在后面讲，我们暂时把边框的尺寸当作九宫格的尺寸，先将注意力全部放在学习源图像的划分上。
+
+假设我们有一个尺寸是 162px×162px 的源图像，如图 3-18 所示。
+
+![](res/2022-01-03-14-31-07.png)
+
+这个源图像一共由 9 个格子构成，每个格子占据的尺寸是 54px×54px，则下面的代码可以让这 9 个格子依次填充到九宫格的 9 个区域中：
+
+```css
+.example {
+   border-image: url(./grid-nine.svg) 54;
+}
+```
+
+此时渲染出来的效果如图 3-19 所示。
+
+渲染的原理如图 3-20 所示，该图展示了源图像的 9 个格子是如何分配到九宫格的各个区域中的。
+
+![](res/2022-01-03-14-33-33.png)
+
+有趣的是，源图像的 9 个格子居然正好和边框划分的 9 个区域一一对应，是巧合，还是本就如此？这不是巧合，这是因为 CSS 属性在其中起了作用。
+
+border-image 属性其实是多个 CSS 的缩写，其中 `url(...) 54` 是 border-image-source 属性和 border-image-slice 属性的缩写，因此下面两段 CSS 代码的效果是一样的：
+
+```css
+.example {
+   border-image: url(./grid-nine.svg) 54;
+}
+
+.example {
+   border-image-source: url(./grid-nine.svg);
+   border-image-slice: 54;
+}
+```
+
+border-image-source 属性的值是一个 `<image>` 数据类型，所以 CSS 中所有图像类型都可以作为边框图片，例如常见的渐变图像，因此 border-image 属性可以实现渐变边框或者条纹边框效果。border-image-source 属性的语法和 background-image 属性类似，不再赘述，接下来我们重点关注一下 border-image-slice 属性，也就是源图像的划分。
+
+### 理解 border-image-slice 属性
+
+border-image-slice 属性的正式语法如下，表示支持 1 ～ 4 个数值或 1 ～ 4 个百分比值，后面可以带一个关键字 fill：
+
+```css
+border-image-slice: <number-percentage>{1, 4} && fill?
+```
+
+border-image-slice 属性的作用是对原始的图像进行划分，划分的方位和顺序同 margin 属性、padding 属性一样，遵循上、右、下、左的顺序。例如 border-image-slice: 20 表示在距离源图像上方 20px、距离源图像右侧 20px、距离源图像下方 20px、距离源图像左侧 20px 的地方进行划分，划分线的位置如图 3-21 所示。
+
+![](res/2022-01-03-14-45-55.png)
+
+此时 4 个边角区域只有很小的一部分被划分，而剩余的上、下、左、右区域会被拉伸，因此，作用在 .example 元素上的效果就会如图 3-22 所示，其中增加的几根辅助线可以方便大家理解。
+
+![](res/2022-01-03-14-47-52.png)
+
+默认情况下，源图像划分的中心位置是不参与填充的。如果想要有填充效果，可以额外使用 fill 关键字，例如：
+
+```css
+.example {
+   border-image-source: url(./grid-nine.svg);
+   border-image-slice: 33.33% fill;
+}
+```
+
+结果如图 3-23 所示。
+
+![](res/2022-01-03-14-50-59.png)
+
+为了方便大家理解，我做了一个简单的原理示意图，如图 3-24 所示。
+
+![](res/2022-01-03-14-51-40.png)
+
+border-image-slice 属性的默认值是 100%，相当于把图 3-24 中左侧 33.33% 的线移动到右边缘，把右侧 33.33% 的线移动到左边缘，把上方 33.33% 的线移动到下边缘，把下方 33.33% 的线移动到上边缘。于是除了 4 个边角区域，其他区域都因为剪裁线发生反向交叉而不可见，这才有图 3-25 所示的效果。
+
+![](res/2022-01-03-14-54-03.png)
+
+[border-image-slice-attr-usage](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-slice-attr-usage)
+
+如果 border-image-source 是渐变图像，则渐变图像的尺寸是按元素的 border-box 尺寸来计算的。
+
+理解了 border-image-slice 属性，border-image 属性的学习就算完成了一半，剩下的就是学会控制九宫格的尺寸了，而控制九宫格尺寸的 CSS 属性就是 border-image-width 和 border-image-outset。
+
+### 了解 border-image-width 属性
+
+border-image-width 属性和 border-width 属性支持的参数个数是一样的，都是 1 ～ 4 个，不同数量的值所对应的方位规则也是一样的。但是，这两个属性支持的属性值类型却有较大区别，为了方便大家对比，如下表所示。
+
+| 值类型       | border-width            | border-image-width |
+| :----------- | :---------------------- | :----------------- |
+| 初始值       | medium                  | 1                  |
+| 长度值       | √                       | √                  |
+| 数值         | ×                       | √                  |
+| 百分比值     | ×（暂时）               | √                  |
+| 关键字属性值 | `thin | medium | thick` | auto               |
+
+针对 border-image-width 和 border-width 属性值类型的对比，有以下几点说明。
+
+1. border-image-width 属性支持使用数值作为属性值，这个数值会作为系数和 border-width 的宽度值相乘，最终的计算值作为边框图片宽度，也就是九宫格的宽度。因此，我们可以设置不同的数值来得到不同宽度的九宫格。图 3-26 所示的是设置 border-image-width 属性值分别为 0.75、1 和 1.5 的九宫格示意图和实际的渲染效果。
+
+   ![](res/2022-01-03-15-05-10.png)
+
+2. 如果 border-image-width 属性设置的是具体的长度值，如 60px、5em 等，则九宫格的宽度就和 border-width 属性没有关系了。但是，有一个特殊的情况，那就是在 border-width 的长度为 0 的时候。理论上来说，如果 border-image-width 的属性值是具体的长度值，此时就算将 border-width 属性设置为 0，也应该可以渲染边框图片，但是在 Chrome 浏览器中，边框图片却消失了，而 Firefox 浏览器则没有这个问题。因此，如果我们希望边框宽度为 0，且 border-image 属性能生效，可以试试将 border-width 属性的值设置为 0.02px（不小于 1/64 像素）。
+3. border-image-width 属性的百分比值是相对于元素自身的尺寸计算的，水平方位相对于宽度计算，垂直方位相对于高度计算。例如：
+
+   ```css
+   .example {
+      border-image: url(./grid-nine.svg) 54;
+      border-image-width: 50% 25%;
+   }
+   ```
+
+   这段代码表示九宫格上下区域高度是 50%，左右区域高度是 25%，此时的九宫格和最终的效果如图 3-27 所示。
+
+   ![](res/2022-01-03-15-09-39.png)
+
+4. auto 关键字很有意思，会使用 border-image-slice 属性划分的尺寸作为九宫格宽度值。例如：
+
+   ```css
+   .example {
+      border-image: url(./grid-nine.svg) 54;
+      border-image-width: auto;
+   }
+   ```
+
+   此时，border-image-width 属性值等同于 border-image-slice 属性设置的 54px。如果 border-image-slice 属性值是百分比值，例如：
+
+   ```css
+   .example {
+      border-image: url(./grid-nine.svg) 33.33%;
+      border-image-width: auto;
+   }
+   ```
+
+   则此时 border-image-width 的宽度值等于 grid-nine.svg 的对应方位的尺寸和 33.33%的计算值。
+
+5. border-image-width 属性和 border-width 属性都不支持负值。
+6. border-image-width 的宽度值很可能会超过元素自身的尺寸，例如：
+
+   ```css
+   .example {
+      border-image: url(./grid-nine.svg) 54;
+      border-image-width: 100% 50%;
+   }
+
+   .example {
+      border-image: url(./grid-nine.svg) 54;
+      border-image-width: 4 3 2 1;
+   }
+   ```
+
+   这时候，border-image-width 属性的宽度表现遵循“等比例原则”和“百分百原则”，也就是九宫格宽度不超过元素对应方向的宽度，同时保持设置的数值比例。例如 border-image-width: 100% 50% 等同于 border-image-width: 50% 25%。那么，border-image-width: 4 3 2 1 等同于什么呢？这个需要计算一下，.example 元素宽高都是 160px，边框宽度是 40px，则一个方位上的最大比例系数应该是 4，此时垂直方向的总系数是 6（4+2），则所有数值都应该乘以 2/3（4/6），所以，border-image-width: 4 3 2 1 应该等同于 border-image-width: 2.6667 2 1.3333 0.6667。
+
+   [border-image-width-attr-usage](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-width-attr-usage)
+
+除了 border-image-width 属性，border-image-outset 属性也能控制九宫格的尺寸，只不过 border-image-width 属性控制的是九宫格的边框宽度，而 border-image-outset 属性控制的是九宫格中间区域的尺寸。
+
+### 了解 border-image-outset 属性
+
+首先，大家千万不要弄错 border-image-outset 属性的拼写，该属性最后的单词是 outset，不是 offset。outset 是往外扩张的意思，它和 offset 的区别在于，offset 扩展的方向既能向外也能向内，反映在属性值上就是 offset 既支持正值也支持负值，例如 outline-offset、text-underline-offset 等 CSS 属性；但是 outset 只能是正值，只能向外扩张，使用负值会被认为是语法错误。
+
+下面来看一下 border-image-outset 属性的正式语法：
+
+```css
+border-image-outset: [<length> | <number>]{1,4}
+```
+
+该属性支持 1 ～ 4 个数值，或者支持 1 ～ 4 个长度值，并且支持数值和长度值混合使用。因此，下面这些 CSS 声明都是合法的。
+
+```css
+border-image-outset: 1rem; /* 长度值 */
+border-image-outset: 1.5; /* 数值 */
+border-image-outset: 1 0.5; /* 垂直 水平 */
+border-image-outset: 30px 2 40px;
+border-image-outset: 10px 15px 20px 25px;
+```
+
+其中，数值是相对于 border-width 计算的，例如：
+
+```css
+.example {
+   border-image: url(./grid-nine.svg) 54;
+   border-image-outset: 0.5;
+}
+```
+
+由于 .example 元素的边框宽度是 40px，因此上面的代码的运行效果和下面的代码的运行效果一样：
+
+```css
+.example {
+   border-image: url(./grid-nine.svg) 54;
+   border-image-outset: 20px;
+}
+```
+
+提醒一下，这里有一个细节，那就是元素扩展了 20px 指的是九宫格中间区域的上、右、下、左这 4 个方位的尺寸都扩大了 20px，所以九宫格中间序号为 9 的区域的高和宽最终增加了 40px，九宫格尺寸变化的过程和最终效果如图 3-28 所示。
+
+![](res/2022-01-03-15-25-55.png)
+
+[border-image-outset-attr-usage](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-outset-attr-usage)
+
+最后再告诉大家一个小知识，border-image-outset 属性扩展出去的和 outline 属性扩展出去的九宫格区域的轮廓一样，不会影响布局，也不会响应鼠标经过行为或者点击行为。
+
+我们现在回顾一下，border-image-slice 属性用于划分源图像，border-image-width 用于控制九宫格第一区到第八区的尺寸，border-image-outset 属性用于控制九宫格最中间第九区的尺寸。掌握这 3 个属性，就算完全理解 border-image 属性了。
+
+总而言之，border-image 属性的作用就是划分源图像，然后将其依次填充到九宫格区域中。等等，好像缺了什么？好像九宫格第五区到第八区的图形永远是被拉伸的状态，如果我希望这几块区域的图形是平铺的，有什么解决办法吗？这就是最后一个子属性 border-image-repeat 做的事情了。
+
+### 了解 border-image-repeat 属性
+
+border-image-repeat 属性可以控制九宫格上、右、下、左 4 个区域（对应的区域序号是 5 ～ 8，我称这几个区域为平铺区）图形的平铺规则，如图 3-29 所示。
+
+![](res/2022-01-03-15-30-33.png)
+
+border-image-repeat 属性的正式语法如下：
+
+```css
+border-image-repeat: [stretch | repeat | round | space]{1,2}
+```
+
+从语法中我们可以看出该属性和 border-image 其他相关属性有一个明显的不同，即无论是 border-image-slice 属性还是 border-image-width 属性，其属性值数量都是 1 ～ 4 个，但是 border-image-repeat 属性最多只支持两个属性值同时使用。该属性强制规定水平方向的两条边的平铺规则必须是一样的，垂直方向的两条边的平铺规则也必须是一样的。
+
+接下来我们快速了解一下 border-image-repeat 属性支持的几个关键字属性值的含义，这几个关键字属性值的含义在整个 CSS 世界中都是通用的。
+
+- stretch：默认值，让源图像拉伸以充满显示区域。
+- repeat：让源图像紧密相连平铺，保持原始比例，平铺单元在边界位置处可能会被截断。
+- round：让源图像紧密相连平铺，适当伸缩，以确保平铺单元在边界位置处不会被截断。
+- space：让源图像保持原始尺寸，平铺时彼此保持适当的等宽间隙，以确保平铺单元在边界位置处不会被截断；如果区域的尺寸不足以呈现至少一个源图像单元，则会以空白呈现。目前在移动端有部分浏览器并不支持该关键字，IE 浏览器中的渲染和其他现代浏览器也不一样，因此这个关键字要谨慎使用。
+
+假设有如下 CSS 代码：
+
+```css
+.example {
+   border-image: url(./grid-nine.svg) 54;
+}
+```
+
+则不同 border-image-repeat 属性值的渲染过程和效果如图 3-30 所示。
+
+![](res/2022-01-03-15-34-28.png)
+
+[border-image-repeat-attr-usage](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-repeat-attr-usage)
+
+可以发现，无论是哪种平铺类型，最终 4 个对角处的图形和 4 个平铺区的图形是无法做到尺寸永远一致的，除非元素尺寸固定，同时元素的尺寸和源图像尺寸匹配，显然这样的场景有限。这就导致规律的边框装饰效果实际上是不适合使用 border-image 属性来实现的，这就是一开始提到的 border-image 属性自身的缺点——4 个尴尬的边角。
+
+当然，理论和现实有时候就是会有差异，如果边框图案比较小，同时元素尺寸比较大，则我们是可以使用 round 关键字实现近似规律的边框装饰效果的。因为此时，边角图案和平铺图案的尺寸差异会很小，乍一看是一样的尺寸，给用户的感觉是天衣无缝的平铺，如图 3-31 所示。图中使用的是 round 类型的平铺，乍一看各个菱形图案尺寸都是一样的，但实际上是有差异的，4 个边角的菱形尺寸比水平方向的菱形图案尺寸大，比垂直方向的菱形图案尺寸小，并不是严格意义上的平铺效果。
+
+![](res/2022-01-03-15-37-18.png)
+
+最后提示一下，关于 round 关键字和 space 关键字的更深入的细节参见之后与 background-repeat 属性相关部分的介绍。
+
+### 精通 border-image 缩写语法
+
+border-image 属性缩写还是不缩写没什么本质区别，但是如果你想看懂别人写的代码，或者真正学会 border-image 属性，那么 border-image 属性的缩写语法是必学的。
+
+border-image 属性的正式语法如下：
+
+```css
+border-image: <border-image-source> || <border-image-slice>[/ <border-image-width> | / <border-image-width>? /
+   <border-image-outset>]? || <border-image-repeat>;
+```
+
+语法被 || 符号分成了 3 部分，分别是资源引入、尺寸控制和平铺规则。这 3 个部分可以任意组合显示，这一点很容易理解，不展开讲解。
+
+语法关键的难点在于“尺寸控制”，不过如果你认真阅读过上面的内容，你就会发现，本书关于“尺寸控制”的剖析和缩写语法是完全一致的，即源图像的划分、九宫格边框宽度的控制、九宫格中间区域的尺寸控制。如果能够想到这一点，“尺寸控制”的语法顺序就变得很好记忆了。
+
+“尺寸控制”相关的 3 个 CSS 属性全部使用斜杠进行分隔，结合 2.2 节介绍的 CSS 属性值定义语法，我们就可以得到下面这些合法的 CSS 声明：
+
+```css
+/* slice: 54 */
+border-image: 54;
+/* slice: 54, width: 20px */
+border-image: 54 / 20px;
+/* slice: 54, outset: 20px */
+border-image: 54 / /20px;
+/* slice: 54, width: 20px, outset: 20px */
+border-image: 54 / 20px / 20px;
+```
+
+其中，需要重点关注 `54 / / 20px` 这个属性值，该属性值中出现了连续的斜杠。首先，这个写法是合法的；其次，为了便于大家理解，我在两个斜杠之间加了空格，实际上没有空格也是合法的：
+
+```
+/* 合法的 */
+border-image: 54 // 20px;
+```
+
+所以如果大家在 border-image 的属性值中看到了双斜杠，千万不要误认为是多写了一个斜杠，这是遵循 border-image 属性的语法，把 `<border-image-width>` 数据类型给省略了。因为在正式语法中，`<border-image-width>` 数据类型的后面有一个问号，这就表明这个数据类型可以省略，但是斜杠后面并无问号，因此斜杠不能省略，于是就出现了双斜杠的场景。
+
+由于“尺寸控制”相关的 3 个 CSS 属性都支持 4 个方位的分别设置，因此 border-image 属性最复杂的缩写可能会有下面这么长。
+
+```css
+.example {
+   border-image: url(./grid-nine.svg) 54 33.33% 33.33% 54 / 10px 20px 30px 1 / 1 30px 20px 10px round space;
+}
+```
+
+显示的效果如图 3-32 所示。
+
+![](res/2022-01-03-15-52-15.png)
+
+[border-image-abbr-usage](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-abbr-usage)
+
+## border-image 属性与渐变边框
+
+为什么 border-image 属性的渲染机制那么怪异？
+
+border-image 属性的规范出现得很早，浏览器也支持得很早。2008 年，Chrome 浏览器的第一个版本就已经支持 border-image 属性了（老语法）。在那个年代，所有图形效果全部都是使用图片实现的，例如圆角边框、圆角渐变选项卡等。
+
+开发者为了让选项卡背景或者按钮的边框高宽自适应，会把源图像尺寸做得很大，然后将边缘位置专门裁好放在图像的边缘，方便使用 background-position 属性进行控制。例如，图 3-33 展示的就是十几年前 CSS 开发所使用的选项卡背景图，可以看到右侧的边框部分被裁开了。
+
+实现的效果图。
+
+![](res/2022-01-03-15-53-45.png)
+
+通过内外两层便签分别定位左侧背景和右侧背景，就可以实现一个 1 ～ 7 个字的宽度自适应选项卡效果了，图 3-34 所示就是
+
+![](res/2022-01-03-15-54-28.png)
+
+有没有觉得这种边缘划分再重新分配定位的套路有些熟悉？对，border-image 属性的作用机制就是源自这里，先划分再分配。或者我们可以这么认为，border-image 属性的设计初衷就是用来简化自适应边框或者自适应选项卡的开发的，因为这可以让源图像的体积大大减小，灵活性大大提升。例如，图 3-35 所示的 3 个 border-image 应用案例，源图像都是很小的图形。
+
+![](res/2022-01-03-15-55-37.png)
+
+[border-image-origin-usage](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-origin-usage)
+
+但是，其他 CSS 新属性的崛起把 border-image 属性想要实现的效果用一种更好的方式实现了。图 3-35 所示的 3 个案例，使用 CSS 就完全可以实现，圆角可以使用 border-radius 属性模拟，多边框可以使用 box-shadow 模拟，并且这样做兼容性更好，IE9+ 版本均支持，而 border-image 属性在 IE11+ 版本才被支持。border-image 属性的竞争对手 background-image 属性更是 bug 一样的存在，使用它配合 CSS 渐变和多背景，任何规律的图形都可以模拟出来。
+
+以上这些原因导致 border-image 属性在众多 CSS 属性的竞争中逐渐没落，只在边框造型浮夸且不得不使用图片的场景中偶尔出现。然而，在 2012 年之后，随着各大浏览器对 border-image 属性开始了新的语法支持，border-image 属性又逐渐在实际项目开发中找到了属于自己的一片小天地，那就是和 CSS 渐变配合实现渐变边框、条纹边框。如果想要让某一个模块格外醒目，就可以使用渐变边框，代码如下：
+
+```html
+<p class="border-linear-gradient">上下渐变边框</p>
+<p class="border-radial-gradient">径向渐变边框</p>
+<style>
+   .border-linear-gradient {
+      border-style: solid;
+      border-image: linear-gradient(deepskyblue, deeppink) 20 / 10px;
+   }
+
+   .border-radial-gradient {
+      border-style: solid;
+      border-image: radial-gradient(deepskyblue, deeppink) 20 / 10px;
+   }
+</style>
+```
+
+最终效果如图 3-36 所示。
+
+![](res/2022-01-03-16-01-09.png)
+
+要想警示某一段内容存在风险，可以使用红色的条纹边框，代码如下：
+
+```html
+<div class="border-stripe">
+   我们可以使用红色条纹边框表示警示
+</div>
+<style>
+   .border-stripe {
+      border: 12px solid;
+      border-image: repeating-linear-gradient(-45deg, red, red 5px, transparent 5px transparent 10px) 12px;
+   }
+</style>
+```
+
+最终效果如图 3-37 所示。
+
+![](res/2022-01-03-16-04-14.png)
+
+我们甚至可以用 border-image 属性重新定义元素的虚线边框，虚线的尺寸和虚实比例都可以随意控制，例如：
+
+```html
+<div class="border-dashed">
+   1: 1 的虚线
+</div>
+<style>
+   .border-dashed {
+      border: 1px dashed deepskyblue;
+      border-image: repeating-linear-gradient(135deg, deepskyblue, deepskyblue 5px, transparent 5px, transparent 10px) 1;
+   }
+</style>
+```
+
+图 3-38 展示的就是 Edge 浏览器、Chrome 浏览器和 Firefox 浏览器中的自定义虚线边框效果，可以看到，虽然各个浏览器默认的虚线边框不一样，但是自定义的虚线边框完成了统一。
+
+![](res/2022-01-03-16-08-00.png)
+
+[border-image-with-gradient](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-with-gradient)
+
+border-image 属性最适合模拟宽度为 1px 的虚线边框。如果边框宽度比较大，实线的端点就会有明显的斜边，此时建议使用 background-image 属性和线性渐变语法进行模拟，或者干脆使用 SVG 元素配合 stroke-dasharray 实现更灵活的边框效果。
+
+### 圆角渐变边框
+
+有时候为了让渐变边框有圆角效果，我们的第一反应是使用 border-radius 属性，但事实是 border-radius 属性无法改变 border-image 属性生成的图形效果，我们需要使用其他的方法。
+
+1. 外层嵌套一层 `<div>` 元素，然后设置圆角和溢出隐藏，代码如下：
+
+   ```css
+   .father {
+      border-radius: 10px;
+      overflow: hidden;
+   }
+   ```
+
+   效果如图 3-39 所示。
+
+2. 使用 clip-path 剪裁，该方法无须嵌套额外的元素，代码如下：
+
+   ```css
+   .clip-path {
+      clip-path: inset(0 round 10px);
+   }
+   ```
+
+   实现的效果和图 3-39 所示的效果是一模一样的。
+
+![](res/2022-01-03-16-12-17.png)
+
+[border-image-with-radius-gradient](embedded-codesandbox://css-new-world-enhance-existing-css/border-image-with-radius-gradient)
 
 // TODO CSS 新世界增强已有的 CSS 属性

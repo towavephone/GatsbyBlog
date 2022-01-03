@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+      }
+
+      h4 {
+        text-align: left;
+      }
+
+      .border-linear-gradient {
+        padding: 30px;
+        border-style: solid;
+        border-image: linear-gradient(deepskyblue, deeppink) 20 / 10px;
+      }
+
+      .border-radial-gradient {
+        padding: 30px;
+        border-style: solid;
+        border-image: radial-gradient(deepskyblue, deeppink) 20 / 10px;
+      }
+
+      .border-stripe {
+        padding: 10px;
+        border: 12px solid;
+        border-image: repeating-linear-gradient(-45deg, red, red 5px, transparent 5px, transparent 10px) 12;
+      }
+
+      .border-dashed {
+        padding: 10px;
+        border: 1px dashed deepskyblue;
+        border-image: repeating-linear-gradient(135deg, deepskyblue, deepskyblue 5px, transparent 5px, transparent 10px)
+          1;
+      }
+
+      p.border-dashed {
+        border-image: none;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>1. 纯色渐变边框</h4>
+      <p class="border-linear-gradient">上下渐变边框</p>
+      <p class="border-radial-gradient">径向渐变边框</p>
+
+      <h4>2. 条纹边框</h4>
+      <div class="border-stripe">我们可以使用红色条纹边框表示警示</div>
+
+      <h4>3. 1 : 1 的虚线</h4>
+      <p class="border-dashed">默认的虚线</p>
+      <div class="border-dashed">自定义的 1 : 1 的虚线</div>
+    </div>
+  </body>
+</html>

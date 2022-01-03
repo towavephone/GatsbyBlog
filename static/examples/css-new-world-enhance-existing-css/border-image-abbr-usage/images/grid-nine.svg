@@ -1,0 +1,11 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="162" height="162" viewBox="0 0 162 162">
+	<path d="M27 0L54 27L27 54L0 27" fill="deepskyblue" />
+	<path d="M81 0L108 27L81 54L54 27" fill="deeppink" />
+	<path d="M135 0L162 27L135 54L108 27" fill="deepskyblue" />
+	<path d="M27 54L54 81L27 108L0 81" fill="deeppink" />
+	<path d="M81 54L108 81L81 108L54 81" fill="springgreen" />
+	<path d="M135 54L162 81L135 108L108 81" fill="deeppink" />
+	<path d="M27 108L54 135L27 162L0 135" fill="deepskyblue" />
+	<path d="M81 108L108 135L81 162L54 135" fill="deeppink" />
+	<path d="M135 108L162 135L135 162L108 135" fill="deepskyblue" />
+</svg>

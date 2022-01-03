@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        padding-bottom: 50px;
+      }
+
+      .example {
+        width: 80px;
+        height: 80px;
+        border: 40px solid deepskyblue;
+        border-image: url(/GATSBY_PUBLIC_DIR/images/grid-nine.svg) 54;
+        margin: auto;
+      }
+
+      .example2 {
+        border-image-repeat: repeat;
+      }
+
+      .example3 {
+        border-image-repeat: round;
+      }
+
+      .example4 {
+        border-image-repeat: space;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>初始值 stretch</h4>
+      <div class="example"></div>
+
+      <h4>border-image-repeat: repeat</h4>
+      <div class="example example2"></div>
+
+      <h4>border-image-repeat: round</h4>
+      <div class="example example3"></div>
+
+      <h4>border-image-repeat: space</h4>
+      <div class="example example4"></div>
+    </div>
+  </body>
+</html>
