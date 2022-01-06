@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        max-width: 414px;
+        text-align: left;
+        margin: auto;
+      }
+
+      .demo h6 {
+        margin: 0;
+        font-weight: 400;
+      }
+
+      h6,
+      dt {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+
+        background-color: #eee;
+        color: #444;
+        padding: 3px 1rem;
+      }
+
+      ul {
+        padding-left: 0;
+        list-style: none;
+      }
+
+      .demo li,
+      .demo dd {
+        padding: 5px 1rem;
+        border-top: 1px solid #f5f5f5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>同一个父元素，重叠覆盖</h4>
+      <h6>A</h6>
+      <ul>
+        <li>Alice</li>
+        <li>暗香</li>
+        <li>Ares-徐舟</li>
+      </ul>
+      <h6>B</h6>
+      <ul>
+        <li>贝贝王爷有点萌</li>
+        <li>Blue 含资</li>
+        <li>不吵不闹</li>
+        <li>不动的飞矢、大奔</li>
+      </ul>
+      <h6>C</h6>
+      <ul>
+        <li>- Ccccccc 张磊</li>
+        <li>采蘑菇的小姑娘</li>
+        <li>Cecilia_yu</li>
+        <li>陈玲</li>
+        <li>虫儿飞</li>
+        <li>窗棂微风-高晨萱</li>
+        <li>从此以后。。。</li>
+        <li>CSS conf 的好友</li>
+      </ul>
+      <h6>D</h6>
+      <ul>
+        <li>大白鲨</li>
+        <li>大猫猫</li>
+        <li>大漠</li>
+        <li>大嘴</li>
+        <li>DARKEN</li>
+        <li>Double 宜-前端开发小萌新</li>
+        <li>Dream</li>
+      </ul>
+
+      <h4>不同的父元素，依次推开</h4>
+
+      <dl>
+        <dt>A</dt>
+        <dd>Alice</dd>
+        <dd>暗香</dd>
+        <dd>Ares-徐舟</dd>
+      </dl>
+      <dl>
+        <dt>B</dt>
+        <dd>贝贝王爷有点萌</dd>
+        <dd>Blue 含资</dd>
+        <dd>不吵不闹</dd>
+        <dd>不动的飞矢、大奔</dd>
+      </dl>
+      <dl>
+        <dt>C</dt>
+        <dd>- Ccccccc 张磊</dd>
+        <dd>采蘑菇的小姑娘</dd>
+        <dd>Cecilia_yu</dd>
+        <dd>陈玲</dd>
+        <dd>虫儿飞</dd>
+        <dd>窗棂微风-高晨萱</dd>
+        <dd>从此以后。。。</dd>
+        <dd>CSS conf 的好友</dd>
+      </dl>
+      <dl>
+        <dt>D</dt>
+        <dd>大白鲨</dd>
+        <dd>大猫猫</dd>
+        <dd>大漠</dd>
+        <dd>大嘴</dd>
+        <dd>DARKEN</dd>
+        <dd>Double 宜-前端开发小萌新</dd>
+        <dd>Dream</dd>
+      </dl>
+    </div>
+  </body>
+</html>

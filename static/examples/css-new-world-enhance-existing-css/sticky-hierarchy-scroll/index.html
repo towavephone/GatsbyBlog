@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        max-width: 414px;
+        text-align: left;
+        margin: auto;
+      }
+
+      .demo p {
+        margin: 0.5em 0;
+      }
+
+      article {
+        position: relative;
+        z-index: 0;
+      }
+
+      article h4,
+      article footer {
+        position: -webkit-sticky; /* for Safari */
+        position: sticky;
+      }
+
+      .demo article h4 {
+        margin: 1em 0 0;
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        top: 0;
+        z-index: 1;
+      }
+
+      article content {
+        display: block;
+        background-color: #ffffe0;
+        position: relative;
+        padding: 5px 10px;
+      }
+
+      article footer {
+        background-color: #cd0000;
+        color: #fff;
+        padding: 10px;
+        bottom: 50vh;
+        z-index: -1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <article>
+        <section>
+          <h4>新闻标题 1</h4>
+          <content>
+            <p>新闻内容第 1 段。</p>
+            <p>新闻内容第 2 段。</p>
+            <p>新闻内容第 3 段。</p>
+            <p>新闻内容第 4 段。</p>
+          </content>
+          <footer>网友评论：这个新闻太夸张了吧！</footer>
+        </section>
+        <section>
+          <h4>新闻标题 2</h4>
+          <content>
+            <p>新闻内容第 1 段。</p>
+            <p>新闻内容第 2 段。</p>
+            <p>新闻内容第 3 段。</p>
+            <p>新闻内容第 4 段。</p>
+          </content>
+          <footer>网友评论：感动</footer>
+        </section>
+        <section>
+          <h4>新闻标题 3</h4>
+          <content>
+            <p>新闻内容第 1 段。</p>
+            <p>新闻内容第 2 段。</p>
+          </content>
+          <footer>网友评论：比心</footer>
+        </section>
+        <section>
+          <h4>新闻标题 4</h4>
+          <content>
+            <p>新闻内容第 1 段。</p>
+            <p>新闻内容第 2 段。</p>
+          </content>
+          <footer>网友评论：赞赞赞</footer>
+        </section>
+        <section>
+          <h4>新闻标题 5</h4>
+          <content>
+            <p>新闻内容第 1 段。</p>
+            <p>新闻内容第 2 段。</p>
+          </content>
+          <footer>网友评论：666</footer>
+        </section>
+        <section>
+          <h4>新闻标题 6</h4>
+          <content>
+            <p>新闻内容第 1 段。</p>
+            <p>新闻内容第 2 段。</p>
+          </content>
+          <footer>网友评论：好耶！</footer>
+        </section>
+      </article>
+    </div>
+  </body>
+</html>
