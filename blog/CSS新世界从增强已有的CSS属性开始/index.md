@@ -1524,7 +1524,7 @@ IE 浏览器可以使用 Polyfill 进行支持，可以兼容到 IE9+ 版本。
 
 同时设置 top 属性、bottom 属性的时候，上下两个方位的黏性效果会同时生效。水平方向的 left 属性、right 属性也是类似的，不过由于水平滚动场景不常见，因此，left 属性、right 属性并不常用。
 
-## position:sticky 声明的精彩应用——层次滚动
+## position: sticky 声明的精彩应用——层次滚动
 
 黏性定位可以实现很多很棒的效果，例如巧妙配合 top 黏性定位和 bottom 黏性定位可以实现带有视差效果的层次滚动。
 
@@ -1555,5 +1555,557 @@ IE 浏览器可以使用 Polyfill 进行支持，可以兼容到 IE9+ 版本。
 2. 每一段的标题和网友评论都使用一个 `<section>` 元素包起来，让黏性定位元素隶属于不同的容器元素，这样就实现了依次置顶占位的效果。
 
 上面的例子只是抛砖引玉，只要是符合标题、内容和辅助信息结构的内容布局，都非常适合使用这种层次滚动交互效果，通过几行简单 CSS 代码就可以实现，性价比极高，非常推荐使用。
+
+# font-family 属性和 @font-face 规则新特性
+
+本节主要介绍与字体相关的一些新特性，包括 font-family 属性的功能加强，以及 @font-face 自定义字体。
+
+## system-ui 等全新的通用字体族字体族
+
+表示一个系列字体，而非单指具体某一个字体。字体族又分为普通字体族和通用字体族，例如 Arial 就是普通字体族。通用字体族数量有限，传统的通用字体族包括下面这些（对应的示意图均来自 CSS FontsModule Level 4 规范文档）。
+
+- serif：衬线字体，指笔画有粗有细，开始和结束带有装饰的字体。图 3-44 所示的就是衬线字体。
+
+   ![](res/2022-01-08-16-00-24.png)
+
+- sans-serif：无衬线字体，指笔画粗细均匀，没有额外装饰的字体。图 3-45 所示的就是无衬线字体。
+
+   ![](res/2022-01-08-16-01-18.png)
+
+- monospace：等宽字体，指所有字形具有相同的固定宽度的字体。图 3-46 所示的就是等宽字体。
+
+   ![](res/2022-01-08-16-02-26.png)
+
+- cursive：手写字体，中文中的楷体（font-family: Kaiti）就属于手写字体。图 3-47 所示的就是手写字体。
+
+   ![](res/2022-01-08-16-03-19.png)
+
+- fantasy：奇幻字体，主要用来装饰和表现效果，字形和原本字符可以没有关系。从这一点看，自定义的小图标字体就属于奇幻字体。图 3-48 所示的就是奇幻字体。
+
+   ![](res/2022-01-08-16-04-18.png)
+
+传统的通用字体族在 CSS 世界一书已经详细介绍过了，这里不再赘述，我们把目光投向全新的通用字体族。全新的通用字体族包括以下几种。
+
+- system-ui：系统 UI 字体。
+- emoji：适用于 emoji 字符的字体家族。
+- math：适用于数学表达式的字体家族。
+- fangsong：中文字体中的仿宋字体家族。
+
+system-ui 和 emoji 这两种通用字体族尤其实用。下面我就对每一种通用字体族做一下详细的介绍。
+
+### system-ui 通用字体族
+
+在过去，如果想要使用系统字体，只能使用 font: menu、font: status-bar 等 CSS 声明。但是 menu、status-bar、small-caption 等 font 关键字属性值是包含字号的，不同操作系统中的字号会不一样，因此我们还需要通过设置 font-size 属性值重置字号大小，比较麻烦。
+
+system-ui 字体族的出现很好地解决了使用系统字体的需求。有人会有疑问：为什么要使用系统字体？这是因为所有网站都会设置通用字体，过去流行在网站中指定具体的字体，例如：
+
+```css
+body {
+   font-family: Helvetica, Segoe UI, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+```
+
+指定具体的字体存在以下不足。
+
+1. 字体可能会相互冲突。例如，有些用户给自己的 Windows 操作系统安装了苹方字体，但显示器密度并没有跟上，导致网页里显示的字体效果很奇怪，文字瘦瘦的，边缘糊糊的，不利于阅读，如图 3-49 所示。
+
+   ![](res/2022-01-08-16-12-56.png)
+
+2. 系统升级后可能有了更适合网页的字体，但是由于网页指定了字体，因此并不能使用更适合网页的字体。例如 OS X 10.9 Mavericks 版本、OS X 10.10 Yosemite 版本和 OS X 10.11 El Capitan 版本分别使用了不同的默认字体，如下表所示
+
+| OS X 版本       | 系统字体       |
+| :-------------- | :------------- |
+| 10.11 Mavericks | San Francisco  |
+| 10.10 Yosemite  | Helvetica Neue |
+| 10.9 EI Capitan | Lucida Grande  |
+
+San Francisco 字体具有动态特性，更适合小屏幕，可以提升阅读体验。如果我们代码中指定了 Helvetica Neue 字体，则我们的页面就没办法跟着系统一起提升体验。
+
+综上所述，全局的字体设置应该随着系统字体变动，理论上只需要下面的 CSS 代码就可以实现：
+
+```css
+body {
+   font-family: system-ui;
+}
+```
+
+但是，由于兼容性问题的存在，实际开发过程中是不能直接使用上面的 CSS 代码的，还需要使用其他字体族兜底。
+
+#### 兼容性
+
+system-ui 字体族的兼容性如表 3-8 所示。
+
+![](res/2022-01-08-16-21-43.png)
+
+关于其他兜底字体的设置可以参考一些大型网站，例如 GitHub 站点的字体设置：
+
+```css
+body {
+   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji,
+      Segoe UI Emoji;
+}
+```
+
+先具体分析一下这个字体设置的组成。
+
+- -apple-system 只在 macOS 中有效，是 system-ui 字体族还没出现之前的一种私有语法，可以让 Firefox 浏览器和 Safari 9.1 ～ Safari 10.1 浏览器使用系统字体。
+- BlinkMacSystemFont 也只在 macOS 中有效，是 Chrome 53 ～ Chrome 55 浏览器使用系统字体的一种非标准语法。考虑到目前 system-ui 字体族的兼容性，并从适应未来的角度来看，BlinkMacSystemFont 可以删掉了。
+- Segoe UI、Helvetica、Arial 是给不支持系统字体的浏览器兜底用的，如 IE 浏览器、Edge 浏览器等。其中需要注意以下 3 点。
+
+   - Segoe UI 是 Windows 操作系统从 Vista 版本开始默认的西文字体族，可以在 Windows 操作系统上以最佳的西文字体显示。
+   - Helvetica 是 macOS 和 iOS 中很常用的一款无衬线字体。
+   - Arial 是全平台都支持的一款无衬线字体，可以作为最后的兜底，例如较老版本的 Windows 操作系统。
+
+   可能是 GitHub 的开发者不喜欢 Android 操作系统，这里的字体设置遗漏了 Roboto 字体。Roboto 字体是为 Android 操作系统设计的一款无衬线字体，可以在 Android 操作系统上以最佳的西文字体显示。
+
+- Apple Color Emoji 和 Segoe UI Emoji 是 emoji 字体，此处同样遗漏了 Android 操作系统的 emoji 字体。关于 emoji 字体的更多内容后面会讲解，这里先不做介绍。
+
+通过上面的分析讲解，我们可以去粗取精，得到一段最佳的系统字体设置代码（暂时不考虑 emoji 字体）：
+
+```css
+body {
+   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+```
+
+字体设置还没结束，上面的 CSS 代码还差对 emoji 字体的设置。
+
+### emoji 通用字体族
+
+目前主流的操作系统都已经内置 emoji 字体，如 macOS、iOS、Android 操作系统和 Windows 10 操作系统等。然而，虽然主流的操作系统内置了 emoji 字体，但是有些 emoji 字符并不会显示为彩色的图形，需要专门指定 emoji 字体，代码如下：
+
+```css
+.emoji {
+   font-family: Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
+```
+
+我先具体分析一下这个字体设置的组成。
+
+- Apple Color Emoji 用在 Apple 的产品中的，如 iPhone（iOS）或者 Mac Pro（macOS）等。
+- Segoe UI Emoji 是用在 Windows 操作系统中的 emoji 字体。
+- Segoe UI Symbol 是在 Windows 7 操作系统中添加的一种新字体，是一种 Unicode 编码字体，显示的是单色图案，非彩色图形。
+- Noto Color Emoji 是谷歌的 emoji 字体，用在 Android 和 Linux 操作系统中。
+
+以上 4 种字体涵盖了所有主流的操作系统。不过每次使用 emoji 字体都要指定 4 个元素有些麻烦，加上 Noto Color Emoji 直接作为 font-family 属性值没有效果，因此我们可以专门定义一个新的 emoji 字体来优化代码，例如：
+
+```css
+@font-face {
+   font-family: Emoji;
+   src: local('Apple Color Emoji'), local('Segoe UI Emoji'), local('Segoe UI Symbol'), local('Noto Color Emoji');
+}
+
+.emoji {
+   font-family: Emoji;
+}
+```
+
+我们来看一下上面 emoji 字体设置的效果。下面是两段不同的 HTML 代码：
+
+```html
+<p>笑脸☺：\263a、铅笔✏：\270f、警示⚠：\26a0</p>
+<p class="emoji">笑脸☺：\263a、铅笔✏：\270f、警示⚠：\26a0</p>
+```
+
+在 Windows 10 操作系统下的 Chrome 浏览器中为图 3-50 所示的效果。
+
+![](res/2022-01-08-16-46-25.png)
+
+在 Android 操作系统下的 Chrome 浏览器中为图 3-51 所示的效果。
+
+![](res/2022-01-08-16-46-53.png)
+
+可以看到，应用了 emoji 字体的那段文字的字符图案都变成了彩色的 emoji 图形。
+
+[font-family-emoji](embedded-codesandbox://css-new-world-enhance-existing-css/font-family-emoji)
+
+如果我们仔细观察，就会发现 emoji 字体对普通文本的渲染也产生了影响。例如在 Windows 10 操作系统下的 Chrome 浏览器中，文字在应用 emoji 字体后显示的字体不再是微软雅黑；在 Android 操作系统下的 Chrome 浏览器中，在应用 emoji 字体后，数字和字母的字形变粗了，字宽加大了。这种效果肯定不是我们需要的，因此，在实际开发的时候，emoji 字体设置应该放在系统字体设置后面。结合前面的最佳系统字体设置代码
+
+```css
+@font-face {
+   font-family: Emoji;
+   src: local('Apple Color Emoji'), local('Segoe UI Emoji'), local('Segoe UI Symbol'), local('Noto Color Emoji');
+}
+
+body {
+   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Emoji;
+}
+```
+
+实际效果如何？我们可以做一个测试：
+
+```css
+p {
+   font: menu;
+}
+
+.emoji {
+   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Emoji;
+}
+```
+
+为了方便演示，我们在 HTML 代码中增加一个 Unicode 值为 1f600 的笑脸，代码如下：
+
+```html
+<p>笑脸：☺\263a😀\1f600、铅笔：✏\270f、警示：⚠\26a0</p>
+<p class="emoji">笑脸：☺\263a😀\1f600、铅笔：✏\270f、警示：⚠\26a0</p>
+```
+
+在 Windows 10 操作系统和 macOS 下的 Chrome 浏览器中分别有图 3-52 和图 3-53 所示的效果。
+
+![](res/2022-01-08-16-54-59.png)
+
+在 Android 操作系统下的 Chrome 浏览器和 iOS 下的 Safari 浏览器中有图 3-54 和图 3-55 所示的效果。
+
+![](res/2022-01-08-16-56-04.png)
+
+很有意思，图 3-52 ～图 3-55 所示的 emoji 字体效果居然没有一个是一样的。
+
+[font-family-emoji-at-last](embedded-codesandbox://css-new-world-enhance-existing-css/font-family-emoji-at-last)
+
+很多开发者懵了，emoji 效果的出现难道没有规律的吗？emoji 字体放在后面居然让 emoji 图形还原成字符了？实际上，上面所有问题出现的原因都是 emoji 前面的那些字体的 Unicode 范围涵盖了 emoji 字符的 Unicode 范围。例如，😀 这个字符的 Unicode 值是 1f600，是非常靠后的字符，这种以 1f 开头的 5 位数的 Unicode 值都是非常安全的字符，常规字体的 Unicode 范围并未覆盖这么广。因此，大家可以看到，无论在哪个操作系统下或哪个浏览器中，😀 都能以 emoji 图形显示。
+
+但是，那些靠前的传统的 Unicode 字符就不是这样的。例如 ☺ 这个字符，其 Unicode 值是 263a，比较小，位置非常靠前，很多常见字体中就有这个字符的字体信息。例如，Helvetica 和 Arial 字体可以让 \263a 笑脸以字符图案呈现而不是 emoji 图形，因此，无论是在 Windows 操作系统还是在 macOS 中，\263a 笑脸都是字符效果。但是 \263a 笑脸在 iOS 下 Safari 浏览器中显示的是 emoji 图形，这是因为 iOS 中的 system-ui 字体族包含了 emoji 字体，如果我们删掉 system-ui，类似下面的 CSS 代码：
+
+```css
+.emoji {
+   font-family: Helvetica, Arial, sans-serif, Emoji;
+}
+```
+
+大家可以发现，emoji 笑脸又变成单调的字符图案了。
+
+最后再说一下为何 \263a 笑脸在 Android 操作系统下的 Chrome 浏览器中没有变成字符，这是因为 Android 浏览器并没有 Helvetica 和 Arial 这两个字体。所以，将 emoji 字体设置放在最后，出现部分字符没有变成 emoji 图形的情况，并不是 emoji 字体的问题，而是被为了兼容而设置的其他字体干扰的结果。
+
+于是，我想到了一种优化方法，那就是把 emoji 字体放在 Helvetica 和 Arial 这两个字体的前面，同时通过 unicode-range 属性调整 emoji 字体生效的 Unicode 范围：
+
+```css
+@font-face {
+   font-family: Emoji;
+   src: local('Apple Color Emoji'), local('Segoe UI Emoji'), local('Segoe UI Symbol'), local('Noto Color Emoji');
+   unicode-range: U+1F000-1F644, U+203C-3299;
+}
+
+.emoji {
+   font-family: system-ui, -apple-system, Segoe UI, Roboto, Emoji, Helvetica, Arial, sans-serif;
+}
+```
+
+此时，系统字体、emoji 字体和向下兼容字体达到了完美的平衡。
+
+假设有如下 HTML 代码：
+
+```html
+<p>&#x263a;\263a&#x270f;\270f&#x26a0;\26a0&#x1f600;\1f600&#x1f638;\1f638&#x1f921;\1f921</p>
+<p class="emoji">&#x263a;\263a&#x270f;\270f&#x26a0;\26a0&#x1f600;\1f600&#x1f638;\1f638&#x1f921;\1f921</p>
+```
+
+这段代码在 Windows 10 操作系统下的 Chrome 浏览器中的效果会如图 3-56 所示。
+
+![](res/2022-01-08-17-11-24.png)
+
+其他操作系统下第二行内容中的 emoji 图形也都全部正常显示了。
+
+[font-family-emoji-unicode-range](embedded-codesandbox://css-new-world-enhance-existing-css/font-family-emoji-unicode-range)
+
+于是，我们就可以得到无衬线字体 CSS 最佳实践代码，这套 CSS 代码适合用于设置页面主体文字内容。大家可以看看自己的代码，如果还是传统的字体设置，就可以换成下面这段 CSS 代码：
+
+```css
+@font-face {
+   font-family: Emoji;
+   src: local('Apple Color Emoji'), local('Segoe UI Emoji'), local('Segoe UI Symbol'), local('Noto Color Emoji');
+   unicode-range: U+1F000-1F644, U+203C-3299;
+}
+
+body {
+   font-family: system-ui, -apple-system, Segoe UI, Roboto, Emoji, Helvetica, Arial, sans-serif;
+}
+```
+
+下面附上我觉得不错的衬线字体和等宽字体的字体族设置代码：
+
+```css
+.font-serif {
+   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+.font-mono {
+   font-family: Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+```
+
+### math 通用字体族
+
+math 通用字体族的作用是方便在 Web 中展现数学公式。数学公式包含非常多的层次关系，需要特殊的字体进行支持。图 3-57 所示的就是一个相对比较复杂的数学公式。
+
+![](res/2022-01-08-17-21-10.png)
+
+有一种名为 MathML 的 XML 语言专门用来呈现富有层级关系的数学公式（对 MathML 的 [详细介绍](https://www.zhangxinxu.com/wordpress/?p=8108)）。数学标签（如`<math>`）背后使用的 font-family 就是 math 通用字体族。例如，Windows 操作系统中使用的字体是 Cambria Math，这种字体包括额外的数据信息（如 OpenType 数学表），可以帮助数学公式实现层次化的布局，如可以对一些数字和符号进行拉伸等字体变形。
+
+理论上在开发的时候，我们只要使用 MathML 语言进行数学公式书写就好了，无须关心背后的字体。但是，在实际操作中，Chrome 浏览器并不支持 MathML。为了兼容 Chrome 浏览器，我们需要对数学标签进行 CSS 重定义，此时就需要用到 math 通用字体族：
+
+```css
+math {
+   font-family: Cambria Math, Latin Modern Math;
+}
+```
+
+其中，Cambria Math 是 Windows 操作系统中的数学字体，Latin Modern Math 是 macOS 中的数学字体。
+
+其他数学字体还有很多，如 STIX Two Math、XITS Math、STIXMath、Libertinus Math、TeX Gyre Termes Math、Asana Math、Lucida Bright Math、Minion Math 等。不过这些字体在实际情况中一般都用不到，因此不必深究。
+
+### fangsong 通用字体族
+
+这个字体族来自中文字体“仿宋”，仿宋是介于宋体（衬线字体）和楷体（手写字体）之间的一种字体。和宋体相比，仿宋笔画的水平线通常是倾斜的，端点修饰较少，笔画宽度变化较小。一般非常正式的公告才会用到这个字体，平常开发项目中很少用到：
+
+```css
+article {
+   font-family: fangsong;
+}
+```
+
+### 其他系统关键字
+
+在未来的某个网站中可能会使用下面的系统关键字：
+
+- ui-serif；
+- ui-sans-serif；
+- ui-monospace；
+- ui-rounded。
+
+其中：
+
+- font-family: ui-serif 表示使用和系统一样的衬线字体；
+- font-family: ui-sans-serif 表示使用和系统一样的无衬线字体；
+- font-family: ui-monospace 表示使用和系统一样的等宽字体；
+- font-family: ui-rounded 表示使用和系统一样的圆形字体（边和角都很圆润的字体），如果系统中没有这样的字体，则不指向任何系统字体。
+
+目前 ui- 开头的这些系统字体只有 Safari 浏览器支持，不过在实际项目中也是可以用的，可以添加在传统的字体族关键字 serif、sans-serif 或 monospace 之前，例如：
+
+```css
+body {
+   font-family: system-ui, -apple-system, Segoe UI, Roboto, Emoji, Helvetica, Arial, ui-sans-serif, sans-serif;
+}
+
+.font-serif {
+   font-family: Georgia, Cambria, 'Times New Roman', Times, ui-serif, serif;
+}
+
+.font-mono {
+   font-family: Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', ui-monospace, monospace;
+}
+```
+
+## local() 函数与系统字体的调用
+
+从 IE9 浏览器开始，@font-face 规则开始支持使用 local() 函数调用系统安装的字体。使用 local() 函数主要有两大好处。
+
+1. 简化字体调用。例如我们要使用等宽字体，但是不同操作系统中的等宽字体不一样。为了兼容，我们需要一长串不同的字体名称作为 font-family 属性值，但是根本就记不住这么多字体，没关系，有了 local() 函数，使用这些字体的方法就一下子变得简单了：
+
+   ```css
+   @font-face {
+      font-family: Mono;
+      /* 单个单词可以不用加引号 */
+      src: local('Menlo'), local('Monaco'), local('Consolas'), local('Liberation Mono'), local('Courier New'), local('monospace');
+   }
+
+   .code {
+      font-family: Mono;
+   }
+   ```
+
+2. 在自定义字体场景下提高性能。例如我们希望在各个平台都能使用 Roboto 字体，则可以像下面这样重新定义下 Roboto 字体：
+
+   ```css
+   @font-face {
+      font-family: Roboto;
+      font-style: normal;
+      font-weight: 400;
+      src: local('Roboto'), local('Roboto-Regular'), url(./Roboto.woff2) format('woff2');
+   }
+   ```
+
+   此时 local() 函数可以让已经安装了 Roboto 字体的用户无须发起额外的 Roboto 字体请求，优化了这部分用户的使用体验。
+
+## unicode-range 属性的详细介绍
+
+我们在使用 @font-face 规则自定义字体的时候，还可以通过使用 unicode-range 属性来决定自定义的字体作用在哪些字符上。例如设置 emoji 字体的作用范围：
+
+```css{4}
+@font-face {
+   font-family: Emoji;
+   src: local('Apple Color Emoji'), local('Segoe UI Emoji'), local('Segoe UI Symbol'), local('Noto Color Emoji');
+   unicode-range: U+1F000-1F644, U+203C-3299;
+}
+```
+
+上面演示了 unicode-range 属性的基本用法，下面详细展开讲一下 unicode-range 属性的值和语法。
+
+unicode-range 属性值的写法是“U+”加上目标字符的 Unicode 编码或者 Unicode 范围。初始值为 U+0-10FFFF，也就是所有字符集。其语法如下：
+
+```css
+/* 支持的值 */
+unicode-range: U+26; /* 单个字符编码 */
+unicode-range: U+0025-00FF; /* 字符编码区间 */
+unicode-range: U+4??; /* 通配符 */
+unicode-range: U+0025-00FF, U+4??; /* 多个值 */
+```
+
+有些读者可能不知道 U+4?? 是什么意思，? 可以理解为占位符，表示 0-F 的值，因此 U+4?? 表示从 U+400 到 U+4FF。
+
+在前端领域，使用 Unicode 编码显示字符在各种语言中都是可以的，不过前缀各有不同。
+
+1. 在 HTML 中，字符输出可以使用 &#x 加上 Unicode 编码。
+2. 在 JavaScript 文件中，为了避免中文乱码需要转义，应使用 \u 加上 Unicode 编码。
+3. 在 CSS 文件中，如 CSS 伪元素的 content 属性，就直接使用 \ 加上对应字符的 Unicode 编码值。
+4. unicode-range 属性则是使用 U+ 加上 Unicode 编码。
+
+### unicode-range 属性常用的 Unicode 编码值
+
+对中文用户而言，最常用的 Unicode 编码值有下面这些。
+
+- 基本二次汉字：[0x4e00, 0x9fa5]（或十进制[19968, 40869]）。
+- 数字：[0x30, 0x39]（或十进制[48, 57]）。
+- 小写字母：[0x61, 0x7a]（或十进制[97, 122]）。
+- 大写字母：[0x41, 0x5a]（或十进制[65, 90]）。
+
+如果想获取某一个具体字符的 Unicode 编码值，例如 \263a 编码对应的笑脸字符 ☺，可以使用下面的 JavaScript 代码：
+
+```js
+U = '☺'.codePointAt().toString(16);
+// U 的值是 263a
+```
+
+需要注意的是，IE 浏览器并不支持 codePointAt() 方法，要想兼容 IE 浏览器，需要先引入一段 Polyfill 代码。
+
+### 结语
+
+unicode-range 属性还是很实用的，大家一定要重视。当你遇到中文排版问题，或者需要对某些字符进行精修，一定要想到 unicode-range 属性，说不定爱上 CSS 这门语言就是从 unicode-range 属性开始的。
+
+## woff/woff2 字体
+
+为了方便在网页中高效使用自定义字体，woff 和 woff2 应运而生，它们是两个专门用在 Web 中的字体。其中，woff 字体在 2012 年 12 月被 WorldWide Web Consortium（W3C）推荐使用，IE9+ 浏览器支持该字体。woff2 字体最早在 2013 年 7 月的 Chrome Canary 版本上就可以使用了，发展到现在，几乎已经成为自定义图标字体使用的标准配置，目前浏览器对它的兼容性已经相当不错了。
+
+### 兼容性
+
+woff2 字体的兼容性如表 3-9 所示。
+
+![](res/2022-01-08-17-55-19.png)
+
+woff2 字体最大的优点在于传输的体积小，借用 Google Chrome 官方的话：新的 woff 2.0 Web 字体压缩格式平均要比 woff 1.0 小 30%以上（某些情况下可以达到 50%）。图 3-58 展示了 woff 和 woff2 字体大小对比情况。
+
+![](res/2022-01-08-17-56-06.png)
+
+如果你的项目无须兼容 IE8 浏览器，直接使用 woff2 和 woff 字体就可以了：
+
+```css
+@font-face {
+   font-family: MyFont;
+   src: url(myfont.woff2) format('woff2'), url(myfont.woff) format('woff');
+}
+```
+
+如果你的字体文件不是很大，也可以直接以 Base64 的形式将 woff 或 woff2 字体内嵌在 CSS 中，加载体验比外链字体时的加载体验要好一些，语法是类似的：
+
+```css
+@font-face {
+   font-family: MyFont;
+   src: url('data:font/woff2;base64,...') format('woff2'), url('data:font/woff;base64,...') format('woff');
+}
+```
+
+起初我以为 woff2 和 woff 字体无法像 OpenType 字体（扩展名 otf）那样可以包含其他字体信息，也就是 woff2 和 woff 字体无法配合 font-feature-settings 属性呈现出不同的字体特征效果，结果我发现并不是这样的。woff2 和 woff 字体也是可以包含其他字体特征信息的，不过具体的实现细节我还不清楚。
+
+另外，woff2 字体没有必要再开启 GZIP，因为这个字体文本本身就是压缩过的。
+
+最后说一下 woff 字体的 MIME type 值。关于这一点有点小争议，拿 woff2 字体举例，Google 使用的是 font/woff2，而 W3C 则推荐使用 application/font-woff2。我个人的建议是，在 Web 中使用的时候采用 font/woff2，在服务器端进行 MIME type 配置的时候采用 application/font-woff2。
+
+为了方便大家学习，专门整理了一个关于各种字体类型及其用法的表，如下表所示
+
+| 格式 | 文件拓展名 | MIME Type | 补充信息 |
+| :-- | :-- | :-- | :-- |
+| Web Open Font Format 2 | .woff2 | font/woff2 | Web 字体加载首选 |
+| Web Open Format | .woff | font/woff | Web 字体加载备选 |
+| TrueType | .ttf | font/ttf | 没有在 Web 中使用的理由，请转换成 woff2 字体 |
+| OpenType | .otf | font/otf | 支持更高级的排版功能，如小型大写字母、上标下标、连字等。但是由于缺乏包含高级排版的中文字体，因此中文场景没有使用的理由 |
+| Embedded OpenType | .eot | application/vnd.ms-fontobject | 只有需要兼容 IE6 ~ IE8 浏览器的时候才用到 |
+
+## font-display 属性与自定义字体的加载渲染
+
+假设我们定义一个名为 MyFont 的自定义字体，并且采用 url() 函数外链的方式引入，代码如下：
+
+```css
+@font-face {
+   font-family: MyFont;
+   src: url(myfont.woff2) format('woff2');
+}
+
+body {
+   font-family: MyFont;
+}
+```
+
+这时浏览器的字体加载行为表现为，应用 MyFont 字体的文本会先被隐藏，直到字体加载结束才会显示，但是这个隐藏最多持续 3s，3s 后字体仍未加载结束则会使用其他字体代替。这种加载体验利弊参半。
+
+如果我们使用自定义字体的目的是实现图标字体功能，则这种加载行为就比较合适。因为渲染出来的小图标和小图标使用的真正字符往往外形差异巨大，那些用户看不懂的字符需要被隐藏起来，以此提升视觉体验。但是，如果我们使用自定义字体来呈现普通文本内容，则这种加载行为就不太合适。因为文字内容应该第一时间呈现给用户，而不应该出现长时间的空白，内容绝对比样式更重要。
+
+由于英文字体体积小，最多几百 KB，因此自定义字体的使用非常普遍。自定义字体加载时候空白的问题是一个普遍的现象，在这种背景下，font-display 属性出现了，font-display 属性可以控制字体加载和文本渲染之间的时间线关系。
+
+在对 font-display 属性值展开介绍之前，我先来讲一下字体显示时间线。
+
+### 字体显示时间线
+
+字体显示时间线开始于浏览器尝试下载字体的那一刻，整个时间线分为 3 个时段，浏览器会在这 3 个时段让元素表现出不同的字体渲染行为。
+
+- 字体阻塞时段：如果未加载字体，任何试图使用它的元素都必须以不可见的方式渲染后备字体；如果在此期间字体成功加载，则正常使用它。
+- 字体交换时段：如果未加载字体，任何试图使用它的元素都必须以可见的方式渲染后备字体；如果在此期间字体成功加载，则正常使用它。
+- 字体失败时段：如果未加载字体，则浏览器将其视为加载失败，并使用正常字体进行回退渲染。
+
+font-display 的属性值就是围绕字体显示时间线展开的。
+
+### 正式语法
+
+font-display 的语法如下：
+
+```css
+font-display: [auto | block | swap | fallback | optional];
+```
+
+属性值的含义如下所示。
+
+- auto：字体显示策略由浏览器决定，大多数浏览器的字体显示策略类似 block。
+- block：字体阻塞时段较短（推荐 3s），字体交换时段无限。此值适合图标字体场景。
+- swap：字体阻塞时段极短（不超过 100ms），字体交换时段无限。此值适合用在小段文本，同时文本内容对页面非常重要的场景。
+- fallback：字体阻塞时段极短（不超过 100ms），字体交换时段较短（推荐 3s）。此值适合用于大段文本，例如文章正文，同时对字体效果比较看重的场景，例如广告页面、个人网站等。
+- optional：字体阻塞时段极短（不超过 100ms），没有字体交换时段。此值的作用可以描述为，如果字体可以瞬间被加载（例如已经被缓存了），则浏览器使用该字体，否则使用回退字体。optional 是日常 Web 产品开发更推荐的属性值，因为无论任何时候，网页内容在用户第一次访问时快速呈现是最重要的，不能让用户等待很长时间后再看到你认为的完美效果。
+
+总结一下，如果你的自定义字体是用于字体呈现，就使用 optional，否则使用默认值。至于 swap 和 fallback，如果对你而言自定义字体的效果很重要，同时你能忍受页面字体突然变化的问题，就可以使用下面的设置：
+
+```css
+@font-face {
+   font-family: MyFont;
+   src: url(myfont.woff2) format('woff2');
+   font-display: swap;
+}
+
+body {
+   font-family: MyFont;
+}
+```
+
+### 其他小的知识点
+
+网上有不少资料会提到 FOIT（Flash of Invisible Text）、FOUT（Flashof Unstyled Text）和 FOFT（Flash of Faux Text）等概念。需要注意的是，千万别拿这些概念去理解 font-display 属性，W3C 官方没有这样的概念。这些是十几年前的开发者基于 font-display 属性外在表现提出的概念，请使用官网提供的字体显示时间线来理解 font-display 属性。
+
+如果自定义字体的大小在 30 KB 以内，建议直接用 Base64 将其内联在页面中。不过只有 woff2 字体采取内联处理，woff 字体依旧采用 url() 函数外链体验最佳，因为此时现代浏览器中的字体都是瞬间渲染，根本无须使用 font-display 属性进行字体加载优化。示意如下：
+
+```css
+@font-face {
+   font-family: MyFont;
+   src: url('data:font/woff2;base64,...') format('woff2'), url(myfont.woff) format('woff');
+}
+```
+
+我们还可以使用 `<link rel="preload">` 对字体进行预加载，从而提高字体的加载体验：
 
 // TODO CSS 新世界增强已有的 CSS 属性
