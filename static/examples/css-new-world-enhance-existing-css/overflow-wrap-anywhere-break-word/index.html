@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>overflow-wrap: anywhere 和 break-word 的区别实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      p {
+        display: inline-block;
+        width: min-content;
+        padding: 10px;
+        border: solid deepskyblue;
+        vertical-align: top;
+      }
+
+      .anywhere {
+        overflow-wrap: anywhere;
+      }
+
+      .break-word {
+        overflow-wrap: break-word;
+      }
+
+      .break-all {
+        word-break: break-all;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p class="anywhere">I'm zhangxinxu.</p>
+      <p class="break-word">I'm zhangxinxu.</p>
+      <p class="break-all">I'm zhangxinxu.</p>
+
+      <div class="remind">
+        左1：overflow-wrap: anywhere<br />
+        中间：overflow-wrap: break-word<br />
+        右1：word-break: break-all
+      </div>
+    </div>
+  </body>
+</html>

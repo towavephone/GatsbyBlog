@@ -2108,4 +2108,350 @@ body {
 
 我们还可以使用 `<link rel="preload">` 对字体进行预加载，从而提高字体的加载体验：
 
+# 字符单元的中断与换行
+
+CSS 这门语言在文字排版这一块的功能是非常强大的，例如有大量的 CSS 特性可以对字符单元的中断与换行进行精确控制。如果你想要成为文字排版的高手，本节的内容不容错过。本节会大量出现“CJK 文本”这个词，其中 CJK 是 Chinese/Japanese/Korean 的缩写，因此 CJK 文本指的是中文/日文/韩文这几种文字。
+
+字符单元默认的中断与换行规则如下。
+
+- Space 普通空格、Enter（回车）空格和 Tab（制表符）空格这 3 种空格无论怎样组合都会合并为单个普通空格。
+- 文字可以在 CJK 文本、普通空格和短横线连字符处换行，连续英文单词和数字不换行。
+
+上面的排版规则有时候并不能实现我们想要的排版效果，怎么办呢？此时可以使用专门的 CSS 属性对排版进行控制。
+
+例如，我们不希望 Enter（回车）空格合并为普通空格，想保留换行效果，就可以使用 white-space 属性进行设置。这个在 CSS 世界一书已经详细介绍过了，这里不再展开讲解。又如，我们希望 CJK 文本不换行，但是空格处正常换行，怎么办呢？这就是接下来要介绍的 CSS 新特性。
+
+## 使用 keep-all 属性值优化中文排版
+
+word-break 属性语法如下：
+
+```css
+word-break: normal | break-all | keep-all | break-word;
+```
+
+不同的属性值对应不同的换行规则。keep-all 这个属性值可以让 CJK 文本不换行排版，同时又不影响非 CJK 文本的排版行为。
+
+CSS 中有些属性见得少、用得少，并不是因为它们不实用，而是因为知道的人少。keep-all 就是一个典型代表，其看起来是一个鲜为人知的属性值，但是在中文排版领域非常强大，一旦遇到合适的使用场景，效果就非常理想。
+
+中文虽然是一个字一个字拼起来的，但是有些文字的组合是固定的，不建议断开，如人的姓名、一些固定的词组等。然而默认的排版规则会断开这些姓名和词组，keep-all 属性值可以用来优化这个排版细节。我们看一个例子：有一个表格需要在移动端显示，而移动端设备的宽度是有限的，因此，如果我们不做任何处理，排版效果就会是图 3-59 所示的这样。
+
+![](res/2022-01-09-10-56-26.png)
+
+“会议人员”里的“会议”是一个词，“人员”也是一个词，但是标题那里“人”和“员”两个字断开了，这种中断就非常不利于阅读。“会议人员”标题下方的列表项中的“王二麻子”是一个人名，结果也断开了，这种中断也是可以优化的排版细节。
+
+这种情况下，使用 keep-all 属性值就可以保护我们的中文词组不被断开。完整的代码如下：
+
+```html
+<table>
+   <thead>
+      <tr>
+         <th>会议时间</th>
+         <th>会议地点</th>
+         <th>会议人员(3)</th>
+         <th>会议内容</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>2021 年 2 月 28 日</td>
+         <td>6 号楼 3 楼伏羲会议室</td>
+         <td class="keep-all">张三 李四 王二麻子</td>
+         <td>讨论字符单元的中断与换行，以及如何组织内容让表达效果最好</td>
+      </tr>
+   </tbody>
+</table>
+
+<style>
+   th,
+   td.keep-all {
+      word-break: keep-all;
+   }
+</style>
+```
+
+给表头还有“会议人员”所在的这一列的单元格设置了 word-break: keep-all 声明，此时的排版效果和阅读体验就得到了提升，如图 3-60 所示的箭头所指位置的效果。
+
+![](res/2022-01-09-11-03-57.png)
+
+[keep-all](embedded-codesandbox://css-new-world-enhance-existing-css/keep-all)
+
+keep-all 属性值的兼容性非常好，IE 浏览器也完全支持，之所以这个属性值不常用，完全是因为现代浏览器对其支持得较晚，普遍在 2015 年之后才开始支持。当然，现在大家可以放心使用这一属性值，因为就算浏览器不支持，也会采用默认的中文排版效果。
+
+## break-all 属性值的问题和 line-break 属性
+
+与鲜为人知的 keep-all 属性值相比，word-break 属性的另外一个属性值 break-all 可就广为人知了，其经常会被用到。
+
+测试工程师喜欢输入一些连续的英文和数字进行内容测试，就会出现连续英文字符溢出容器的情况。这个时候设置 word-break: break-all 声明不仅解决了字符溢出问题，同时排版看起来也更整齐了，因此 break-all 属性值深受广大开发者喜爱，甚至有开发者会这样夸张地设置：
+
+```css
+* {
+   word-break: break-all;
+}
+```
+
+这种通配符设置的做法确实有点过了，要知道应用 word-break: break-all 声明其实是为了少数场景下可能出现的排版问题，使用这种做法牺牲了大多数场景的阅读体验，并不是上佳之选。我们来看一个例子，有两段文字，第二段文字应用了 word-break: break-all 声明：
+
+```html
+<style>
+   p {
+      width: 150px;
+      padding: 10px;
+      border: solid deepskyblue;
+   }
+
+   .break-all {
+      word-break: break-all;
+   }
+</style>
+<p>本节会大量出现“CJK文本”这个词。</p>
+<p class="break-all">本节会大量出现“CJK文本”这个词。</p>
+```
+
+最终的排版效果如图 3-61 所示。
+
+![](res/2022-01-09-11-18-18.png)
+
+可以看到，第二段文字中 CJK 这个固定词组被分开了，这大大降低了阅读体验。因此，站在用户阅读体验的角度来看，使用 word-break: break-word（表现为尽量不断开单词）所带来的收益要大于 word-break: break-all。
+
+但是在大多数产品经理和设计师眼中，视觉上的愉悦要比阅读时的舒适更重要，因为 word-break: break-word 声明在有大段连续英文字符的情况下会留下较大的空白，例如，图 3-61 所示上面那个框内的右侧就有明显的空白。虽然上面一段文字阅读速度更快，但是空白的存在导致看上去文字内容没有左右居中，这种不和谐的视觉感受没有哪个设计师可以容忍。因此在现实世界中，只要文本内容是用户动态产生的，都是使用 word-break: break-all 声明。
+
+稍等，事情还没结束。照理说，按照字面意思，元素应用 word-break: break-all 声明后，任何文本内容都不会溢出元素，但是有几个意外情况，那就是连续的破折号、连续的点字符，以及避首标点在设置 word-break: break-all 声明后无法换行。还是根据图 3-61 所示的案例，我们修改一下 HTML 内容，在最后插入一段连续的破折号，代码如下：
+
+```html
+<p>本节会大量出现“CJK文本”这个词。——————————————————</p>
+<p class="break-all">本节会大量出现“CJK文本”这个词。——————————————————</p>
+```
+
+在 Edge 浏览器中的效果如图 3-62 所示。
+
+![](res/2022-01-09-11-18-59.png)
+
+破折号不换行的问题在 Chrome 浏览器和 Firefox 浏览器中同样存在，想要让连续的破折号换行，可以使用 break-word 这个 CSS 属性值。
+
+CSS 中有 3 个属性都有 break-word 属性值，且它们的作用都是一样的，分别是：
+
+```css
+word-break: break-word;
+word-wrap: break-word;
+overflow-wrap: break-word;
+```
+
+不过考虑到 IE 浏览器和 Edge 浏览器不支持 overflow-wrap 属性，以及 IE 浏览器和 Edge 浏览器虽然支持 word-break 属性，却不支持 word-break: break-word 声明，最终动态内容的换行控制可以写成下面这样的组合：
+
+```css
+p {
+   /* 字符换行主力 */
+   word-break: break-all;
+   /* 兼容 IE 浏览器和 Edge 浏览器的破折号换行 */
+   word-wrap: break-word;
+}
+```
+
+虽然上面的代码可以让连续英文和连续破折号换行，但是依然会在中文标点的前后留下空白，如图 3-63 所示。
+
+![](res/2022-01-09-11-28-55.png)
+
+如果希望中文标点也能成为换行点，彻底告别空白，则可以使用 line-break 属性：
+
+```css
+p {
+   /* 中文标点也能换行 */
+   line-break: anywhere;
+}
+```
+
+![](res/2022-01-09-14-57-18.png)
+
+[break-all](embedded-codesandbox://css-new-world-enhance-existing-css/break-all)
+
+从图 3-64 可以看出，布局空间被字符充分利用了。不过，虽然布局规整了，阅读体验却不一定好，例如避尾标点前引号出现在了一行的末尾，而避首标点句号出现了在一行的开头。因此，究竟要换行到何种程度，请大家根据实际项目场景自行判断。
+
+以上提到的换行处理技术非常适合动态内容。如果呈现的文本内容是静态的，我们有能力对其中每个字符进行精确调整，这时候可以试试更高级的排版技术。
+
+## hyphens 属性与连字符
+
+hyphens 是专为英文场景设计的一个属性，这个属性可以让英文单词断开换行的时候带上连字符（也就是短横线），这样可以让读者知道上一行的尾部和下一行的头部连起来是一个完整的单词。其语法如下：
+
+```css
+hyphens: none | manual | auto;
+```
+
+其中，属性值 auto 可以让英文单词在行尾自动换行，同时带上短横线。需要注意的是，英文单词换行不需要设置 word-break 或者 word-wrap 属性，hyphens 属性自带换行能力。如果你设置了 word-break: break-all 声明，反而不会有短横线效果。
+
+举个例子，假设页面的 `<html>` 元素的 lang 属性值是 en，则下面的代码就会有图 3-65 所示的样式效果：
+
+```html
+<p class="hyphens">
+   hi, my name is zhangxinxu, how are you?
+</p>
+
+<style>
+   p {
+      width: 150px;
+      padding: 10px;
+      border: solid deepskyblue;
+   }
+
+   .hyphens {
+      hyphens: auto;
+   }
+</style>
+```
+
+![](res/2022-01-09-11-40-53.png)
+
+乍一看，hyphens: auto 还是有点儿用的，但可惜的是，在中文场景中，hyphens: auto 一点儿用处都没有，具体原因有以下几条。
+
+1. 需要在英语环境中，也就是需要祖先元素设置 lang="en" 属性。
+2. 由于中文语句中随时可以换行，因此在中文场景下，轮不到 hyphens 属性起作用。就算真的遇到长串的连续字母和数字，也不一定是英文单词，多半是 URL 网址或者特殊字符串，而在网址换行位置添加短横线是不可以的，因为增加一个短横线会导致原本正确的网址变成错误的网址。
+3. 只有在 Android 操作系统下和 macOS 下的 Chrome 浏览器中才有效果，在用户量较大的 Windows 操作系统中无效。
+
+综上所述，在中文场景下，使用 hyphens 属性自动添加短横线是行不通的。这是不是就说明 hyphens 属性彻底无用呢？是的，彻底无用！我们没有在中文项目中使用 hyphens 属性的理由。但是，请注意，我们可以使用 hyphens 属性的默认特性来设置类似 auto 属性值的排版体验。hyphens 属性的默认值是 manual，表示单词在有换行机会的时候才换行，其中一个常见的换行机会就是连字符。
+
+很多人并不清楚，连字符总共分两种。一种是“硬连字符”（U+2010），称为可见的换行机会。这个字符就是我们键盘上的短横线“-”，是可见的。另一种是“软连字符”（U+00AD），称为不可见的换行机会。这个字符很有意思，通常情况是隐藏的，但是，如果浏览器觉得有必要在软连字符所在位置打断单词，则连字符又会变为可见。
+
+在这里，我们需要用到的就是软连字符。在 HTML 中，可以使用 `&shy;` 表示软连字符，单词 shy 的意思是害羞的，因此很好记忆，“害羞”的符号就是软连字符。当然，也可以使用 Unicode 编码表示，即 `&#x00AD;`。例如，下面这段 HTML 代码，在 zhangxinxu 每个汉字的拼音连接处插入了“害羞”的软连字符：
+
+```html
+<p>大家好，我叫zhang&shy;xin&shy;xu，感谢大家购买我的书。</p>
+```
+
+同时设置为两端对齐：
+
+```css
+p {
+   padding: 10px;
+   border: solid deepskyblue;
+   text-align: justify;
+   text-justify: inter-ideograph;
+}
+```
+
+效果如图 3-66 所示，换行符在换行位置显示了，在非换行位置则不可见。
+
+![](res/2022-01-09-13-44-52.png)
+
+如果我们没有在文字中插入连字符，则效果如图 3-67 所示，第一行中文文字之间会有很大的间隙，排版效果看起来非常不自然。
+
+![](res/2022-01-09-13-48-03.png)
+
+[hyphens-manual-shy](embedded-codesandbox://css-new-world-enhance-existing-css/hyphens-manual-shy)
+
+由于软连字符需要提前手动插入，因此，这种排版优化只适合文本内容固定的静态场景。如果想要取消软连字符的换行特性，可以使用 hyphens: none，不过由于在 Chrome 浏览器中不支持 hyphens: none 这个声明，因此其没有实用价值。
+
+软连字符的兼容性是极好的，IE 浏览器已经完全支持，大家可以放心大胆使用。但是，软连字符实现换行只适合英文单词，类似 https://www.cssworld.cn 这样的 URL 地址会因为连字符的出现而产生语义上的干扰，那有没有其他什么符号可以让连续的英文和数字出现换行机会，同时不会影响语义呢？还真有！
+
+## `<wbr>` 与精确换行的控制
+
+HTML 中有一个 `<wbr>` 元素标签，可以实现连续英文和数字的精准换行，具体效果如下：如果宽度足够，不换行；如果宽度不足，则在 `<wbr>` 元素所在的位置进行换行。也就是说，`<wbr>` 元素提供了一个换行机会。
+
+借用图 3-66 所示对应的例子，如果我们把 `&shy;` 换成 `<wbr>` 标签，代码如下：
+
+```html
+<p>大家好，我叫zhang<wbr />xin<wbr />xu，感谢大家购买我的书。</p>
+```
+
+则会有图 3-68 所示的效果。
+
+![](res/2022-01-09-13-54-56.png)
+
+[wbr-tag](embedded-codesandbox://css-new-world-enhance-existing-css/wbr-tag)
+
+### `<wbr>` 实现换行原理
+
+`<wbr>` 之所以能够创造新的换行机会，是因为其创建了一个带有换行特性的宽度为 0px 的空格。该空格的 Unicode 编码是 U+200B，因此 `<wbr>` 标签也可以替换为 `&#x200b;`，例如下面 HTML 代码实现的效果和图 3-68 所示的效果是一样的：
+
+```html
+<p>大家好，我叫zhang&#x200B;xin&#x200B;xu，感谢大家购买我的书。</p>
+```
+
+不过 `&#x200b;` 的语义不太好，建议大家还是使用 `<wbr>`。
+
+### IE 浏览器的兼容处理
+
+IE 浏览器并不支持 `<wbr>` 标签，不过好在有简单的方法使 IE 浏览器也兼容 `<wbr>` 的换行特性，那就是加上以下 CSS 代码：
+
+```css
+wbr:after {
+   content: '\00200B';
+}
+```
+
+### `<wbr>` 与 `<br>` 换行的区别
+
+`<wbr>` 是 “Word Break Opportunity” 的缩写，表示有机会就断开换行；而 `<br>` 则是直接换行显示，无论宽度是否足够。
+
+### 其他
+
+`<wbr>` 换行和 `&shy;` 换行的区别在于 `<wbr>` 在换行的时候不会有额外的字符显现，因此，其非常适合用于非英文单词的内容换行，例如 URL 网址，或者长长的 API 名称等。例如，CanvasRenderingContext2D.globalCompositeOperation 就可以使用 `<wbr>` 进行排版优化，保证换行在完整单词末尾处，提高阅读体验：
+
+```html
+Canvas<wbr />Rendering<wbr />Context2D<wbr />.global<wbr />Composite<wbr />Operation
+```
+
+同样，由于 `<wbr>` 需要提前插入，因此其更适合文本内容固定的静态场景。
+
+word-break: keep-all 声明可以让 CJK 文本不换行，我们可以在 CJK 文本中的恰当位置插入 `<wbr>` 标签，实现在宽度不足的时候一行变两行的排版优化效果。在应用了 white-space: nowrap 声明的场景下也是类似的。和 `&shy;` 字符一样，`<wbr>` 不能与 word-break: break-all 同时使用，因为这会使 `<wbr>` 变得没有意义。
+
+最后，总结一下本节的内容。
+
+- 动态文本内容换行使用 word-break: break-all 和 word-wrap: break-word 组合代码，如果要彻底换行，还可以使用 line-break: anywhere。
+- 静态内容排版不建议使用 word-break 属性、word-wrap 属性或者 line-break 属性，如果是英文单词，则使用 `&shy;` 软连字符优化排版；如果是非英文单词，则使用 `<wbr>` 标签优化排版。
+
+## overflow-wrap: anywhere 声明有什么用
+
+overflow-wrap 属性就是以前的 word-wrap 属性，由于 overflow-wrap 属性在 IE 浏览器中不被支持，而其他现代浏览器依然支持 word-wrap 属性语法，因此，没有任何理由使用 overflow-wrap 属性。如果某一天 overflow-wrap 属性突然支持了一个新的属性值 anywhere，那时就有了使用 overflow-wrap 属性的理由。
+
+overflow-wrap 属性的正式语法如下：
+
+```css
+overflow-wrap: normal | break-word | anywhere;
+```
+
+这里主要讲一下属性值 anywhere 的作用。在展开讲解之前，先给大家讲解一个概念，关于“硬换行”和“软换行”。硬换行会在文本的换行点处插入实际换行符；而软换行的文本实际上仍在同一行，但看起来它被分成了多行，例如通过 word-break: break-all 让长英文单词换行就属于软换行。
+
+属性值 anywhere 正常状态下的效果和属性值 break-word 类似，具体描述为：如果行中没有其他可接受的断点，则可以在任何点断开原本不可断开的字符串（如长单词或 URL），并且在断点处不插入连字符。
+
+属性值 anywhere 和属性值 break-word 的不同之处在于，overflow-wrap: anywhere 在计算最小内容尺寸的时候会考虑软换行，而 overflow-wrap: break-word 则不会考虑软换行。看下面这个例子：
+
+```html
+<p class="anywhere">I'm zhangxinxu.</p>
+<p class="break-word">I'm zhangxinxu.</p>
+<style>
+   p {
+      display: inline-block;
+      width: min-content;
+      padding: 10px;
+      border: solid deepskyblue;
+      vertical-align: top;
+   }
+
+   .anywhere {
+      overflow-wrap: anywhere;
+   }
+
+   .break-word {
+      overflow-wrap: break-word;
+   }
+</style>
+```
+
+在 Chrome 浏览器中的效果如图 3-69 所示。
+
+![](res/2022-01-09-14-14-05.png)
+
+大家可以看到，应用了 overflow-wrap: anywhere 声明的元素的最小宽度是把每一个英文单词都断开后的宽度，而应用了 overflow-wrap: break-word 声明的元素还是按照默认的最小宽度规则进行计算。也就是说，属性值 anywhere 和 break-word 均按照最小宽度渲染，都保留标点符号的避首规则和避尾规则，但是 anywhere 的换行点是单词的任意位置，而 break-word 的换行点是单词之间的空格。
+
+[overflow-wrap-anywhere-break-word](embedded-codesandbox://css-new-world-enhance-existing-css/overflow-wrap-anywhere-break-word)
+
+由此可见，overflow-wrap: anywhere 就像 overflow-wrap: break-word 和 word-break: break-all 声明的混合体，适合用在弹性布局中，即元素尺寸足够的时候尽量让长串的数字和英文完整显示，不随便中断；如果尺寸不够，那就能断则断。overflow-wrap: anywhere 的行为表现和 line-break: anywhere 是有明显区别的，line-break: anywhere 不管元素尺寸是否足够，都是能断则断。
+
+### 兼容性
+
+overflow-wrap: anywhere 声明目前的兼容性还不算乐观，在 2021 年 2 月 Safari 浏览器还不支持，具体信息如表 3-11 所示。
+
+![](res/2022-01-09-14-20-10.png)
+
+由于 overflow-wrap: anywhere 的兼容性不佳，因此它目前的实用性远不及 line-break: anywhere，大家了解即可。
+
 // TODO CSS 新世界增强已有的 CSS 属性

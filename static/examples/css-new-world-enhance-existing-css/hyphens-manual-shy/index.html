@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hyphens: manual 与软连字符优化排版效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .demo p {
+        margin: -10px 0 1em;
+        font-size: medium;
+      }
+
+      p {
+        width: 170px;
+        padding: 10px;
+        border: solid deepskyblue;
+        text-align: justify;
+        text-justify: inter-ideograph;
+      }
+
+      p + p {
+        width: 190px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>没有连字符</h4>
+      <p>大家好，我叫 zhangxinxu，感谢大家购买我的书。</p>
+      <p>大家好，我叫 zhangxinxu，感谢大家购买我的书。</p>
+
+      <h4>有软连字符</h4>
+      <p>大家好，我叫 zhang&shy;xin&shy;xu，感谢大家购买我的书。</p>
+      <p>大家好，我叫 zhang&shy;xin&shy;xu，感谢大家购买我的书。</p>
+    </div>
+  </body>
+</html>

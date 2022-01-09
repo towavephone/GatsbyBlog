@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><wbr> 标签与排版效果优化实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .demo p {
+        margin: -10px 0 1em;
+        font-size: medium;
+      }
+
+      p {
+        width: 154px;
+        padding: 10px;
+        border: solid deepskyblue;
+        text-align: justify;
+        text-justify: inter-ideograph;
+      }
+
+      p + p {
+        width: 184px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>没有 &lt;wbr&gt;</h4>
+      <p>大家好，我叫 zhangxinxu，感谢大家购买我的书。</p>
+      <p>大家好，我叫 zhangxinxu，感谢大家购买我的书。</p>
+
+      <h4>有 &lt;wbr&gt; 或 &amp;#x200B;</h4>
+      <p>大家好，我叫 zhang<wbr>xin<wbr>xu，感谢大家购买我的书。</p>
+      <p>大家好，我叫 zhang&#x200B;xin&#x200B;xu，感谢大家购买我的书。</p>
+    </div>
+  </body>
+</html>
