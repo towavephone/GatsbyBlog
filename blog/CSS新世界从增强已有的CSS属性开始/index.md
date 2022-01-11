@@ -2454,4 +2454,219 @@ overflow-wrap: anywhere 声明目前的兼容性还不算乐观，在 2021 年 2
 
 由于 overflow-wrap: anywhere 的兼容性不佳，因此它目前的实用性远不及 line-break: anywhere，大家了解即可。
 
+# text-align 属性相关的新特性
+
+text-align 属性支持常用的属性值 left、right、center、justify，也支持逻辑属性值 start、end，除此之外，还新增了多个其他属性值。包括：
+
+```css
+text-align: match-parent;
+text-align: justify-all;
+text-align: <string>;
+```
+
+不过这几个新增的属性值的兼容性都不太好，因此不适合在生产环境中使用，大家先简单了解一下即可。
+
+## match-parent 等新属性值
+
+先了解一下 match-parent 属性值。match-parent 视觉表现类似 inherit，由于 text-align 属性本身就具有继承性，因此，match-parent 不是用来改变视觉上的对齐效果的，而是用来改变“看不见”的对齐计算值。
+
+没错，match-parent 属性值的作用是有些奇怪，我们看一个例子来帮助我们理解这个属性值，HTML 代码如下：
+
+```html
+<section>
+   <p id="p1"></p>
+</section>
+<section>
+   <p id="p2"></p>
+</section>
+```
+
+有 p1 和 p2 两个元素，此时，我们给 p2 设置 text-align: match-parent，代码如下：
+
+```css
+section {
+   direction: rtl;
+   text-align: start;
+}
+
+#p2 {
+   text-align: -webkit-match-parent;
+   text-align: match-parent;
+}
+```
+
+此时，p1 和 p2 两个元素的对齐表现是一样的，但是如果我们使用 JavaScript 代码去获取 p1 和 p2 两个元素的 text-align 计算值，就会有不同的表现：
+
+```js
+// 显示的是 start
+console.log(getComputedStyle(p1).textAlign);
+// 显示的是 right
+console.log(getComputedStyle(p2).textAlign);
+```
+
+match-parent 的计算值是视觉上的 left 或者 right，哪怕继承自 start 或者 end 这类逻辑属性值。这样有助于我们在 JavaScript 应用中知道元素对齐的视觉方位。
+
+接下来了解一下 justify-all 属性值。justify-all 属性值的作用是实现两端对齐，它和 justify 属性值的区别在于 justify-all 属性值可以让最后一行也表现为两端对齐。可惜目前还没有浏览器支持 justify-all 属性值，因此要实现最后一行两端对齐，可以使用目前兼容性最好的 CSS 属性 text-align-last 属性，示意如下：
+
+```css
+text-align-last: justify;
+```
+
+可惜 Safari 浏览器一直到 Safari 14 版本都没有支持 text-align-last 属性。
+
+说到两端对齐，顺便提一下 text-justify 属性。在现代浏览器中，两端对齐的算法是：CJK 文本使用 letter-spacing 间隔算法，非 CJK 文本使用 word-spacing 间隔算法。如果我们希望非 CJK 文本也使用 letter-spacing 间隔算法，也就是每个字母彼此都可以拉开间隙，则可以使用：
+
+```css
+text-justify: inter-character;
+```
+
+可惜 Safari 浏览器一直到 Safari 14 版本都没有支持 text-justify 属性。
+
+## text-align 属性的字符对齐特性
+
+在 CSS Text Module Level 4 规范中，text-align 属性还新增了对字符属性值的支持。
+
+这个字符属性值必须是单个字符，否则会被忽略，同时只能作用在单元格中，让单元格基于这个指定的字符对齐。字符可以和关键字属性值一起使用，如果没有关键字属性值，字符会显示在右侧。例如：
+
+```css
+td {
+   text-align: '.' center;
+}
+```
+
+HTML 如下：
+
+```html
+<table>
+<col width="40">
+<tr><th>长途电话费用
+<tr><td>¥1.30
+<tr><td>¥2.50
+<tr><td>¥10.80
+<tr><td>¥111.01
+<tr><td>¥85.
+<tr><td>N/A
+<tr><td>¥.05
+<tr><td>¥.06
+</table>
+```
+
+此时，单元格的数值会按照字符“.”进行对齐：
+
+```
++---------------------+
+|     长途电话费用     |
++---------------------+
+|         ¥1.30       |
+|         ¥2.50       |
+|        ¥10.80       |
+|       ¥111.01       |
+|        ¥85.         |
+|        N/A          |
+|          ¥.05       |
+|          ¥.06       |
++---------------------+
+```
+
+更细节的对齐规则（如边界和换行）这里做了省略
+
+# text-decoration 属性全新升级
+
+顾名思义，text-decoration 就是“文字装饰”的意思，常见应用之一就是控制链接元素的下划线样式，代码如下：
+
+```css
+a {
+   text-decoration: none;
+}
+
+a:hover {
+   text-decoration: underline;
+}
+```
+
+还可以和 `<del>` 元素一起使用以实现贯穿线删除效果：
+
+```css
+del {
+   text-decoration: line-through;
+}
+```
+
+不少前端开发者对 text-decoration 属性的认识就只有上面这点信息，实际上 text-decoration 属性包含的细节知识还是比较多的。
+
+## text-decoration 属性现在是一种缩写
+
+在过去，text-decoration 属性就是一个单一的 CSS 属性。但是现在，text-decoration 属性则是一个 CSS 缩写属性，完整的 CSS 属性包括 text-decoration-line、text-decoration-style、text-decoration-color 和 text-decoration-thickness。
+
+- text-decoration-line：表示装饰线的类型。语法如下：
+
+   ```css
+   /* 没有装饰线 */
+   text-decoration-line: none;
+   /* 下装饰线 */
+   text-decoration-line: underline;
+   /* 上装饰线 */
+   text-decoration-line: overline;
+   /* 贯穿装饰线 */
+   text-decoration-line: line-through;
+   ```
+
+   text-decoration-line 属性支持多个值同时使用，例如
+
+   ```css
+   /* 上、下装饰线同时出现 */
+   text-decoration-line: underline overline;
+   ```
+
+- text-decoration-style：表示装饰线的样式风格。语法如下
+
+   ```css
+   /* 实线 */
+   text-decoration-style: solid;
+   /* 双实线 */
+   text-decoration-style: double;
+   /* 点线 */
+   text-decoration-style: dotted;
+   /* 虚线 */
+   text-decoration-style: dashed;
+   /* 波浪线 */
+   text-decoration-style: wavy;
+   ```
+
+   不同的 text-decoration-style 属性值效果如图 3-71 所示。
+
+   ![](res/2022-01-11-12-08-01.png)
+
+- text-decoration-color：表示装饰线的颜色。
+- text-decoration-thickness：表示装饰线的粗细。
+
+   缩写的正式语法如下：
+
+   ```css
+   text-decoration: <text-decoration-line> || <text-decoration-style> || <text-decoration-color> ||
+      <text-decoration-thickness>;
+   ```
+
+   意思就是，4 个子属性值位置随机、组合随机，因此下面这些语法都是合法的：
+
+   ```css
+   text-decoration: underline;
+   text-decoration: dotted underline;
+   text-decoration: red underline dashed;
+   text-decoration: wavy underline 3px red;
+   ```
+
+   不过由于 text-decoration-thickness 属性是在 CSS Text DecorationModule Level 4 规范中加入的，因此兼容性要差一些，因此属性值 wavy underline 3px red 建议分开设置：
+
+   ```css
+   text-decoration: wavy underline red;
+   text-decoration-thickness: 3px;
+   ```
+
+## text-decoration 属性的累加特性
+
+text-decoration 最有意思的特性要数装饰线的累加特性了。
+
+过去我一直坚信，如果父元素和子元素使用相同的 CSS 属性，那么子元素的属性值一定会覆盖父元素的属性值。CSS 属性那么多，几乎都遵循了这个规律，然而，在这么多 CSS 属性中出现了一个异类，那就是 text-decoration 属性。当父元素和子元素同时设置 text-decoration 效果的时候，文字的装饰线效果是累加的，而不是覆盖的。例如：
+
 // TODO CSS 新世界增强已有的 CSS 属性
