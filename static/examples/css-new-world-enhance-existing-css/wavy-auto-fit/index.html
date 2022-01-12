@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>宽度 100% 自适应的波浪线效果实现实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      wavy {
+        display: block;
+        height: 0.5em;
+        white-space: nowrap;
+        letter-spacing: 100vw;
+        padding-top: 0.5em;
+        overflow: hidden;
+      }
+
+      wavy::before {
+        content: '\2000\2000';
+        text-decoration: overline;
+        text-decoration: overline wavy;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <wavy></wavy>
+    </div>
+  </body>
+</html>

@@ -2669,4 +2669,292 @@ text-decoration 最有意思的特性要数装饰线的累加特性了。
 
 过去我一直坚信，如果父元素和子元素使用相同的 CSS 属性，那么子元素的属性值一定会覆盖父元素的属性值。CSS 属性那么多，几乎都遵循了这个规律，然而，在这么多 CSS 属性中出现了一个异类，那就是 text-decoration 属性。当父元素和子元素同时设置 text-decoration 效果的时候，文字的装饰线效果是累加的，而不是覆盖的。例如：
 
+```html
+<section>
+   <p>父元素设置了 text-decoration: dashed underline</p>
+   <p>子元素设置了 text-decoration: wavy overline</p>
+</section>
+<style>
+   section {
+      text-decoration: dashed underline;
+   }
+
+   p {
+      text-decoration: wavy overline;
+   }
+</style>
+```
+
+按照我们的日常开发经验，`<p>` 元素是子元素，其设置的 text-decoration 属性值 wavy overline 应该覆盖 `<section>` 父元素设置的 text-decoration 属性值 dashed underline，但是实际上，最终呈现的是两个属性值合并的效果，如图 3-72 所示。
+
+![](res/2022-01-11-19-53-44.png)
+
+[text-decoration-merge](embedded-codesandbox://css-new-world-enhance-existing-css/text-decoration-merge)
+
+## 唯一实用的 wavy 波浪线
+
+text-decoration 属性虽然新增了多个装饰线样式，同时可以控制线条颜色和粗细，乍一看使人感觉这个属性非常强大，实际上 text-decoration 属性还没有 10 年前“混得好”，至少 10 年前还流行给链接加个下划线（现在链接都是通过颜色区分）。
+
+text-decoration 属性境遇尴尬的另外一个原因就是它竞争不过 border 属性：用 border 属性实现实线、双实线、点线或虚线效果很轻松，它对颜色和粗细的控制能力也很强，而且 border 属性配合 padding 属性还能灵活控制装饰线和文字之间的距离，也支持多行下划线（元素需要保持 inline 水平）；虽然新出现的 text-underline-offset 属性可以控制文字和下划线的距离，但是其兼容性比 border 属性差得多。所以无论怎么看都是 border 属性更有优势。
+
+好在 text-decoration 属性并非一无是处，它有一个特性要比 border 属性强，那就是可以实现波浪线装饰线效果，这个是 border 属性实现不了的。
+
+例如，想要绘制一个宽度 100% 的波浪线效果，可以自定义 wavy 标签，然后应用如下 CSS 代码：
+
+```css
+wavy {
+   display: block;
+   height: 0.5em;
+   white-space: nowrap;
+   letter-spacing: 100vw;
+   padding-top: 0.5em;
+   overflow: hidden;
+}
+
+wavy::before {
+   content: '\2000\2000';
+   /* IE 浏览器用实线代替 */
+   text-decoration: overline;
+   /* 现代浏览器，Safari 浏览器不支持 text-decoration: overline wavy 缩写 */
+   text-decoration: overline wavy;
+}
+```
+
+此时，只要插入下面这段 HTML 代码，就会有波浪线效果了：
+
+```html
+<wavy></wavy>
+```
+
+实现的原理很简单，伪元素生成两个空格，使用 letter-spacing 属性控制两个空格占据足够的宽度，这样空格字符的装饰线的尺寸一定可以充满整个容器，此时只要设置装饰线的类型是波浪线，宽度 100% 自适应的波浪线效果就实现了。最终效果如图 3-73 所示（截自 Chrome 浏览器）。
+
+[wavy-auto-fit](embedded-codesandbox://css-new-world-enhance-existing-css/wavy-auto-fit)
+
+与用图片实现的波浪线相比，这里借助 text-decoration 属性实现的波浪线更加灵活，颜色可以通过 color 属性控制，大小可以通过 font-size 控制。虽然使用 CSS 渐变也能生成波浪线效果，但是那个要难理解多了。总而言之，波浪线效果的最佳实现方法就是使用 text-decoration 属性，这也是 text-decoration 属性唯一无可替代的新特性。
+
+## 可能需要 text-underline-position: under 声明
+
+text-underline-position 属性可以用来设置下划线的位置。text-underline-position 这个属性很有意思，虽然是最近几年现代浏览器才开始支持的 CSS 新属性，但是 IE 浏览器很早就支持这个 CSS 属性了，而且从 IE6 浏览器就开始支持了。
+
+但是，别高兴得太早，不要以为 IE 浏览器这次挣回了点面子，其实 IE 浏览器支持的那些属性值在 CSS 规范中压根就没被承认，而且一点也不实用。为了对比方便，我专门整理了一个表，把各个浏览器目前支持的 text-underline-position 属性值罗列到了一起，个中关系一目了然，如表所示。
+
+| 属性值/浏览器             | IE/Edge | Chrome | Firefox | Safari(PC) |
+| :------------------------ | :------ | :----- | :------ | :--------- |
+| auto（初始值）            | √       | √      | √       | √          |
+| above（非标准）           | √       | ×      | √       | ×          |
+| below（非标准）           | √       | ×      | √       | ×          |
+| under                     | ×       | √      | √       | √          |
+| left                      | ×       | √      | √       | ×          |
+| right                     | ×       | √      | √       | ×          |
+| from-font（Level 4 新增） | ×       | ×      | √       | ×          |
+
+虽然上表所示的 text-underline-position 支持的属性值很多，但是实用的属性值其实就只有一个，那就是 under。
+
+在默认状态下，下划线在基线位置附近显示，于是就会和“g”“q”这些下方有“小尾巴”的字符发生重叠，以及会和中文字体，尤其是那些字重偏下的中文字体（如微软雅黑）的下边缘重叠，这样的视觉体验很不好，例如：
+
+```html
+<p>看看下划线的位置在哪里？</p>
+<style>
+   p {
+      text-decoration: underline;
+   }
+</style>
+```
+
+上面代码的效果如图 3-74 所示，可以看到很多汉字最下面的“横”笔画和下划线重叠在一起了，看起来很不舒服。
+
+![](res/2022-01-12-10-44-41.png)
+
+text-underline-position: under 声明就是专门用来解决这个糟糕的视觉体验问题的，例如：
+
+```html{8}
+<p class="under">看看下划线的位置在哪里？</p>
+<style>
+   p {
+      text-decoration: underline;
+   }
+
+   .under {
+      text-underline-position: under;
+   }
+</style>
+```
+
+上面代码的效果如图 3-75 所示，可以看到汉字最下面的“横”笔画和下划线明显分开了，这个下划线效果看起来就舒服多了。
+
+![](res/2022-01-12-10-46-23.png)
+
+[text-underline-position](embedded-codesandbox://css-new-world-enhance-existing-css/text-underline-position)
+
+如果是桌面端的网页项目，下面这段 CSS 语句务必引入：
+
+```css
+a {
+   text-underline-position: under;
+}
+```
+
+text-underline-position 属性除了支持 under，还支持 left、right 和 from-font 这几个 CSS 规范定义的属性值。
+
+- left 和 right 这两个属性值平常根本用不到，只有在使用 writing-mode 属性让文字垂直排版，并且需要控制下划线左右位置的时候才会用到。
+- from-font 是 CSS 文本装饰规范 Level 4 新增的属性值，表示优先使用字体文件中设置的下划线位置，如果字体没有设置下划线对齐信息，就使用 auto 效果。大家目前可以无视 from-font 这个属性值，因为就算不考虑其目前糟糕的兼容性，这个属性值也是非常不实用的，限制太多了。
+
+总而言之，如果使用了文字的下划线效果，你可能需要 text-underline-position: under 来优化下划线的显示位置。
+
+## 更需要 text-underline-offset 属性
+
+text-underline-position 属性虽然可以调整下划线的位置，但是调整的位置都是固定的，不能满足多变的开发需求。此时，你更需要 text-underline-offset 属性。
+
+text-underline-offset 属性可以用来设置下划线的位置，其偏移量支持数值和百分比值。例如：
+
+```css
+<p class="under">看看下划线的位置在哪里？</p>
+<style>
+   p {
+      text-decoration: underline;
+   }
+
+   .under {
+      text-underline-offset: 1em;
+   }
+</style>
+```
+
+表示下划线从原来的位置继续向下偏移 1em，对应的效果如图 3-76 所示。
+
+![](res/2022-01-12-10-55-10.png)
+
+[text-underline-offset](embedded-codesandbox://css-new-world-enhance-existing-css/text-underline-offset)
+
+百分比值表示偏移量相对于 1em 的大小。因此，text-underline-offset: 100% 等同于 text-underline-offset: 1em。
+
+text-underline-offset 支持负值，此时下划线就会向上偏移。
+
+text-underline-offset 属性只对下划线类型的装饰线有效，对删除线和上划线都无效。例如，对下面两种装饰线设置 text-underline-offset 属性是无效的：
+
+```css
+/* 设置 text-underline-offset 属性无效 */
+text-decoration: through;
+text-decoration: overline;
+```
+
+如果父元素设置了下划线，然后希望子元素的下划线位置偏移，下面的 CSS 语句是无效的：
+
+```css
+p {
+   text-decoration: underline;
+   text-underline-offset: 0.5em;
+}
+
+p span {
+   text-underline-offset: 1.5em; /* 无效 */
+}
+```
+
+此时子元素明确声明具有下划线才有效，例如：
+
+```css{7}
+p {
+   text-decoration: underline;
+   text-underline-offset: 0.5em;
+}
+
+p span {
+   text-decoration: underline;
+   text-underline-offset: 1.5em; /* 有效 */
+}
+```
+
+目前所有现代浏览器均已支持 text-underline-offset 属性，读者可以尝试使用。
+
+## 讲一讲 text-decoration-skip 属性的故事
+
+text-decoration-skip 属性可以用来控制装饰线和文字之间的重叠关系，这里的装饰线专指下划线。因为一些英文字符（如“g”“q”）的“小尾巴”会和下划线重叠，所以需要使用 text-decoration-skip 属性设置装饰线是跳过文字，还是和文字连在一起。虽然删除线（text-decoration: line-through）也会和文字重叠，但是它并不是 text-decoration-skip 属性的目标装饰线，因为删除线必须贯穿文字。
+
+如果了解 text-decoration-skip 属性的历史，你会发现 text-decoration-skip 属性也是一个颇有故事的 CSS 属性。text-decoration-skip 属性最初是 Safari 浏览器的私有特性，从 Safari 8 开始被支持，语法如下所示：
+
+```css
+-webkit-text-decoration-skip: none;
+-webkit-text-decoration-skip: auto;
+-webkit-text-decoration-skip: skip;
+-webkit-text-decoration-skip: ink;
+```
+
+其中，auto、skip、ink 等值的表现都是一样的，就是下划线会跳过和字符重叠的部分，如图 3-77 所示的字母“g”和下划线的重叠效果（截自 Safari 浏览器）。
+
+![](res/2022-01-12-11-18-23.png)
+
+因此，一些文档直接就认为 Safari 的 text-decoration-skip 属性仅仅支持 none 和 skip 这两个属性值，我觉得可以认为 Safari 的 text-decoration-skip 属性仅仅支持 none 和 ink 这两个属性值，因为属性值 ink 和 CSS 规范“走得更近”。
+
+随着时间的推移，Safari 浏览器从 12.1 版本开始取消了 -webkit- 私有前缀（iOS 的 Safari 是从 12.2 版本开始取消私有前缀的），因此现在 Safari 浏览器其实可以直接这么设置：
+
+```css
+text-decoration-skip: none;
+text-decoration-skip: ink;
+```
+
+在 Safari 浏览器取消私有前缀之前的一段时期，text-decoration-skip 属性成了 CSS Text Decoration 模块规范中的一员，正式成为 CSS 标准属性，并且一开始是在 Level 3 规范中的。那时候 text-decoration-skip 属性的语法是下面这样的：
+
+```css
+text-decoration-skip: objects;
+text-decoration-skip: none;
+text-decoration-skip: spaces;
+text-decoration-skip: ink;
+text-decoration-skip: edges;
+text-decoration-skip: box-decoration;
+text-decoration-skip: trailing-spaces;
+```
+
+先来看一下各个属性值的含义。
+
+- objects 是默认值，表示装饰线跳过内联对象，如图片或者 inline-block 元素。
+- none 表示装饰线穿过一切，包括本应跳过的内联对象。
+- spaces 表示装饰线跳过空格或字符间分隔，以及 letter-spacing 或 word-spacing 形成的间距。
+- ink 表示装饰线跳过符号或下沉字母。
+- edges 表示装饰线起始于内容起始边缘的后面，结束于内容结束边缘的前面。这个属性值的目的是让两个靠在一起的下划线元素看上去是分离的。这对中文字体很有用，因为中文语境中会使用下划线作为一种标点符号（如使用下划线表示专有名词）。
+- box-decoration 表示装饰线跳过继承的 margin、border 和 padding。
+- trailing-spaces 表示装饰线跳过 pre 或 white-space: pre-wrap 里面前后的空格。
+
+理想的效果如图 3-78 所示。
+
+![](res/2022-01-12-11-23-41.png)
+
+或许是因为存在诸多争议，所以图 3-78 中出现的属性值没有任何浏览器进行跟进支持，然后由于 text-decoration-skip 属性的规范文档需要大改，同时又不想影响 CSS Text Decoration Module Level 3 的发布，因此 text-decoration-skip 属性的规范文档就被移到了 CSS TextDecoration Module Level 4 中，规范内容也发生了巨大的变化。
+
+发生了什么变化呢？那就是 text-decoration-skip 从一个单一的 CSS 属性变成了 5 个 CSS 属性的缩写集合，这 5 个 CSS 属性分别如下：
+
+- text-decoration-skip-self；
+- text-decoration-skip-box；
+- text-decoration-skip-inset；
+- text-decoration-skip-spaces；
+- text-decoration-skip-ink。
+
+其实这 5 个 CSS 属性分别对应一个 text-decoration-skip 之前的规范中的属性值：
+
+- text-decoration-skip-self: objects 对应之前的 text-decoration-skip: objects
+- text-decoration-skip-box: all 对应之前的 text-decoration-skip: box-decoration；
+- text-decoration-skip-inset: auto 对应之前的 text-decoration-skip: edges；
+- text-decoration-skip-spaces: all 对应之前的 text-decoration-skip: spaces；
+- text-decoration-skip-ink: all 对应之前的 text-decoration-skip: ink。
+
+由于上面的很多 CSS 属性和属性值还在审查阶段，之后变动的可能性还很大，因此暂不展开介绍。不过，text-decoration-skip-ink 这个 CSS 属性除外，因为 Chrome 浏览器在 2018 年 1 月、Firefox 浏览器在 2019 年 10 月均对 text-decoration-skip-ink 属性进行了支持，它可以用来设置下划线是贯穿还是避让，语法如下所示：
+
+```css
+text-decoration-skip-ink: auto; /* 初始值 */
+text-decoration-skip-ink: none;
+```
+
+其中，text-decoration-skip-ink: auto 等同于 Safari 浏览器支持的 text-decoration-skip: ink，text-decoration-skip-ink: none 等同于 Safari 浏览器支持的 text-decoration-skip: none。
+
+于是，理论上所有现代浏览器都有控制下划线是否贯穿所有字母的能力。在默认状态下，现代浏览器的下划线都会避让“g”“q”等字母多出来的“小尾巴”，如果希望下划线直接贯穿这些字母，则可以这么设置：
+
+```css
+p {
+   -webkit-text-decoration-skip: none;
+   text-decoration-skip: ink;
+}
+```
+
+在所有现代浏览器中均支持以上写法，不过问题在于，存在需要下划线贯穿字母的场景吗？考虑到目前下划线效果并不多见，因此我觉得 text-decoration-skip 属性使用的概率并不大，大家了解一下就可以了。
+
 // TODO CSS 新世界增强已有的 CSS 属性
