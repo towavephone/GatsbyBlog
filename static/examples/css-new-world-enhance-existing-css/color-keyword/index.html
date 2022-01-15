@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS Level1 - Level4 全部颜色关键字实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 800px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .css3_color_names td {
+        background: #fff;
+        padding: 0 5px;
+        border: 0;
+      }
+
+      .css3_color_names .tr_title td {
+        background-color: #486aaa;
+      }
+
+      td[data-level] {
+        position: relative;
+      }
+
+      td[data-level]::before {
+        content: 'LV' attr(data-level);
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 0 3px;
+        color: gray;
+        color: var(--color);
+        transform: scale(0.83333);
+        transform-origin: 0 0;
+        background: linear-gradient(var(--color), var(--color)), linear-gradient(gray, gray);
+        background-blend-mode: difference;
+      }
+
+      td[data-level]::after {
+        content: attr(data-index) '.';
+        position: absolute;
+        right: 100%;
+        top: 0;
+        color: gray;
+        transform: scale(0.83333);
+        transform-origin: 0 0;
+        margin-left: -5px;
+      }
+
+      .remind {
+        margin-top: 0;
+      }
+
+      .select {
+        float: right;
+      }
+
+      @media screen and (max-width: 480px) {
+        .demo {
+          width: auto;
+          margin-left: 1.5rem;
+          margin-right: 10px;
+          text-align: left;
+        }
+
+        .remind {
+          margin-left: 0;
+          margin-top: 3px;
+        }
+
+        .css3_color_names td:nth-of-type(n + 3):nth-last-of-type(n + 2) {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <span class="select">
+        颜色级别：<select id="select">
+          <option value="all">全部级别</option>
+          <option value="1">级别1</option>
+          <option value="2">级别2</option>
+          <option value="3">级别3</option>
+          <option value="4">级别4</option>
+        </select></span
+      >
+      <p class="remind">当前显示<output id="output">148</output>个颜色关键字</p>
+
+      <table
+        class="css3_color_names"
+        style="font-family:Arial, Helvetica, sans-serif; background:#a0b3d6;"
+        width="100%"
+        cellpadding="0"
+        cellspacing="1"
+        summary="147个CSS3颜色名称和值表"
+      >
+        <colgroup>
+          <col style="width: 100px;" />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col style="text-align: center;" />
+        </colgroup>
+        <tbody>
+          <tr class="tr_title" height="30px" style="color: #fff; font-weight: bold; font-size:12px;">
+            <td>名称</td>
+            <td>16进制</td>
+            <td>百分值</td>
+            <td>整数值</td>
+            <td>16进制缩写</td>
+            <td>示例</td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="1" style="--color:aliceblue;">aliceblue</td>
+            <td>#f0f8ff</td>
+            <td>rgb(94.1%,96.9%,100%)</td>
+            <td>rgb(240,248,255)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f0f8ff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="2" style="--color:antiquewhite;">antiquewhite</td>
+
+            <td>#faebd7</td>
+            <td>rgb(98%,92.2%,84.3%)</td>
+            <td>rgb(250,235,215)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #faebd7;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="3" style="--color:aqua;">aqua</td>
+            <td>#00ffff</td>
+            <td>rgb(0%,100%,100%)</td>
+
+            <td>rgb(0,255,255)</td>
+            <td>#0ff</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00ffff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="4" style="--color:aquamarine;">aquamarine</td>
+            <td>#7fffd4</td>
+            <td>rgb(49.8%,100%,83.1%)</td>
+            <td>rgb(127,255,212)</td>
+            <td>&nbsp;</td>
+
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #7fffd4;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="5" style="--color:azure;">azure</td>
+            <td>#f0ffff</td>
+            <td>rgb(94.1%,100%,100%)</td>
+            <td>rgb(240,255,255)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f0ffff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="6" style="--color:beige;">beige</td>
+            <td>#f5f5dc</td>
+            <td>rgb(96.1%,96.1%,86.3%)</td>
+            <td>rgb(245,245,220)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f5f5dc;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="7" style="--color:bisque;">bisque</td>
+            <td>#ffe4c4</td>
+
+            <td>rgb(100%,89.4%,76.9%)</td>
+            <td>rgb(255,228,196)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffe4c4;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="8" style="--color:black;">black</td>
+            <td>#000000</td>
+            <td>rgb(0%,0%,0%)</td>
+            <td>rgb(0,0,0)</td>
+
+            <td>#000</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #000000;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="9" style="--color:blanchedalmond;">blanchedalmond</td>
+            <td>#ffebcd</td>
+            <td>rgb(100%,92.2%,80.4%)</td>
+            <td>rgb(255,235,205)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffebcd;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="10" style="--color:blue;">blue</td>
+            <td>#0000ff</td>
+            <td>rgb(0%,0%,100%)</td>
+            <td>rgb(0,0,255)</td>
+            <td>#00f</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #0000ff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="11" style="--color:blueviolet;">blueviolet</td>
+            <td>#8a2be2</td>
+            <td>rgb(54.1%,16.9%,88.6%)</td>
+            <td>rgb(138,43,226)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #8a2be2;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="12" style="--color:brown;">brown</td>
+            <td>#a52a2a</td>
+
+            <td>rgb(64.7%,16.5%,16.5%)</td>
+            <td>rgb(165,42,42)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #a52a2a;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="13" style="--color:burlywood;">burlywood</td>
+            <td>#deb887</td>
+            <td>rgb(87.1%,72.2%,52.9%)</td>
+            <td>rgb(222,184,135)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #deb887;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="14" style="--color:cadetblue;">cadetblue</td>
+            <td>#5f9ea0</td>
+            <td>rgb(37.3%,62%,62.7%)</td>
+            <td>rgb(95,158,160)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #5f9ea0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="15" style="--color:chartreuse;">chartreuse</td>
+            <td>#7fff00</td>
+            <td>rgb(49.8%,100%,0%)</td>
+            <td>rgb(127,255,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #7fff00;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="16" style="--color:chocolate;">chocolate</td>
+
+            <td>#d2691e</td>
+            <td>rgb(82.4%,41.1%,11.8%)</td>
+            <td>rgb(210,105,30)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #d2691e;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="17" style="--color:coral;">coral</td>
+            <td>#ff7f50</td>
+            <td>rgb(100%,49.8%,31.4%)</td>
+
+            <td>rgb(255,127,80)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff7f50;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="18" style="--color:cornflowerblue;">cornflowerblue</td>
+            <td>#6495ed</td>
+            <td>rgb(39.2%,58.4%,92.9%)</td>
+            <td>rgb(100,149,237)</td>
+            <td>&nbsp;</td>
+
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #6495ed;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="19" style="--color:cornsilk;">cornsilk</td>
+            <td>#fff8dc</td>
+            <td>rgb(100%,97.3%,86.3%)</td>
+            <td>rgb(255,248,220)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fff8dc;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="20" style="--color:crimson;">crimson</td>
+            <td>#dc143c</td>
+            <td>rgb(86.3%,7.8%,23.5%)</td>
+            <td>rgb(220,20,60)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #dc143c;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="21" style="--color:cyan;">cyan</td>
+            <td>#00ffff</td>
+
+            <td>rgb(0%,100%,100%)</td>
+            <td>rgb(0,255,255)</td>
+            <td>#0ff</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00ffff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="22" style="--color:darkblue;">darkblue</td>
+            <td>#00008b</td>
+            <td>rgb(0%,0%,54.5%)</td>
+            <td>rgb(0,0,139)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00008b;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="23" style="--color:darkcyan;">darkcyan</td>
+            <td>#008b8b</td>
+            <td>rgb(0%,54.5%,54.5%)</td>
+            <td>rgb(0,139,139)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #008b8b;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="24" style="--color:darkgoldenrod;">darkgoldenrod</td>
+            <td>#b8860b</td>
+            <td>rgb(72.2%,52.5%,4.3%)</td>
+            <td>rgb(184,134,11)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #b8860b;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="25" style="--color:darkgray;">darkgray</td>
+            <td>#a9a9a9</td>
+
+            <td>rgb(66.3%,66.3%,66.3%)</td>
+            <td>rgb(169,169,169)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #a9a9a9;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="26" style="--color:darkgreen;">darkgreen</td>
+            <td>#006400</td>
+            <td>rgb(0%,39.2%,0%)</td>
+            <td>rgb(0,100,0)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #006400;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="27" style="--color:darkgrey;">darkgrey</td>
+            <td>#a9a9a9</td>
+            <td>rgb(66.3%,66.3%,66.3%)</td>
+            <td>rgb(169,169,169)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #a9a9a9;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="28" style="--color:darkkhaki;">darkkhaki</td>
+            <td>#bdb76b</td>
+            <td>rgb(74.1%,71.8%,42%)</td>
+            <td>rgb(189,183,107)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #bdb76b;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="29" style="--color:darkmagenta;">darkmagenta</td>
+            <td>#8b008b</td>
+
+            <td>rgb(54.5%,0%,54.5%)</td>
+            <td>rgb(139,0,139)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #8b008b;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="30" style="--color:darkolivegreen;">darkolivegreen</td>
+            <td>#556b2f</td>
+            <td>rgb(33.3%,42%,18.4%)</td>
+            <td>rgb(85,107,47)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #556b2f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="31" style="--color:darkorange;">darkorange</td>
+            <td>#ff8c00</td>
+            <td>rgb(100%,54.9%,0%)</td>
+            <td>rgb(255,140,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff8c00;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="32" style="--color:darkorchid;">darkorchid</td>
+            <td>#9932cc</td>
+            <td>rgb(60%,19.6%,80%)</td>
+            <td>rgb(153,50,204)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #9932cc;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="33" style="--color:darkred;">darkred</td>
+            <td>#8b0000</td>
+
+            <td>rgb(54.5%,0%,0%)</td>
+            <td>rgb(139,0,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #8b0000;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="34" style="--color:darksalmon;">darksalmon</td>
+            <td>#e9967a</td>
+            <td>rgb(91.4%,58.8%,47.8%)</td>
+            <td>rgb(233,150,122)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #e9967a;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="35" style="--color:darkseagreen;">darkseagreen</td>
+            <td>#8fbc8f</td>
+            <td>rgb(56.1%,73.7%,56.1%)</td>
+            <td>rgb(143,188,143)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #8fbc8f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="36" style="--color:darkslateblue;">darkslateblue</td>
+            <td>#483d8b</td>
+            <td>rgb(28.2%,23.9%,54.5%)</td>
+            <td>rgb(72,61,139)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #483d8b;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="37" style="--color:darkslategray;">darkslategray</td>
+            <td>#2f4f4f</td>
+
+            <td>rgb(18.4%,31%,31%)</td>
+            <td>rgb(47,79,79)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #2f4f4f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="38" style="--color:darkslategrey;">darkslategrey</td>
+            <td>#2f4f4f</td>
+            <td>rgb(18.4%,31%,31%)</td>
+            <td>rgb(47,79,79)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #2f4f4f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="39" style="--color:darkturquoise;">darkturquoise</td>
+            <td>#00ced1</td>
+            <td>rgb(0%,80.8%,82%)</td>
+            <td>rgb(0,206,209)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00ced1;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="40" style="--color:darkviolet;">darkviolet</td>
+            <td>#9400d3</td>
+            <td>rgb(58%,0%,82.7%)</td>
+            <td>rgb(148,0,211)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #9400d3;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="41" style="--color:deeppink;">deeppink</td>
+            <td>#ff1493</td>
+            <td>rgb(100%,7.8%,57.6%)</td>
+            <td>rgb(255,20,147)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff1493;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="42" style="--color:deepskyblue;">deepskyblue</td>
+
+            <td>#00bfff</td>
+            <td>rgb(0%,74.9%,100%)</td>
+            <td>rgb(0,191,255)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00bfff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="43" style="--color:dimgray;">dimgray</td>
+            <td>#696969</td>
+            <td>rgb(41.1%,41.1%,41.1%)</td>
+
+            <td>rgb(105,105,105)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #696969;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="44" style="--color:dimgrey;">dimgrey</td>
+            <td>#696969</td>
+            <td>rgb(41.1%,41.1%,41.1%)</td>
+            <td>rgb(105,105,105)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #696969;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="45" style="--color:dodgerblue;">dodgerblue</td>
+            <td>#1e90ff</td>
+            <td>rgb(11.8%,56.5%,100%)</td>
+            <td>rgb(30,144,255)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #1e90ff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="46" style="--color:firebrick;">firebrick</td>
+            <td>#b22222</td>
+            <td>rgb(69.8%,13.3%,13.3%)</td>
+            <td>rgb(178,34,34)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #b22222;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="47" style="--color:floralwhite;">floralwhite</td>
+            <td>#fffaf0</td>
+            <td>rgb(100%,98%,94.1%)</td>
+            <td>rgb(255,250,240)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fffaf0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="48" style="--color:forestgreen;">forestgreen</td>
+
+            <td>#228b22</td>
+            <td>rgb(13.3%,54.5%,13.3%)</td>
+            <td>rgb(34,139,34)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #228b22;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="49" style="--color:fuchsia;">fuchsia</td>
+            <td>#ff00ff</td>
+            <td>rgb(100%,0%,100%)</td>
+
+            <td>rgb(255,0,255)</td>
+            <td>#f0f</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff00ff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="50" style="--color:gainsboro;">gainsboro</td>
+            <td>#dcdcdc</td>
+            <td>rgb(86.3%,86.3%,86.3%)</td>
+            <td>rgb(220,220,220)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #dcdcdc;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="51" style="--color:ghostwhite;">ghostwhite</td>
+            <td>#f8f8ff</td>
+            <td>rgb(97.3%,97.3%,100%)</td>
+            <td>rgb(248,248,255)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f8f8ff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="52" style="--color:gold;">gold</td>
+            <td>#ffd700</td>
+            <td>rgb(100%,84.3%,0%)</td>
+            <td>rgb(255,215,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffd700;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="53" style="--color:goldenrod;">goldenrod</td>
+
+            <td>#daa520</td>
+            <td>rgb(85.5%,64.7%,12.5%)</td>
+            <td>rgb(218,165,32)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #daa520;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="54" style="--color:gray;">gray</td>
+            <td>#808080</td>
+            <td>rgb(50.2%,50.2%,50.2%)</td>
+
+            <td>rgb(128,128,128)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #808080;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="55" style="--color:green;">green</td>
+            <td>#008000</td>
+            <td>rgb(0%,50.2%,0%)</td>
+            <td>rgb(0,128,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #008000;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="56" style="--color:greenyellow;">greenyellow</td>
+            <td>#adff2f</td>
+            <td>rgb(67.8%,100%,18.4%)</td>
+            <td>rgb(173,255,47)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #adff2f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="57" style="--color:grey;">grey</td>
+
+            <td>#808080</td>
+            <td>rgb(50.2%,50.2%,50.2%)</td>
+            <td>rgb(128,128,128)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #808080;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="58" style="--color:honeydew;">honeydew</td>
+            <td>#f0fff0</td>
+            <td>rgb(94.1%,100%,94.1%)</td>
+
+            <td>rgb(240,255,240)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f0fff0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="59" style="--color:hotpink;">hotpink</td>
+            <td>#ff69b4</td>
+            <td>rgb(100%,41.1%,70.6%)</td>
+            <td>rgb(255,105,180)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff69b4;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="60" style="--color:indianred;">indianred</td>
+            <td>#cd5c5c</td>
+            <td>rgb(80.4%,36%,36%)</td>
+            <td>rgb(205,92,92)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #cd5c5c;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="61" style="--color:indigo;">indigo</td>
+
+            <td>#4b0082</td>
+            <td>rgb(29.4%,0%,51%)</td>
+            <td>rgb(75,0,130)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #4b0082;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="62" style="--color:ivory;">ivory</td>
+            <td>#fffff0</td>
+            <td>rgb(100%,100%,94.1%)</td>
+
+            <td>rgb(255,255,240)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fffff0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="63" style="--color:khaki;">khaki</td>
+            <td>#f0e68c</td>
+            <td>rgb(94.1%,90.2%,54.9%)</td>
+            <td>rgb(240,230,140)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f0e68c;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="64" style="--color:lavender;">lavender</td>
+            <td>#e6e6fa</td>
+            <td>rgb(90.2%,90.2%,98%)</td>
+            <td>rgb(230,230,250)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #e6e6fa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="65" style="--color:lavenderblush;">lavenderblush</td>
+
+            <td>#fff0f5</td>
+            <td>rgb(100%,94.1%,96.1%)</td>
+            <td>rgb(255,240,245)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fff0f5;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="66" style="--color:lawngreen;">lawngreen</td>
+            <td>#7cfc00</td>
+            <td>rgb(48.6%,98.8%,0%)</td>
+
+            <td>rgb(124,252,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #7cfc00;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="67" style="--color:lemonchiffon;">lemonchiffon</td>
+            <td>#fffacd</td>
+            <td>rgb(100%,98%,80.4%)</td>
+            <td>rgb(255,250,205)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fffacd;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="68" style="--color:lightblue;">lightblue</td>
+            <td>#add8e6</td>
+            <td>rgb(67.8%,84.7%,90.2%)</td>
+            <td>rgb(173,216,230)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #add8e6;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="69" style="--color:lightcoral;">lightcoral</td>
+
+            <td>#f08080</td>
+            <td>rgb(94.1%,50.2%,50.2%)</td>
+            <td>rgb(240,128,128)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f08080;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="70" style="--color:lightcyan;">lightcyan</td>
+            <td>#e0ffff</td>
+            <td>rgb(87.8%,100%,100%)</td>
+
+            <td>rgb(224,255,255)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #e0ffff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="71" style="--color:lightgoldenrodyellow;">lightgoldenrodyellow</td>
+            <td>#fafad2</td>
+            <td>rgb(98%,98%,82.4%)</td>
+            <td>rgb(250,250,210)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fafad2;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="72" style="--color:lightgray;">lightgray</td>
+            <td>#d3d3d3</td>
+            <td>rgb(82.7%,82.7%,82.7%)</td>
+            <td>rgb(211,211,211)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #d3d3d3;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="73" style="--color:lightgreen;">lightgreen</td>
+
+            <td>#90ee90</td>
+            <td>rgb(56.5%,93.3%,56.5%)</td>
+            <td>rgb(144,238,144)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #90ee90;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="74" style="--color:lightgrey;">lightgrey</td>
+            <td>#d3d3d3</td>
+            <td>rgb(82.7%,82.7%,82.7%)</td>
+
+            <td>rgb(211,211,211)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #d3d3d3;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="75" style="--color:lightpink;">lightpink</td>
+            <td>#ffb6c1</td>
+            <td>rgb(100%,71.4%,75.7%)</td>
+            <td>rgb(255,182,193)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffb6c1;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="76" style="--color:lightsalmon;">lightsalmon</td>
+            <td>#ffa07a</td>
+            <td>rgb(100%,62.7%,47.8%)</td>
+            <td>rgb(255,160,122)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffa07a;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="77" style="--color:lightseagreen;">lightseagreen</td>
+
+            <td>#20b2aa</td>
+            <td>rgb(12.5%,69.8%,66.7%)</td>
+            <td>rgb(32,178,170)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #20b2aa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="78" style="--color:lightskyblue;">lightskyblue</td>
+            <td>#87cefa</td>
+            <td>rgb(52.9%,80.8%,98%)</td>
+
+            <td>rgb(135,206,250)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #87cefa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="79" style="--color:lightslategray;">lightslategray</td>
+            <td>#778899</td>
+            <td>rgb(46.7%,53.3%,60%)</td>
+            <td>rgb(119,136,153)</td>
+            <td>#789</td>
+
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #778899;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="80" style="--color:lightslategrey;">lightslategrey</td>
+            <td>#778899</td>
+            <td>rgb(46.7%,53.3%,60%)</td>
+            <td>rgb(119,136,153)</td>
+            <td>#789</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #778899;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="81" style="--color:lightsteelblue;">lightsteelblue</td>
+            <td>#b0c4de</td>
+            <td>rgb(69%,76.9%,87.1%)</td>
+            <td>rgb(176,196,222)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #b0c4de;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="82" style="--color:lightyellow;">lightyellow</td>
+            <td>#ffffe0</td>
+
+            <td>rgb(100%,100%,87.8%)</td>
+            <td>rgb(255,255,224)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffffe0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="83" style="--color:lime;">lime</td>
+            <td>#00ff00</td>
+            <td>rgb(0%,100%,0%)</td>
+            <td>rgb(0,255,0)</td>
+
+            <td>#0f0</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00ff00;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="84" style="--color:limegreen;">limegreen</td>
+            <td>#32cd32</td>
+            <td>rgb(19.6%,80.4%,19.6%)</td>
+            <td>rgb(50,205,50)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #32cd32;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="85" style="--color:linen;">linen</td>
+            <td>#faf0e6</td>
+            <td>rgb(98%,94.1%,90.2%)</td>
+            <td>rgb(250,240,230)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #faf0e6;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="86" style="--color:magenta;">magenta</td>
+
+            <td>#ff00ff</td>
+            <td>rgb(100%,0%,100%)</td>
+            <td>rgb(255,0,255)</td>
+            <td>#f0f</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff00ff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="87" style="--color:maroon;">maroon</td>
+            <td>#800000</td>
+            <td>rgb(50.2%,0%,0%)</td>
+
+            <td>rgb(128,0,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #800000;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="88" style="--color:mediumaquamarine;">mediumaquamarine</td>
+            <td>#66cdaa</td>
+            <td>rgb(40%,80.4%,66.7%)</td>
+            <td>rgb(102,205,170)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #66cdaa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="89" style="--color:mediumblue;">mediumblue</td>
+            <td>#0000cd</td>
+            <td>rgb(0%,0%,80.4%)</td>
+            <td>rgb(0,0,205)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #0000cd;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="90" style="--color:mediumorchid;">mediumorchid</td>
+
+            <td>#ba55d3</td>
+            <td>rgb(72.9%,33.3%,82.7%)</td>
+            <td>rgb(186,85,211)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ba55d3;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="91" style="--color:mediumpurple;">mediumpurple</td>
+            <td>#9370db</td>
+            <td>rgb(57.6%,43.9%,85.9%)</td>
+
+            <td>rgb(147,112,219)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #9370db;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="92" style="--color:mediumseagreen;">mediumseagreen</td>
+            <td>#3cb371</td>
+            <td>rgb(23.5%,70.2%,44.3%)</td>
+            <td>rgb(60,179,113)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #3cb371;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="93" style="--color:mediumslateblue;">mediumslateblue</td>
+            <td>#7b68ee</td>
+            <td>rgb(48.2%,40.8%,93.3%)</td>
+            <td>rgb(123,104,238)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #7b68ee;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="94" style="--color:mediumspringgreen;">mediumspringgreen</td>
+
+            <td>#00fa9a</td>
+            <td>rgb(0%,98%,60.4%)</td>
+            <td>rgb(0,250,154)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00fa9a;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="95" style="--color:mediumturquoise;">mediumturquoise</td>
+            <td>#48d1cc</td>
+            <td>rgb(28.2%,82%,80%)</td>
+
+            <td>rgb(72,209,204)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #48d1cc;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="96" style="--color:mediumvioletred;">mediumvioletred</td>
+            <td>#c71585</td>
+            <td>rgb(78%,8.2%,52.2%)</td>
+            <td>rgb(199,21,133)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #c71585;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="97" style="--color:midnightblue;">midnightblue</td>
+            <td>#191970</td>
+            <td>rgb(9.8%,9.8%,43.9%)</td>
+            <td>rgb(25,25,112)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #191970;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="98" style="--color:mintcream;">mintcream</td>
+
+            <td>#f5fffa</td>
+            <td>rgb(96.1%,100%,98%)</td>
+            <td>rgb(245,255,250)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f5fffa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="99" style="--color:mistyrose;">mistyrose</td>
+            <td>#ffe4e1</td>
+            <td>rgb(100%,89.4%,88.2%)</td>
+
+            <td>rgb(255,228,225)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffe4e1;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="100" style="--color:moccasin;">moccasin</td>
+            <td>#ffe4b5</td>
+            <td>rgb(100%,89.4%,71%)</td>
+            <td>rgb(255,228,181)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffe4b5;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="101" style="--color:navajowhite;">navajowhite</td>
+            <td>#ffdead</td>
+            <td>rgb(100%,87.1%,67.8%)</td>
+            <td>rgb(255,222,173)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffdead;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="102" style="--color:navy;">navy</td>
+            <td>#000080</td>
+            <td>rgb(0%,0%,50.2%)</td>
+            <td>rgb(0,0,128)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #000080;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="103" style="--color:oldlace;">oldlace</td>
+            <td>#fdf5e6</td>
+
+            <td>rgb(99.2%,96.1%,90.2%)</td>
+            <td>rgb(253,245,230)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fdf5e6;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="104" style="--color:olive;">olive</td>
+            <td>#808000</td>
+            <td>rgb(50.2%,50.2%,0%)</td>
+            <td>rgb(128,128,0)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #808000;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="105" style="--color:olivedrab;">olivedrab</td>
+            <td>#6b8e23</td>
+            <td>rgb(42%,55.7%,13.7%)</td>
+            <td>rgb(107,142,35)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #6b8e23;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="2" data-index="106" style="--color:orange;">orange</td>
+            <td>#ffa500</td>
+            <td>rgb(100%,64.7%,0%)</td>
+            <td>rgb(255,165,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffa500;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="107" style="--color:orangered;">orangered</td>
+            <td>#ff4500</td>
+
+            <td>rgb(100%,27.1%,0%)</td>
+            <td>rgb(255,69,0)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff4500;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="108" style="--color:orchid;">orchid</td>
+            <td>#da70d6</td>
+            <td>rgb(85.5%,43.9%,83.9%)</td>
+            <td>rgb(218,112,214)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #da70d6;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="109" style="--color:palegoldenrod;">palegoldenrod</td>
+            <td>#eee8aa</td>
+            <td>rgb(93.3%,91%,66.7%)</td>
+            <td>rgb(238,232,170)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #eee8aa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="110" style="--color:palegreen;">palegreen</td>
+            <td>#98fb98</td>
+            <td>rgb(59.6%,98.4%,59.6%)</td>
+            <td>rgb(152,251,152)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #98fb98;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="111" style="--color:paleturquoise;">paleturquoise</td>
+
+            <td>#afeeee</td>
+            <td>rgb(68.6%,93.3%,93.3%)</td>
+            <td>rgb(175,238,238)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #afeeee;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="112" style="--color:palevioletred;">palevioletred</td>
+            <td>#db7093</td>
+            <td>rgb(85.9%,43.9%,57.6%)</td>
+
+            <td>rgb(219,112,147)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #db7093;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="113" style="--color:papayawhip;">papayawhip</td>
+            <td>#ffefd5</td>
+            <td>rgb(100%,93.7%,83.5%)</td>
+            <td>rgb(255,239,213)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffefd5;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="114" style="--color:peachpuff;">peachpuff</td>
+            <td>#ffdab9</td>
+            <td>rgb(100%,85.5%,72.5%)</td>
+            <td>rgb(255,218,185)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffdab9;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="115" style="--color:peru;">peru</td>
+
+            <td>#cd853f</td>
+            <td>rgb(80.4%,52.2%,24.7%)</td>
+            <td>rgb(205,133,63)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #cd853f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="116" style="--color:pink;">pink</td>
+            <td>#ffc0cb</td>
+            <td>rgb(100%,75.3%,79.6%)</td>
+
+            <td>rgb(255,192,203)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffc0cb;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="117" style="--color:plum;">plum</td>
+            <td>#dda0dd</td>
+            <td>rgb(86.7%,62.7%,86.7%)</td>
+            <td>rgb(221,160,221)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #dda0dd;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="118" style="--color:powderblue;">powderblue</td>
+            <td>#b0e0e6</td>
+            <td>rgb(69%,87.8%,90.2%)</td>
+            <td>rgb(176,224,230)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #b0e0e6;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="119" style="--color:purple;">purple</td>
+
+            <td>#800080</td>
+            <td>rgb(50.2%,0%,50.2%)</td>
+            <td>rgb(128,0,128)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #800080;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="120" style="--color:red;">red</td>
+            <td>#ff0000</td>
+            <td>rgb(100%,0%,0%)</td>
+
+            <td>rgb(255,0,0)</td>
+            <td>#f00</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff0000;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="4" data-index="121" style="--color:rebeccapurple;">rebeccapurple</td>
+            <td>#663399</td>
+            <td>rgb(40%, 20%, 60%)</td>
+            <td>rgb(102, 51, 153);</td>
+            <td>#639</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #663399;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td data-level="3" data-index="122" style="--color:rosybrown;">rosybrown</td>
+            <td>#bc8f8f</td>
+            <td>rgb(73.7%,56.1%,56.1%)</td>
+            <td>rgb(188,143,143)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #bc8f8f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="123" style="--color:royalblue;">royalblue</td>
+            <td>#4169e1</td>
+            <td>rgb(25.5%,41.1%,100%)</td>
+            <td>rgb(65,105,225)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #4169e1;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="124" style="--color:saddlebrown;">saddlebrown</td>
+            <td>#8b4513</td>
+            <td>rgb(54.5%,27.1%,7.5%)</td>
+            <td>rgb(139,69,19)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #8b4513;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="125" style="--color:salmon;">salmon</td>
+            <td>#fa8072</td>
+
+            <td>rgb(98%,50.2%,44.7%)</td>
+            <td>rgb(250,128,114)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fa8072;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="126" style="--color:sandybrown;">sandybrown</td>
+            <td>#f4a460</td>
+            <td>rgb(95.7%,64.3%,37.6%)</td>
+            <td>rgb(244,164,96)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f4a460;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="127" style="--color:seagreen;">seagreen</td>
+            <td>#2e8b57</td>
+            <td>rgb(18%,54.5%,34.1%)</td>
+            <td>rgb(46,139,87)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #2e8b57;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="128" style="--color:seashell;">seashell</td>
+            <td>#fff5ee</td>
+            <td>rgb(100%,96.1%,93.3%)</td>
+            <td>rgb(255,245,238)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fff5ee;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="129" style="--color:sienna;">sienna</td>
+            <td>#a0522d</td>
+
+            <td>rgb(62.7%,32.2%,17.6%)</td>
+            <td>rgb(160,82,45)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #a0522d;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="130" style="--color:silver;">silver</td>
+            <td>#c0c0c0</td>
+            <td>rgb(75.3%,75.3%,75.3%)</td>
+            <td>rgb(192,192,192)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #c0c0c0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="131" style="--color:skyblue;">skyblue</td>
+            <td>#87ceeb</td>
+            <td>rgb(52.9%,80.8%,92.2%)</td>
+            <td>rgb(135,206,235)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #87ceeb;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="132" style="--color:slateblue;">slateblue</td>
+            <td>#6a5acd</td>
+            <td>rgb(41.6%,35.3%,80.4%)</td>
+            <td>rgb(106,90,205)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #6a5acd;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="133" style="--color:slategray;">slategray</td>
+            <td>#708090</td>
+
+            <td>rgb(43.9%,50.2%,56.5%)</td>
+            <td>rgb(112,128,144)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #708090;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="134" style="--color:slategrey;">slategrey</td>
+            <td>#708090</td>
+            <td>rgb(43.9%,50.2%,56.5%)</td>
+            <td>rgb(112,128,144)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #708090;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="135" style="--color:snow;">snow</td>
+            <td>#fffafa</td>
+            <td>rgb(100%,98%,98%)</td>
+            <td>rgb(255,250,250)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #fffafa;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="136" style="--color:springgreen;">springgreen</td>
+            <td>#00ff7f</td>
+            <td>rgb(0%,100%,49.8%)</td>
+            <td>rgb(0,255,127)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #00ff7f;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="137" style="--color:steelblue;">steelblue</td>
+            <td>#4682b4</td>
+
+            <td>rgb(27.5%,51%,70.6%)</td>
+            <td>rgb(70,130,180)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #4682b4;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="138" style="--color:tan;">tan</td>
+            <td>#d2b48c</td>
+            <td>rgb(82.4%,70.6%,54.9%)</td>
+            <td>rgb(210,180,140)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #d2b48c;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="139" style="--color:teal;">teal</td>
+            <td>#008080</td>
+            <td>rgb(0%,50.2%,50.2%)</td>
+            <td>rgb(0,128,128)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #008080;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="140" style="--color:thistle;">thistle</td>
+            <td>#d8bfd8</td>
+            <td>rgb(84.7%,74.9%,84.7%)</td>
+            <td>rgb(216,191,216)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #d8bfd8;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="141" style="--color:tomato;">tomato</td>
+            <td>#ff6347</td>
+
+            <td>rgb(100%,38.8%%,27.8%)</td>
+            <td>rgb(255,99,71)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ff6347;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="142" style="--color:turquoise;">turquoise</td>
+            <td>#40e0d0</td>
+            <td>rgb(25.1%,87.7%,81.6%)</td>
+            <td>rgb(64,224,208)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #40e0d0;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="143" style="--color:violet;">violet</td>
+            <td>#ee82ee</td>
+            <td>rgb(93.3%,51%,93.3%)</td>
+            <td>rgb(238,130,238)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ee82ee;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="144" style="--color:wheat;">wheat</td>
+            <td>#f5deb3</td>
+            <td>rgb(96.1%,87.1%,70.2%)</td>
+            <td>rgb(245,222,179)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f5deb3;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="145" style="--color:white;">white</td>
+            <td>#ffffff</td>
+
+            <td>rgb(100%,100%,100%)</td>
+            <td>rgb(255,255,255)</td>
+            <td>#fff</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffffff;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="146" style="--color:whitesmoke;">whitesmoke</td>
+            <td>#f5f5f5</td>
+            <td>rgb(96.1%,96.1%,96.1%)</td>
+            <td>rgb(245,245,245)</td>
+
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #f5f5f5;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="1" data-index="147" style="--color:yellow;">yellow</td>
+            <td>#ffff00</td>
+            <td>rgb(100%,100%,0%)</td>
+            <td>rgb(255,255,0)</td>
+            <td>#ff0</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #ffff00;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td data-level="3" data-index="148" style="--color:yellowgreen;">yellowgreen</td>
+            <td>#9acd32</td>
+            <td>rgb(60.4%,80.4%,19.6%)</td>
+            <td>rgb(154,205,50)</td>
+            <td>&nbsp;</td>
+            <td style="text-align: center;">
+              <img
+                src="/GATSBY_PUBLIC_DIR/images/color_cover.png"
+                width="50px"
+                height="50px"
+                style="background: #9acd32;"
+                alt="Color Example"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script src="./index.js"></script>
+  </body>
+</html>
