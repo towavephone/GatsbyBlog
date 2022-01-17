@@ -3270,4 +3270,215 @@ hs1(270 60% 50% / 15%)
 
 空格语法和传统的逗号语法相比，只是书写形式不同，唯一的优点是书写速度更快了，原因很简单，键盘上的 Space 键要大得多。
 
+# 必学必会的 background 属性新特性
+
+本节要介绍的 background 新特性都非常实用，兼容性强，IE9+ 浏览器均支持，是务必要牢牢掌握的。
+
+## 最实用的当属 background-size 属性
+
+所有 background 新特性相关的属性中，background-size 属性的使用率是最高的。因为现在的电子设备的屏幕密度普遍都很高，所以为了避免因为图像的像素点不够而造成渲染模糊，开发者会使用 2 倍图甚至 3 倍图作为背景图。
+
+把一张大图限制在一个小的区域里面就需要用到 background-size 属性。例如一个删除按钮，按钮元素的尺寸是 20px×20px，按钮元素使用 SVG 图标作为背景，这个 SVG 图标的原始尺寸是 2000px×2000px，此时，我们可以用多种语法将这个尺寸巨大的 SVG 图标限制在按钮元素范围内。
+
+```css
+background-size: cover;
+background-size: contain;
+background-size: 100%;
+background-size: 20px;
+background-size: auto 100%;
+background-size: auto 20px;
+background-size: 100% 100%;
+background-size: 20px 20px;
+```
+
+以上语法包含了 background-size 属性的常用用法。
+
+### cover 和 contain
+
+cover 和 contain 是两个关键字属性值，两者都不会改变背景图的原始比例，非常适合背景图像高宽不确定的场景。
+
+cover 是覆盖的意思，表示背景图尽可能把当前元素完全覆盖，不留任何空白。contain 是包含的意思，表示背景图尽可能包含在当前元素区域内，同时没有任何剪裁。
+
+我们来看一个例子，一张 256px×192px 的图像需要在 128px×128px 的区域内显示，background-size 属性值分别是 cover 和 contain：
+
+```css
+.bg-cover,
+.bg-contain {
+   width: 128px;
+   height: 128px;
+   border: solid deepskyblue;
+   background: url(./1.jpg) no-repeat center;
+}
+
+.bg-cover {
+   background-size: cover;
+}
+
+.bg-contain {
+   background-size: contain;
+}
+```
+
+结果如图 3-82 所示。
+
+![](res/2022-01-17-13-54-47.png)
+
+大家可以看到，如果显示区域的比例和原始图像的比例不一致，那么 cover 属性值最终的表现效果就是有一部分图像被剪裁掉，而 contain 属性值的表现效果是图片有一部分的区域会留白。但是无论是 cover 属性值还是 contain 属性值，都至少有一个方向的元素边界和图像边界是重合的。
+
+[background-cover-contain](embedded-codesandbox://css-new-world-enhance-existing-css/background-cover-contain)
+
+### 理解 auto 关键字下的尺寸渲染规则
+
+在深入理解 auto 关键字的尺寸渲染规则之前，我们需要先了解一下常见图像的内在尺寸和内在比例。在 CSS 世界中，常见的图像有以下几种。
+
+- 位图。例如 JPG 或者 PNG 图片都属于位图，这些图像总是有自己的内在尺寸（原始图像大小）和内在比例（原始图像比例）。
+- 矢量图。例如 SVG 图像就属于矢量图，这些图像不一定具有内在尺寸。如果水平尺寸和垂直尺寸都设置了，那么它就具有内在的比例；如果没有设置尺寸，或者只设置了一个方向的尺寸，它可能有比例，也可能没有比例，要视 SVG 内部代码而定，如有些 SVG 元素内部只有 `<defs>` 元素，此时矢量图就没有比例。
+- 渐变图像。就是使用 CSS 渐变语法绘制的图像，这些图像是没有内在尺寸和内在比例的。
+- 元素图像。例如使用 element() 函数把 DOM 元素作为背景图，此时的内在尺寸就是这个 DOM 元素的尺寸。
+
+下面讲一下 auto 关键字的尺寸渲染规则。
+
+如果 background-size 的属性值是 auto，或者 background-size 的属性值是 auto auto，又或者没有设置 background-size 属性（此时会使用初始值 auto auto），那么：
+
+1. 如果图像水平和垂直方向同时具有内在尺寸，则按照图像原始大小进行渲染。例如一个 PNG 图片尺寸是 800px×600px，那么背景图的尺寸就是 800px×600px，这就是多倍图一定要设置 background-size 属性的原因，否则只能显示部分图像内容。
+2. 如果图像没有内在尺寸，也没有内在比例，则按照背景定位区域的大小进行渲染，等同于设置属性值为 100%。所以，CSS 渐变图像默认都是覆盖整个背景定位区域的，例如：
+
+   ```css
+   .bg-gradient {
+      width: 300px;
+      height: 100px;
+      background: linear-gradient(deepskyblue, deeppink);
+   }
+   ```
+
+   此时的渐变背景的大小就是 300px×100px。
+
+3. 如果图像没有内在尺寸，但具有内在比例，则渲染效果等同于设置属性值为 contain。例如，有一个名为 triangle.svg 的 SVG 文件，XML 源码如下：
+
+   ```svg
+   <!-- triangle.svg -->
+   <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+      <path d="M512 0L1024 1024L0 1024Z"/>
+   </svg>
+   ```
+
+   其中，`<svg>` 元素没有设置 width 属性和 height 属性，也就是没有设置内在尺寸。此时这个 SVG 文件作为背景图，我们无须指定 background-size 属性值，SVG 图像就能自动被包含在背景定位区域内。CSS 示意代码如下：
+
+   ```css
+   .svg-nosize {
+      width: 40px;
+      height: 40px;
+      border: solid deepskyblue;
+      background: url(./triangle.svg);
+   }
+   ```
+
+   结果如图 3-83 所示。
+
+   ![](res/2022-01-17-14-11-02.png)
+
+   [background-svg](embedded-codesandbox://css-new-world-enhance-existing-css/background-svg)
+
+4. 如果图像只有一个方向有内在尺寸，但又具有内在比例，则图像会拉伸到该内在尺寸的大小，同时宽高比符合内在比例。例如，某个 SVG 图像的内在比例是 1:1，但是 SVG 图像源码中的 `<svg>` 元素只设置了 width 属性，没有设置 height 属性，则最终的 SVG 图像会按照 width 属性设置的宽度渲染，高度和宽度保持 1:1 的比例进行渲染。
+
+   例如上面的 triangle.svg 文件，我们对其设置 width 属性，而不设置 height 属性，如下所示：
+
+   ```svg
+   <svg width="30" viewBox="0 0 1024 1024">
+      <path d="M512 0L1024 1024L0 1024Z" />
+   </svg>
+   ```
+
+   同样的 CSS 代码：
+
+   ```css
+   .svg-one-size {
+      width: 40px;
+      height: 40px;
+      border: solid deepskyblue;
+      background: url(./triangle.svg);
+   }
+   ```
+
+   结果如图 3-84 所示，图像展示的尺寸是 30px×30px。
+
+   ![](res/2022-01-17-14-48-37.png)
+
+   然而，在 Edge 浏览器中，只有一个方向设置了尺寸的 SVG 图像还是按照 contain 属性值进行渲染的。因此在实际开发中，不建议 SVG 图像只设置一侧尺寸。
+
+5. 如果图像只有一个方向有内在尺寸而没有内在比例，则图像有内在尺寸的一侧会拉伸到该内在尺寸大小，没有设置内在尺寸的一侧会拉伸到背景定位区域大小。例如：
+
+   ```svg
+   <svg viewBox="0 0 200 50" height="50" preserveAspectRatio="none">
+      <text x="0" y="30">只有一侧有内在尺寸，没有内在比例</text>
+   </svg>
+   ```
+
+   preserveAspectRatio="none" 可以去除 SVG 图像的内在比例，根据我的测试，除 Firefox 浏览器的渲染有问题外，IE、Edge 和 Chrome 浏览器都可以达到预期效果。
+
+   如果 background-size 的属性值一个是 auto，另外一个值不是 auto，有如下两种情况。
+
+   - 如果图像有内在比例，则图像会拉伸到指定的尺寸，高宽依然保持原始的比例。
+
+      假设 PNG 背景图片的尺寸是 800px×600px，则 background-size: 40px 的效果是将图片宽度拉伸到 40px，高度和宽度的比例保持原始的 4:3，所以高度值是 30px。类似的，background-size: auto 30px 表示宽度 auto，高度拉伸到 30px，由于图片内在比例是 4:3，因此最终的背景尺寸是 40px×30px。
+
+   - 如果图像没有内在比例，则图像会拉伸到指定的尺寸。同时，如果图像有内在尺寸，则 auto 的计算尺寸就是图像的尺寸；如果图像没有内在尺寸，则 auto 的计算尺寸就是背景定位区域的尺寸。例如：
+
+      ```css
+      .bg-gradient {
+         width: 300px;
+         height: 100px;
+         border: solid deepskyblue;
+         background: linear-gradient(deepskyblue, nosize) no-repeat center;
+         background-size: 150px;
+      }
+      ```
+
+      background-size: 150px 等同于 background-size: 150px auto。因此，背景图像的宽度会拉伸到 150px。渐变是没有内在尺寸的，因此 auto 的计算值是背景定位区域的高度，也就是 100px。于是，最终的渐变背景呈现的尺寸大小是 150px×100px，如图 3-85 所示。
+
+      ![](res/2022-01-17-15-10-48.png)
+
+### 数值或百分比值
+
+background-size 属性值无论是数值还是百分比值，都不能是负值，其中百分比值是相对于元素的背景定位区域计算的。背景定位区域是由 background-origin 属性决定的，默认值是 padding-box。例如：
+
+```css
+.bg-percent {
+   width: 100px;
+   height: 75px;
+   border: 20px solid rgba(0, 192, 255, 0.5);
+   padding: 20px;
+   background: url(./1.jpg) no-repeat;
+   background-size: 100% 100%;
+}
+```
+
+100% 是相对于 padding box 计算的，需要把设置的 padding: 20px 的大小计算在内，因此，此时背景图的尺寸是 140px×115px，效果如图 3-86 左图所示。如果我们设置 background-origin: content-box，则 100% 是相对于 content-box 计算的，在本例中，content-box 的尺寸是 100px×75px，因此，此时背景图的尺寸是 100px×75px，效果如图 3-86 右图所示。
+
+![](res/2022-01-17-15-15-24.png)
+
+[background-origin](embedded-codesandbox://css-new-world-enhance-existing-css/background-origin)
+
+以上就是对 background-size 属性的不同类型属性值的介绍，下面介绍 background-size 其他的一些细节知识。
+
+background-size 属性值是可以作为缩写直接在 background 属性中设置的，但是需要注意的是，background-size 属性值只能写在 background-position 属性值的后面，并且使用斜杠分隔，其他写法都是无效的。例如下面的写法都是无效的：
+
+```css
+/* 无效 */
+background: url(1.jpg) no-repeat / 100%;
+background: url(1.jpg) / 100%
+background: url(1.jpg) fixed / 100%
+```
+
+下面这些写法都是有效的：
+
+```css
+/* 有效 */
+background: url(1.jpg) no-repeat center / 100%;
+background: 0 / 100% url(1.jpg);
+background: linear-gradient(red, blue) round 100% / 100% scroll;
+```
+
+background-size 属性值作为缩写的语法是较近版本的浏览器才支持的，一些过时的浏览器是不支持的，主要体现在 2014 年之前的 iOS 和 Android 设备上。如果你的项目还需要兼容这些陈旧的浏览器，那么就需要将 background-size 属性分开写。
+
 // TODO CSS 新世界增强已有的 CSS 属性

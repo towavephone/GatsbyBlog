@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>background-size 百分比计算区域与 background-origin 关系实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 200px;
+        margin: auto;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .demo h4 {
+        margin-bottom: 0.375em;
+      }
+
+      .bg-percent {
+        width: 100px;
+        height: 75px;
+        border: 20px solid rgba(0, 192, 255, 0.5);
+        padding: 20px;
+        background: url(/GATSBY_PUBLIC_DIR/images/1.jpg) no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .content-box {
+        background-origin: content-box;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>默认 padding-box</h4>
+      <div class="bg-percent"></div>
+      <h4>background-origin: content-box</h4>
+      <div class="bg-percent content-box"></div>
+    </div>
+  </body>
+</html>
