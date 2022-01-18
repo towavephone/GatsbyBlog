@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>outline 轮廓被覆盖 outline-offset 优化实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+      }
+
+      p {
+        font-size: 0;
+      }
+
+      p img {
+        width: 100px;
+        height: 136px;
+      }
+
+      p img:hover,
+      p img:active {
+        outline: solid deepskyblue;
+      }
+
+      .outline-offset img {
+        outline-offset: -3px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>有问题的</h4>
+      <p>
+        <img src="/GATSBY_PUBLIC_DIR/images/wallpaper-1.jpg" />
+        <img src="/GATSBY_PUBLIC_DIR/images/wallpaper-2.jpg" />
+        <img src="/GATSBY_PUBLIC_DIR/images/wallpaper-3.jpg" />
+      </p>
+      <h4>优化后的</h4>
+      <p class="outline-offset">
+        <img src="/GATSBY_PUBLIC_DIR/images/wallpaper-1.jpg" />
+        <img src="/GATSBY_PUBLIC_DIR/images/wallpaper-2.jpg" />
+        <img src="/GATSBY_PUBLIC_DIR/images/wallpaper-3.jpg" />
+      </p>
+    </div>
+  </body>
+</html>

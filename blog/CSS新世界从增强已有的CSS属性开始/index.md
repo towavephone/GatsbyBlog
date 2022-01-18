@@ -3012,7 +3012,7 @@ HWB 颜色、gray() 函数、color() 函数、device-cmyk() 函数目前还没�
 .gradient {
    width: 300px;
    height: 150px;
-   background: linear gradient(transparent, red);
+   background: linear-gradient(transparent, red);
 }
 ```
 
@@ -3024,7 +3024,7 @@ HWB 颜色、gray() 函数、color() 函数、device-cmyk() 函数目前还没�
 
 ```js
 console.log(window.getComputedStyle(document.body).backgroundColor);
-//输出是：rgba(0, 0, 0, 0)
+// 输出是：rgba(0, 0, 0, 0)
 ```
 
 transparent 到 red 的渐变效果本质上就是色值 rgba(0, 0, 0, 0)到 rgba(255, 0, 0, 1)的渐变效果。接下来我抛出一个问题，请问渐变 50% 位置的色值是什么？我敢肯定很多人的答案是 rgba(128, 0, 0, 0.5)。但是仔细一想就会发现这个答案肯定有问题，因为这个答案中的颜色已经与红色无关了。所以，transparent 关键字实现符合认知的渐变效果是需要特别的算法的，否则，如果只是按照字面上的色值进行纯数学的计算，最终的渐变效果就会变得“不干净”，例如透明到红色的渐变效果会渲染成透明 → 灰红色 → 红色的渐变效果，渐变中间会出现让人感觉很“脏”的红色。
@@ -3684,4 +3684,311 @@ background-clip: text 声明实现渐变文字效果是一种侵入式的实现�
 
 另外，如果使用 background-clip: text 声明实现渐变文字效果，那么原本彩色的 emoji 字符的颜色会丢失。
 
-// TODO CSS 新世界增强已有的 CSS 属性
+## background-origin 属性与背景定位原点控制
+
+先看一段代码，之前至少有两位同行请教过我类似的问题：
+
+```css
+.example {
+   width: 180px;
+   height: 70px;
+   border: 20px dashed;
+   background: linear-gradient(deepskyblue, deeppink);
+}
+```
+
+此时，虚线框上边间隙的背景颜色为深粉色，虚线框下边间隙的背景颜色为深天蓝色，渐变图像并没有在整个元素区域完整显示，像被断开了，如图 3-94 所示，这显然不是我们想要的效果。
+
+![](res/2022-01-18-22-43-06.png)
+
+之所以渐变图像会断开，是因为 background-origin 属性在起作用。background-origin 属性支持下面几个属性值：
+
+```css
+background-origin: border-box;
+background-origin: padding-box;
+background-origin: content-box;
+```
+
+其中 padding-box 是默认值，表示背景图像定位的左上角位置是从 padding-box 开始的，默认的背景定位区域大小也是 padding-box 大小。因此，若希望渐变背景从边框位置开始就是一个完整的自上而下的渐变效果，只要设置 background-origin 属性值为 border-box 即可，代码如下：
+
+```css
+.example {
+   width: 180px;
+   height: 70px;
+   border: 20px dashed;
+   background: linear-gradient(deepskyblue, deeppink);
+   background-origin: border-box;
+}
+```
+
+效果如图 3-95 所示。
+
+![](res/2022-01-18-22-54-03.png)
+
+## space 和 round 平铺模式
+
+background-repeat 属性新增了 space 和 round 这两个关键字属性值，下面就具体介绍其作用。
+
+### space
+
+让背景图像尽可能地重复，而不进行剪裁，每个重复单元的尺寸不会变化。其中第一张和最后一张图像固定在元素的两边，然后通过拉伸空白区域让剩余的图像均匀分布，例如：
+
+```css
+.space {
+   background: url(./1.jpg) center / auto 100%;
+   background-repeat: space;
+   outline: 1px dotted;
+}
+```
+
+效果如图 3-96 所示。
+
+![](res/2022-01-18-22-57-05.png)
+
+space 主要用来平铺小尺寸图像，但是凡事都有例外，万一背景图像的尺寸比背景定位区域的尺寸还要大，那么会有怎么样的效果呢？
+
+首先，原本无效的 background-position 属性此时就生效了，也就是背景显示区域只能显示一张图像的情况下，我们是使用 background-position 属性来控制这张图像的定位的。
+
+其次，如果背景显示区域尺寸比平铺图像尺寸小，则在不同浏览器中的渲染效果是不一样的，在 Chrome 浏览器和 Firefox 浏览器中，图像可以显示；但是在 IE 和 Edge 浏览器中，图像无法显示，一片空白。这个兼容性差异最终导致如果要使用 space 平铺，要么不在 IE 浏览器中渲染，要么保证元素尺寸比平铺图像的尺寸大，这在一定程度上限制了 space 平铺模式的普及。
+
+### round
+
+背景图像会被拉伸，并保证不留间隙。随着定位区域空间的增加，如果（假设图像都是原始尺寸下的）剩余空间大于图像宽度的一半，则添加另外一张图像。在添加下一张图像时，当前的所有图像都会压缩以留出空间放下这个新添加的图像，例如：
+
+```css
+.round {
+   background: url(./1.jpg) left / auto 100%;
+   background-repeat: round;
+   outline: 1px dotted;
+}
+```
+
+效果如图 3-97 所示。
+
+![](res/2022-01-18-23-02-50.png)
+
+在 Firefox 浏览器中，设置了 round 平铺后 background-position 属性是会被忽略的，这个其实是有问题的（以后的版本可能会修复此问题），而在 IE 浏览器、Edge 浏览器和 Chrome 浏览器中都没有这个问题。因此，为了保证兼容，我们在使用 round 平铺的时候，一定要设置 background-position 边缘定位，而不能设置居中定位。
+
+查看图 3-96 和图 3-97 所示的效果
+
+[background-repeat-space-round](embedded-codesandbox://css-new-world-enhance-existing-css/background-repeat-space-round)
+
+space 和 round 这两个关键字属性值除了可以设置背景图像的平铺方式，还改变了 background-repeat 属性的语法，那就是可以分别指定水平和垂直方向上的图像平铺方式。例如我们可以指定水平方向是 round 平铺，垂直方向是 space 平铺，语法如下：
+
+```css
+background-repeat: round space;
+```
+
+在 IE9 浏览器之前，background-repeat 只能使用一个关键字属性值。下表所示的是单个 background-repeat 属性值对应的双值语法。
+
+| 单值      | 等同的双值       |
+| :-------- | :--------------- |
+| repeat-x  | repeat no-repeat |
+| repeat-y  | no-repeat repeat |
+| repeat    | repeat repeat    |
+| space     | space space      |
+| round     | round round      |
+| no-repeat | no-repeat        |
+
+space 和 round 适合用在装饰性的背景图中，不过当下推崇扁平化设计，追求纯粹的色彩，并不推崇华丽的背景图案效果，因此 space 和 round 值在实际项目开发中用得并不多，这是 10 年前的我没有想到的。
+
+## 可以指定 background-position 的起始方位了
+
+由于 background-position 的百分比定位的计算比较特殊，因此在过去，我们想要实现一个距离元素右下方特定距离的定位就不太容易，唯一的方法就是借助透明边框帮助定位。好在 IE9 浏览器已经开始支持指定 background-position 的起始位置了，于是我们想要让背景图像在距离右下方 20px 的位置就非常简单了：
+
+```css
+.example {
+   width: 300px;
+   height: 200px;
+   border: solid deepskyblue;
+   background: url(./1.jpg) no-repeat right 20px bottom 20px;
+}
+```
+
+效果如图 3-98 所示。
+
+![](res/2022-01-18-23-19-32.png)
+
+[background-position-right-bottom](embedded-codesandbox://css-new-world-enhance-existing-css/background-position-right-bottom)
+
+我多次看到有人是这样实现图 3-98 所示的效果的：
+
+```css
+.example {
+   background: url(./1.jpg) no-repeat calc(100% - 20px) calc(100% - 20px);
+}
+```
+
+虽然这种写法也有效果，但是性能不够好，而且这种写法可能会让 IE9 浏览器崩溃。因此，请使用 background-position 属性的原生语法实现。
+
+下面逐个介绍 background-position 属性的具体语法。
+
+### 1 个值语法
+
+如果只有 1 个值，无论是具体的数值、百分比值，还是关键字属性值，则另外一个值一定是 center，如下表所示
+
+| 单值   | 等同的双值    |
+| :----- | :------------ |
+| 20px   | 20px center   |
+| 20%    | 20% center    |
+| top    | top center    |
+| right  | right center  |
+| bottom | bottom center |
+| left   | left center   |
+| center | center center |
+
+### 2 个值语法
+
+如果有 2 个值，则分 3 种情况
+
+1. 2 个值都是关键字属性值。left 关键字和 right 关键字表示水平方向，top 关键字和 bottom 关键字表示垂直方向，因此 top right 和 right top 的效果是一样的。需要注意的是，不能包含对立的方位，也就是说 left right 和 top bottom 这样的语法是无效的。
+2. 1 个值是关键字属性值，另外一个值是数值或百分比值。如果数值或百分比值是第一个值，则表示水平方向，另外一个关键字属性值就表示垂直方向。如果数值或百分比值是第二个值，则表示垂直方向，另外一个关键字属性值就表示水平方向。因此属性值 20px left 是非法的，因为 20px 是数值且是第一个值，此时第二个值应该表示垂直方向，但是 left 显然是水平方向关键字属性值，出现了对立方位，所以为无效语法。
+3. 2 个值都是数值或百分比值。第一个值表示水平方向，第二个值表示垂直方向。因此 20px 20% 表示在距离默认定位原点（左上角）水平方向 20px、垂直方向 20% 的位置开始定位。
+
+background-position 属性的初始值是 2 个值，即 0% 0%，其等同于 left top。
+
+### 3 个值和 4 个值语法
+
+数值和百分比值表示偏移量，第一个值一定要是关键字属性值，这个关键字属性值用来表示偏移是从哪个方向开始的。如果是 3 个值，则认为缺少的偏移量是 0。因此，20px left top 一定是不合法的，其第一个值不是关键字属性值。left 20px right 也是不合法的，因为 left 和 right 方位对立。left 20px top 就是合法的，其等同于 left 20px top 0px，表示距离左侧 20px，距离顶部 0。由于 background-position 默认的定位就是 left top，因此 left 20px top 0 也等同于 20px 0px。下面的 CSS 代码展示了相对于左上角偏移的各种语法和计算值：
+
+```css
+background-position: left 10px top 15px; /* 10px 15px */
+background-position: left top; /* 0px 0px */
+background-position: 10px 15px; /* 10px 15px */
+background-position: left 15px; /* 0px 15px */
+background-position: 10px top; /* 10px 0px */
+background-position: left top 15px; /* 0px 15px */
+background-position: left l0px top; /* 10px 0px */
+```
+
+background-position 属性也可以用在多背景中，用于分别指定每一个背景图像的定位，如：
+
+```css
+.example {
+   background-image: linear-gradient(deepskyblue, deeppink), url(./1.jpg);
+   background-position: 0 0, right 3em bottom 2em;
+}
+```
+
+总结一下，IE 浏览器从 IE9 版本开始就已经支持 background-position 属性的 3 值和 4 值语法，因此不要再使用 calc() 函数实现相对于右下方的定位了。
+
+# outline 相关新属性 outline-offset
+
+outline-offset 属性用于改变 outline 属性设置的轮廓的偏移位置。
+
+以我的经验来看，outline-offset 属性使用负值来缩小轮廓的频率要比使用正值来扩大轮廓的频率高很多。
+
+默认情况下，我们给元素设置的 outline 轮廓都是紧贴元素外边缘的，但是，如果多个元素紧密相连，那么 outline 轮廓就会出现互相覆盖遮挡的情况，如图 3-99 所示。
+
+![](res/2022-01-18-23-42-17.png)
+
+此时就可以使用 outline-offset 属性优化这个小小的体验问题，CSS 代码如下：
+
+```css
+img {
+   outline-offset: -3px;
+}
+```
+
+借助 outline-offset 属性让轮廓范围收缩，这样轮廓就只会在图片所在区域显示，而不会有轮廓相互覆盖的问题了，如图 3-100 所示。
+
+![](res/2022-01-18-23-44-10.png)
+
+[outline-offset-img](embedded-codesandbox://css-new-world-enhance-existing-css/outline-offset-img)
+
+另外，让合适的 outline 尺寸配合合适的 outline-offset 负值，我们可以通过颜色覆盖的方式实现渐变边框效果，或者绘制一个加号图案，如下所示：
+
+```css
+.example {
+   width: 120px;
+   height: 120px;
+   background: linear-gradient(deepskyblue, deeppink);
+   outline: 40px solid #fff;
+   outline-offset: -92px;
+}
+```
+
+效果如图 3-101 所示。
+
+![](res/2022-01-18-23-48-47.png)
+
+虽然实现的方法很巧妙，但这并不是常用技巧，大家了解一下即可。
+
+Edge15+ 浏览器和现代浏览器均支持 outline-offset 属性，该属性的兼容性还算不错。
+
+# cursor 属性新增的手形效果
+
+本节介绍两组新增的手形效果，分别是缩放和抓取。
+
+## 放大手形 zoom-in 和缩小手形 zoom-out 简介
+
+cursor: zoom-in / cursor: zoom-out 的鼠标指针如图 3-102 所示，多用于在桌面端的网页中查看大图的交互场景中：
+
+```css
+.zoom-in {
+   /* 放大 */
+   cursor: zoom-in;
+}
+
+.zoom-out {
+   /* 缩小 */
+   cursor: zoom-out;
+}
+```
+
+![](res/2022-01-18-23-56-02.png)
+
+[cursor-zoom-in-out](embedded-codesandbox://css-new-world-enhance-existing-css/cursor-zoom-in-out)
+
+Edge 浏览器从 Edge12 版本开始支持 zoom-in 和 zoom-out 效果，Chrome 和 Firefox 等浏览器也都支持。如果想要兼容 IE 浏览器，则需要制作两个放大和缩小的 cur 文件进行自定义，CSS 代码示意如下：
+
+```css
+.zoom-in {
+   cursor: url(zoom-in.cur);
+   cursor: zoom-in;
+}
+
+.zoom-out {
+   cursor: url(zoom-out.cur);
+   cursor: zoom-out;
+}
+```
+
+## 抓取手形 grab 和放手手形 grabbing 简介
+
+cursor: grab 的鼠标指针是一个五指张开的手的形状，cursor: grabbing 的鼠标指针是一个五指收起的手的形状，它们多用在元素预览空间不足并需要拖动元素的交互场景中：
+
+```css
+.element {
+   /* 准备抓取 */
+   cursor: -webkit-grab;
+   cursor: -moz-grab;
+   cursor: grab;
+}
+
+.element:active {
+   /* 已经抓住 */
+   cursor: -webkit-grabbing;
+   cursor: -moz-grabbing;
+   cursor: grabbing;
+}
+```
+
+两者的效果如图 3-103 所示。
+
+![](res/2022-01-19-00-03-43.png)
+
+[cursor-grab-grabbing](embedded-codesandbox://css-new-world-enhance-existing-css/cursor-grab-grabbing)
+
+Edge 浏览器从 Edge15 版本开始支持 grab 和 grabbing，Chrome 和 Firefox 等浏览器也都支持，且最新的版本中已经不需要加私有前缀。不过由于浏览器支持无私有前缀语法的时间比较晚，为了安全起见，目前最好加上私有前缀，等到 2022 年之后就可以放心去除了。如果想要兼容 IE 浏览器，可以使用 move 属性值代替 grab 和 grabbing，CSS 代码示意如下：
+
+```css
+.element {
+   cursor: move;
+   cursor: grab;
+}
+
+.element:active {
+   cursor: grabbing;
+}
+```
