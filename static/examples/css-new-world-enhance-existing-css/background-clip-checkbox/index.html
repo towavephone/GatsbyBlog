@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>background-clip 与复选框背景色范围限制实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .checkbox {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 3px solid transparent;
+        box-shadow: inset 0 1px, inset -1px 0, inset 0 -1px, inset 1px 0;
+        color: gray;
+        user-select: none;
+        vertical-align: middle;
+      }
+
+      .checkbox.checked {
+        color: deepskyblue;
+        background: currentColor;
+        background-clip: padding-box;
+      }
+
+      .checkbox.checked::before {
+        content: '';
+        display: block;
+        width: 10px;
+        height: 3px;
+        margin: 5px auto 0;
+        border: solid #fff;
+        border-width: 0 0 2px 2px;
+        transform: rotate(-45deg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">默认：<label class="checkbox"></label> 选中：<label class="checkbox checked"></label></div>
+    <script>
+      [].slice.call(document.querySelectorAll('label')).forEach(function(label) {
+        label.addEventListener('click', function() {
+          if (this.classList) {
+            this.classList.toggle('checked');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PNG 透明网格背景原理</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .square {
+        display: inline-block;
+        padding: 150px 300px;
+        background-color: #fff;
+        background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
+          linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
+        background-size: 16px 16px;
+        background-position: 0 0, 8px 8px;
+      }
+
+      /*mobile*/
+      @media screen and (max-width: 640px) {
+        .square {
+          padding: 25% 50%;
+        }
+      }
+
+      .shape-basic-x {
+        padding: 64px 64px 20px;
+        isolation: isolate;
+        overflow: hidden;
+      }
+
+      .shape-basic {
+        display: inline-block;
+        width: 96px;
+        height: 96px;
+        background-color: #fff;
+        background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
+        outline: 1px dotted gray;
+        vertical-align: bottom;
+      }
+
+      .shape-basic-2 {
+        position: absolute;
+        margin-left: 20px;
+      }
+
+      .shape-basic.active {
+        transition: transform 1s;
+        mix-blend-mode: darken;
+        transform: translate(-68px, -48px);
+      }
+
+      .shape-basic-g {
+        margin-top: 20px;
+      }
+
+      .shape-basic-g.active {
+        transition: transform 1s;
+        mix-blend-mode: darken;
+        transform: translate(-48px, -164px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="main">
+      <h1>CSS 创意与视觉表现</h1>
+      <div class="body">
+        <!-- 返回顶部 -->
+        <a href="#" id="backtop" class="backtop" role="button" aria-label="返回顶部" style="display: block;"></a>
+        <script>
+          // 返回顶部
+          var eleBacktop = document.querySelector('#backtop');
+          window.addEventListener('scroll', function() {
+            var st = window.pageYOffset;
+            if (st > 0) {
+              eleBacktop.style.display = 'block';
+            } else {
+              eleBacktop.style.display = 'none';
+            }
+          });
+          eleBacktop.addEventListener('click', function(event) {
+            event.preventDefault();
+            document.scrollingElement.scrollTop = 0;
+          });
+        </script>
+        <article class="article">
+          <section>
+            <h3>效果</h3>
+            <div class="square"></div>
+          </section>
+          <section>
+            <h3>原理</h3>
+            <p>1. 下面两个图形错位叠加后的效果。</p>
+            <div class="shape-basic-x">
+              <i class="shape-basic"></i>
+              <i id="targetShape" class="shape-basic shape-basic-2"></i>
+              <p>
+                <button id="button" class="button">合体</button>
+              </p>
+            </div>
+
+            <p>2. 下面是若干图形平铺状态下的叠加效果。</p>
+            <div class="shape-basic-x">
+              <i class="shape-basic"></i><i class="shape-basic"></i><br /><i class="shape-basic"></i
+              ><i class="shape-basic"></i>
+              <div id="targetShape2" class="shape-basic-g">
+                <i class="shape-basic"></i><i class="shape-basic"></i><br /><i class="shape-basic"></i
+                ><i class="shape-basic"></i>
+              </div>
+              <p>
+                <button id="button2" class="button">合体</button>
+              </p>
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+    <script>
+      button.addEventListener('click', function() {
+        targetShape.classList.remove('active');
+        setTimeout(function() {
+          targetShape.classList.add('active');
+        }, 17);
+        this.innerHTML = '再来一遍';
+      });
+
+      button2.addEventListener('click', function() {
+        targetShape2.classList.remove('active');
+        setTimeout(function() {
+          targetShape2.classList.add('active');
+        }, 17);
+        this.innerHTML = '再来一遍';
+      });
+    </script>
+  </body>
+</html>

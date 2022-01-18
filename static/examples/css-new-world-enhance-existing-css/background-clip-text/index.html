@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>background-clip: text 与渐变文字效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .text-gradient {
+        font-size: 5rem;
+        color: deepskyblue;
+      }
+
+      @supports (-webkit-background-clip: text) or (background-clip: text) {
+        .text-gradient {
+          background: linear-gradient(deepskyblue, deeppink);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p class="text-gradient">我是渐变文字</p>
+    </div>
+  </body>
+</html>
