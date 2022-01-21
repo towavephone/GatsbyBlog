@@ -257,3 +257,400 @@ CSS 代码如下：
 假设 --percent 的值是 40，也就是 40% 范围的饼状图，将 40 代入 `99999 * (var(--percent) - 50)` 计算可以得到 -999990 的结果，opacity: -999990 等同于 opacity: 0，也就是饼状图百分比不足 50% 的时候，左半圆和右覆盖圆是隐藏的，只有右半圆在旋转。假设 --percent 的值是 80，可以发现最终的 opacity 计算值远大于 1，此时会按照 opacity: 1 渲染，也就是饼状图百分比大于 50% 的时候，左半圆和右覆盖圆是显示的。于是，我们就实现了一个基于 CSS 变量自动绘制的饼状图效果了。
 
 [opacity-pie](embedded-codesandbox://css-new-world-detailed-style-performance/opacity-pie)
+
+# 深入了解圆角属性 border-radius
+
+border-radius 属性是一个典型的符合“二八原则”的 CSS 属性，也就是说要想深入了解 border-radius 属性，需要花费额外 80% 的学习精力，但是用这一部分精力所学到的知识只能用在 20% 的场景中。
+
+在日常开发中，我们使用 border-radius 属性的场景无非下面两类。
+
+1. 为按钮、输入框等控件，或者为背景色块增加小圆角，例如：
+
+   ```css
+   input,
+   button {
+      border-radius: 4px;
+   }
+   ```
+
+2. 将用户头像变成圆形：
+
+   ```css
+   .user-avatar {
+      border-radius: 50%;
+   }
+   ```
+
+上面两类场景就满足了日常 80% 与圆角相关的开发需求了，那么到此结束了吗？显然没有，如果继续深入了解 border-radius 属性，你会发现 border-radius 属性远没有你想的那么简单，它可以呈现的效果也绝对超出你的预期。
+
+## 了解 border-radius 属性的语法
+
+我们平时使用的 border-radius 属性其实是一种缩写，它是 border-top-left-radius、border-top-right-radius、border-bottom-left-radius 和 border-bottom-right-radius 这 4 个属性的缩写。这 4 个属性的圆角位置如图 4-5 所示。
+
+![](res/2022-01-21-10-34-32.png)
+
+这 4 个属性很好理解，因为属性名称就暴露了一切，例如 border-top-left-radius 显然就是用来设置左上角圆角大小的。不过，虽然它们好理解，但是不好记忆，一段时间后就会不记得到底是 border-top-left-radius 还是 border-left-top-radius。我是使用这种方法让自己记住的：圆角属性的方位顺序和中文表述是相反的。例如中文我们都是说左上角、右上角，或者左下角、右下角，顺序是先左右再上下，但是，CSS 圆角属性却是先上下再左右，例如 border-top-left-radius 先是 top 再是 left，又如 border-bottom-right-radius 先是 bottom 再是 right。
+
+### 1 ～ 4 个值表示的方位
+
+border-radius 属性支持 1 ～ 4 个值，分别表示不同的角。
+
+1. 如果只有 1 个值，则表示圆角效果作用在全部 4 个角，效果如图 4-6 所示，代码如下：
+
+   ```css
+   border-radius: 10px;
+   ```
+
+   ![](res/2022-01-21-10-43-24.png)
+
+2. 如果有 2 个值，则第一个值作用于左上角和右下角，第二个值作用于右上角和左下角，效果如图 4-7 所示，代码如下：
+
+   ```css
+   border-radius: 10px 50%;
+   ```
+
+   ![](res/2022-01-21-10-44-47.png)
+
+3. 如果有 3 个值，则第一个值作用于左上角，第二个值作用于右上角和左下角，第三个值作用于右下角，效果如图 4-8 所示，代码如下：
+
+   ```css
+   border-radius: 10px 50% 30px;
+   ```
+
+   ![](res/2022-01-21-10-45-58.png)
+
+4. 如果有 4 个值，则 4 个值按照顺时针方向依次作用于左上角、右上角、右下角和左下角，效果如图 4-9 所示。
+
+   ```css
+   border-radius: 10px 50% 30px 0;
+   ```
+
+   ![](res/2022-01-21-10-46-58.png)
+
+### 水平半径和垂直半径
+
+还有很多人不知道我们平时使用的圆角值也是一种缩写。例如，下面 CSS 代码中的 10px 就是一种缩写：
+
+```css
+border-top-left-radius: 10px;
+```
+
+它等同于：
+
+```css
+border-top-left-radius: 10px 10px;
+```
+
+其中，第一个值表示水平半径，第二个值表示垂直半径。又如：
+
+```css
+border-top-left-radius: 30px 60px;
+```
+
+表示左上角的圆角是由水平半径（短半轴）为 30px、垂直半径（长半轴）为 60px 的椭圆产生的，效果如图 4-10 所示。
+
+![](res/2022-01-21-10-50-09.png)
+
+如果是 border-radius 属性，则水平半径和垂直半径不是通过空格进行区分，而是通过斜杠区分。例如：
+
+```css
+border-radius: 30px / 60px;
+```
+
+表示 4 个角落的圆角的水平半径都是 30px，垂直半径都是 60px，效果如图 4-11 所示。
+
+![](res/2022-01-21-10-53-04.png)
+
+斜杠前后都支持 1 ～ 4 个长度值。因此，下面的语法都是合法的：
+
+```css
+/* 左上 右上+左下 右下 / 左上 右上+左下 右下 */
+border-radius: 10px 5px 2em / 20px 25px 30%;
+/* 左上+右下 右上+左下 / 左上 右上 右下 左下 */
+border-radius: 10px 5% / 20px 25em 30px 35em;
+```
+
+现在了解了语法，那这里的水平半径和垂直半径究竟是如何作用才让边角产生圆角效果的呢？这个问题就是接下来要深入探讨的。
+
+## 弄懂圆角效果是如何产生的
+
+虽然我们口头上都称 border-radius 为圆角属性，实际上 border-radius 属性的字面意思不是“圆角”，而是“边界半径”，也就是圆角效果来自以这个半径值绘制的圆或以半轴值绘制的椭圆。例如，图 4-10 所示左上角的圆角效果是由水平半径为 30px、垂直半径为 60px 的椭圆产生的，原理如图 4-12 所示。
+
+![](res/2022-01-21-11-01-58.png)
+
+如果进一步放大半径值，例如设置垂直半径大小和元素等高，也就是 100% 高度值，如下所示：
+
+```css
+border-top-left-radius: 30px 100%;
+```
+
+效果和原理此时如图 4-13 所示。
+
+![](res/2022-01-21-11-03-23.png)
+
+### 重叠曲线的渲染机制
+
+左上角和左下角的垂直半径都是 100%，代码如下：
+
+```css
+border-top-left-radius: 30px 100%;
+border-bottom-left-radius: 30px 100%;
+```
+
+显然，元素的高度并不足以放下两个半轴为 100% 尺寸的椭圆，如果我们对这种场景不加以约束，则曲线一定会发生重叠，而且曲线的交叉点一定不是平滑的，最后得到的绝对不会是我们想看到的效果。
+
+因此，CSS 规范对圆角曲线重叠这一问题做了额外的渲染设定，具体算法如下：设置 $f = min(L_h/S_h, L_v/S_v)$，其中 S 是半径之和，L 是元素宽高，下标 h 和 v 表示方向，f 是计算值，简称“f 计算值”。CSS 圆角曲线的渲染规则很简单，如果 f 计算值小于 1，则所有圆角半径都乘以 f。
+
+回到这里的例子，左上角和左下角的垂直半径都是 100%，水平半径都是 30px，因此 $f = min(L_h/S_h, L_v/S_v) = min(150/60, 100/200) = 0.5$，f 计算值是 0.5，小于 1，所有圆角值都要乘以 0.5，因此：
+
+```css
+border-top-left-radius: 30px 100%;
+border-bottom-left-radius: 30px 100%;
+```
+
+实际上，这等同于：
+
+```css
+border-top-left-radius: 15px 50%;
+border-bottom-left-radius: 15px 50%;
+```
+
+此时会有图 4-14 所示的效果。
+
+![](res/2022-01-21-11-06-33.png)
+
+明白了重叠曲线的渲染机制，一些常见却不太理解的现象也就明白了。
+
+如果元素的高度和宽度是一样的，例如都是 150px，则下面两段 CSS 声明的效果是一样的：
+
+```css
+border-radius: 100%;
+border-radius: 150px;
+```
+
+但是，如果元素的高度和宽度是不一样的，例如宽度是 150px，高度是 100px，则下面两段 CSS 声明的效果就不一样：
+
+```css
+border-radius: 100%;
+border-radius: 150px;
+```
+
+效果如图 4-15 所示。
+
+![](res/2022-01-21-11-27-24.png)
+
+为什么会不一样呢？很多人百思不得其解。其实，简单套用一下重叠曲线的算法，一切就豁然开朗了：
+
+- border-radius: 100% 的 f 计算值是 0.5，因此，最终的圆角半径都要乘以 0.5，等同于：
+
+   ```css
+   border-radius: 75px / 50px;
+   ```
+
+- border-radius: 150px 水平方向的 $L/S$ 的计算值是 0.5，而垂直方向的 $L/S$ 计算值是 100/300，也就是 0.3333，于是 $f = min(0.5, 0.3333) = 0.3333$，也就是所有圆角半径（都是 150px）都要乘以 0.3333，等同于：
+
+   ```css
+   border-radius: 50px;
+   ```
+
+## border-radius 属性渲染 border 边框的细节
+
+如果元素设置了 border 边框，则圆角半径会被分成内半径和外半径，如图 4-16 所示。
+
+![](res/2022-01-21-11-36-53.png)
+
+其中直线为外半径，圆心到内部虚线圆的距离为内半径。
+
+1. padding 边缘的圆角大小为设置的 border-radius 大小减去边框的厚度，如果结果为负，则内半径为 0。例如：
+
+   ```css
+   .radius {
+      width: 100px;
+      height: 100px;
+      border-top: 40px solid deepskyblue;
+      border-left: 40px solid deepskyblue;
+      border-radius: 40px 0 0;
+   }
+   ```
+
+   圆角半径大小和边框的大小均是 40px，此时内半径大小为 0，因此，padding 边缘是直角，没有弧度。最终效果如图 4-17 所示。
+
+   ![](res/2022-01-21-11-42-49.png)
+
+   此特性在边框颜色透明的场景下依旧适用。另外，当内半径大于 0 的时候边框会和 padding box 重叠，此时文字内容可能会出现在边框之上。
+
+2. 如果相邻两侧边框的厚度不同，则圆角大小将在较厚和较薄边界之间显示平滑过渡。例如：
+
+   ```css
+   .radius {
+      width: 100px;
+      height: 100px;
+      border-top: 40px solid deepskyblue;
+      border-left: 20px solid deepskyblue;
+      border-radius: 40px 0 0 / 60px 0 0;
+   }
+   ```
+
+   最终效果如图 4-18 所示。可以明显看出在圆角位置处，边框的厚度在 20px ～ 40px 范围内变化的时候是平滑的，是流畅的。
+
+   ![](res/2022-01-21-11-45-59.png)
+
+   我们可以利用这一特性实现图 4-24 所示的带尾巴的小尖角效果。
+
+3. 圆角边框的连接线和直角边框连接线位置一致，但是角度会有所不同。例如：
+
+   ```css
+   .radius {
+      width: 100px;
+      height: 100px;
+      border-top: 40px solid deepskyblue;
+      border-left: 20px solid deeppink;
+      border-right: 20px solid deeppink;
+      border-radius: 40px 0 0 / 60px 0 0;
+   }
+   ```
+
+   最终效果如图 4-19 所示。
+
+   ![](res/2022-01-21-12-03-30.png)
+
+下面是其他一些细节。
+
+1. border-radius 不支持负值。
+2. 圆角以外的区域不可点击，无法响应 click 事件。
+3. border-radius 没有继承性，因此父元素设置了 border-radius，子元素依然是直角效果。我们可以通过给父元素设置 overflow: hidden 让子元素视觉上表现为圆角。
+4. border-radius 属性支持 transition 过渡效果，也支持 animation 动画效果，因此在图形表现领域，border-radius 属性会非常给力。
+5. border-radius 属性也是可以应用于 display 的计算值为 table、inline-table 或者 table-cell 的元素上的，但是有一个前提，那就是表格元素的 border-collapse 属性值需要是 separate（separate 是 border-collapse 属性的默认值），如果 border-collapse 属性值是 collapse，那么是没有圆角效果的。
+
+## border-radius 属性的高级应用技巧
+
+border-radius 在实际开发中的高级应用主要在两方面，一个是增强原本的圆角效果，另外一个就是绘制各类图形效果。
+
+### border-radius 与不规则圆角头像
+
+我们平时给头像设置的圆角效果都是规则的圆，其实还可以使用百分比值设置不同的水平半径和垂直半径，实现不规则的圆角效果，例如：
+
+```css
+.avatar {
+   border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+}
+```
+
+效果如图 4-20 所示。
+
+![](res/2022-01-21-12-06-58.png)
+
+再配点标题和描述，一个非常有设计感的布局效果就出来了，如图 4-21 所示。
+
+![](res/2022-01-21-12-07-17.png)
+
+[border-radius-avatar](embedded-codesandbox://css-new-world-detailed-style-performance/border-radius-avatar)
+
+如果是很多个头像，我们还可以利用“蝉原则”（质数）实现随机圆角效果。
+
+一种方法是直接指定圆角大小，IE9+ 浏览器均提供支持，例如：
+
+```css
+.avatar {
+   border-radius: 87% 91% 98% 100%;
+}
+
+.avatar:nth-child(2n + 1) {
+   border-radius: 59% 52% 56% 59%;
+}
+
+.avatar:nth-child(3n + 2) {
+   border-radius: 84% 94% 83% 72%;
+}
+
+.avatar:nth-child(5n + 3) {
+   border-radius: 73% 100% 82% 100%;
+}
+
+.avatar:nth-child(7n + 5) {
+   border-radius: 93% 90% 85% 78%;
+}
+
+.avatar:nth-child(11n + 7):hover {
+   border-radius: 58% 98% 78% 83%;
+}
+```
+
+另外一种方法是选取圆角动画中的某一帧，这可以借助 animation-delay 负值技术实现，例如：
+
+```css
+.avatar {
+   border-radius: 50%;
+   animation: morph 6s paused linear;
+}
+
+@keyframes morph {
+   0% {
+      border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+   }
+   100% {
+      border-radius: 40% 60%;
+   }
+}
+
+.avatar:nth-child(2n + 1) {
+   animation-delay: -1s;
+}
+
+.avatar:nth-child(3n + 2) {
+   animation-delay: -2s;
+}
+
+.avatar:nth-child(5n + 3) {
+   animation-delay: -3s;
+}
+
+.avatar:nth-child(7n + 5) {
+   animation-delay: -4s;
+}
+
+.avatar:nth-child(11n + 7) {
+   animation-delay: -5s;
+}
+```
+
+最终可以实现图 4-22 所示的随机不规则圆角头像效果，支持任意数量的头像。
+
+![](res/2022-01-21-13-34-00.png)
+
+[border-radius-random-avatar-1](embedded-codesandbox://css-new-world-detailed-style-performance/border-radius-random-avatar-1)
+
+[border-radius-random-avatar-2](embedded-codesandbox://css-new-world-detailed-style-performance/border-radius-random-avatar-2)
+
+### border-radius 图形绘制技巧
+
+一句话，只要是带圆弧的图形效果，border-radius 属性都能绘制出来，前提是对 border-radius 属性有足够深入的了解。想要出神入化地绘制图形，离不开人的创造力，下面先来介绍几个常用的图形效果，其他效果可以在此基础上延伸。
+
+下面两个例子纯属抛砖引玉。
+
+1. 绘制 1/4 圆作为角标，用来显示序号，关键 CSS 代码如下：
+
+   ```css
+   border-bottom-right-radius: 100%;
+   ```
+
+   效果如图 4-23 所示。
+
+   ![](res/2022-01-21-13-41-25.png)
+
+2. 例如，border 边框应用 border-radius 属性时，可以使用平滑特性实现带尖角的对话框小尾巴效果：
+
+   ```css
+   .corner-tail {
+      width: 15px;
+      height: 10px;
+      border-top: 10px solid deepskyblue;
+      border-top-left-radius: 80%;
+   }
+   ```
+
+   效果如图 4-24 所示。
+
+   ![](res/2022-01-21-13-43-57.png)
+
+   [border-radius-graphics-drawing](embedded-codesandbox://css-new-world-detailed-style-performance/border-radius-graphics-drawing)

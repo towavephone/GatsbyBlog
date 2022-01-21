@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>border-radius 不规则圆角头像效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .radius {
+        width: 150px;
+        height: 150px;
+        border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+        object-fit: cover;
+        object-position: right;
+      }
+
+      .example {
+        width: 414px;
+        padding: 20px;
+        background: #ffe0bc;
+        display: flex;
+        margin: 1em auto;
+        text-align: left;
+      }
+
+      .detail {
+        flex: 1;
+        margin-right: 20px;
+      }
+
+      .detail h6 {
+        font-size: 24px;
+        font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+        margin: -5px 0 0;
+        font-weight: 400;
+      }
+
+      .detail time {
+        color: #703818;
+        font-size: 125%;
+        margin-left: 5px;
+      }
+
+      .detail p {
+        font-size: 12px;
+        color: #703818;
+        line-height: 1.5;
+        margin-bottom: 0;
+        text-align: justify;
+      }
+
+      @media screen and (max-width: 480px) {
+        .radius {
+          width: 100px;
+          height: 100px;
+          align-self: center;
+        }
+
+        .detail {
+          margin-right: 1rem;
+        }
+
+        .example {
+          width: auto;
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <img class="radius" src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+
+      <div class="example">
+        <div class="detail">
+          <h6>CCling<time>2020</time></h6>
+          <p>
+            阳光透过窗户映照在地上，散开的云朵，地上的阳光越发的强烈，强烈的发白，让人窒息。这是炎炎夏日的阳光啊，思绪里立马填满的暑假的味道，淡定的心境，来往的故事，心里不免一丝感叹——又是一个暑假。
+          </p>
+        </div>
+        <img class="radius" src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+      </div>
+    </div>
+  </body>
+</html>
