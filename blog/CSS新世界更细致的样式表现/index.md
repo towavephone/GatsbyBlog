@@ -654,3 +654,371 @@ border-radius 在实际开发中的高级应用主要在两方面，一个是增
    ![](res/2022-01-21-13-43-57.png)
 
    [border-radius-graphics-drawing](embedded-codesandbox://css-new-world-detailed-style-performance/border-radius-graphics-drawing)
+
+# box-shadow 盒阴影
+
+box-shadow 盒阴影也是非常实用的 CSS 属性，可以给元素设置阴影效果，让视觉表现更富有层次。例如，为固定定位的头部元素设置方向朝下的阴影效果可以让页面层次更清晰：
+
+```css
+header {
+   background-color: #fff;
+   position: fixed;
+   left: 0;
+   right: 0;
+   top: 0;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+```
+
+其中，`box-shadow: 0 2px 4px rgba(0, 0, 0, .2)` 这段 CSS 声明包含 box-shadow 属性最常使用的几个值，0 表示水平偏移，2px 表示垂直偏移，4px 是模糊大小，`rgba(0, 0, 0, .2)` 则是投影的颜色。
+
+常规的投影效果使用上面几个值就可以了，偏移+模糊+颜色，例如 filter 属性中的 drop-shadow 投影滤镜就是上面几个部件组成的。
+
+无论是盒阴影还是投影效果，其光源都默认在页面的左上角。因此水平偏移的值如果是正数则表示投影偏右，如果是负数则表示投影偏左，垂直偏移也是类似效果。这种偏移方位与文档流的方向没有任何关系，例如我们设置文档流是从右往左（direction: rtl），正数偏移值依然表示投影偏右下，不会有任何变化。
+
+本书不会在 box-shadow 属性的常规用法上多费笔墨，主要介绍你可能不知道的其他的一些应用。
+
+## inset 关键字与内阴影
+
+box-shadow 属性支持 inset 关键字，表示阴影朝向元素内部。先看一个简单的内外阴影对比案例：
+
+```css
+.inset {
+   width: 180px;
+   height: 100px;
+   background-color: deepskyblue;
+   box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.normal {
+   width: 180px;
+   height: 100px;
+   background-color: deepskyblue;
+   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+```
+
+效果如图 4-25 所示。
+
+![](res/2022-01-22-12-47-36.png)
+
+从图 4-25 中可以看出以下两点。
+
+1. box-shadow 内阴影效果适合实现内嵌效果，表现更低一层级的视觉效果。
+2. box-shadow 内阴影的水平和垂直偏移方向和外阴影一致，都是左上角光源。
+
+然而，根据我多年的实践经验，内阴影更常见的使用场景并不是视觉层级表现，而是辅助图形效果。
+
+### 模拟边框
+
+在 border 边框被占用，或者不方便使用 border 属性的情况下，我们可以借助 box-shadow 内阴影来模拟边框效果。
+
+例如，一套按钮组件，深色背景按钮无边框，浅色背景按钮需要有边框，这就带来了一点小麻烦。因为 border 会影响元素的尺寸，为了保证所有按钮尺寸一致的同时代码被高度复用，很多人会给深色背景按钮设置透明边框。其实还有更好的做法，那就是使用 box-shadow 内阴影模拟边框，例如：
+
+```html
+<button class="normal">正常</button>
+<button class="primary">主要</button>
+<button class="warning">警示</button>
+<style>
+   button {
+      height: 40px;
+      border: 0;
+      border-radius: 4px;
+   }
+
+   .normal {
+      background-color: #fff;
+      /* 模拟边框 */
+      box-shadow: inset 1px 0 #a2a9b6, inset -1px 0 #a2a9b6, inset 0 1px #a2a9b6, inset 0 -1px #a2a9b6;
+   }
+
+   .primary {
+      color: #fff;
+      background-color: #2a80eb;
+   }
+
+   .warning {
+      color: #fff;
+      background-color: #eb4646;
+   }
+</style>
+```
+
+效果如图 4-26 所示，有边框按钮和无边框按钮的尺寸完全一致。
+
+![](res/2022-01-22-12-53-32.png)
+
+[border-shadow-inset-button](embedded-codesandbox://css-new-world-detailed-style-performance/border-shadow-inset-button)
+
+### 颜色覆盖
+
+box-shadow 内阴影有一个实用特性，那就是生成的阴影会位于文字内容的下面，背景颜色的上面。于是我们可以使用 box-shadow 属性在元素上面再覆盖一层颜色，这种做法在不少场景下非常有用。
+
+在 Chrome 浏览器中，输入框在自动填充的时候会自带背景颜色，一般是黄色或者浅蓝色，我们可以使用 box-shadow 内阴影创建白色颜色层对其进行覆盖，代码如下：
+
+```css
+input:-webkit-autofill {
+   -webkit-box-shadow: inset 0 0 0 1000px #fff;
+   background-color: transparent;
+}
+```
+
+又如，按钮在被按下的时候其背景色要深一点，这用来给用户提供操作反馈。使用 box-shadow 内阴影，只用一行代码便可以搞定所有按钮，无须一个一个专门进行颜色设置，例如：
+
+```css
+button:active {
+   box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.1);
+}
+```
+
+效果如图 4-27 所示，在中间按钮被按下的时候背景颜色明显加深了。
+
+![](res/2022-01-22-20-54-13.png)
+
+box-shadow 内阴影颜色覆盖也是有局限的，其对于部分替换元素是无效的，例如 `<img>` 元素：
+
+```css
+/* 无效 */
+img:active {
+   box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.1);
+}
+```
+
+因为替换元素的内容在盒阴影之上。此时可以使用 outline 属性进行模拟，假设图片尺寸是 75px×100px，则可以：
+
+```css
+img:active {
+   outline: 50px solid rgba(0, 0, 0, 0.1);
+   outline-offset: -50px;
+}
+```
+
+## 不要忽略第四个长度值
+
+box-shadow 属性支持 2 ～ 4 个长度值，前两个长度值是固定的，表示水平偏移和垂直偏移，第三个长度值表示模糊半径，还有第四个长度值，表示扩展半径。“扩展”这一特性并不符合现实世界对投影的认知，因此在模拟真实世界投影效果的时候是用不到的，用得少自然知道的人就少。
+
+不过扩展半径在某些时候还是很有用的，扩展半径主要用在以下两个场景：一是轮廓模拟，二是实现单侧阴影。
+
+### 轮廓模拟
+
+理论上，按钮的轮廓可以借助第四个长度值，即扩展半径来实现，代码如下：
+
+```css
+.normal {
+   background-color: #fff;
+   /* 模拟轮廓 */
+   box-shadow: inset 0 0 0 1px #a2a9b6;
+}
+```
+
+使用扩展半径模拟轮廓的代码量要比实现 4 个方向分别投影的代码量小很多。但是很遗憾，在有圆角的情况下，使用扩展半径的方法在 IE 浏览器中的渲染是有问题的，4 个圆角阴影会重叠，如图 4-28 所示，这不符合我们的预期。
+
+![](res/2022-01-22-21-00-44.png)
+
+因此，扩展半径多用来模拟大范围的色块效果，例如新手引导的蒙层效果：
+
+```css
+.guide {
+   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+   border-radius: 50%;
+}
+```
+
+相比 outline 属性，使用 box-shadow 属性实现蒙层效果出现的 bug 要更少（Firefox 浏览器的 outline 轮廓有些小问题），同时还支持圆角，是最佳的实现方法，效果如图 4-29 所示。
+
+![](res/2022-01-22-21-03-32.png)
+
+[border-shadow-guide](embedded-codesandbox://css-new-world-detailed-style-performance/border-shadow-guide)
+
+### 单侧阴影
+
+扩展半径还支持负值，可以用来实现单侧阴影效果。理论上，实现单侧阴影效果只要设置一侧阴影的偏移大小为 0 即可，但是，如果模糊半径设置得较大，就会看到有部分阴影显示在左右两侧了，并不是单侧阴影效果，例如：
+
+```css
+header {
+   width: 150px;
+   padding: 10px;
+   background-color: white;
+   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+```
+
+效果如图 4-30 所示。
+
+![](res/2022-01-22-21-12-07.png)
+
+此时可以设置扩展半径为负值，让阴影只在一侧显示，相关代码如下：
+
+```css
+header {
+   box-shadow: 0 7px 5px -5px rgba(0, 0, 0, 0.5);
+}
+```
+
+效果如图 4-31 所示。
+
+![](res/2022-01-22-21-16-08.png)
+
+## 多阴影特性与图形绘制
+
+box-shadow 属性支持无限多个阴影效果不断累加，因此理论上 box-shadow 属性可以实现任意图形效果，我们只需要设置 1px×1px 的元素，然后不断投影。当然，我们在实际开发中不会这么使用，因为没必要，性能也很糟糕。但是，box-shadow 属性的多阴影特性确实让 box-shadow 属性在图形绘制领域大放光彩。
+
+### 多边框和渐变边框效果
+
+我们可以使用 box-shadow 属性模拟多边框效果，该属性也支持圆角效果，例如：
+
+```css
+.multi-border {
+   height: 100px;
+   border-radius: 10px;
+   background-color: deepskyblue;
+   box-shadow: 0 0 0 4px #fff, 0 0 0 8px deeppink, 0 0 0 12px yellow, 0 0 0 16px purple;
+}
+```
+
+效果如图 4-32 所示。
+
+![](res/2022-01-22-21-21-50.png)
+
+如果我们多边框的过渡颜色足够细腻，我们还可以使用 box-shadow 属性实现由内往外但并不是径向渐变的渐变效果，例如：
+
+```css
+.gradient-border {
+   height: 100px;
+   border-radius: 10px;
+   background-color: deepskyblue;
+   box-shadow: 0 0 0 1px #07b9fb, 0 0 0 2px #17aef4, 0 0 0 3px #27a4ee, 0 0 0 4px #3799e7, 0 0 0 5px #478ee0, 0 0 0 6px
+         #5784d9, 0 0 0 7px #6779d3, 0 0 0 8px #776ecc, 0 0 0 9px #8764c5, 0 0 0 10px #9759be, 0 0 0 11px #a74eb8, 0 0 0
+         12px #b744b1, 0 0 0 13px #c739aa, 0 0 0 14px #d72ea3, 0 0 0 15px #e7249d, 0 0 0 16px #f71996;
+}
+```
+
+效果如图 4-33 所示。
+
+![](res/2022-01-22-21-29-16.png)
+
+### 加载效果
+
+box-shadow 属性可以实现多种 CSS 加载效果，例如下面这个经典的旋转加载效果：
+
+```css
+.loading {
+   width: 4px;
+   height: 4px;
+   border-radius: 100%;
+   color: rgba(0, 0, 0, 0.4);
+   box-shadow: 0 -10px rgba(0, 0, 0, 0.9), 10px 0px, 0 10px, -10px 0 rgba(0, 0, 0, 0.7), -7px -7px rgba(0, 0, 0, 0.8), 7px -7px
+         rgba(0, 0, 0, 1), 7px 7px, -7px 7px;
+   animation: spin 1s steps(8) infinite;
+}
+
+@keyframes spin {
+   0% {
+      transform: rotate(0deg);
+   }
+
+   100% {
+      transform: rotate (360deg);
+   }
+}
+```
+
+效果如图 4-34 所示。
+
+![](res/2022-01-22-21-38-34.png)
+
+### 云朵效果
+
+使用 box-shadow 属性实现云朵效果的代码如下：
+
+```css
+.cloud {
+   width: 60px;
+   height: 50px;
+   color: white;
+   background-color: currentcolor;
+   border-radius: 50%;
+   box-shadow: 100px 0px 0 -10px, 40px 0px, 70px 15px, 30px 20px 0 -10px, 70px -15px, 30px -30px;
+}
+```
+
+效果如图 4-35 所示。
+
+![](res/2022-01-22-21-44-49.png)
+
+实现原理很简单，就是使用 box-shadow 属性克隆多个圆，然后让圆不断交错重叠。
+
+### 3D 投影效果
+
+给按钮设置一个 3D 投影效果，按下按钮的时候按钮的位置发生偏移，同时投影高度降低，这可以实现非常有立体感的按钮效果，代码如下：
+
+```css
+.shadow-3d-button {
+   width: 100px;
+   height: 36px;
+   border: 1px solid #a0b3d6;
+   background-color: #f0f3f9;
+   box-shadow: 1px 1px #afc4ea, 2px 2px #afc4ea, 3px 3px #afc4ea;
+}
+
+.shadow-3d-button:active {
+   transform: translate(1px, 1px);
+   box-shadow: 1px 1px #afc4ea, 2px 2px #afc4ea;
+}
+```
+
+效果如图 4-36 所示。
+
+![](res/2022-01-22-21-50-48.png)
+
+[border-shadow-graphics-drawing](embedded-codesandbox://css-new-world-detailed-style-performance/border-shadow-graphics-drawing)
+
+## box-shadow 动画与性能优化
+
+在日常开发中，对 box-shadow 属性的使用没有什么限制，不用担心相对较大的性能开销。个别元素应用 box-shadow 动画也没问题，毕竟抛开数量谈性能是没有意义的。但是，如果页面本身比较复杂，应用渐变、半透明、盒阴影、滤镜等特性的元素很多，则此时 box-shadow 动画所带来的性能开销就会很大，实现的动画效果帧率不足 60f/s，GPU 加速疯狂运转，手机电量迅速减少。这时可以使用一些小技巧优化一下。
+
+例如，有一个盒阴影过渡效果：
+
+```css
+.normal {
+   transition: all 0.5s;
+   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+.normal:hover {
+   box-shadow: 0 16px 24px rgba(0, 0, 0, 0.7);
+}
+```
+
+在鼠标经过盒的时候会伴随大量的样式重计算和 GPU 加速，此时，我们可以使用伪元素创建盒阴影，然后在鼠标经过盒的时候改变盒阴影的透明度，以此进行优化，代码如下：
+
+```css
+.optimize::before,
+.optimize::after {
+   content: '';
+   transition: opacity 0.6s;
+}
+
+.optimize::before {
+   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+.optimize::after {
+   opacity: 0;
+   box-shadow: 0 16px 24px rgba(0, 0, 0, 0.7);
+}
+
+.optimize:hover::before {
+   opacity: 0;
+}
+
+.optimize:hover::after {
+   opacity: 1;
+}
+```
+
+图 4-37 所示是优化前后的一些性能指标，从左往右共 4 段动画区间，分别代表正常实现鼠标经过、正常实现鼠标移开、优化实现鼠标经过和优化实现鼠标移开触发的 transition 过渡效果，可以看到正常实现的盒阴影动画的样式重计算和 GPU 开销明显更大（左方块内的栅格数量更多）。
+
+![](res/2022-01-22-21-58-03.png)
+
+[border-shadow-performance-optimize](embedded-codesandbox://css-new-world-detailed-style-performance/border-shadow-performance-optimize)
