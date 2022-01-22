@@ -524,3 +524,9 @@ pre[class*='language-'] {
   color: white;
   fill: currentColor;
 }
+
+.katex {
+  white-space: normal;
+  line-break: anywhere;
+  word-wrap: break-word;
+}
