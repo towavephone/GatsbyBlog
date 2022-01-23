@@ -527,6 +527,7 @@ pre[class*='language-'] {
 
 .katex {
   white-space: normal;
-  line-break: anywhere;
+  word-break: break-all;
   word-wrap: break-word;
+  line-break: anywhere;
 }

@@ -1022,3 +1022,477 @@ box-shadow 属性可以实现多种 CSS 加载效果，例如下面这个经典�
 ![](res/2022-01-22-21-58-03.png)
 
 [border-shadow-performance-optimize](embedded-codesandbox://css-new-world-detailed-style-performance/border-shadow-performance-optimize)
+
+# CSS 2D 变换
+
+本节主要介绍 2D 变换，3D 变换会在之后详细讲解。
+
+首先说一下私有前缀，现在已经不是 10 年前了，没有任何理由需要给 transform 属性添加 -moz- 和 -o- 私有前缀。如果是需要兼容 IE 浏览器的传统 Web 产品，则需要加上 -ms- 私有前缀，但不需要加上 -webkit- 私有前缀，示例如下：
+
+```css
+.pc {
+   -ms-transform: none;
+   transform: none;
+}
+```
+
+如果是移动端项目，考虑到还有不到 4% 的 Android 4.4 操作系统用户，因此还需要加 -webkit- 私有前缀，但不需要加 -ms- 私有前缀。
+
+```css
+.mobile {
+   -webkit-transform: none;
+   transform: none;
+}
+```
+
+transform 属性相关特性和细节非常多，想要理解本节内容需要反复阅读。
+
+## 从基本的变换方法说起
+
+2D 变换常用的变换方法包括位移、旋转、缩放和斜切，示例如下：
+
+```css
+/* 位移 */
+transform: translate(0, 0);
+/* 旋转 */
+transform: rotate(0deg);
+/* 缩放 */
+transform: scale(1);
+/* 斜切 */
+transform: skew(0deg);
+```
+
+我们先逐个快速了解一下各个变换方法的基本特性。
+
+### translate() 位移
+
+以自身坐标为基准，进行水平方向或垂直方向的位移，语法如下：
+
+```css
+/* 往右偏移 10px，往下偏移 20px */
+transform: translate(10px, 20px);
+/* 往右偏移 10px */
+transform: translateX(10px);
+/* 往下偏移 20px */
+transform: translateY(20px);
+```
+
+其中，translate() 函数中的第二个值可以省略，省略后表示垂直方向的偏移大小是 0。因此，translate(10px) 等同于 translate(10px, 0)，也等同于 translateX(10px)。大家千万不要被 scale() 函数的语法给误导，translate(10px) 不是 translate(10px, 10px) 的简写。
+
+位移的方向和文档流的顺序没有任何关系，也就是即使祖先元素设置 direction: rtl，translateX(10px) 依然表示往右偏移。
+
+位移变换最不可替代的特性就是设定百分比偏移值，因为 CSS 世界中就没有几个属性的百分比值是相对于自身尺寸计算的，示例如下：
+
+```css
+/* 往左偏移自身宽度的一半，往上偏移自身高度的一半 */
+transform: translate(-50%, -50%);
+```
+
+百分比值相对于自身计算的这个特性非常适合用来实现高宽不固定元素的水平垂直居中效果，例如，弹框元素想要居中定位，可以使用下面的 CSS 语句：
+
+```css
+.dialog {
+   position: absolute;
+   left: 50%;
+   top: 50%;
+   transform: translate(-50%, -50%);
+}
+```
+
+然而对于绝对定位元素，如果可以，请尽量避免使用 transform 属性进行位置偏移，应改用 margin 属性进行偏移定位，这样就可以把 transform 属性预留出来，方便实现各种 animation 动画效果。例如，我们希望元素出现的时候有一个缩放动画效果，但是如果偏移是使用 transform 属性实现的，那么这个动画执行的时候元素的定位就会出现问题。
+
+### rotate() 旋转
+
+例如，将图片旋转 45 度：
+
+```css
+img {
+   transform: rotate(45deg);
+}
+```
+
+效果如图 4-38 所示。
+
+![](res/2022-01-23-17-39-41.png)
+
+由此可见，正值是顺时针旋转。
+
+这里顺便详细介绍一下角度单位，CSS 中的角度单位包括下表所示的 4 个单位。
+
+| 单位 | 含义              |
+| :--- | :---------------- |
+| deg  | degrees，表示角度 |
+| grad | grads，表示百分度 |
+| rad  | radians，表示弧度 |
+| turn | turns，表示圈数   |
+
+下面分别介绍一下这 4 个单位。
+
+- 角度（deg）：角度范围为 0 ～ 360 度，角度为负值可以理解为逆时针旋转。例如，−45deg 可以理解为逆时针旋转 45 度。
+- 百分度（grad）：一个梯度，或者说一个百分度表示 1/400 个整圆。因此 100grad 相当于 90deg，它和 deg 单位一样支持负值，负值可以理解为逆时针方向旋转。
+- 弧度（rad）：1 弧度等于 180/π 度，或者大致等于 57.3 度。1.5708rad 相当于 100grad 或是 90deg，如图 4-39 所示。
+
+   ![](res/2022-01-23-17-43-25.png)
+
+- 圈数（turn）：这个很好理解，1 圈表示 360 度，平时体操或跳水中出现的“后空翻 720 度”，也就是后空翻两圈的意思。于是有等式 1turn=360deg、2turn=720deg 等。
+
+下面的 CSS 代码均表示顺时针旋转 45 度：
+
+```css
+transform: rotate(45deg);
+transform: rotate(50gard);
+transform: rotate(0.7854rad);
+transform: rotate(0.25turn);
+```
+
+在实际开发的时候，我们只需要使用 deg 单位就好了，没必要“炫技”使用其他角度单位。那么什么时候使用 grad 或者 rad 这些 CSS 单位呢？这些单位一般用在动态计算的场景（例如 JavaScript 计算运动轨迹或者根据坐标计算角度的时候，使用弧度更方便）。
+
+### scale() 缩放
+
+缩放变换也支持 x 和 y 两个方向，因此，下面的语法都属于 2D 变换的语法：
+
+```css
+/* 水平放大 2 倍，垂直缩小 1 / 2 */
+transform: scale(2, 0.5);
+/* 水平放大 2 倍 */
+transform: scaleX(2);
+/* 垂直缩小 1 / 2 */
+transform: scaleY(0.5);
+```
+
+图 4-40 所示就是图片元素应用 scale(2, .5) 变换后的效果。
+
+![](res/2022-01-23-17-52-12.png)
+
+缩放变换不支持百分比值，仅支持数值，因此 scale(200%, 50%) 是无效的。
+
+缩放变换支持负值。如果我们想要实现元素的水平翻转效果，可以设置 transform: scaleX(-1)；想要实现元素的垂直翻转效果，可以设置 transform: scaleY(-1)。如果水平缩放和垂直缩放的大小一样，我们可以只使用一个值，例如，transform: scale(2) 表示将元素水平方向和垂直方向的尺寸放大到现有尺寸的 2 倍。
+
+### skew() 斜切
+
+斜切变换也支持 x 和 y 两个方向，例如：
+
+```css
+/* 水平切斜 10 度，垂直切斜 20 度 */
+transform: skew(10deg, 20deg);
+/* 水平切斜 10 度 */
+transform: skewX(10deg);
+/* 垂直切斜 20 度 */
+transform: skewY(20deg);
+```
+
+所有包含 X 和 Y 字符的变换函数都不区分大小写，例如 skewX(10deg) 写作 skewx(10deg) 是合法的，translateX(10px) 写作 translatex(10px) 也是合法的，不过我们约定俗成字符 X 和 Y 都是大写。skew(10deg) 可以看成 skew(10deg, 0) 的简写，效果等同于 skewX(10deg)。
+
+图 4-41 所示的是图片元素分别应用 skewX (10deg) 和 skewY(20deg) 变换后的效果。
+
+![](res/2022-01-23-17-56-47.png)
+
+旋转是 360 度一个轮回，斜切则是 180 度一个轮回。元素处于 90 度或者 270 度斜切的时候是看不见的，因为此时元素的尺寸在理论上是无限的。对浏览器而言，尺寸不可能是无限的，因为没办法表现出来！于是这种情况下的尺寸为 0，所以元素在 90 度或者 270 度斜切的时候是不会影响祖先元素的滚动状态的。如果读者对这句话不理解，把 skewY() 函数的角度调成 89 度或者 271 度就知道什么意思了。skew() 函数支持所有角度单位值。
+
+斜切变换在图形绘制的时候非常有用，这是一个被低估的变换特性。举个例子，使用 CSS 实现图 4-42 所示的导航效果。
+
+![](res/2022-01-23-17-59-22.png)
+
+有些人会使用 clip-path 属性以剪裁方式实现这个效果，有些人会使用 border 属性以模拟边框方式实现这个效果，其实，完全不需要这么复杂，使用斜切变换就可以轻松实现这个效果。
+
+首先按照正常的方块布局进行排版，让每一个导航元素由上下两个矩形盒子组成，使用 skew() 函数斜切一下效果就出来了，连定位都不需要，这是最佳实现方式，没有之一。实现原理如图 4-43 所示。
+
+![](res/2022-01-23-18-00-07.png)
+
+## transform 属性的若干细节特性
+
+这里介绍的 transform 特征对于 2D 变换和 3D 变换均适用。
+
+### 盒模型尺寸不会变化
+
+页面中的元素无论应用什么 transform 属性值，该元素盒模型的尺寸和位置都不会有任何变化。例如，页面中有一个 `<img>` 元素，尺寸是 128px×96px，则无论应用什么 transform 属性值，这个 `<img>` 元素的尺寸依然是 128px×96px，位置依然是原来的位置。例如：
+
+```css
+img {
+   transfrom: translateX(-9999px);
+}
+```
+
+图片原来的位置会变成一片空白，图片在视觉上已经不知道偏移到何处了。这和 position: relative 相对定位偏移的行为有些类似。又如：
+
+```css
+img {
+   transfrom: scale(2);
+}
+```
+
+虽然图片的视觉尺寸放大了 2 倍，但是，并不会推开旁边的元素，只会在视觉上重叠与覆盖。
+
+元素尺寸和位置不会变化的特性让人又爱又恨，爱的是可以放心使用 transform 实现各类交互效果，恨的是有时候我们又希望位置可以发生变化。例如，我们希望一个元素往上移动自身高度的 50%，同时后面的元素也跟着一起位移，这在目前的 CSS 世界中，是没有有效的实现方法的，需要借助 JavaScript 计算实现。原因在于相对自身尺寸偏移的特性只有 translate 位移才有，但是 translate 位移无法影响其他元素的布局；可以影响其他元素布局的 margin 负值定位虽然也支持百分比值，但这个百分比值却是相对宽度计算的。于是，这就形成了一个死结。
+
+但需要注意的是，元素应用 transform 变换后还是可能因为某些间接的原因影响排版，主要是在触发滚动条的显示与隐藏的情况下影响容器的可用尺寸（Windows 操作系统中的滚动条默认占据一定的宽度和高度）。且看下面这个具有代表性的案例：
+
+```html
+<p><img src="./1.jpg" /></p>
+<style>
+   img {
+      width: 100%;
+   }
+
+   p {
+      width: 128px;
+      border: solid deepskyblue;
+      overflow: auto;
+   }
+</style>
+```
+
+很显然，此时 `<img>` 元素的宽度是 128px，但是，如果 `<img>` 元素旋转一下，则 `<img>` 元素尺寸就会发生变化，尺寸瞬间变小了。
+
+```css
+img {
+   width: 100%;
+   transform: rotate(45deg);
+}
+```
+
+例如，在 Windows 10 操作系统下的 Chrome 浏览器中，`<img>` 元素的宽度变成了 111px，如图 4-44 所示。
+
+![](res/2022-01-23-18-09-20.png)
+
+之所以是这样的结果，是因为 `<img>` 元素旋转导致 `<p>` 元素出现滚动条，滚动条占据了 17px 的宽度，进而导致 width: 100% 的 `<img>` 元素的宽度变成了 111px。
+
+### 内联元素无效
+
+内联元素（不包括替换元素）是无法应用 transform 变换的，且不支持所有变换特性。例如：
+
+```html
+<span>不能变换</span>
+<style>
+   span {
+      transform: translateX(99px);
+   }
+</style>
+```
+
+此时 `<span>` 元素是不会有位移效果的。但有两种方法可以实现位移效果，一种是给元素增加块状特性，例如设置 display 属性值为 inline-block，如下所示：
+
+```css
+span {
+   display: inline-block;
+   transform: translateX(99px);
+}
+```
+
+还有一种方法是改用相对定位：
+
+```css
+span {
+   position: relative;
+   left: 99px;
+}
+```
+
+### 锯齿或虚化的问题
+
+在应用旋转或者斜切变换的时候，元素边缘会表现出明显的锯齿，文字会明显虚化。这个现象主要出现在桌面端浏览器上，而且这个问题是没有办法避免的，因为显示器的密度跟不上。
+
+目前大部分桌面显示器还都是 1 倍屏，显示的最小单元是 1px× 1px，你可以理解为显示器屏幕是由一个个 1px×1px 大小的格子组成的。如果像素点旋转 45 度，那么这个正方形像素点的端点和边必然就会穿过其他的格子，如图 4-45 所示。
+
+![](res/2022-01-23-18-17-30.png)
+
+于是，有一个问题出现了，显示器没有能力显示小于 1px×1px 的图形，于是，要么裁剪像素点（锯齿），要么使用算法进行边缘模糊计算（虚化）。因此，要想解决 transform 变换锯齿和虚化的问题，只要把我们的显示器换掉就可以了。换成一个高清屏，类似 iMac 那种 5KB 显示屏，这个现象就没了。因为这类屏幕密度足够高，0.2px×0.2px 的元素都可以细腻渲染。
+
+### 不同顺序不同效果
+
+我们可以一次性应用多个不同的变换函数，但需要注意的是，即使变换内容一样，如果顺序不同，最终的效果也会不一样，例如：
+
+```html
+<p><img src="1.jpg" class="transform-1" /></p>
+<p><img src="1.jpg" class="transform-2" /></p>
+<style>
+   p {
+      width: fit-content;
+      border: solid deepskyblue;
+   }
+
+   .transform-1 {
+      transform: translateX(40px) scale(0.75);
+   }
+
+   .transform-2 {
+      transform: scale(0.75) translateX(40px);
+   }
+</style>
+```
+
+结果两张图片的位置表现出了明显的不一致，如图 4-46 所示。
+
+![](res/2022-01-23-18-21-57.png)
+
+下面一张图片实际偏移大小是 30px，因为先缩小到了原大小的 75%。
+
+[transform-order](embedded-codesandbox://css-new-world-detailed-style-performance/transform-order)
+
+### clip/clip-path 前置剪裁
+
+一个元素应用 transform 变换之后，同时再应用 clip 或者 clip-path 等属性，此时很多人会误认为剪裁的是应用变换之后的图形，实际上不是的，剪裁的还是变换之前的图形，也就是先剪裁再变换。例如：
+
+```css
+img {
+   width: 128px;
+   height: 96px;
+   transform: scale(2);
+   clip-path: circle(48px at 64px 48px);
+}
+```
+
+如果是先执行 transform 再执行 clip-path，则最终剪裁的圆的半径应该还是 circle() 函数中的 48px，即最终剪裁的圆的直径是 96px；如果是先执行 clip-path 再执行 transform，则最终剪裁的圆的直径应该是 192px，在各个浏览器中实际渲染的结果都是直径为 192px 的圆，如图 4-47 所示。
+
+![](res/2022-01-23-18-26-52.png)
+
+由此可以证明，transform 和 clip-path 同时用的时候，是先执行 clip-path 剪裁，另外一个剪裁属性 clip 也是类似的。
+
+[transform-clip-path](embedded-codesandbox://css-new-world-detailed-style-performance/transform-clip-path)
+
+### 动画性能优秀
+
+CSS 高性能动画三要素指的是绝对定位、opacity 属性和 transform 属性。因此，同样的动画效果，优先使用 transform 属性实现。例如，元素移动动画应使用 transform 属性，而不是 margin 属性。
+
+## 元素应用 transform 属性后的变化
+
+元素应用 transform 属性后还会带来很多看不见的特性变化。
+
+### 创建层叠上下文
+
+和 opacity 属性值不是 1 的元素类似，如果元素的 transform 属性值不是 none，则会创建一个新的层叠上下文。这一特性常被用在下面两个场景中。
+
+1. 覆盖其他元素。
+2. 限制 z-index: -1 的层级表现。
+
+在默认情况下，多个 `<img>` 元素相互重叠的时候，一定是 DOM 位置偏后的 `<img>` 元素覆盖 DOM 位置靠前的元素，例如：
+
+```css
+img + img {
+   margin-left: -60px;
+}
+```
+
+效果如图 4-48 所示，可以看到 DOM 位置靠后的图片覆盖了 DOM 位置靠前的图片。
+
+![](res/2022-01-23-18-31-53.png)
+
+但是，如果我们给 DOM 位置靠前的图片设置 transform 属性，例如：
+
+```css
+img:first-child {
+   transform: scale(1);
+}
+```
+
+则此时 DOM 位置靠前的图片会覆盖 DOM 位置靠后的图片，如图 4-49 所示。
+
+![](res/2022-01-23-18-33-34.png)
+
+[transform-z-index](embedded-codesandbox://css-new-world-detailed-style-performance/transform-z-index)
+
+这就是我们实现鼠标悬停图片放大效果的时候无须指定层级的原因。
+
+我们再看一个使用 transform 属性限制 z-index: -1 层级位置的案例，有一个模拟纸张投影的效果，HTML 代码结构如下：
+
+```html
+<div class="container">
+   <div class="page"></div>
+</div>
+```
+
+其中，容器元素设置了让效果更突出的深灰色背景，纸张元素使用 ::before 和 ::after 伪元素创建了模拟卷角投影的效果，由于投影效果需要放在纸张元素后面，因此 z-index 设为了负值，如下所示：
+
+```css
+.container {
+   background-color: #666;
+}
+
+.page {
+   width: 300px;
+   height: 200px;
+   background-color: #f4f39e;
+   box-shadow: 0 2px 10px 1px rgba(0, 0, 0, 0.2);
+   border-bottom-right-radius: 50% 10px;
+   position: relative;
+}
+
+.page::before {
+   transform: skew(-15deg) rotate(-5deg);
+   left: 15px;
+   bottom: 10px;
+   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.page::after {
+   transform: skew(15deg) rotate(8deg);
+   right: 15px;
+   bottom: 25px;
+   box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.4);
+}
+
+.page:before,
+.page:after {
+   content: '';
+   width: 90%;
+   height: 30%;
+   position: absolute;
+   z-index: -1;
+}
+```
+
+此时，::before 和 ::after 伪元素创建的投影效果不见了，如图 4-50 所示
+
+原因就在于，z-index: -1 是定位在第一个层叠上下文祖先元素的背景层上的，而网页在默认状态下的层叠上下文元素就是 `<html>` 根元素，也就是伪元素创建的阴影效果其实是在页面根元素的上面、在 .container 元素的下面，而 .container 元素设置了背景颜色，挡住了伪元素，因此阴影效果在视觉上不可见。
+
+要想解决这个问题很简单，把 .container 元素作为层叠上下文元素即可，实现这个操作的方法很多，比较合适的方法就是设置一个无关紧要的 transform 属性值。例如我就喜欢设置 scale(1)，因为拼写更快：
+
+```css
+.container {
+   transform: scale(1);
+}
+```
+
+此时的结果如图 4-51 所示，可以看到纸张底部两个角落均出现了明显的卷角投影效果。
+
+![](res/2022-01-23-18-47-23.png)
+
+[transform-page-shadow-z-index](embedded-codesandbox://css-new-world-detailed-style-performance/transform-page-shadow-z-index)
+
+### 固定定位失效
+
+想要实现固定定位效果，可以应用 position: fixed 声明。大部分情况下，最终的样式表现是符合预期的，但是，如果父元素设置了 transform 变换，则固定定位效果就会失效，样式表现就会类似于绝对定位。例如：
+
+```html
+<p>
+   <img src="./1.jpg" />
+</p>
+<p class="transform">
+   <img src="./1.jpg" />
+</p>
+<style>
+   img {
+      position: fixed;
+   }
+
+   .transform {
+      transform: scale(1);
+   }
+</style>
+```
+
+结果页面滚动的时候，第一张图片纹丝不动，第二张图片跟着页面滚动，这说明第二张图片的固定定位效果失效了。
+
+[transform-fixed-invalid](embedded-codesandbox://css-new-world-detailed-style-performance/transform-fixed-invalid)
+
+此特性表现不包括 IE 浏览器。
+
+另外，顺便提一下，filter 滤镜也会让子元素的固定定位效果失效。那么，问题来了，如何让变换效果和固定定位同时有效呢？之前有人问过我这样一个问题：产品的要求是既要有动画又要固定定位，有什么方法可以使两者共存呢？解决方法就是使用嵌套，外层元素负责固定定位，内层元素负责实现动画。
+
+### 改变 overflow 对绝对定位元素的限制
+
+下面这句话源自 CSS2.1 规范：
+
+如果绝对定位元素含有 overflow 属性值不为 visible 的祖先元素，同时，该祖先元素以及到该绝对定位元素之间的任何嵌套元素都没有 position: static 的声明，则 overflow 对该 absolute 元素不起作用。
+
+现在这个规范已经不准确了，因为现在不仅 position 属性值不为 static 的元素可以影响绝对定位在 overflow 元素中的表现，transform 属性值不为 none 的元素也可以影响绝对定位在 overflow 元素中的表现。例如：
