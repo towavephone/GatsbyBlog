@@ -1493,6 +1493,102 @@ img:first-child {
 
 下面这句话源自 CSS2.1 规范：
 
-如果绝对定位元素含有 overflow 属性值不为 visible 的祖先元素，同时，该祖先元素以及到该绝对定位元素之间的任何嵌套元素都没有 position: static 的声明，则 overflow 对该 absolute 元素不起作用。
+> 如果绝对定位元素含有 overflow 属性值不为 visible 的祖先元素，同时，该祖先元素以及到该绝对定位元素之间的任何嵌套元素都没有 position: static 的声明，则 overflow 对该 absolute 元素不起作用。
 
 现在这个规范已经不准确了，因为现在不仅 position 属性值不为 static 的元素可以影响绝对定位在 overflow 元素中的表现，transform 属性值不为 none 的元素也可以影响绝对定位在 overflow 元素中的表现。例如：
+
+```html
+<p>
+   <img src="1.jpg" />
+</p>
+<p class="transform">
+   <img src="1.jpg" />
+</p>
+<style>
+   p {
+      border: solid deepskyblue;
+      width: 150px;
+      height: 150px;
+      overflow: hidden;
+   }
+
+   img {
+      position: absolute;
+   }
+
+   .transform {
+      transform: scale(1);
+   }
+</style>
+```
+
+第一个 `<img>` 元素没有被 overflow: hidden 隐藏，第二个 `<img>` 元素被 overflow: hidden 隐藏了（因为设置了 transform 变换），如图 4-52 所示。
+
+![](res/2022-01-26-09-42-50.png)
+
+[transform-overflow-absolute](embedded-codesandbox://css-new-world-detailed-style-performance/transform-overflow-absolute)
+
+### 改变绝对定位元素的包含块
+
+过去绝对定位元素的包含块是第一个 position 属性值不为 static 的祖先元素，现在 transform 属性值不为 none 的元素也可以作为绝对定位元素的包含块。例如：
+
+```html
+<p>
+   <img src="1.jpg" />
+</p>
+<style>
+   p {
+      border: solid deepskyblue;
+      width: 150px;
+      height: 150px;
+      transform: scale(1);
+   }
+
+   img {
+      width: 100%;
+      position: absolute;
+   }
+</style>
+```
+
+`<img>` 元素的宽度是 150px，因为此时的 100% 宽度是相对于父元素 `<p>` 计算的，如图 4-53 所示。但是，如果父元素 `<p>` 没有设置 `transform: scale(1)`，则图片的宽度就不一定是 150px 了。
+
+[transform-absolute](embedded-codesandbox://css-new-world-detailed-style-performance/transform-absolute)
+
+### 深入了解矩阵函数 matrix()
+
+transform 变换还支持矩阵函数 matrix()。无论是位移、旋转、缩放还是斜切，其变换的本质都是应用矩阵函数 matrix() 进行矩阵变换。所谓矩阵变换，就是套用矩阵公式，把原先的坐标点转换成另外一个坐标点的过程。其语法如下：
+
+```css
+transform: matrix(a, b, c, d, e, f);
+```
+
+可以看到总共有 6 个参数（a ～ f），参数数量多是多了点，但是，只要你认真学习，就会发现，矩阵真的很难！所以，这里只介绍 2D 变换中的矩阵变换，关于 3D 变换中的矩阵变换大家可以参考更专业的资料。
+
+matrix() 函数的 6 个参数对应的矩阵如图 4-54 所示。
+
+![](res/2022-01-26-09-54-03.png)
+
+注意书写方向是从上到下的。
+
+大家可以把矩阵想象成古代的士兵方阵，若要让其发生变化，就要让其与另外一个士兵方阵对战，即使这是一个小方阵。这个变化过程可以用图 4-55 所示的转换公式表现。
+
+图 4-55 所示的 x 和 y 表示转换元素的所有坐标变量，后面的 ax + cy + e 和 bx + dy + f 就是转换之后的新的坐标，这个新的坐标是如何计算得来的呢？
+
+![](res/2022-01-26-09-56-24.png)
+
+这就是大学线性代数的知识了，其实挺简单的。3×3 矩阵每一行的第一个值与后面 1×3 矩阵的第一个值相乘，3×3 矩阵每一行的第二个值与 1×3 矩阵的第二个值相乘，3×3 矩阵每一行的第三个值与 1×3 矩阵的第三个值相乘，然后将 3 个乘积结果相加，如图 4-56 所示。其中，ax + cy + e 表示变换后的水平坐标，bx + dy + f 表示变换后的垂直坐标。
+
+![](res/2022-01-26-09-57-39.png)
+
+我们通过一个简单的例子来快速了解一下，假设矩阵参数如下：
+
+```css
+transform: matrix(1, 0, 0, 1, 30, 30); /* a=1, b=0, c=0, d=1, e=30, f=30 */
+```
+
+我们随便选取一个点坐标，例如(0, 0)，即 x=0, y=0。于是，矩阵计算后的 x 坐标就是 ax + xy + e = 1 × 0 + 0 × 0 + 30 = 30。矩阵计算后的 y 坐标就是 bx + dy + f = 0 × 0 + 1 × 0 + 30 = 30。
+
+也就是点坐标从 (0, 0) 变成了 (30, 30)。请读者好好想象一下，原来 (0, 0) 的位置，经过矩阵变换后就移到了 (30, 30) 的位置，是不是等同于往右方和下方各偏移了 30px？如果我们再选取其他坐标点进行计算，就会发现计算后的坐标相比原坐标同样是往右方和下方各偏移了 30px。实际上 transform: matrix(1, 0, 0, 1, 30, 30) 等同于 transform: translate(30px, 30px)。
+
+注意，translate()、rotate() 等函数都是需要单位的，而 matrix() 函数中的参数的单位是省略的。
