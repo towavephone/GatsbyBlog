@@ -54,16 +54,17 @@ jobs:
         node-version: "10"
     # 编译项目
     - name: Build blog
-      run: yarn install --pure-lockfile && yarn build
-    # 构建部署代码
-    - name: Build and Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@releases/v2
       env:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
         ALGOLIA_SEARCH_ONLY_API_KEY: ${{ secrets.ALGOLIA_SEARCH_ONLY_API_KEY }}
         ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
         ALGOLIA_INDEX_NAME: ${{ secrets.ALGOLIA_INDEX_NAME }}
+      run: yarn install --pure-lockfile && yarn build
+    # 构建部署代码
+    - name: Build and Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@releases/v2
+      env:
         BRANCH: gh-pages
         FOLDER: public
     # 上传压缩包
