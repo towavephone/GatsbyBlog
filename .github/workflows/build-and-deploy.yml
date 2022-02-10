@@ -47,6 +47,14 @@ jobs:
         key: ${{ runner.os }}-gatsby-site-build-${{ secrets.CACHE_VERSION }}-${{ github.run_id }}
         restore-keys: |
           ${{ runner.os }}-gatsby-site-build-${{ secrets.CACHE_VERSION }}
+    # 切换版本
+    - name: Setup node version
+      uses: actions/setup-node@v2
+      with:
+        node-version: "10"
+    # 编译项目
+    - name: Build blog
+      run: yarn install --pure-lockfile && yarn build
     # 构建部署代码
     - name: Build and Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@releases/v2
@@ -58,9 +66,6 @@ jobs:
         ALGOLIA_INDEX_NAME: ${{ secrets.ALGOLIA_INDEX_NAME }}
         BRANCH: gh-pages
         FOLDER: public
-        NODE_OPTIONS: --max_old_space_size=4096
-        # 不生成 lockfile
-        BUILD_SCRIPT: yarn install --pure-lockfile && yarn build
     # 上传压缩包
     # - name: Archive production artifacts
     #   uses: actions/upload-artifact@v1
