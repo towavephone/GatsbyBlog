@@ -44,9 +44,9 @@ jobs:
           public
           .cache
           node_modules
-        key: ${{ runner.os }}-gatsby-site-build-${{ github.run_id }}
+        key: ${{ runner.os }}-gatsby-site-build-${{ secrets.CACHE_VERSION }}-${{ github.run_id }}
         restore-keys: |
-          ${{ runner.os }}-gatsby-site-build-
+          ${{ runner.os }}-gatsby-site-build-${{ secrets.CACHE_VERSION }}
     # 构建部署代码
     - name: Build and Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@releases/v2
