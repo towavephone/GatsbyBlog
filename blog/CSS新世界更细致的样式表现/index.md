@@ -1771,7 +1771,7 @@ transform-origin 属性在实际项目开发中主要用在下面两个场景。
 
    ```css
    .text {
-      transform: scale(0 83333);
+      transform: scale(0.83333);
    }
    ```
 

@@ -36,17 +36,17 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
     # 缓存项目
-    - name: Caching Gatsby
-      id: gatsby-cache-build
-      uses: actions/cache@v2
-      with:
-        path: |
-          public
-          .cache
-          node_modules
-        key: ${{ runner.os }}-gatsby-site-build-${{ github.run_id }}
-        restore-keys: |
-          ${{ runner.os }}-gatsby-site-build-
+    # - name: Caching Gatsby
+    #   id: gatsby-cache-build
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: |
+    #       public
+    #       .cache
+    #       node_modules
+    #     key: ${{ runner.os }}-gatsby-site-build-${{ github.run_id }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-gatsby-site-build-
     # 构建部署代码
     - name: Build and Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@releases/v2
