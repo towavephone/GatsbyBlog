@@ -1789,4 +1789,111 @@ transform-origin 属性在实际项目开发中主要用在下面两个场景。
 
 transform-origin 属性是支持 CSS 过渡和 CSS 动画效果的，活用这个特性可以实现体现数学之美的运动轨迹效果，本书不展开讲解。
 
-// TODO css 新世界
+#### transform-origin 属性作用原理
+
+transform-origin 属性的作用原理就是改变 transform 变换的中心点坐标。transform 变换默认的中心点坐标为 (0, 0)，如图 4-60 所示。
+
+![](res/2022-02-11-11-20-58.png)
+
+为了方便大家理解，我就使用这个中心点坐标来做原理讲解。在默认状态下，这个点的坐标是 (0, 0)。2D 矩阵变换的坐标转换公式如下：
+
+```
+x' = ax + cy + e
+y' = bx + dy + f
+```
+
+坐标 (0, 0) 表示 x 是 0，y 是 0，因此，此时无论旋转多少度，变换后的坐标还是 (0, 0)，因为旋转相关的 4 个参数 a、b、c、d 都是与 0 相乘。
+
+现在，我们设置变换中心点位于左上角：
+
+```css
+transform-origin: 0 0;
+```
+
+现在的中心点坐标就不是 (0, 0) 了，而是 (140, -145)（这是因为色块尺寸为 280px×290px），如图 4-61 所示。
+
+![](res/2022-02-11-11-51-31.png)
+
+此时，中心点的旋转变换坐标值就变成了：
+
+```
+x' = ax + cy + e = a * 140 - c * 145 + e
+y' = bx + dy + f = b * 140 - d * 145 + f
+```
+
+显然是一个有着明显坐标变化的新的坐标点，于是视觉上就有元素绕着左上角旋转的效果了。
+
+总结一下，所有 transform 变换本质上都是坐标点位置的矩阵变换，transform-origin 属性变化后，所有点的坐标都会发生变化，这导致最终的矩阵变换计算结果也发生变化。
+
+### scale() 函数缩放和 zoom 属性缩放的区别
+
+除了 Firefox 浏览器不支持 zoom 属性，其他所有浏览器都支持，且支持时间非常早，移动端也可以放心使用。zoom 属性的正式语法如下：
+
+```css
+zoom: normal | reset | <number> | <percentage>;
+```
+
+从语法中可以看出 zoom 属性支持以下属性值。
+
+- 百分比值。zoom: 50%，表示缩小到原来的一半。
+- 数值。zoom: 0.5，表示缩小到原来的一半。
+- normal 关键字。zoom: normal 等同于 zoom: 1，是默认值。
+- reset 关键字。zoom: reset，表示用户按 Ctrl 和 − 或 Ctrl 和 + 进行文档缩放的时候，元素不跟着缩小与放大。不过，这个关键字兼容性很糟糕，仅被 Safari 浏览器支持。
+
+下面我通过对比 zoom 属性缩放和 scale() 函数缩放的不同之处带大家快速了解一下 zoom 属性。
+
+1. 标准和非标准区别。zoom 属性是一个非标准属性，虽然 MDN 文档建议不要在非生产环境使用，但是根据我的判断，浏览器日后绝无可能放弃对 zoom 属性的支持。
+2. 坐标系不同。zoom 属性缩放的中心坐标是相对于元素的左上角，且不能修改。transform 变换中的 scale() 函数缩放默认的中心坐标是元素的中心点。
+3. 占据的尺寸空间表现不同。zoom 属性缩放会实时改变元素占据的尺寸空间。例如，一个图片原始尺寸是 128px×96px，则应用下面的 CSS 代码后，图片占据的尺寸就会变成 256px×192px，该图片周围的元素会被推开，并会触发重绘和重计算，因此 zoom 属性缩放的性能比 scale() 函数缩放的性能差。
+
+   ```css
+   img {
+      zoom: 2;
+   }
+   ```
+
+   如果图片使用的是 scale() 函数缩放，则占据的尺寸还是原先的 128px×96px。
+
+4. 元素应用 zoom 属性不会出现应用 transform 属性后的 N 个变化。元素应用 zoom 属性不会创建层叠上下文，不会影响 fixed 元素的定位和 overflow 属性对绝对定位的溢出隐藏，也不会改变绝对定位元素的包含块。
+
+总而言之，zoom 属性就是一个普普通通的改变元素比例的 CSS 属性。
+
+### 了解全新的 translate、scale 和 rotate 属性
+
+最新的 CSS Transforms Level 2 规范针对位移、缩放和旋转定义了全新的 CSS 属性。例如，位移可以直接使用 translate 属性，该属性支持 1 ～ 3 个值，分别表示 x 轴、y 轴和 z 轴，语法如下：
+
+```css
+translate: 50%;
+translate: 10px 20px;
+translate: 50% 105px 5rem;
+```
+
+缩放可以直接使用 scale 属性，支持 1 ～ 3 个值，分别表示 x 轴、y 轴和 z 轴，语法如下：
+
+```css
+scale: 1;
+scale: 1.5;
+scale: 1 2 3;
+```
+
+旋转可以直接使用 rotate 属性，语法相对复杂些：
+
+```css
+rotate: 45deg;
+/* 指定旋转轴 */
+rotate: x 90deg;
+rotate: y 0.25turn;
+rotate: z 1.57rad;
+/* 矢量角度值 */
+rotate: 1 1 1 90deg;
+```
+
+下面将逐一讲解上述语法中的元素：
+
+- rotate: 45deg 等同于 transform: rotate(45deg)，是一个 2D 旋转变换；
+- rotate: x 90deg 等同于 transform: rotateX(90deg)；
+- rotate: y 0.25turn 等同于 transform: rotateY(0.25turn)；
+- rotate: z 1.57rad 等同于 transform: rotateZ(1.57rad)；
+- rotate: 1 1 1 90deg 等同于 transform: rotate3D(1, 1, 1, 90deg)。
+
+目前只有 Firefox 浏览器支持这个新特性，想要在实际项目中使用这个新特性，还需要一段时间，大家了解即可。最后，没有 skew 属性。
