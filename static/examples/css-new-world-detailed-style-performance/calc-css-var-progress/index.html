@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>calc() 和 CSS 变量和进度条效果</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        text-align: left;
+        margin: auto;
+      }
+
+      .demo > div {
+        margin-bottom: 10px;
+        margin-top: 2px;
+      }
+
+      .bar {
+        line-height: 20px;
+        background-color: #eee;
+      }
+
+      .bar::before {
+        counter-reset: progress var(--percent);
+        content: counter(progress) '%\2002';
+        display: block;
+        width: calc(100% * var(--percent) / 100);
+        font-size: 12px;
+        color: #fff;
+        background-color: deepskyblue;
+        text-align: right;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <label>图片 1：</label>
+      <div class="bar" style="--percent: 60;"></div>
+      <label>图片 2：</label>
+      <div class="bar" style="--percent: 40;"></div>
+      <label>图片 3：</label>
+      <div class="bar" style="--percent: 20;"></div>
+    </div>
+  </body>
+</html>

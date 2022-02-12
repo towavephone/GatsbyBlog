@@ -1296,7 +1296,7 @@ span {
 
 ![](res/2022-01-23-18-17-30.png)
 
-于是，有一个问题出现了，显示器没有能力显示小于 1px×1px 的图形，于是，要么裁剪像素点（锯齿），要么使用算法进行边缘模糊计算（虚化）。因此，要想解决 transform 变换锯齿和虚化的问题，只要把我们的显示器换掉就可以了。换成一个高清屏，类似 iMac 那种 5KB 显示屏，这个现象就没了。因为这类屏幕密度足够高，0.2px×0.2px 的元素都可以细腻渲染。
+于是，有一个问题出现了，显示器没有能力显示小于 1px×1px 的图形，于是，要么裁剪像素点（锯齿），要么使用算法进行边缘模糊计算（虚化）。因此，要想解决 transform 变换锯齿和虚化的问题，只要把我们的显示器换掉就可以了。换成一个高清屏，类似 iMac 那种 5K 显示屏，这个现象就没了。因为这类屏幕密度足够高，0.2px×0.2px 的元素都可以细腻渲染。
 
 ### 不同顺序不同效果
 
@@ -1897,3 +1897,233 @@ rotate: 1 1 1 90deg;
 - rotate: 1 1 1 90deg 等同于 transform: rotate3D(1, 1, 1, 90deg)。
 
 目前只有 Firefox 浏览器支持这个新特性，想要在实际项目中使用这个新特性，还需要一段时间，大家了解即可。最后，没有 skew 属性。
+
+# 简单实用的 calc() 函数
+
+calc() 函数非常实用，项目使用率接近 100%，且其语法简单，效果显著，深受广大开发者喜欢。
+
+## 关于 calc() 函数
+
+calc() 函数支持加减乘除 4 种运算，任何可以使用 `<length>`、`<frequency>`、`<angle>`、`<time>`、`<percentage>`、`<number>` 或者 `<integer>` 数据类型的地方都可以使用 calc() 函数。但这并不表示上述数据类型都可以出现在 calc() 函数中，该函数是有很多约束的。
+
+在 calc() 函数中，不能使用当前 CSS 属性不支持的数据类型。例如，下面这些 CSS 声明都是不合法的：
+
+```css
+/* 不合法 */
+width: calc(100% - 10deg);
+width: calc(10s / 10);
+```
+
+在 calc() 函数中，运算符前后带单位或者带百分号的值只能进行加减运算，不能进行乘除运算，否则是不合法的，例如：
+
+```css
+/* 不合法 */
+width: calc(10px * 10px);
+width: calc(90% / 1rem);
+```
+
+在 calc() 函数中，除法运算斜杠右侧必须是不为 0 的数值类型，否则是不合法的，例如：
+
+```css
+/* 不合法 */
+width: calc(100 / 10px);
+width: calc(100px / 0);
+```
+
+关于 calc() 运算符的书写也是有一定的限制的，如加号和减号左右两边一定要有空格，否则是不合法的：
+
+```css
+/* 不合法 */
+width: calc(100%-2rem);
+width: calc(lem+2px);
+```
+
+因为浏览器无法区分 −2rem 和 +2px 是表示正负还是表示计算。乘法和除法符号两侧无须空格，但是为了格式一致、便于阅读，建议也要设置空格。calc() 函数在过去很长一段时间的发展中都处于一种很平和的状态，主要是以一种非常硬朗的方式实现各种自适应布局效果。例如，替换元素的宽度自适应：
+
+```css
+button {
+   width: calc(100% - 20px);
+}
+```
+
+又如，根据设备屏幕设定根字号大小：
+
+```css
+html {
+   font-size: calc(16px + 2 * (100vw - 375px) / 39);
+}
+```
+
+再如，让等比例的列表尺寸之和可以 100% 匹配容器尺寸，如果写成 width: 16.67%，则 6 个列表尺寸之和可能会超过容器尺寸，如果写成 width: 16.66%，则 6 个列表尺寸之和可能会小于容器尺寸 1 ～ 2 像素。
+
+```css
+.list {
+   width: calc(100% / 6);
+}
+```
+
+在数年前，calc() 函数突然大量地出现在 CSS 代码中，原因就是 CSS 变量出现了。
+
+我们只需要定义一个 CSS 自定义属性，让其他 CSS 样式全部基于这个自定义属性构建，然后我们只需要通过 JavaScript 代码重置这个唯一的 CSS 自定义属性值，整个网页的样式效果就会神奇地跟着变化，大大降低了实现成本和日后的维护成本。而基于 CSS 自定义属性构建其他 CSS 样式必须依赖 calc() 函数，这就导致 calc() 函数迎来了爆发式的发展。
+
+举个自定义进度条效果例子，以前我们需要先使用双层 HTML 标签模拟出进度条的样式，然后使用 JavaScript 代码实时改变内层 DOM 元素的宽度，这很麻烦。但是现在有了 CSS 自定义属性和 calc() 函数，就可以很方便地实现这个效果，HTML 代码和 CSS 代码如下：
+
+```html
+<label>图片 1：</label>
+<div class="bar" style="--percent: 60;"></div>
+<label>图片 2：</label>
+<div class="bar" style="--percent: 40;"></div>
+<label>图片 3：</label>
+<div class="bar" style="--percent: 20;"></div>
+<style>
+   .bar {
+      line-height: 20px;
+      background-color: #eee;
+   }
+
+   .bar::before {
+      counter-reset: progress var(--percent);
+      content: counter(progress) '%\2002';
+      display: block;
+      width: calc(100% * var(--percent) / 100);
+      color: #fff;
+      background-color: deepskyblue;
+      text-align: right;
+   }
+</style>
+```
+
+加载的进度数值和加载的进度条宽度全部由 --percent 这个 CSS 自定义属性控制，最终的效果如图 4-62 所示。
+
+![](res/2022-02-12-23-54-28.png)
+
+[calc-css-var-progress](embedded-codesandbox://css-new-world-detailed-style-performance/calc-css-var-progress)
+
+类似的案例非常多。随着陈旧设备的迅速淘汰，calc() 函数一定会铺天盖地袭来，大家准备好迎接 calc() 函数的暴风雨吧。
+
+最后，在现代浏览器中，还支持 calc() 函数嵌套使用，例如：
+
+```css
+.list {
+   --size: calc(100% - 2rem);
+   width: calc(var(--size) / 6);
+}
+```
+
+等同于：
+
+```css
+.list {
+   width: calc(calc(100% - 2rem) / 6);
+}
+```
+
+## 了解 min()、max() 和 clamp() 函数
+
+min()、max() 和 clamp() 这 3 个函数是现代浏览器从 2018 年底开始支持的，理论上还不是可以放心使用的 CSS 特性。但是由于这几个函数太实用了，因此我建议大家尽量使用。至于那些陈旧的不支持的浏览器，直接使用固定值兜底，保证样式不乱即可。例如：
+
+例如：
+
+```css
+html {
+   font-size: 16px;
+   font-size: clamp(16px, calc(16px + 2 * (100vw - 375px) / 39), 20px);
+}
+```
+
+如果浏览器支持，则根字体大小随着浏览器宽度不同在 16px ～ 20px 弹性变化，如果浏览器不支持，则依然使用浏览器默认的根字体大小 16px。
+
+### 语法
+
+和 calc() 函数类似，任何可以使用 `<length>`、`<frequency>`、`<angle>`、`<time>`、`<percentage>`、`<number>` 或者 `<integer>` 数据类型的地方都可以使用 min()、max() 和 clamp() 这 3 个函数。
+
+min()、max() 和 clamp() 这 3 个函数与 calc() 函数是可以相互嵌套使用的，例如：
+
+```css
+width: calc(min(800px, 100vw) / 6);
+```
+
+下面具体介绍一下 min()、max() 和 clamp() 这 3 个函数。
+
+### min() 函数
+
+min() 函数语法如下：
+
+```css
+min(expression [,expression])
+```
+
+min() 函数支持一个或多个表达式，每个表达式之间使用逗号分隔，然后将最小的表达式的值作为返回值。例如：
+
+```css
+width: min(10vw, 5em, 80px);
+```
+
+其中出现了 2 个相对长度值，1 个固定长度值，因此上面的 width 计算值最大就是 80px。至于真实的宽度值，如果浏览器视口宽度小于 800px，或文字字号小于 16px，真实宽度值则会更小。也就是说，虽然函数的名称是 min()，表示最小，但实际上这个函数是用来限制最大值的。
+
+min() 函数的表达式可以是数学表达式（使用算术运算符）、具体的值或其他表达式（如 attr() 新语法）。因此，下面这些 CSS 声明都是合法的：
+
+```css
+/* 合法 */
+width: min(10px * 10, 10em);
+width: min(calc(10px * 10), 10em);
+width: min(10px * 10, var(--width));
+```
+
+如果我们希望网页在桌面端浏览器中的宽度为 1024px，在移动端的宽度为 100%，过去是这么实现的：
+
+```css
+.constr {
+   width: 1024px;
+   max-width: 100%;
+}
+```
+
+有了 min() 函数，我们只需要一句 CSS 声明就可以实现这个效果了：
+
+```css
+.constr {
+   width: min(1024px, 100%);
+}
+```
+
+### max() 函数
+
+max() 函数和 min() 函数语法类似，区别在于 max() 函数返回的是最大值，min() 函数返回的是最小值。例如：
+
+```css
+width: max(10vw, 5em, 80px);
+```
+
+表示最小宽度是 80px，如果浏览器视口宽度大于 800px，或者文字字号大于 16px，则最终的宽度值会更大。也就是说，虽然 max() 函数从名称上看表示最大，但是其实际作用是限制最小值。max() 函数其他特性都和 min() 函数类似，在此不赘述。
+
+### clamp() 函数
+
+clamp() 函数的作用是返回一个区间范围的值，语法如下：
+
+```css
+clamp(MIN, VAL, MAX);
+```
+
+其中，MIN 表示最小值，VAL 表示首选值，MAX 表示最大值。这段语句的意思是：如果 VAL 在 MIN ～ MAX 范围内，则使用 VAL 作为函数返回值；如果 VAL 大于 MAX，则使用 MAX 作为返回值；如果 VAL 小于 MIN，则使用 MIN 作为返回值。clamp(MIN, VAL, MAX) 实际上等同于 max(MIN, min(VAL, MAX))。
+
+我们通过一个例子看一下效果：
+
+```html
+<button>我的宽度是？</button>
+<style>
+   button {
+      width: clamp(200px, 50vw, 600px);
+   }
+</style>
+```
+
+如果我们不断改变浏览器视口的宽度，可以看到按钮的宽度在 200px ～ 600px 范围内变化。
+
+例如，在浏览器视口很宽的时候，按钮宽度是 600px，如图 4-63 所示。随着浏览器视口宽度不断变小，小到宽度为 646px 的时候，按钮宽度变成了 323px，如图 4-64 所示。随着浏览器视口宽度进一步变小，按钮宽度维持在 200px 并不再变小，如图 4-65 所示。
+
+![](res/2022-02-13-00-26-19.png)
+
+[clamp-attr](embedded-codesandbox://css-new-world-detailed-style-performance/clamp-attr)
+
+在弹性布局中（宽度自适应布局中），min()、max() 和 clamp() 函数可以帮助我们简化很多 CSS 代码，用过的开发者都说好用，有机会大家一定要在项目中试一试。
