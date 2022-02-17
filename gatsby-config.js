@@ -79,6 +79,14 @@ module.exports = {
               backgroundColor: '#fafafa'
             }
           },
+          {
+            resolve: 'gatsby-remark-graph',
+            options: {
+              // this is the language in your code-block that triggers mermaid parsing
+              language: 'mermaid', // default
+              theme: 'default' // could also be dark, forest, or neutral
+            }
+          },
           'gatsby-remark-static-images',
           'gatsby-remark-copy-linked-files',
           `gatsby-remark-autolink-headers`,

@@ -122,7 +122,7 @@ sequenceDiagram
 
 This is a beautiful iframe:
 
-<iframe src="http://www.baidu.com/" width="600" height="400"></iframe>
+<iframe src="https://www.w3school.com.cn/i/eg_landscape.jpg" width="600" height="400"></iframe>
 
 ```audio
 autoplay: false
@@ -147,7 +147,7 @@ T200 - Smoke, #6c3b0b
 color: white
 image: true
 span: 6
-src: "http://acg.bakayun.cn/randbg.php"
+src: "https://blog.towavephone.com/examples/css-new-world-enhance-existing-css/background-cover-contain/images/1.jpg"
 subtitle: 8KB
 title: Avatar Social
 width: 100%
@@ -175,7 +175,7 @@ autoplay: false
 loop: false
 muted: false
 name: Animation Video
-src: "http://pgccdn.v.baidu.com/1433338647_3201895533_20170601063418.mp4?authorization=bce-auth-v1%2Fc308a72e7b874edd9115e4614e1d62f6%2F2017-05-31T22%3A34%3A23Z%2F-1%2F%2F02736a11697d263da0886271f479d44dc9c2ed5c6d76d230f135f2e915ac1134&responseCacheControl=max-age%3D8640000&responseExpires=Sat%2C+09+Sep+2017+06%3A34%3A23+GMT&xcode=8819c6695b10432f4bdfb8ea24f47350d262a7c4b51fdd36&time=1525536483&_=1525453380361"
+src: "https://blog.towavephone.com/examples/page-visibility-api-introduction-extend/cat2.mp4"
 span: 6
 width: 100%
 ```
