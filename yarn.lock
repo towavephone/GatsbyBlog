@@ -5839,10 +5839,10 @@ gatsby-remark-embed-snippet@^1.0.22:
     parse-numeric-range "^0.0.2"
     unist-util-map "^1.0.3"
 
-gatsby-remark-embedded-codesandbox-towavephone@^1.3.3:
-  version "1.3.3"
-  resolved "https://registry.npmmirror.com/gatsby-remark-embedded-codesandbox-towavephone/-/gatsby-remark-embedded-codesandbox-towavephone-1.3.3.tgz#8fffd69cb9272908dc7c4ac5884c89ad744a8b75"
-  integrity sha512-hD9hu05xkN39dw+vf2xGW0QtFXw5oxoajqB0seMerBpXzYTRiiIB77Gz+bMTkB7eVtRtR6BY5fmXuxxl1S6mpA==
+gatsby-remark-embedded-codesandbox-towavephone@^1.3.5:
+  version "1.3.5"
+  resolved "https://registry.npmmirror.com/gatsby-remark-embedded-codesandbox-towavephone/-/gatsby-remark-embedded-codesandbox-towavephone-1.3.5.tgz#949625fe529937abc1ee0d1bdfad5cae21766881"
+  integrity sha512-+ZEbHKgS7jOl75ywH16rWmWJPr/bI9fLXk2mbGcW2grKO8/ijarnQtauL+sUgtF8Zecq/EdmiKMDcXZjBOKx1w==
   dependencies:
     jest "^23.1.0"
     lz-string "^1.4.4"
