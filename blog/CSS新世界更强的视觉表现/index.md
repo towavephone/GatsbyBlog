@@ -374,3 +374,138 @@ radial-gradient(farthest-corner circle at right 100px bottom 100px, white, 99%, 
 上面的例子中出现了一个关键字 circle，它表示一个圆。与之对应的还有一个关键字 ellipse，它表示椭圆。由于径向渐变的默认形状就是椭圆，因此，没有任何一个场景必须要使用 ellipse 关键字。
 
 circle 关键字必须要出现的场景也不多，多用在需要使用 closest-side、closest-corner、farthest-side 或者 farthest-corner 关键字的场景。
+
+### 径向渐变中的语法细节
+
+上面这些示例已经覆盖了常见的径向渐变的语法，是时候给出径向渐变的正式语法了，再看看是否还有遗漏的细节：
+
+```
+radial-gradient(
+   [
+      [ circle || <length> ] [ at <position> ]?, | [ ellipse || [ <length> | <percentage> ]{2} ] [ at <position> ]?, | [ [circle | ellipse ] || [ extent-keyword ] ] [ at <position> ]?, | at <position>,
+   ]?
+   <color-stop-list> [ , <color-stop-list> ]+
+)
+```
+
+下面说明一下具体细节。
+
+1. 从 `[ circle || <length> ]` 可以看出，如果只有 1 个值，或者出现了 circle 关键字，后面的值只能是长度值，不能是百分比值，因此下面的语法是不合法的：
+
+   ```css
+   /* 不合法 */
+   radial-gradient(circle 50%, white, deepskyblue);
+   ```
+
+2. circle 关键字和 ellipse 关键字在与半径值或者 `<extent-keyword>` 一起使用的时候，前后顺序是没有要求的，也就是下面的语法都是合法的：
+
+   ```css
+   /* 合法 */
+   radial-gradient(50px circle, white, deepskyblue);
+   radial-gradient(circle farthest-side, white, deepskyblue);
+   ```
+
+   但是 `at <position>` 的位置是固定的，其一定是在半径值的后面、渐变断点的前面，否则语法就不合法。例如下面的语法都是不合法的：
+
+   ```css
+   /* 不合法 */
+   radial-gradient(circle, white, deepskyblue, at center);
+   radial-gradient(at 50%, farthest-side, white, deepskyblue);
+   ```
+
+最后，如果能一眼就看出下面这些径向渐变代码的效果都是一样的，说明对径向渐变语法的学习合格了：
+
+```css
+radial-gradient(white, deepskyblue);
+radial-gradient(ellipse, white, deepskyblue);
+radial-gradient(farthest-corner, white, deepskyblue);
+radial-gradient(ellipse farthest-corner, white, deepskyblue);
+radial-gradient(at center, white, deepskyblue);
+radial-gradient(ellipse at center, white, deepskyblue);
+radial-gradient(farthest-corner at center, white, deepskyblue);
+radial-gradient(ellipse farthest-corner at center, white, deepskyblue);
+```
+
+### 径向渐变在实际开发中的应用举例
+
+在实际项目中，径向渐变除了用来实现元素本身的渐变效果，还被用来绘制各类圆形图案。例如，给按钮增加白色高光：
+
+```css
+button {
+   color: #fff;
+   background-color: #2a80eb;
+   background-image: radial-gradient(160% 100% at 50% 0%, hsla(0, 0%, 100%, 0.3) 50%, hsla(0, 0%, 100%, 0) 52%);
+}
+```
+
+效果如图 5-19 所示。
+
+![](res/2022-02-18-11-31-31.png)
+
+径向渐变也可以让按钮背景呈现多彩的颜色融合效果：
+
+```css
+button {
+   color: #fff;
+   background-color: #2a80eb;
+   background-image: radial-gradient(farthest-side at bottom left, rgba(255, 0, 255, 0.5), transparent), radial-gradient(farthest-corner
+            at bottom right, rgba(255, 255, 50, 0.5), transparent);
+}
+```
+
+效果如图 5-20 所示。
+
+![](res/2022-02-18-11-43-35.png)
+
+径向渐变还可以实现点击按钮的时候，出现一个圆形扩散的效果：
+
+```css
+button {
+   color: #fff;
+   background-color: #2a80eb no-repeat center;
+   background-image: radial-gradient(
+      closest-side circle,
+      rgba(255, 70, 70, 0.9),
+      rgba(255, 70, 70, 0.9) 99%,
+      rgba(255, 70, 70, 0) 100%
+   );
+   background-size: 0% 0%;
+   transition: background-size 0.2s;
+}
+
+button:active {
+   background-size: 250% 250%;
+}
+```
+
+效果如图 5-21 所示，这里为了方便示意，扩散的圆形使用了红色。
+
+![](res/2022-02-18-11-46-57.png)
+
+[radial-gradient-button](embedded-codesandbox://css-new-world-stronger-visual-performance/radial-gradient-button)
+
+径向渐变还可以用来绘制各种波形效果，例如绘制优惠券边缘的波形效果：
+
+```html
+<div class="radial-wave"></div>
+<style>
+   .radial-wave {
+      width: 200px;
+      height: 100px;
+      background: linear-gradient(to top, transparent 10px, red 10px) no-repeat, radial-gradient(
+            20px 15px at left 50% bottom 10px,
+            red 10px,
+            transparent 11px
+         );
+      background-size: auto, 20px 10px;
+   }
+</style>
+```
+
+效果如图 5-22 所示。
+
+![](res/2022-02-18-11-51-10.png)
+
+[radial-gradient-wave](embedded-codesandbox://css-new-world-stronger-visual-performance/radial-gradient-wave)
+
+径向渐变可以实现的图形效果非常多，就不一一举例了。总而言之，要想将径向渐变用得出神入化，一定要牢牢掌握其语法。
