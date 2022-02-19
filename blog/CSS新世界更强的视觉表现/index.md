@@ -509,3 +509,142 @@ button:active {
 [radial-gradient-wave](embedded-codesandbox://css-new-world-stronger-visual-performance/radial-gradient-wave)
 
 径向渐变可以实现的图形效果非常多，就不一一举例了。总而言之，要想将径向渐变用得出神入化，一定要牢牢掌握其语法。
+
+## 了解 conic-gradient() 锥形渐变
+
+锥形渐变是 CSS Images Module Level 4 规范中新定义的一种渐变，也很实用，但其兼容性不太好，IE 浏览器和 Edge 浏览器并不支持，因此只适合在移动端项目和中后台项目中使用。
+
+锥形渐变的语法比径向渐变要简单不少，正式语法如下：
+
+```css
+conic-gradient([ from <angle> ]? [ at <position> ]?, <angular-color-stop-list>)
+```
+
+可以看出锥形渐变由以下 3 部分组成：
+
+- 起始角度；
+- 中心位置；
+- 角渐变断点。
+
+其中起始角度和中心位置都是可以省略的，因此，最简单的锥形渐变用法如下：
+
+```css
+.example {
+   width: 300px;
+   height: 150px;
+   background-image: conic-gradient(white, deepskyblue);
+}
+```
+
+效果如图 5-23 所示。
+
+![](res/2022-02-19-11-15-53.png)
+
+图 5-23 所示的锥形渐变渲染的关键要素如图 5-24 所示。
+
+![](res/2022-02-19-11-16-27.png)
+
+我们可以改变起始角度和中心位置，让图 5-23 所示的锥形渐变效果发生变化，例如：
+
+```css
+conic-gradient(from 45deg at 25% 25%, white, deepskyblue);
+```
+
+渐变起始角度改成 45 度，中心点位置移动到了相对元素左上角 25% 的位置，效果如图 5-25 所示。
+
+![](res/2022-02-19-11-18-45.png)
+
+最后说一下角渐变断点，它的数据类型是 `<angular-color-stop-list>`。角渐变断点与线性渐变和径向渐变的区别在于角渐变断点不支持长度值，支持的是角度值。例如：
+
+```css
+conic-gradient(white, deepskyblue 45deg, white)
+```
+
+效果如图 5-26 所示，可以明显看到 1 点钟方向的颜色最深。
+
+![](res/2022-02-19-11-33-25.png)
+
+需要注意的是，角渐变断点中设置的角度值是一个相对角度值，最终渲染的角度值是设置的角度值和起始角度累加的值，例如：
+
+```css
+conic-gradient(from 45deg, white, deepskyblue 45deg, white);
+```
+
+此时 deepskyblue 实际渲染的坐标角度是 90deg（45deg + 45deg），效果如图 5-27 所示，可以明显看到 3 点钟方向的颜色最深。
+
+![](res/2022-02-19-11-36-35.png)
+
+由此可见，锥形渐变中颜色断点角度值和百分比值没有什么区别，两者可以互相转换。一个完整的旋转总共 360 度， 45deg 就等同于 12.5%，因此，下面两段 CSS 代码的效果是一模一样的：
+
+```css
+/* 下面两段语句效果一样 */
+conic-gradient(white, deepskyblue 45deg, white);
+conic-gradient(white, deepskyblue 12.5%, white);
+```
+
+如果作为渐变转换点，角度值和百分比值也可以互相转换。例如，下面的两条语句都是合法的：
+
+```css
+/* 合法 */
+conic-gradient(white, 12.5%, deepskyblue);
+/* 合法 */
+conic-gradient(white, 45deg, deepskyblue);
+```
+
+效果如图 5-28 所示。由于把渐变转换点移动到了 12.5% 的位置（原来是在 50% 位置处），因此渐变的后半部分颜色就比较深。
+
+![](res/2022-02-19-11-47-07.png)
+
+### 锥形渐变的应用举例
+
+用锥形渐变可以非常方便地实现饼状图效果，例如：
+
+```css
+.pie {
+   width: 150px;
+   height: 150px;
+   border-radius: 50%;
+   background: conic-gradient(yellowgreen 40%, gold 0deg 75%, deepskyblue 0deg);
+}
+```
+
+效果如图 5-29 所示。
+
+![](res/2022-02-19-11-50-20.png)
+
+[conic-gradient-pie](embedded-codesandbox://css-new-world-stronger-visual-performance/conic-gradient-pie)
+
+其中，可能有人会以为代码部分的 `gold 0deg 75%` 是什么新语法，其实不是的，这个语法在线性渐变那里介绍过（渐变断点第八个细节点），就是颜色值后面紧跟着的两个值表示颜色范围，另外这里 0deg 换成 0% 也是一样的效果，并非必须使用角度值。
+
+注意，重点来了！理论上，这里设置的数值应该是 40%，或者 144deg，而不是 0deg，那为何这里设置 0deg 效果也是正常的呢？至于原因，同样在线性渐变那里介绍过（渐变断点第七个细节点），后面的渐变断点位置值比前面的渐变断点位置值小的时候，后面的渐变断点的位置值会按照前面较大的渐变断点位置值渲染。于是 `gold 0deg 75%` 这里的 0deg 就会使用 `yellowgreen 40%` 中的 40% 位置值进行渲染，同理，`deepskyblue 0deg` 实际是按照 `deepskyblue 75%` 渲染的。也就是说，如果我们想要 A、B 两种渐变颜色界限分明，只要设置 B 颜色的起始位置值为 0% 就可以了，无须动脑子去计算，这算是一个 CSS 实用小技巧。
+
+图 5-30 所示是使用锥形渐变实现的基于色相和饱和度的取色盘，CSS 代码如下：
+
+```css
+.hs-wheel {
+   width: 150px;
+   height: 150px;
+   border-radius: 50%;
+   background: radial-gradient(closest-side, gray, transparent), conic-gradient(red, magenta, blue, aqua, lime, yellow, red);
+}
+```
+
+![](res/2022-02-19-11-58-01.png)
+
+[conic-gradient-color-disc](embedded-codesandbox://css-new-world-stronger-visual-performance/conic-gradient-color-disc)
+
+之前演示过使用 CSS 多背景实现灰白网格效果（棋盘效果），如果使用锥形渐变来实现，只需要一行 CSS 代码就足够了：
+
+```css
+.checkerboard {
+   width: 200px;
+   height: 160px;
+   background: conic-gradient(#eee 25%, white 0deg 50%, #eee 0deg 75%, white 0deg) 0 / 20px 20px;
+}
+```
+
+效果如图 5-31 所示。
+
+![](res/2022-02-19-13-42-29.png)
+
+[conic-gradient-grid](embedded-codesandbox://css-new-world-stronger-visual-performance/conic-gradient-grid)

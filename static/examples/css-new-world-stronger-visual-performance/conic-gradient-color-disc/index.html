@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>锥形渐变与色相饱和度色盘实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .hs-wheel {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: deepskyblue;
+        background: radial-gradient(closest-side, gray, transparent),
+          conic-gradient(red, magenta, blue, aqua, lime, yellow, red);
+        margin: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="hs-wheel"></div>
+    </div>
+  </body>
+</html>
