@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>锥形渐变与Loading效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .loading {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: conic-gradient(deepskyblue, 30%, white);
+        --mask: radial-gradient(closest-side, transparent 75%, black 76%);
+        -webkit-mask-image: var(--mask);
+        mask-image: var(--mask);
+        animation: spin 1s linear infinite reverse;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .demo div {
+        margin: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="loading"></div>
+    </div>
+  </body>
+</html>

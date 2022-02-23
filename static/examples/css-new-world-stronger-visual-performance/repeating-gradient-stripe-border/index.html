@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>重复线性渐变与条纹边框效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .stripe-border {
+        width: 150px;
+        height: 200px;
+        border: 20px solid;
+        border-image: repeating-linear-gradient(135deg, deepskyblue, deepskyblue 6px, white 7px, white 12px) 20;
+        border-image: repeating-linear-gradient(135deg, deepskyblue 0 6px, white 7px 12px) 20;
+      }
+
+      .demo div {
+        margin: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="stripe-border"></div>
+    </div>
+  </body>
+</html>

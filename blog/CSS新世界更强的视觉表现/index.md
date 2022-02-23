@@ -648,3 +648,76 @@ conic-gradient(white, 45deg, deepskyblue);
 ![](res/2022-02-19-13-42-29.png)
 
 [conic-gradient-grid](embedded-codesandbox://css-new-world-stronger-visual-performance/conic-gradient-grid)
+
+最后一个例子，演示如何借助锥形渐变实现很实用的加载效果，代码如下：
+
+```css
+.loading {
+   width: 100px;
+   height: 100px;
+   border-radius: 50%;
+   background: conic-gradient(deepskyblue, 30%, white);
+   --mask: radial-gradient(closest-side, transparent 75%, black 76%);
+   -webkit-mask-image: var(--mask);
+   mask-image: var(--mask);
+   animation: spin 1s linear infinite reverse;
+}
+
+@keyframes spin {
+   from {
+      transform: rotate(0deg);
+   }
+
+   to {
+      transform: rotate(360deg);
+   }
+}
+```
+
+效果如图 5-32 所示。
+
+![](res/2022-02-23-09-54-56.png)
+
+原理很简单，图 5-32 所示的其实就是一个锥形渐变，使用 CSS 遮罩属性只让外圈 25% 的范围显示，于是 loading 的圆环效果就出现了。如果想要小尺寸的 loading 效果，直接修改上述 CSS 代码中的 width 属性值和 height 属性值即可。
+
+[conic-gradient-loading](embedded-codesandbox://css-new-world-stronger-visual-performance/conic-gradient-loading)
+
+本例 CSS 代码中出现了 CSS 自定义属性（指 --mask）、CSS 遮罩属性 mask-image 和 CSS 动画属性 animation，它们都是非常实用的 CSS 属性，均会在本书的后面着重介绍，敬请期待。
+
+## 重复渐变
+
+线性渐变、径向渐变和锥形渐变都有对应的重复渐变函数，就是在各自的函数名前面添加 repeating- 前缀，示意如下：
+
+```css
+repeating-linear-gradient(transparent, deepskyblue 40px);
+repeating-radial-gradient(transparent, deepskyblue 40px);
+repeating-conic-gradient(transparent, deepskyblue 40deg);
+```
+
+假设上面的语句是作为 background-image 应用在尺寸为 200px×100px 的元素上的，则最终的效果如图 5-33 所示。
+
+![](res/2022-02-23-13-37-26.png)
+
+无论是重复线性渐变、重复径向渐变还是重复锥形渐变，其语法和对应的非重复渐变语法是一模一样的，区别在渲染表现上，非重复渐变的起止颜色位置如果是 0% 和 100%，则可以省略，但是对于重复渐变，起止颜色位置需要明确定义。
+
+重复渐变就这么点内容，很多人会觉得重复渐变复杂难懂，这只是因为对基本的渐变特性了解还不够深入而已。
+
+重复渐变非常适合实现条纹效果。例如，使用 border-image 属性和重复线性渐变实现条纹边框效果，代码如下：
+
+```css
+.stripe-border {
+   width: 150px;
+   height: 200px;
+   border: 20px solid;
+   /* IE 旧语法 */
+   border-image: repeating-linear-gradient(135deg, deepskyblue, deepskyblue 6px, white 7px, white 12px) 20;
+   /* 新语法 */
+   border-image: repeating-linear-gradient(135deg, deepskyblue 0 6px, white 7px 12px) 20;
+}
+```
+
+效果如图 5-34 所示。
+
+![](res/2022-02-23-13-40-53.png)
+
+[repeating-gradient-stripe-border](embedded-codesandbox://css-new-world-stronger-visual-performance/repeating-gradient-stripe-border)
