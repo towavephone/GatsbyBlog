@@ -833,3 +833,131 @@ img {
 - 子元素设置的 translateZ() 函数值越大，该元素的视觉大小也会越大，因为元素在视觉上越近，看上去也就越大。
 - 当子元素设置的 translateZ() 函数值非常接近 201 像素，但是不超过 201 像素的时候（如 200 像素），该元素就会撑满整个屏幕（如果父元素没有类似 overflow: hidden 的限制的话）。因为这个时候，子元素正好移到了你的眼睛前面，看起来非常大，所谓“一叶障目，不见泰山”，就是这么回事。
 - 当子元素设置的 translateZ() 函数值再变大，即超过 201 像素的时候，就看不见该元素了——这很好理解，我们是看不见眼睛后面的东西的！
+
+[translateZ-perspective](embedded-codesandbox://css-new-world-stronger-visual-performance/translateZ-perspective)
+
+拖动滑杆控制子元素的 translateZ() 函数值，大家会发现当值为 −100 的时候视觉尺寸最小；随着值慢慢变大（例如值为 40 的时候），子元素的视觉尺寸明显变大；等到值继续增加到 200 的时候，会发现子元素充满了整个屏幕；而值是 250 的时候，由于子元素已经在透视点之外，因此是看不见子元素的，子元素如消失一般。整个视觉变化过程如图 5-41 所示。
+
+![](res/2022-02-28-14-03-10.png)
+
+此时，我们再换一个视角，从侧面观察 translateZ() 函数的作用原理，如图 5-42 所示，可以更清楚地明白为什么 translateZ() 函数值会影响元素的视觉尺寸。
+
+![](res/2022-02-28-14-04-15.png)
+
+## 指定 perspective 透视点的两种写法
+
+有两种书写形式可以指定元素的透视点，一种设置在舞台元素上，也就是设置在 3D 渲染元素的共同父元素上；第二种是设置在当前 3D 渲染元素上，与 transform 其他变换属性值写在一起，代码示例如下：
+
+```css
+.stage {
+   perspective: 600px;
+}
+
+.box {
+   transform: rotateY(45deg);
+}
+```
+
+第二种：
+
+```css
+.stage .box {
+   transform: perspective(600px) rotateY(45deg);
+}
+```
+
+[perspective-two-way-writing](embedded-codesandbox://css-new-world-stronger-visual-performance/perspective-two-way-writing)
+
+看到的效果如图 5-43 所示，其中左侧的是 perspective 属性写法，右侧的是 perspective() 函数写法。
+
+![](res/2022-02-28-14-10-21.png)
+
+仔细对比图 5-43 左右两侧图形的效果，会发现虽然透视点设置的方法不一样，但是效果貌似是一样的。果真是这样吗？其实不然，图 5-43 左右两侧图形的效果之所以会一样，是因为舞台上只有一个元素，因此，两种书写形式的表现正好一样。如果舞台上有多个元素，那么两种书写形式的表现差异就会立刻显示出来，如图 5-44 所示。
+
+![](res/2022-02-28-14-11-13.png)
+
+图 5-44 所示的效果其实不难理解。图 5-44 上面一排元素把整个舞台作为透视元素，也就是我们看到的每个子元素都共用同一个透视点，因此每一个子元素的视觉形状都不一样，这个效果比较符合现实世界的 3D 透视效果。例如视线前方有一排人，远处的人只能被看到侧脸，近处的人可以被看到正脸。而图 5-44 下面一排元素中的每个子元素都有一个自己独立的透视点，加上旋转的角度又是一样的，因此每个元素看上去也就一模一样了。
+
+[perspective-two-way-writing-diff](embedded-codesandbox://css-new-world-stronger-visual-performance/perspective-two-way-writing-diff)
+
+## 理解 perspective-origin 属性
+
+perspective-origin 属性很好理解，表示我们的眼睛相对 3D 变换元素的位置，你可以通过改变眼睛的位置来改变元素的 3D 渲染效果，原理如图 5-45 所示。
+
+![](res/2022-02-28-14-13-19.png)
+
+正式语法如下：
+
+```css
+perspective-origin: <position>;
+```
+
+一看到 `<position>` 数据类型，就应该赶快回想起 background-position 属性支持哪些值，也就知道了 perspective-origin 属性支持哪些值。例如，下面这些语句都是合法的：
+
+```css
+perspective-origin: top left;
+perspective-origin: right 20px bottom 40%;
+perspective-origin: 50% 50%;
+perspective-origin: -200% 200%;
+perspective-origin: 20cm 100ch;
+```
+
+perspective-origin 属性初始值是 50% 50%，表示默认的透视点是舞台或元素的中心。但是有时候，需要让变换的元素不在舞台的中心，或让透视角度偏上或者偏下，此时就可以通过设置 perspective-origin 属性值实现。
+
+图 5-46 所示的就是一个立方体应用 perspective-origin: 25% 75% 声明后的透视效果图。
+
+![](res/2022-02-28-14-18-33.png)
+
+## transform-style: preserve-3d 声明的含义
+
+transform-style 支持两个关键字属性值，分别是 preserve-3d 和 flat，语法如下：
+
+```css
+transform-style: preserve-3d;
+transform-style: flat;
+```
+
+先讲一下这一语法中的几个关键点。
+
+- preserve-3d 表示应用 3D 变换的元素位于三维空间中，preserve-3d 属性值的渲染表现更符合真实世界的 3D 表现。
+- flat 是默认值，表示应用 3D 变换的元素位于舞台或元素的平面中，其渲染表现类似“二向箔”，把三维空间压缩在舞台元素的二维空间中。
+
+我们通过一个例子直观地了解一下 preserve-3d 和 flat 这两个属性值的区别，HTML 和 CSS 代码如下：
+
+```html
+<section class="stage preserve-3d">
+   <div class="box"></div>
+</section>
+
+<section class="stage">
+   <div class="box"></div>
+</section>
+
+<style>
+   .stage {
+      width: 150px;
+      height: 150px;
+      background-color: rgba(0, 191, 255, 0.75);
+      perspective: 600px;
+   }
+
+   .box {
+      height: 100%;
+      opacity: 0.75;
+      background-color: darkred;
+      transform: rotateY(45deg);
+   }
+
+   .preserve-3d {
+      transform-style: preserve-3d;
+   }
+</style>
+```
+
+应用了 transform-style: preserve-3d 声明的 3D 变换元素有部分区域藏到了舞台元素的后面，因为此时整个舞台按照真实的三维空间渲染，自然看不到旋转到后面的图形区域，如图 5-47 左侧图形所示。默认情况下，元素无论怎么变换，其 3D 效果都会被渲染在舞台元素所在的二维平面之上，因此没有视觉上的穿透效果，如图 5-47 右侧图形所示。
+
+![](res/2022-02-28-14-24-42.png)
+
+[transform-style](embedded-codesandbox://css-new-world-stronger-visual-performance/transform-style)
+
+需要注意的是，transform-style 属性需要用在 3D 变换元素的父元素上，也就是舞台元素上才有效果。

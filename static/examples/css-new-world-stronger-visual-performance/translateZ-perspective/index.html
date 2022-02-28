@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>translateZ() 函数与 perspective 视角关系实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      body {
+        width: auto;
+      }
+
+      .container {
+        perspective: 201px;
+        margin: 0 1rem;
+        border: solid deepskyblue;
+        background-color: #f0fcff;
+      }
+
+      .target {
+        width: 100px;
+        height: 100px;
+        background-color: rgba(255, 0, 0, 0.6);
+        transform: translateZ(0);
+        pointer-events: none;
+        margin: 50px auto;
+      }
+
+      [type='range'] {
+        width: 240px;
+        margin: 0 5px 10px;
+        vertical-align: top;
+      }
+
+      output {
+        color: red;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p>
+        舞台元素视角大小 201 像素，子元素此时 translateZ 值为:
+        <output id="output">
+          50px
+        </output>
+      </p>
+      -100
+      <input type="range" min="-100" max="300" step="10" value="0" />
+      300
+      <div class="container">
+        <div id="target" class="target" style="transform: translateZ(50px);"></div>
+      </div>
+    </div>
+    <script>
+      var eleRange = document.querySelector('input[type="range"]');
+
+      eleRange.addEventListener('input', function() {
+        output.innerHTML = this.value + 'px';
+        target.style.transform = 'translateZ(' + this.value + 'px)';
+      });
+    </script>
+  </body>
+</html>

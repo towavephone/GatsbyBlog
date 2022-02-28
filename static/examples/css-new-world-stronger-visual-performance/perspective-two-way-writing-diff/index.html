@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>perspective 视点两种写法不同之处示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      body {
+        width: auto;
+      }
+
+      .stage {
+        display: flex;
+        height: 150px;
+        width: 600px;
+        max-width: calc(100% - 2rem);
+        border: 1px solid darkgray;
+      }
+
+      .box {
+        height: 100%;
+        flex: 1;
+        opacity: 0.75;
+      }
+
+      .darkblue {
+        perspective: 600px;
+      }
+
+      .darkblue .box {
+        background-color: darkblue;
+        transform: rotateY(45deg);
+      }
+
+      .darkred .box {
+        background-color: darkred;
+        transform: perspective(600px) rotateY(45deg);
+      }
+
+      .demo section {
+        margin: 30px auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <section class="stage darkblue">
+        <div class="box"></div>
+        <div class="box"></div>
+        <div class="box"></div>
+        <div class="box"></div>
+      </section>
+
+      <section class="stage darkred">
+        <div class="box"></div>
+        <div class="box"></div>
+        <div class="box"></div>
+        <div class="box"></div>
+      </section>
+    </div>
+  </body>
+</html>
