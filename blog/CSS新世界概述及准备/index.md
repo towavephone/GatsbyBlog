@@ -1046,10 +1046,13 @@ Chromium Edge 浏览器会把任意带有 -ms- 前缀的伪元素都认为是合
 ```css
 @supports (display: flex) {
 }
+
 @supports not (display: flex) {
 }
+
 @supports (display: flex) and (display: grid) {
 }
+
 @supports (display: flex) or (display: grid) {
 }
 ```
@@ -1073,6 +1076,7 @@ Chromium Edge 浏览器会把任意带有 -ms- 前缀的伪元素都认为是合
 /* 不合法 */
 @supports (display: flex) and not (display: grid) {
 }
+
 @supports not (display: grid) and (display: flex) {
 }
 ```
@@ -1155,6 +1159,7 @@ Edge12 ～ Edge15 浏览器正好是符合上面的条件判断的，我们不�
 /* 这里不能使用 css 语法高亮，否则会格式化到 :default */
 @supports (--var: blue) {
 }
+
 @supports selector(:default) {
 }
 ```
@@ -1195,6 +1200,7 @@ Edge12 ～ Edge15 浏览器正好是符合上面的条件判断的，我们不�
             color: #fff;
          }
       }
+      
       /* 支持内嵌 @supports 语法 */
       @supports (animation: none) {
          .supports-match {

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>backface-visibility 属性基本效果示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      body {
+        width: auto;
+      }
+
+      .stage {
+        display: inline-block;
+        width: 150px;
+        height: 150px;
+        border: 1px solid darkgray;
+        perspective: 600px;
+        transform-style: preserve-3d;
+      }
+
+      .box {
+        width: inherit;
+        height: inherit;
+        opacity: 0.75;
+        background-color: darkred;
+        transform: rotateY(225deg);
+      }
+
+      .box:first-child {
+        transform: rotateY(-45deg);
+        background-color: darkblue;
+        position: absolute;
+      }
+
+      .backface-hidden .box {
+        backface-visibility: hidden;
+      }
+
+      .demo section + section {
+        margin-left: 7px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <section class="stage backface-hidden">
+        <div class="box"></div>
+        <div class="box"></div>
+      </section>
+
+      <section class="stage">
+        <div class="box"></div>
+        <div class="box"></div>
+      </section>
+
+      <p class="remind">// 左侧矩形的舞台元素设置了 backface-visibility: hidden</p>
+    </div>
+  </body>
+</html>

@@ -961,3 +961,216 @@ transform-style: flat;
 [transform-style](embedded-codesandbox://css-new-world-stronger-visual-performance/transform-style)
 
 需要注意的是，transform-style 属性需要用在 3D 变换元素的父元素上，也就是舞台元素上才有效果。
+
+## backface-visibility 属性的作用
+
+在 CSS 世界中，一个元素的背面表现为其正面图像的镜像，因此，当我们使用翻转效果使其背面展示在用户面前的时候，显示的是该元素正面图像的镜像。
+
+这一特性和现实中的 3D 效果并不一致，例如我们要实现扑克牌翻转的 3D 效果，很显然，扑克牌的背面一定是花纹，不可能是正面的牌号。因此，当我们对扑克牌进行翻转使其背面展示在用户面前的时候，显示扑克牌的正面镜像显然是不合理的。我们需要隐藏扑克牌元素的背面，至于扑克牌背面花纹的效果，我们可以使用其他元素进行模拟，然后让前后两个元素互相配合来实现 3D 扑克牌翻转效果。这个控制扑克牌的背面不显示的 CSS 属性就是 backface-visibility。
+
+backface-visibility 属性语法如下：
+
+```css
+backface-visibility: hidden;
+backface-visibility: visible;
+```
+
+其中，visible 是默认值，也就是元素翻转时背面是可见的；如果 backface-visibility 的属性值是 hidden，则表示元素翻转时背面是不可见的。
+
+我们通过一个例子直观地了解一下 hidden 和 visible 这两个属性值的区别，HTML 和 CSS 代码如下：
+
+```html
+<section class="stage backface-hidden">
+   <div class="box"></div>
+   <div class="box"></div>
+</section>
+
+<section class="stage">
+   <div class="box"></div>
+   <div class="box"></div>
+</section>
+
+<style>
+   .stage {
+      width: 150px;
+      height: 150px;
+      border: 1px solid darkgray;
+      perspective: 600px;
+      transform-style: preserve-3d;
+   }
+
+   .box {
+      width: inherit;
+      height: inherit;
+      opacity: 0.75;
+      background-color: darkred;
+      transform: rotateY(225deg);
+   }
+
+   .box:first-child {
+      transform: rotateY(-45deg);
+      background-color: darkblue;
+      position: absolute;
+   }
+
+   .backface-hidden .box {
+      backface-visibility: hidden;
+   }
+</style>
+```
+
+设置了 backface-visibility: hidden 后，绕 y 轴旋转 225 度后元素被隐藏了，因为 rotateY 值在大于 180 度、小于 360 度的时候，我们看到的就是元素的背面了，如图 5-48 左侧所示；而 backface-visibility 属性值是 visible 的元素绕 y 轴旋转 225 度后依然清晰可见，效果如图 5-48 右侧所示。
+
+![](res/2022-03-02-14-02-45.png)
+
+[backface-visibility](embedded-codesandbox://css-new-world-stronger-visual-performance/backface-visibility)
+
+## 值得学习的旋转木马案例
+
+这里举一个图片列表旋转木马效果案例，它可以用来替换常见的 2D 轮播效果，如果读者能弄明白这个例子，那么对 CSS 3D 变换的学习就算是合格了。
+
+[3d-marquee](embedded-codesandbox://css-new-world-stronger-visual-performance/3d-marquee)
+
+实现的效果如图 5-49 所示，点击任意图片可以看到图片列表的旋转木马效果。
+
+![](res/2022-03-02-14-12-33.png)
+
+### 实现原理
+
+这个案例用到的 CSS 属性就是前面提到的几个常用 CSS 属性，包括透视、3D 变换和三维空间设置。
+
+首先，HTML 代码结构如下：
+
+```
+舞台
+   容器
+      图片
+      图片
+      图片
+      ......
+```
+
+相关 HTML 代码是：
+
+```html
+<div class="stage">
+   <div id="container" class="container">
+      <img class="piece" src="1.jpg" style="--index:0;" />
+      <img class="piece" src="2.jpg" style="--index:1;" />
+      <img class="piece" src="3.jpg" style="--index:2;" />
+      <img class="piece" src="4.jpg" style="--index:3;" />
+      <img class="piece" src="5.jpg" style="--index:4;" />
+      <img class="piece" src="6.jpg" style="--index:5;" />
+      <img class="piece" src="7.jpg" style="--index:6;" />
+      <img class="piece" src="8.jpg" style="--index:7;" />
+      <img class="piece" src="9.jpg" style="--index:8;" />
+   </div>
+</div>
+```
+
+对于舞台，需要为其设置视距，例如设置为 800px：
+
+```css
+.stage {
+   perspective: 800px;
+}
+```
+
+对于容器，需要为其添加 3D 视图声明：
+
+```css
+.container {
+   transform-style: preserve-3d;
+}
+```
+
+然后就是图片元素了，为了方便定位，我们让所有图片应用 position: absolute 声明，共用一个 3D 变换中心点。
+
+显然，图片旋转木马的运动方式需要应用的 3D 变换函数是 rotateY() 函数。因此，图片元素需要设置的 rotateY() 函数值就是 360 度除以图片数量后的计算值，这里有 9 张图片，则每张图片的旋转角度比前一张图片多 40 度（360 / 9 = 40）。如果需要兼容 IE 浏览器，我们可以这样书写：
+
+```css
+img:nth-child(1) {
+   transform: rotateY(0deg);
+}
+
+img:nth-child(2) {
+   transform: rotateY(40deg);
+}
+
+img:nth-child(3) {
+   transform: rotateY(80deg);
+}
+
+img:nth-child(4) {
+   transform: rotateY(120deg);
+}
+
+img:nth-child(5) {
+   transform: rotateY(160deg);
+}
+
+img:nth-child(6) {
+   transform: rotateY(200deg);
+}
+
+img:nth-child(7) {
+   transform: rotateY(240deg);
+}
+
+img:nth-child(8) {
+   transform: rotateY(280deg);
+}
+
+img:nth-child(9) {
+   transform: rotateY(320deg);
+}
+```
+
+如果无须兼容 IE 浏览器，我们可以使用 CSS 自定义属性实现：
+
+```css
+img {
+   transform: rotateY(calc(var(--index) * 40deg));
+}
+```
+
+虽然 9 张图片的方位都不一样，但由于它们共用一个 3D 变换中心点，因此一定会挤成一团，如图 5-50 所示，图片挤成一团的效果显然不是我们需要的，我们需要拉开图片之间的距离。
+
+![](res/2022-03-02-14-29-42.png)
+
+如何拉开距离呢？其实很简单。我们可以把 9 张图片想象成 9 个人，现在这 9 个人站在一起分别面朝不同的方位，这 9 个人是不是只要每个人向前走 4 ～ 5 步，彼此之间的距离就拉开了？不妨想象一下夜空中礼花绽开的场景。这里的向前走 4 ～ 5 步的行为，就相当于应用 translateZ() 函数的行为，当 translateZ() 函数值为正值的时候，元素会向其面对的方向走去。
+
+现在只剩下一个问题了：要向前走多远呢？这个距离是有计算公式的！这 9 张图片宽度均是 128px，因此就有图 5-51 所示的理想方位效果。
+
+![](res/2022-03-02-14-33-56.png)
+
+图 5-51 中使用红色标注的 r 就是图片需要设置的 translateZ() 函数的理想值，使用该值可以让所有图片无缝围在一起。
+
+r 的计算比较简单：
+
+$$ r = 64 / tan(20 ^ \circ) \approx 175.8 $$
+
+为了好看，图片左右两边可以留点间距，例如 20px，最终得到需要使用的 translateZ() 函数值为 175.8 + 20 = 195.8。于是，最终图片元素设置的 transform 属性值是：
+
+```css
+transform: rotateY(calc(var(--index) * 40deg)) translateZ(195.839px);
+```
+
+最后，要让图片旋转起来，只要让容器每次旋转 40 度就可以了，这个可以使用 CSS 动画完成，或者使用 JavaScript 设置也是可以的。理解了旋转木马 3D 效果实现原理，其他 3D 效果基本上就都可以轻松驾驭了。
+
+## 3D 变换与 GPU 加速
+
+3D 变换除了用来实现 3D 效果，还经常被用来开启 GPU 加速，例如实现左位移 100px，下面两种写法都是有效的：
+
+```css
+transform: translate(-100px, 0);
+transform: translate3d(-100px, 0, 0);
+```
+
+但是，使用 translate3d() 函数的变换效果性能要更高，因为使用该函数会开启 GPU 加速。然后问题就来了，很多开发者一看到“性能更好”就激动了，遇到了元素变换效果就使用 3D 变换，甚至实现其他简单的图形表现时也会添加一段无关紧要的 CSS 3D 变换代码，例如：
+
+```css
+transform: translateZ(0);
+```
+
+这是一个很糟糕的做法，Web 网页是如此简单，2D 变换原本的性能就很高，根本就没有任何必要去开启 GPU 加速，没有遇到任何一个场景非得使用 3D 变换才不卡顿的。要知道，不必要的 GPU 加速会增加内存的使用，这会影响移动设备的电池寿命。因此，我直接就下结论了：单纯的 2D 变换请一定使用 2D 变换函数，没有任何理由需要使用 3D 变换函数，此时让 GPU 加速是一种糟糕的做法。
