@@ -1146,9 +1146,7 @@ img {
 
 图 5-51 中使用红色标注的 r 就是图片需要设置的 translateZ() 函数的理想值，使用该值可以让所有图片无缝围在一起。
 
-r 的计算比较简单：
-
-$$ r = 64 / tan(20 ^ \circ) \approx 175.8 $$
+r 的计算比较简单：$ r = 64 / tan(20 ^ \circ) \approx 175.8 $
 
 为了好看，图片左右两边可以留点间距，例如 20px，最终得到需要使用的 translateZ() 函数值为 175.8 + 20 = 195.8。于是，最终图片元素设置的 transform 属性值是：
 
@@ -1174,3 +1172,375 @@ transform: translateZ(0);
 ```
 
 这是一个很糟糕的做法，Web 网页是如此简单，2D 变换原本的性能就很高，根本就没有任何必要去开启 GPU 加速，没有遇到任何一个场景非得使用 3D 变换才不卡顿的。要知道，不必要的 GPU 加速会增加内存的使用，这会影响移动设备的电池寿命。因此，我直接就下结论了：单纯的 2D 变换请一定使用 2D 变换函数，没有任何理由需要使用 3D 变换函数，此时让 GPU 加速是一种糟糕的做法。
+
+# CSS 过渡
+
+使用 transition 属性可以实现元素 A 状态到 B 状态的过渡效果，经常使用 :hover 伪类或者 :active 伪类触发。
+
+目前，我们已经无须给 transition 属性增加私有前缀了，无论是什么项目都不需要。IE 浏览器从 IE10 版本开始，就从未支持过 -ms- 私有前缀，完全没有任何需要添加 -ms- 私有前缀的理由。
+
+至于添加 -moz- 和 -webkit- 私有前缀也是很多年以前的事情了，目前已经无须再添加。即使有个别用户使用的是非常古老的浏览器也没有关系，因为 transition 是一个体验增强的 CSS 属性，即使浏览器不支持，也只会导致一些交互效果生硬一点，对页面功能没有任何影响。
+
+transition 是一个常用属性，相信基础的知识大家都比较了解，因此，接下来我只会介绍一些我认为读者可能不知道的关于 transition 属性的知识。
+
+## 你可能不知道的 transition 属性知识
+
+transition 属性是一个缩写属性，它是 transition-duration、transition-delay、transition-property、transition-timing-function 这 4 个 CSS 属性的缩写，每一个 CSS 属性的背后都有大家所不知道的细节。
+
+### transition-duration 属性
+
+transition-duration 属性表示过渡时间，它的值可以是 0，但是不能是负值，其他就没什么好说的……真的是这样吗？请看下面这段 CSS 声明：
+
+```css
+transition: 1s 0.5s;
+```
+
+很多开发者都知道，第一个时间值 1s 表示过渡时间，第二个时间值表示延时时间（transition-delay），这两个时间值的顺序是固定的，绝对不能调换，否则含义会颠倒过来。久而久之大家容易陷入一个误区，认为 transition 属性如果设置了两个时间值，其顺序必须是固定的，其实不然！有一种场景下 transition 属性的两个时间值的顺序是可以任意调换的。什么场景呢？就是其中一个时间值是负值的时候。例如，下面两句 CSS 声明都是合法的，且含义一模一样：
+
+```css
+/* 效果一样 */
+transition: 2s -1s;
+transition: -1s 2s;
+```
+
+原因就在于不起眼的“transition-duration 不能是负值”的特性，所以上面代码中的 −1s 只能是 transition-delay 的属性值，两个值就可以无序排列。
+
+### transition-delay 属性
+
+transition-delay 属性用来指定延时过渡效果执行的时间，单位是 s（秒）或者 ms（毫秒），其值可以是负值，例如：
+
+```css
+transition-delay: 200ms;
+transition-delay: 2s;
+transition-delay: -0.5s;
+```
+
+当 transition-delay 属性值为负值的时候，会带来一个很有意思的现象，那就是可以省略部分动画进程，例如：
+
+```css
+.example {
+   transform: translateX(0);
+   transition-duration: 1s;
+   transition-delay: -0.5s;
+}
+
+.example:hover {
+   transform: translateX(100px);
+}
+```
+
+此时当鼠标经过 .example 元素的时候，元素的 transform 位移位置不是从 0 开始，而是从靠近 50px 的位置开始的，且过渡效果执行的时间不是 1s，而是 0.5s，因为最终过渡执行的时间等于动画过程时间加动画延时时间，也就是 `1s + (−0.5s) = 0.5s`。
+
+transition-delay 属性有一个隐蔽的但却很实在的作用，那就是可以提高用户的交互体验。例如，使用 :hover 伪类实现的浮层是一种很常见的交互效果，传统的效果都是鼠标指针一旦经过元素，浮层立即出现。这其实是有问题的，因为鼠标非常容易误触该交互效果。优秀的交互体验是会增加一定的延时判断的，也就是如果鼠标指针快速经过元素，会被认为是不小心经过，浮层就不会出现。
+
+想要实现这个交互效果，目前只能使用 transition-delay 属性，请看下面这个具体的案例：
+
+```html
+<a href class="target">显示图片</a> <img src="1.jpg" />
+```
+
+当鼠标指针经过“显示图片”这个链接的时候，浮层图片在鼠标指针停留在元素上一定的时间后才会显示，使用的 CSS 代码如下：
+
+```css
+.target + img {
+   transition-delay: 0.2s;
+   visibility: hidden;
+}
+
+.target:hover + img {
+   visibility: visible;
+}
+```
+
+此时鼠标指针悬停在 `显示图片` 上 200ms 之后浮层图片才会显示，效果如图 5-52 所示。
+
+![](res/2022-03-03-15-29-22.png)
+
+[transition-delay](embedded-codesandbox://css-new-world-stronger-visual-performance/transition-delay)
+
+### transition-property 属性
+
+transition-property 属性用来设置应用过渡效果的 CSS 属性，其初始值是 all，表示默认所有 CSS 属性都应用过渡效果。
+
+不知道“初始值是 all”有没有让你意识到什么。我已经记不清有多少次见到过下面的 CSS 代码了：
+
+```css
+transition: all 0.2s;
+```
+
+上面这段 CSS 代码的语法和功能都没有问题，表示所有 CSS 属性都执行 0.2s 的过渡效果，那问题在哪里呢？问题就在于其中的 all 完全是多余的，直接写成下面的 CSS 代码就可以了：
+
+```css
+transition: 0.2s;
+```
+
+也就是我们只需要指定过渡时间就可以了。
+
+不过不是所有 CSS 属性都支持过渡效果，例如 display 属性就不支持过渡效果，而且，不支持也就罢了，有时候还会“搞破坏”。例如设置了 transition 过渡效果的元素应用 display: none 时，过渡效果会被瞬间中断，导致 transitionend 事件不会被触发。
+
+因此，如果希望元素有过渡效果，同时可以隐藏，请使用 visibility 属性，visibility 属性在 CSS Transition 过渡效果中很实用，后面会专门对此进行介绍。
+
+transition-property 支持任意 `<custom-ident>` 数据类型值，不需要是合法的 CSS 属性名称，例如下面语句也是合法的：
+
+```css
+/* 合法 */
+transition-property: 笑脸-©;
+```
+
+但是该属性不支持以数字或引号开头的数据类型，关于 `<custom-ident>` 数据类型的深入介绍参见之后章节。
+
+最后，我们可以同时设置多个参与过渡效果的 CSS 属性，使用逗号分隔，例如：
+
+```css
+transition-property: color, background-color, opacity, transform;
+```
+
+下面讲一下属性值列表的长度不同时的样式计算规则。用一句话概括就是“有缺则补，多之则除”。例如：
+
+```css
+div {
+   transition-property: opacity, left, top;
+   transition-duration: 3s, 5s;
+}
+
+div {
+   transition-property: opacity, left, top, height;
+   transition-duration: 3s, 5s;
+}
+```
+
+等同于：
+
+```css
+div {
+   transition-property: opacity, left, top;
+   transition-duration: 3s, 5s, 3s;
+}
+
+div {
+   transition-property: opacity, left, top, height;
+   transition-duration: 3s, 5s, 3s, 5s;
+}
+```
+
+如果 transition-property 的属性值列表长度过短，则其他过渡属性多余的列表值会被忽略。例如：
+
+```css
+div {
+   transition-property: opacity, left;
+   transition-duration: 3s, 5s, 2s, 1s;
+}
+```
+
+等同于：
+
+```css
+div {
+   transition-property: opacity, left;
+   transition-duration: 3s, 5s;
+}
+```
+
+子属性支持逗号分隔，自然 transition 缩写属性也支持逗号分隔多个独立的过渡效果设置。例如：
+
+```css
+.example {
+   transition: opacity 0.2s, transform 0.5s;
+}
+```
+
+### transition-timing-function 属性
+
+transition-timing-function 属性通过设置过渡时间函数来影响过渡效果的过渡速率，transition-timing-function 属性和 animation-timing-function 支持的属性值类型一致，总共分为三大类。
+
+- 线性运动类型：使用 linear 表示。
+- 三次贝塞尔时间函数类型：ease、ease-in、ease-out、ease-in-out 等关键字和 cubic-bezier() 函数。
+- 步进时间函数类型：step-start、step-start 等关键字和 steps() 函数。
+
+transition-timing-function 属性平常用得很少，因为默认值 ease 就可以应付几乎所有场景了。
+
+例如我写了 10 多年 CSS 代码，在 CSS Transition 过渡效果中从未使用过线性运动类型和步进时间函数类型（对天发誓一次都没有用过），不过我倒是在 CSS 动画效果中经常用到它们，因此这部分内容会在 5.4 节深入介绍。至于贝塞尔时间函数类型，则偶尔会在 CSS Transition 过渡效果中用到，因此，可以在这里详细介绍一下。
+
+## 了解三次贝塞尔时间函数类型
+
+“贝塞尔”源于著名的法国工程师 Pierre Bézier 的名字，Pierre Bézier 最杰出的贡献是发明了贝塞尔曲线，奠定了计算机矢量图形学的基础，因为有了贝塞尔曲线之后，无论是直线或曲线都能在数学上予以描述。
+
+三次贝塞尔时间函数类型写作 `<cubic-bezier-timing-function>`，其正式语法如下：
+
+```css
+<cubic-bezier-timing-function> = ease | ease-in | ease-out | ease-in-out | cubic-bezier(<number>, <number>, <number>, <number>)
+```
+
+其中，ease、ease-in、ease-out、ease-in-out 这几个关键字是计算机领域通用的运动函数关键字，其贝塞尔函数值是固定的，在其他图形语言中也是适用的，具体分析如下。
+
+- ease：等同于 cubic-bezier(0.25, 0.1, 0.25, 1.0)，是 transition-timing-function 属性的默认值，表示过渡的时候先加速再减速。该时间函数曲线如图 5-53 所示，横坐标是时间，纵坐标是进程，曲线越陡速率越快，曲线越缓速率越慢。
+
+   ![](res/2022-03-03-16-13-36.png)
+
+- ease-in：等同于 cubic-bezier(0.42, 0, 1.0, 1.0)，表示过渡速度刚开始慢，然后过渡速度逐渐加快。单词 in 表示进入的意思，非常符合先慢后快，例如剑插入剑鞘，线穿进针里，都是先慢慢瞄准，再快速进入的。该时间函数曲线如图 5-54 所示。
+
+   ![](res/2022-03-03-16-18-42.png)
+
+- ease-out：等同于 cubic-bezier(0, 0, 0.58, 1.0)，表示过渡刚开始速度快，然后速度逐渐变慢。单词 out 表示移出的意思，非常符合先快后慢，例如拔剑是先快后慢。该时间函数曲线如图 5-55 所示。
+
+   ![](res/2022-03-03-16-19-34.png)
+
+- ease-in-out：等同于 cubic-bezier(0.42, 0, 0.58, 1.0)，表示过渡刚开始速度慢，然后速度逐渐加快，最后再变慢。该时间函数曲线如图 5-56 所示。ease-in-out 是一个对称曲线，因此非常适合用在钟摆运动中。
+
+   ![](res/2022-03-03-16-20-28.png)
+
+### cubic-bezier() 函数
+
+贝塞尔曲线种类很多，包括线性贝塞尔曲线、二次方贝塞尔曲线、三次方贝塞尔曲线、四次方贝塞尔曲线、五次方贝塞尔曲线等。cubic-bezier() 函数是三次方贝塞尔曲线函数。所有三次方贝塞尔曲线都是由起点、终点和两个控制点组成，在 SVG 或者 Canvas 中，三次方贝塞尔曲线的所有控制点都是不固定的。但是在 CSS 的 cubic-bezier() 函数中，起点和终点的坐标是固定的，分别是 (0, 0) 和 (1, 1)，因此，cubic-bezier() 函数支持的参数值只有 4 个，代表了两个控制点的坐标，语法如下：
+
+```css
+cubic-bezier(x1, y1, x2, y2);
+```
+
+其中坐标 (x1, y1) 表示控制点 1 的坐标，坐标 (x2, y2) 表示控制点 2 的坐标。
+
+例如 ease 关键字对应的贝塞尔曲线函数 cubic-bezier(0.25, 0.1, 0.25, 1.0) 的曲线图就是根据 (0.25, 0.1) 和 (0.25, 1.0) 这两个控制点坐标生成的，如图 5-57 所示。
+
+有一个网站（cubic-bezier）专门用来调试 CSS 的贝塞尔曲线函数值，图 5-57 所示的曲线图就是使用这个网站生成的。
+
+![](res/2022-03-03-16-30-38.png)
+
+在初期的时候，cubic-bezier() 函数值的取值范围是 0 ～ 1，如果超过 1 会被认为是不合法的，不过现在浏览器早已放开了这个限制，因此，我们可以使用 cubic-bezier() 函数实现回弹效果。例如：
+
+```css
+.target {
+   transition: 1s cubic-bezier(0.16, 0.67, 0.28, 1.46);
+}
+
+.target.run {
+   transform: translateX(200px);
+}
+```
+
+.target 元素的运动轨迹如图 5-58 所示，元素会运动到超出 200px 的位置，然后回到 200px 的位置，形成回弹效果。
+
+![](res/2022-03-03-16-33-28.png)
+
+最后，附上其他一些非 CSS 标准，但也属于常用缓动类型的贝塞尔曲线值，为了方便调用，这里使用了 CSS 自定义属性表示，具体如下：
+
+```css
+:root {
+   --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+   --ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+   --ease-in-quart: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+   --ease-in-quint: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+   --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+   --ease-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.335);
+   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+   --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+   --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+   --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+   --ease-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1);
+   --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+   --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+   --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+   --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+   --ease-in-out-expo: cubic-bezier(1, 0, 0, 1);
+   --ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+```
+
+## transition 与 visibility 属性的应用指南
+
+如果希望元素在出现和隐藏时有淡入淡出或者移入移出效果，则建议使用 visibility 属性对元素进行隐藏与控制。原因很简单，因为 visibility 属性是支持 CSS 过渡效果和 CSS 动画效果的。
+
+这里举一个移动端经常使用的底部 Popup 浮层的案例，实现遮罩层淡入淡出，底部内容移入移出的效果，HTML 代码结构如下：
+
+```html
+<div class="popup">
+   <div class="content">底部浮层</div>
+</div>
+```
+
+淡入淡出效果是使用 opacity 属性实现的，但是 opacity: 0 仅仅是在视觉上让浮层元素不可见，浮层元素依然覆盖在页面上，影响正常的交互，因此，需要使用其他方法来真正隐藏浮层元素。由于 display: none 不支持过渡效果，因此只能使用 visibility: hidden 声明来实现，核心 CSS 代码如下：
+
+```css
+.popup {
+   position: fixed;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   top: 0;
+   background: rgba(0, 0, 0, 0.5);
+   overflow: hidden;
+   /* 显隐控制关键 css 代码 */
+   opacity: 0;
+   visibility: hidden;
+   transition: opacity 0.2s, visibility 0.2s;
+}
+
+.content {
+   /* 底部浮层移入移出控制关键 css 代码 */
+   transform: translateY(100%);
+   transition: transform 0.2s;
+}
+
+/* 通过切换 “active” 类名实现交互效果 */
+.popup.active {
+   transition-property: opacity;
+   opacity: 1;
+   visibility: visible;
+}
+
+.active > .content {
+   transform: translateY(0%);
+}
+```
+
+淡入淡出和移入移出没什么好讲的，就是属性的变化，这里比较有意思的是 visibility 对元素显隐的控制。根据定义，当过渡时间函数的值在 0 ～ 1 的时候，visibility 的计算值是 visible，也就是显示；如果时间函数大于 1 或者小于 0，则 visibility 属性的计算值由设置的起止点值决定，例如：
+
+```css
+.popup {
+   visibility: hidden;
+   transition: visibility 2s cubic-bezier(0.25, 0.5, 0, -1);
+}
+
+.popup.active {
+   visibility: visible;
+}
+```
+
+此时，.popup 元素会出现先显示，再隐藏，再显示的过渡效果。因为 `cubic-bezier(0.25, 0.5, 0, -1)` 时间函数曲线的一部分在时间轴的下方，这段时间内会按照设置的过渡效果的起始状态，也就是 visibility: hidden 渲染，如图 5-59 所示。
+
+![](res/2022-03-03-17-47-20.png)
+
+由于在实际开发中时间函数的值小于 0 的情况很罕见，因此，我们可以认定 visibility 属性的过渡效果是显示的时候立即显示，隐藏的时候遵循 transition-duration 设置的时间延时隐藏。于是理论上，我们只需要一行 transition 属性代码就可以实现想要的效果，例如：
+
+```css
+.popup {
+   opacity: 0;
+   visibility: hidden;
+   /* transition 如下设置即可 */
+   transition: opacity 0.2s, visibility 0.2s;
+}
+
+.popup.active {
+   opacity: 1;
+   visibility: visible;
+}
+```
+
+但是，不知道是浏览器故意为之还是其他什么原因，在过去的 Chrome 浏览器和现在的 Firefox 浏览器中，通过类名增减触发 transition 过渡效果的时候，元素是在 transition-duration 设置的时间结束的时候才突然显示，而通过 :hover 伪类触发的过渡行为则没有此问题。
+
+因此，在实际开发的时候，为了安全考虑，需要在触发结束状态的 CSS 代码那里重置下 transition-property 值，例如：
+
+```css
+.popup.active {
+   /* visibility 属性不参与过渡效果，因此元素会立即显示 */
+   transition-property: opacity;
+   opacity: 1;
+   visibility: visible;
+}
+```
+
+点击演示页面中心的按钮即可体验，效果如图 5-60 所示。
+
+![](res/2022-03-03-17-54-04.png)
+
+[transition-visibility](embedded-codesandbox://css-new-world-stronger-visual-performance/transition-visibility)
