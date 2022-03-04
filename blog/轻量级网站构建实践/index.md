@@ -13,9 +13,9 @@ tags: 前端, 轻量级网站, 预研
 
 1. 我出的方案：采用原生语法新框架写，考虑到首屏渲染的问题未采用
 2. 主管出的方案：采用后端渲染模板的方式，最大化首屏加载速度，但有以下问题：
-1. 后端渲染对服务器 CPU 的要求较高
-2. 本来打算用 oss 来减少后端渲染，但考虑到表单经常变化，且分享的链接要尽可能的保持不变，这就限制了 oss 的使用
-3. 同样由于分享的链接要尽可能的保持不变，在新的表单分享模板加入后需要后端刷数据，容错性较低
+   1. 后端渲染对服务器 CPU 的要求较高
+   2. 本来打算用 oss 来减少后端渲染，但考虑到表单经常变化，且分享的链接要尽可能的保持不变，这就限制了 oss 的使用
+   3. 同样由于分享的链接要尽可能的保持不变，在新的表单分享模板加入后需要后端刷数据，容错性较低
 3. 最终讨论结果：采用前后端分离的方式，用原生语法新框架写，需要考虑到版本兼容（新的模板数据和旧的模板数据要同时兼容，在接口里面加一个版本号）、模板枚举 wiki 的命名（减少沟通成本同时缩短分享链接的长度）、loading 页（首屏加载时间可能较长）
 
 # 方案调研
@@ -64,214 +64,214 @@ const isDev = !isProd && !isTest;
 
 // 配置反向代理
 const middleware = config.proxies.map((item) =>
-  proxy(item.match, {
-    target: item.host,
-    changeOrigin: true
-  })
+   proxy(item.match, {
+      target: item.host,
+      changeOrigin: true
+   })
 );
 
 function styles() {
-  return src('app/styles/*.css')
-    .pipe($.if(!isProd, $.sourcemaps.init()))
-    .pipe(
-      $.postcss([
-        // autoprefixer(),
-        // 采用 postcss 最新语法
-        postcssPresetEnv({
-          stage: 0
-        })
-      ])
-    )
-    .pipe($.if(!isProd, $.sourcemaps.write()))
-    .pipe(dest('.tmp/styles'))
-    .pipe(server.reload({ stream: true }));
+   return src('app/styles/*.css')
+      .pipe($.if(!isProd, $.sourcemaps.init()))
+      .pipe(
+         $.postcss([
+            // autoprefixer(),
+            // 采用 postcss 最新语法
+            postcssPresetEnv({
+               stage: 0
+            })
+         ])
+      )
+      .pipe($.if(!isProd, $.sourcemaps.write()))
+      .pipe(dest('.tmp/styles'))
+      .pipe(server.reload({ stream: true }));
 }
 
 function scripts() {
-  return (
-    src('app/scripts/**/*.js')
-      // plumber 插件防止 gulp 报错崩溃
-      .pipe($.plumber())
-      .pipe($.if(!isProd, $.sourcemaps.init()))
-      .pipe($.babel())
-      .pipe($.if(!isProd, $.sourcemaps.write('.')))
-      .pipe(dest('.tmp/scripts'))
-      .pipe(server.reload({ stream: true }))
-  );
+   return (
+      src('app/scripts/**/*.js')
+         // plumber 插件防止 gulp 报错崩溃
+         .pipe($.plumber())
+         .pipe($.if(!isProd, $.sourcemaps.init()))
+         .pipe($.babel())
+         .pipe($.if(!isProd, $.sourcemaps.write('.')))
+         .pipe(dest('.tmp/scripts'))
+         .pipe(server.reload({ stream: true }))
+   );
 }
 
 const lintBase = (files) => {
-  return src(files)
-    .pipe($.eslint({ fix: true }))
-    .pipe(server.reload({ stream: true, once: true }))
-    .pipe($.eslint.format())
-    .pipe($.if(!server.active, $.eslint.failAfterError()));
+   return src(files)
+      .pipe($.eslint({ fix: true }))
+      .pipe(server.reload({ stream: true, once: true }))
+      .pipe($.eslint.format())
+      .pipe($.if(!server.active, $.eslint.failAfterError()));
 };
 
 function lint() {
-  return lintBase('app/scripts/**/*.js').pipe(dest('app/scripts'));
+   return lintBase('app/scripts/**/*.js').pipe(dest('app/scripts'));
 }
 
 function lintTest() {
-  return lintBase('test/spec/**/*.js').pipe(dest('test/spec'));
+   return lintBase('test/spec/**/*.js').pipe(dest('test/spec'));
 }
 
 function html() {
-  // 合成 js、css 过程中，要过滤掉模板编译文件夹的代码
-  // 注意这里的 useref 插件合成 js、css 有一个问题文件行尾必须为 crlf，否则此文件不能正常合成
-  // 可用 .editorconfig 来限制文件行尾符
-  return src(['app/**/*.html', '.tmp/**/*.html', '!app/common/**/*.html', '!.tmp/common/**/*.html'])
-    .pipe($.useref({ searchPath: ['.tmp', 'app', '.'] }))
-    .pipe($.if(/\.js$/, $.uglify({ compress: { drop_console: true } })))
-    .pipe($.if(/\.css$/, $.postcss([cssnano({ safe: true, autoprefixer: false })])))
-    .pipe(
-      $.if(
-        /\.html$/,
-        $.htmlmin({
-          collapseWhitespace: true,
-          minifyCSS: true,
-          minifyJS: { compress: { drop_console: true } },
-          processConditionalComments: true,
-          removeComments: true,
-          removeEmptyAttributes: true,
-          removeScriptTypeAttributes: true,
-          removeStyleLinkTypeAttributes: true
-        })
+   // 合成 js、css 过程中，要过滤掉模板编译文件夹的代码
+   // 注意这里的 useref 插件合成 js、css 有一个问题文件行尾必须为 crlf，否则此文件不能正常合成
+   // 可用 .editorconfig 来限制文件行尾符
+   return src(['app/**/*.html', '.tmp/**/*.html', '!app/common/**/*.html', '!.tmp/common/**/*.html'])
+      .pipe($.useref({ searchPath: ['.tmp', 'app', '.'] }))
+      .pipe($.if(/\.js$/, $.uglify({ compress: { drop_console: true } })))
+      .pipe($.if(/\.css$/, $.postcss([cssnano({ safe: true, autoprefixer: false })])))
+      .pipe(
+         $.if(
+            /\.html$/,
+            $.htmlmin({
+               collapseWhitespace: true,
+               minifyCSS: true,
+               minifyJS: { compress: { drop_console: true } },
+               processConditionalComments: true,
+               removeComments: true,
+               removeEmptyAttributes: true,
+               removeScriptTypeAttributes: true,
+               removeStyleLinkTypeAttributes: true
+            })
+         )
       )
-    )
-    .pipe(dest(buildPath));
+      .pipe(dest(buildPath));
 }
 
 function images() {
-  return src('app/images/**/*', { since: lastRun(images) }).pipe(dest(`${buildPath}/images`));
+   return src('app/images/**/*', { since: lastRun(images) }).pipe(dest(`${buildPath}/images`));
 }
 
 function fonts() {
-  return src('app/fonts/**/*.{eot,svg,ttf,woff,woff2}').pipe(
-    $.if(!isProd, dest('.tmp/fonts'), dest(`${buildPath}/fonts`))
-  );
+   return src('app/fonts/**/*.{eot,svg,ttf,woff,woff2}').pipe(
+      $.if(!isProd, dest('.tmp/fonts'), dest(`${buildPath}/fonts`))
+   );
 }
 
 function extras() {
-  // 过滤掉模板编译文件夹的代码与 html 代码
-  return src(['app/*', '!app/**/*.html', '!app/common'], {
-    dot: true
-  }).pipe(dest(buildPath));
+   // 过滤掉模板编译文件夹的代码与 html 代码
+   return src(['app/*', '!app/**/*.html', '!app/common'], {
+      dot: true
+   }).pipe(dest(buildPath));
 }
 
 function clean() {
-  return del(['.tmp', `${buildPath}/*`]);
+   return del(['.tmp', `${buildPath}/*`]);
 }
 
 function measureSize() {
-  return src(`${buildPath}/**/*`).pipe($.size({ title: 'build', gzip: true }));
+   return src(`${buildPath}/**/*`).pipe($.size({ title: 'build', gzip: true }));
 }
 
 const build = series(
-  clean,
-  parallel(lint, series(parallel(styles, scripts, fileVarInclude), html), images, fonts, extras),
-  revAll,
-  measureSize
+   clean,
+   parallel(lint, series(parallel(styles, scripts, fileVarInclude), html), images, fonts, extras),
+   revAll,
+   measureSize
 );
 
 function startAppServer() {
-  server.init({
-    notify: false,
-    port,
-    server: {
-      baseDir: ['.tmp', 'app'],
-      routes: {
-        '/node_modules': 'node_modules'
-      },
-      middleware
-    }
-  });
+   server.init({
+      notify: false,
+      port,
+      server: {
+         baseDir: ['.tmp', 'app'],
+         routes: {
+            '/node_modules': 'node_modules'
+         },
+         middleware
+      }
+   });
 
-  watch(['app/**/*.html', 'app/images/**/*', '.tmp/fonts/**/*']).on('change', server.reload);
+   watch(['app/**/*.html', 'app/images/**/*', '.tmp/fonts/**/*']).on('change', server.reload);
 
-  watch('app/styles/*.css', styles);
-  watch('app/scripts/**/*.js', scripts);
-  watch('app/fonts/**/*', fonts);
-  // 监控 html 编译模板改动
-  watch('app/**/*.html', fileVarInclude);
+   watch('app/styles/*.css', styles);
+   watch('app/scripts/**/*.js', scripts);
+   watch('app/fonts/**/*', fonts);
+   // 监控 html 编译模板改动
+   watch('app/**/*.html', fileVarInclude);
 }
 
 function startTestServer() {
-  server.init({
-    notify: false,
-    port,
-    ui: false,
-    server: {
-      baseDir: 'test',
-      routes: {
-        '/scripts': '.tmp/scripts',
-        '/node_modules': 'node_modules'
+   server.init({
+      notify: false,
+      port,
+      ui: false,
+      server: {
+         baseDir: 'test',
+         routes: {
+            '/scripts': '.tmp/scripts',
+            '/node_modules': 'node_modules'
+         }
       }
-    }
-  });
+   });
 
-  watch('app/scripts/**/*.js', scripts);
-  watch(['test/spec/**/*.js', 'test/index.html']).on('change', server.reload);
-  watch('test/spec/**/*.js', lintTest);
+   watch('app/scripts/**/*.js', scripts);
+   watch(['test/spec/**/*.js', 'test/index.html']).on('change', server.reload);
+   watch('test/spec/**/*.js', lintTest);
 }
 
 function startDistServer() {
-  server.init({
-    notify: false,
-    port,
-    server: {
-      baseDir: buildPath,
-      routes: {
-        '/node_modules': 'node_modules',
-        // 注意这里的别名也要配置，否则资源访问不到
-        [publicPath]: buildPath
-      },
-      middleware
-    }
-  });
+   server.init({
+      notify: false,
+      port,
+      server: {
+         baseDir: buildPath,
+         routes: {
+            '/node_modules': 'node_modules',
+            // 注意这里的别名也要配置，否则资源访问不到
+            [publicPath]: buildPath
+         },
+         middleware
+      }
+   });
 }
 
 // 资源 hash，注意要在最后一步，同时配置路径别名，注意所有的资源引用必须以 "/" 开头，否则别名替换不成功
 function revAll() {
-  return src(`${buildPath}/**`)
-    .pipe(
-      $.revAll.revision({
-        prefix: publicPath,
-        dontRenameFile: [/^\/favicon.ico$/g, '.html', 'robots.txt']
-      })
-    )
-    .pipe($.revDeleteOriginal())
-    .pipe(dest(buildPath));
+   return src(`${buildPath}/**`)
+      .pipe(
+         $.revAll.revision({
+            prefix: publicPath,
+            dontRenameFile: [/^\/favicon.ico$/g, '.html', 'robots.txt']
+         })
+      )
+      .pipe($.revDeleteOriginal())
+      .pipe(dest(buildPath));
 }
 
 function fileVarInclude() {
-  return src('app/**/*.html')
-    .pipe($.plumber())
-    .pipe(
-      $.fileInclude({
-        prefix: '@@',
-        basepath: '@root',
-        // 环境变量注入
-        // 需要在公共的模板文件中注入此变量
-        // <script>
-        //   window.GLOBAL_VARS = @@GLOBAL_VARS;
-        // </script>
-        context: {
-          GLOBAL_VARS: JSON.stringify(globalVars)
-        }
-      })
-    )
-    .pipe(dest('.tmp'))
-    .pipe(server.reload({ stream: true }));
+   return src('app/**/*.html')
+      .pipe($.plumber())
+      .pipe(
+         $.fileInclude({
+            prefix: '@@',
+            basepath: '@root',
+            // 环境变量注入
+            // 需要在公共的模板文件中注入此变量
+            // <script>
+            //   window.GLOBAL_VARS = @@GLOBAL_VARS;
+            // </script>
+            context: {
+               GLOBAL_VARS: JSON.stringify(globalVars)
+            }
+         })
+      )
+      .pipe(dest('.tmp'))
+      .pipe(server.reload({ stream: true }));
 }
 
 let serve;
 if (isDev) {
-  serve = series(clean, parallel(styles, scripts, fonts, fileVarInclude), startAppServer);
+   serve = series(clean, parallel(styles, scripts, fonts, fileVarInclude), startAppServer);
 } else if (isTest) {
-  serve = series(clean, scripts, startTestServer);
+   serve = series(clean, scripts, startTestServer);
 } else if (isProd) {
-  serve = series(build, startDistServer);
+   serve = series(build, startDistServer);
 }
 
 exports.serve = serve;
@@ -291,7 +291,7 @@ exports.default = build;
    ```js
    // 参数的功能分别是调整宽度、质量、是否是渐进式、格式转换为 jpg
    function compressImg(oss, width = window.innerWidth) {
-     return `${oss}?x-oss-process=image/resize,w_${width}/quality,q_50/interlace,1/format,jpg`;
+      return `${oss}?x-oss-process=image/resize,w_${width}/quality,q_50/interlace,1/format,jpg`;
    }
    ```
 

@@ -75,6 +75,10 @@
     }
   }
   article.main-post {
+    ul ul, ul ol, ol ul, ol ol {
+      margin-bottom: 10px;
+    }
+
     h1,
     h2,
     h3,
@@ -112,51 +116,62 @@
     img {
       max-width: 100%;
     }
+
     iframe {
       border: none;
     }
+
     blockquote {
       border-left-color: $link-color;
       background: #dadada;
       font-size: 1em;
       color: #666;
     }
+
     table {
       margin-bottom: 1em;
       display: block;
       overflow: auto;
       max-height: 500px;
+
       thead {
         position: sticky;
         top: 0;
         background: #fff;
       }
+
       thead,
       tbody {
         display: table;
         width: 100%;
         table-layout: fixed;
       }
+
       th,
       td {
         width: 200px;
         padding: 10px;
         border: solid $text-color 1px;
       }
+
       tr:nth-child(2n) {
         background: #dadada;
       }
     }
+
     hr {
       border-top: 1px dashed #dadada;
     }
+
     pre {
       max-height: 500px;
       overflow: auto;
     }
+
     .post-footer {
       padding-top: 2em;
       font-size: 1.2em;
+
       .share-buttons {
         li {
           @media (max-width: 768px) {
@@ -165,8 +180,10 @@
           }
         }
       }
+
       .share-twitter {
         color: #00aced;
+
         @media (max-width: 768px) {
           background-color: #00aced;
           color: #fff;
@@ -175,8 +192,10 @@
           display: block;
         }
       }
+
       .share-reddit {
         color: #ff5700;
+
         @media (max-width: 768px) {
           background-color: #ff5700;
           color: #fff;
@@ -185,8 +204,10 @@
           display: block;
         }
       }
+
       .share-facebook {
         color: #3b5998;
+
         @media (max-width: 768px) {
           background-color: #3b5998;
           color: #fff;
@@ -195,8 +216,10 @@
           display: block;
         }
       }
+
       .share-google-plus {
         color: #dd4b39;
+
         @media (max-width: 768px) {
           background-color: #dd4b39;
           color: #fff;
@@ -214,15 +237,18 @@
       border-radius: 4px;
     }
   }
+
   .post-meta {
     .author-name {
       line-height: 2em;
     }
+
     .author-avatar div {
       display: inline-block;
       width: 2em;
       height: 50px;
     }
+
     .desc {
       float: left;
       text-align: left;
@@ -232,34 +258,41 @@
         text-align: right;
       }
     }
+
     .timeSize {
       margin-top: -10px;
     }
+
     .tags {
       margin-bottom: 4px;
     }
+
     .tags li {
       font-size: 0.8em;
       margin: 5px 5px;
       border: 2px solid $lightblue;
       text-align: center;
       border-radius: 100px / 100px;
+
       a {
         color: $lightblue;
         display: block;
         width: auto;
         padding: 4px 10px;
       }
+
       a:hover,
       a:active {
         text-decoration: none;
       }
+
       &:hover {
         background: $lightblue;
         a {
           color: white;
         }
       }
+
       &.draft-tag {
         border-color: $link-color;
         a {
@@ -283,34 +316,42 @@
     transition: left 0.2s ease-in-out;
     z-index: 3;
     height: calc(100% - 48px);
+
     &.fixed {
       position: fixed;
     }
+
     .index-resizable {
       height: 100% !important;
     }
+
     .index-container {
       overflow: auto;
       box-shadow: 3px 0px 4px #b7afc4;
       background-color: $darkblue;
       height: 100%;
     }
+
     .index-title {
       margin: 10px 0;
       text-align: center;
     }
+
     .index-list {
       padding-right: 2em;
+
       ul {
         list-style: none;
         -webkit-padding-start: 20px;
       }
+
       li {
         position: relative;
         margin-bottom: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
         p {
           margin-bottom: 0;
           display: inline-block;
@@ -321,11 +362,13 @@
           white-space: nowrap;
           vertical-align: bottom;
         }
+
         &::before {
           content: '# ';
           color: $link-color;
         }
       }
+
       a {
         &.active {
           color: $text-color;
@@ -337,6 +380,7 @@
       ul {
         counter-reset: catalog;
       }
+
       li::before {
         content: '# ' counters(catalog, '.') ' ';
         counter-increment: catalog;
