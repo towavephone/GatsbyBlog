@@ -196,7 +196,9 @@ export default class IndexLayout extends Component {
             setTitle: this.setTitle
           })}
         </section>
-        <Footer />
+        {
+          enableHideHeader && <Footer />
+        }
         <div className={cx({ totop: true, show: !transparent })} onClick={() => this.scrollTo()}>
           <Icon type='arrow-up' />
           <span className='progress'>{progress}%</span>

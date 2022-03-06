@@ -79,6 +79,7 @@
     "gatsby-remark-graph": "0.2.2",
     "gatsby-remark-images": "^1.5.63",
     "gatsby-remark-katex": "^1.0.14",
+    "gatsby-remark-lazy-load-towavephone": "^1.0.3",
     "gatsby-remark-prismjs": "^3.13.0",
     "gatsby-remark-responsive-iframe": "^1.4.18",
     "gatsby-remark-smartypants": "^1.4.12",

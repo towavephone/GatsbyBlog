@@ -183,7 +183,8 @@ module.exports = {
               // 占位符正则式，识别后替换
               gatsbyPublicDirRegex: /\/GATSBY_PUBLIC_DIR/g
             }
-          }
+          },
+          `gatsby-remark-lazy-load-towavephone`
         ]
       }
     },

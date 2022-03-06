@@ -37,6 +37,9 @@ export default class Template extends Component {
   }
 
   componentDidMount() {
+    const lazyLoadInstance = new LazyLoad();
+    lazyLoadInstance.update();
+
     const { data } = this.props;
     const { mainPost: post } = data;
     if (this.isProduction && !post.frontmatter.draft) {
@@ -78,7 +81,7 @@ export default class Template extends Component {
   };
   handleSaveScrollTop = () => {
     if (isMobile) {
-      return
+      return;
     }
     const eleBox = document.documentElement || document.body;
     const bounce = eleBox.getBoundingClientRect();
@@ -97,7 +100,7 @@ export default class Template extends Component {
   };
   handleRestoreScrollTop = () => {
     if (isMobile) {
-      return
+      return;
     }
     const eleBox = document.documentElement || document.body;
     if (this.topPOffset === false) {
