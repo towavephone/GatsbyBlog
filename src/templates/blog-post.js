@@ -37,8 +37,12 @@ export default class Template extends Component {
   }
 
   componentDidMount() {
-    const lazyLoadInstance = new LazyLoad();
-    lazyLoadInstance.update();
+    // Only initialize it one time for the entire application
+    if (!document.lazyLoadInstance) {
+      document.lazyLoadInstance = new LazyLoad();
+    }
+
+    document.lazyLoadInstance.update();
 
     const { data } = this.props;
     const { mainPost: post } = data;
@@ -66,6 +70,11 @@ export default class Template extends Component {
     if (hash) this.props.scrollTo(hash);
     this.dealWithCategory(this._handleScroll);
   }
+
+  componentDidUpdate() {
+    document.lazyLoadInstance.update();
+  }
+
   componentWillUnmount() {
     events.off(window, 'scroll', this._handleScroll);
     events.off(window, 'scroll', this.handleSaveScrollTop);
@@ -74,11 +83,13 @@ export default class Template extends Component {
 
     this.props.enableHideHeader(true);
   }
+
   handleHashChange = () => {
     const hash = decodeURIComponent(window.location.hash);
 
     if (hash) this.props.scrollTo(hash);
   };
+
   handleSaveScrollTop = () => {
     if (isMobile) {
       return;
@@ -98,6 +109,7 @@ export default class Template extends Component {
 
     this.topPOffset = Math.round(this.targetEle.getBoundingClientRect().top - bounce.top);
   };
+
   handleRestoreScrollTop = () => {
     if (isMobile) {
       return;
@@ -114,6 +126,7 @@ export default class Template extends Component {
     // 滚动修正
     eleBox.scrollTop = scrollTop - currentTopPOffset - this.topPOffset;
   };
+
   // 滚动事件
   handleScroll = (e) => {
     const scrollTop = domQuery.scrollTop(e ? e.target : window);
@@ -157,6 +170,7 @@ export default class Template extends Component {
       }
     }
   };
+
   // 处理目录，获取一些数据信息
   dealWithCategory = (cb) => {
     const scrollTop = domQuery.scrollTop(window);
@@ -194,6 +208,7 @@ export default class Template extends Component {
 
     this.setState({ anchors }, cb);
   };
+
   // 切换侧边栏
   handleToggleCollapse = () => {
     if (!this.state.collapse) {
@@ -215,6 +230,7 @@ export default class Template extends Component {
       }
     );
   };
+
   render() {
     const { data } = this.props;
     const { mainPost: post } = data;
