@@ -1544,3 +1544,455 @@ cubic-bezier(x1, y1, x2, y2);
 ![](res/2022-03-03-17-54-04.png)
 
 [transition-visibility](embedded-codesandbox://css-new-world-stronger-visual-performance/transition-visibility)
+
+# CSS 动画
+
+本节深入介绍 CSS 动画相关知识，知识量较大，但都很重要，相信大家一定可以学到很多东西。
+
+先从常用的淡出动画效果说起：
+
+```css
+.fade-in {
+   animation: fadeIn 0.25s;
+}
+
+@keyframes fadeIn {
+   from {
+      opacity: 0;
+   }
+
+   to {
+      opacity: 1;
+   }
+}
+```
+
+下面逐一分析上述代码中的项。
+
+- fadeIn 是开发者自己定义的动画名称，命名限制不多，具体命名规则在下面有介绍。
+- .25s 是 0.25s 的简写，表示动画执行的时间。
+- animation 是调用自定义动画规则的 CSS 属性。
+- @keyframes 规则用来定义动画的关键帧。
+
+一个 CSS 动画效果要想出现，动画名称、动画时间、animation 属性和 @keyframes 规则是必不可少的基本单元。CSS 动画自然还包括其他特性，例如动画次数、动画顺序的控制等，但是这些特性不是必需的，因此，单从入门和上手这个角度看，CSS 动画算是简单的。但是，上手简单并不代表 CSS 动画是简单的，随着本节学习内容的逐渐深入，你一定会发现 CSS 动画可以做的事情远远超出了你的想象。下面就先从最基本的 animation 属性说起。
+
+## 初识 animation 属性
+
+animation 属性是多个 CSS 属性的缩写，这些属性包括 animation-name、animation-duration、animation-timing-function、animation-delay、animation-iteration-count、animation-direction、animation-fill-mode 和 animation-play-state。例如：
+
+```css
+/* animation: name | duration | timing-function | delay | iteration-count | direction | fill-mode | play-state */
+animation: fadeIn 3s ease-in 1s 2 reverse both paused;
+```
+
+animation 属性支持同时应用多个动画规则，例如实现元素淡出和右侧划入同时进行的动画效果。正确做法是分隔设置，而不是设置在一个动画规则中，也就是不推荐使用下面的 CSS 代码：
+
+```css
+.element {
+   animation: fadeInSlideInRight 0.2s;
+}
+
+@keyframes fadeInSlideInRight {
+   from {
+      opacity: 0;
+      transform: translateX(100%);
+   }
+
+   to {
+      opacity: 1;
+      transform: translateX(0%);
+   }
+}
+```
+
+而是推荐将代码分隔成多个独立的动画规则，CSS 代码如下：
+
+```css
+.element {
+   animation: fadeIn 0.2s, slideInRight 0.2s;
+}
+
+@keyframes fadeIn {
+   from {
+      opacity: 0;
+   }
+
+   to {
+      opacity: 1;
+   }
+}
+
+@keyframes slideInRight {
+   from {
+      transform: translateX(100%);
+   }
+
+   to {
+      transform: translateX(0%);
+   }
+}
+```
+
+这样做的好处在于我们自定义的动画规则可以在其他场合重复利用，例如希望弹框在出现的时候有淡出动画效果，并且我们无须再额外定义淡出动画规则，直接复用即可：
+
+```css
+dialog {
+   animation: fadeIn 0.2s;
+}
+```
+
+## @keyframes 规则的语法和特性
+
+首先 @keyframes 的后面有个“s”，因为动画效果不可能只有 1 个关键帧。@keyframes 规则的语法如下：
+
+```css
+@keyframes <keyframes-name> {
+   <keyframe-block-list>
+}
+```
+
+其中 `<keyframe-block-list>` 指的是定义的关键帧列表，每个关键帧由关键帧选择器和对应的 CSS 样式组成。
+
+关键帧选择器用来指定当前关键帧在整个动画过程中的位置，其支持 from、to 这两个关键字和百分比值。from 关键字等同于 0%，to 关键字等同于 100%。
+
+也就是说，下面两段 CSS 代码的作用是一样的：
+
+```css
+@keyframes fadeIn {
+   from {
+      opacity: 0;
+   }
+
+   to {
+      opacity: 1;
+   }
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+下面讲一下 @keyframes 规则中你可能不知道的一些特性。
+
+### 起止关键帧可以不设置
+
+例如定义淡出效果，可以这样设置：
+
+```css
+@keyframes fadeInBy {
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+此时动画初始状态的透明度就是当前元素的透明度，例如：
+
+```css
+.element {
+   opacity: 0.5;
+}
+
+.element.active {
+   animation: fadeInBy 0.2s;
+}
+```
+
+.element 元素在匹配 .active 类名之后会有透明度从 0.5（初始状态的透明度）变化到透明度 1 的效果。
+
+但是，这种做法在实际开发的时候并不常见，因为通常会使用更加方便快捷的 transition 属性实现类似的效果。
+
+### 关键帧列表可以合并
+
+如果关键帧对应的 CSS 样式是一样的，则可以合并在一起书写，例如：
+
+```css
+@keyframes blink {
+   0%,
+   50%,
+   100% {
+      opacity: 0;
+   }
+
+   25%,
+   75% {
+      opacity: 1;
+   }
+}
+```
+
+### 不同的关键帧选择器是无序的
+
+虽然动画的执行是有顺序的，从 0% 到 100%，但是在代码层面，不同的关键帧选择器是不分先后顺序的。例如，下面两段 CSS 的效果是一样的：
+
+```css
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+
+@keyframes fadeIn {
+   100% {
+      opacity: 1;
+   }
+
+   0% {
+      opacity: 0;
+   }
+}
+```
+
+### 重复定义的关键帧不是完全被覆盖的
+
+例如：
+
+```css
+@keyframes identifier {
+   50% {
+      top: 30px;
+      left: 20px;
+   }
+
+   50% {
+      top: 10px;
+   }
+}
+```
+
+最终在 50% 这一帧用来动画的 CSS 样式是 top: 10px 和 left: 20px。也就是说，如果关键帧重复定义，则不同的 CSS 样式是累加的，而相同的 CSS 样式是后面的样式覆盖前面的样式，和普通的 CSS 选择器的样式计算规则一致。
+
+### 关键帧中的样式可以不连续
+
+前后关键帧的 CSS 属性无须保持一致，例如：
+
+```css
+@keyframes identifier {
+   0% {
+      top: 0;
+      left: 0;
+   }
+
+   30% {
+      top: 50px;
+   }
+
+   60%,
+   90% {
+      left: 50px;
+   }
+
+   100% {
+      top: 100px;
+      left: 100%;
+   }
+}
+```
+
+这里，top 属性应用动画的帧是 0%、30% 和 100%，left 属性应用动画的帧是 0%、60%、90% 和 100%。
+
+### !important 无效
+
+例如：
+
+```css
+@keyframes identifier {
+   0% {
+      top: 30px;
+      /* 无效 */
+      left: 20px !important;
+   }
+
+   100% {
+      top: 10px;
+   }
+}
+```
+
+其中 left: 20px 这句 CSS 声明是没有任何效果的。其实，根本就没有必要在 @keyframes 规则语句中使用 !important 提高权重，因为当 CSS 动画执行的时候，关键帧中定义的 CSS 优先级就是最高的。
+
+### 优先级最高
+
+请看下面这个例子：
+
+```html
+<img src="1.jpg" style="opacity: 0.5;" />
+<style>
+   img {
+      animation: fadeIn 1s;
+   }
+
+   @keyframes fadeIn {
+      0% {
+         opacity: 0;
+      }
+
+      100% {
+         opacity: 1;
+      }
+   }
+</style>
+```
+
+`<img>` 元素出现了透明度从 0 到 1 的动画效果，这就表明 @keyframes 规则中的 CSS 优先级要比 style 属性设置的 CSS 属性的优先级要高。接下来我们更进一步，使用 CSS 世界中优先级最高的 !important 语法：
+
+```html
+<img src="1.jpg" style="opacity: 0.5!important" />
+```
+
+结果是 Chrome 浏览器、IE 浏览器、Edge 浏览器和 Safari 浏览器均出现了透明度动画效果，只有 Firefox 浏览器中的 `<img>` 元素一直保持 0.5 的透明度。这表明在 Firefox 浏览器中，@keyframes 规则中的 CSS 优先级大于 style 设置的 CSS 属性，小于 !important 语法中的 CSS 属性，而其他所有浏览器 @keyframes 规则中的 CSS 优先级最高。
+
+[keyframes-css-priority](embedded-codesandbox://css-new-world-stronger-visual-performance/keyframes-css-priority)
+
+根据以往的经验，规范中没有定义到的特性会随着浏览器版本的升级而进行调整，因此说不定过几年 Firefox 浏览器也会把 @keyframes 规则中的 CSS 优先级调至最高。
+
+@keyframes 规则优先级最高的这个特性为重置页面中第三方 JavaScript 设置的内联样式提供了一种新的思路。不过，此方法也有局限，就是不支持动画的 CSS 属性是无法重置的，例如我们无法在 @keyframes 规则中设置 display: block 去重置 display: none，因此对于 Adblock 这类去广告插件还是无解。
+
+## 动画命名与 `<custom-ident>` 数据类型
+
+按照规范，动画的名称可以是下面两种数据类型：
+
+```css
+<custom-ident> | <string>
+```
+
+其中，`<string>` 数据类型表示需要带引号的字符串，例如，下面 CSS 代码中的 `'...'` 和 `'Microsoft Yahei'` 就是 `<string>` 数据类型：
+
+```css
+content: '...';
+font-family: 'Microsoft Yahei';
+```
+
+因此，理论上 CSS 动画也是支持使用引号命名的动画效果的，例如：
+
+```css
+.element {
+   animation: 'hello world' 2s;
+}
+
+@keyframes 'hello world' {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+实际测试下来，仅 Firefox 浏览器支持 `<string>` 数据类型的 CSS 动画名称，Chrome 浏览器和 IE 浏览器均认为这是不合法的语法。
+
+[string-animation-name](embedded-codesandbox://css-new-world-stronger-visual-performance/string-animation-name)
+
+因此，我们的注意力还是放在兼容性更好的 `<custom-ident>` 数据类型上。CSS 中可以自定义的名称均是 `<custom-ident>` 数据类型，例如 counter-reset 和 counter-increment 属性中自定义的计数器，CSS 网格布局中对行和列的命名等。故 `<custom-ident>` 数据类型是一学百用的。
+
+### `<custom-ident>` 数据类型语法
+
+`<custom-ident>` 数据类型的语法和 CSS 的标识符（例如，CSS 属性就属于 CSS 标识符）很相似，区别就在于 `<custom-ident>` 数据类型是区分大小写的。`<custom-ident>` 数据类型可以由下面这些字符进行组合：
+
+- 任意字母（a ～ z 或 A ～ Z）；
+- 数字（0 ～ 9）；
+- 短横线（-）；
+- 下划线（\_）；
+- 转义字符（使用反斜杠 \ 转义）；
+- Unicode 字符（反斜杠 \ 后面跟十六进制数字）。
+
+由于 `<custom-ident>` 数据类型区分大小写，因此 id1、Id1、ID1 和 iD1 是不同的名称。而一些看起来差异很大的名称却是相同的，例如，☺ 和 \263a 其实是相同的，因此，下面 CSS 代码中的 CSS 动画是可以执行的：
+
+```css
+.element {
+   animation: ☺ 2s;
+}
+
+@keyframes \263a {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+下面通过案例说一说 `<custom-ident>` 数据类型的合法性。
+
+1. 不能是 CSS 属性本身支持的关键字，例如 animation 属性支持关键字 none，也支持全局关键字 unset、initial 和 inherit。因此，在 CSS 动画中，不能把动画名称定义为 none、unset、initial 或 inherit。
+
+2. 不能以十进制数字开头。例如，下面的名称就是不合法的：
+
+   ```js
+   /* 不合法 */
+   2333fadeIn
+   ```
+
+3. 可以使用短横线作为开头，但是短横线后面不能是十进制数字，也就是说，下面的名称是合法的：
+
+   ```js
+   /* 合法 */
+   -fadeIn;
+   ```
+
+   而下面这个名称就不合法：
+
+   ```js
+   /* 不合法 */
+   -2333fadeIn
+   ```
+
+4. 除短横线和下划线之外的英文标点字符（包括空格）都需要转义。例如，下面的名称是合法的：
+
+   ```js
+   /* 合法 */
+   example\.png
+   hello\ world
+   ```
+
+   而下面这个名称就不合法：
+
+   ```js
+   /* 不合法 */
+   example.png
+   hello world
+   ```
+
+5. 连续短横线开头的名称在 MDN 文档中被认为是不合法的，但是根据我的测试，除了 IE 浏览器不支持，其他浏览器都认为连续短横线的动画名称是合法的，例如：
+
+   ```css
+   /* 除 IE 浏览器外均合法，即使和 CSS 自定义属性名称一致 */
+   .element {
+      --fadeIn: 2;
+      animation: --fadeIn 2s;
+   }
+
+   @keyframes --fadeIn {
+      0% {
+         opacity: 0;
+      }
+
+      100% {
+         opacity: 1;
+      }
+   }
+   ```
+
+   因此，我认为连续短横线开头的名称是合法的。
+
+6. 如果是 Unicode 编码转义字符，记得在后面添加一个空格，例如：
+
+   ```css
+   /* 合法 */
+   \233 haha
+   ```

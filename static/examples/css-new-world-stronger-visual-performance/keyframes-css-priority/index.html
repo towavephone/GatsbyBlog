@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@keyframes 规则中 CSS 优先级测试实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .demo img {
+        width: 256px;
+        height: 192px;
+      }
+
+      button {
+        width: 120px;
+        height: 40px;
+      }
+
+      .active ~ img {
+        animation: fadeIn 1s;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p class="active">
+        <button id="button">
+          动画播放
+        </button>
+      </p>
+      <h4>
+        style 设置透明度
+      </h4>
+      <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="opacity: 0.5;" />
+      <h4>
+        style 加 !important 设置透明度
+      </h4>
+      <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="opacity: 0.5!important;" />
+    </div>
+    <script>
+      button.onclick = function() {
+        var p = this.parentElement;
+        p.classList.remove('active');
+        p.offsetWidth;
+        p.classList.add('active');
+      };
+    </script>
+  </body>
+</html>
