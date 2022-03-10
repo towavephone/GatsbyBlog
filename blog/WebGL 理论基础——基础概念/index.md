@@ -570,7 +570,9 @@ WebGL 会将同名的可变量从顶点着色器输入到片断着色器中。
 
 下面是运行结果
 
-[draw-colorful-triangle](embedded-codesandbox://webgl-fundamental-base-concept/draw-colorful-triangle)
+<iframe src="https://codesandbox.io/embed/7xbtl?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [draw-colorful-triangle](embedded-codesandbox://webgl-fundamental-base-concept/draw-colorful-triangle) -->
 
 当你移动、缩放、旋转三角形时，发现颜色随位置变化，不跟着三角形移动。
 
@@ -649,7 +651,9 @@ WebGL 先获得顶点着色器中计算的三个颜色值，在光栅化三角�
 
 利用这三个值进行插值后传进每个像素运行的片断着色器中。
 
-[fragment-shader-anim](embedded-codesandbox://webgl-fundamental-base-concept/fragment-shader-anim?view=preview)
+<iframe src="https://codesandbox.io/embed/zi15x?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [fragment-shader-anim](embedded-codesandbox://webgl-fundamental-base-concept/fragment-shader-anim?view=preview) -->
 
 想要给片断着色器传值，我们可以先把值传递给顶点着色器然后再传给片断着色器。让我们来画一个由两个不同颜色三角形组成的矩形。我们需要给顶点着色器添加一个属性值，把值通过属性传递给它后它再直接传递给片断着色器。
 
@@ -728,7 +732,9 @@ var count = 6;
 gl.drawArrays(primitiveType, offset, count);
 ```
 
-[webgl-2d-rectangle-with-2-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-colors)
+<iframe src="https://codesandbox.io/embed/fi4uh?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-2d-rectangle-with-2-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-colors) -->
 
 你可能注意到这两个三角形是纯色的。我们传递给每个三角形的顶点的颜色值是相同的，所以我们传递的 varying 会被插值成相同的颜色，如果我们传递不同的颜色，就会看到插值的颜色。
 
@@ -772,7 +778,10 @@ function setColors(gl) {
 
 现在看到的是插值的 varying
 
-[webgl-2d-rectangle-with-random-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-random-colors)
+<iframe src="https://codesandbox.io/embed/5ohcj?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- 
+[webgl-2d-rectangle-with-random-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-random-colors) -->
 
 上例还演示了使用多个属性并且通过顶点着色器向片断着色器传值。如果你看了处理图片的例子，那里面还用了另外一个属性传递纹理坐标。
 
@@ -875,6 +884,8 @@ function setColors(gl) {
 }
 ```
 
-[webgl-2d-rectangle-with-2-byte-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-byte-colors)
+<iframe src="https://codesandbox.io/embed/x51g6?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-2d-rectangle-with-2-byte-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-byte-colors) -->
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-shaders-and-glsl.html
