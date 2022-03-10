@@ -570,7 +570,7 @@ WebGL 会将同名的可变量从顶点着色器输入到片断着色器中。
 
 下面是运行结果
 
-<iframe src="https://codesandbox.io/embed/7xbtl?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/7xbtl?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [draw-colorful-triangle](embedded-codesandbox://webgl-fundamental-base-concept/draw-colorful-triangle) -->
 
@@ -651,7 +651,7 @@ WebGL 先获得顶点着色器中计算的三个颜色值，在光栅化三角�
 
 利用这三个值进行插值后传进每个像素运行的片断着色器中。
 
-<iframe src="https://codesandbox.io/embed/zi15x?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/zi15x?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [fragment-shader-anim](embedded-codesandbox://webgl-fundamental-base-concept/fragment-shader-anim?view=preview) -->
 
@@ -732,7 +732,7 @@ var count = 6;
 gl.drawArrays(primitiveType, offset, count);
 ```
 
-<iframe src="https://codesandbox.io/embed/fi4uh?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/fi4uh?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [webgl-2d-rectangle-with-2-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-colors) -->
 
@@ -778,7 +778,7 @@ function setColors(gl) {
 
 现在看到的是插值的 varying
 
-<iframe src="https://codesandbox.io/embed/5ohcj?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5ohcj?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- 
 [webgl-2d-rectangle-with-random-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-random-colors) -->
@@ -884,7 +884,7 @@ function setColors(gl) {
 }
 ```
 
-<iframe src="https://codesandbox.io/embed/x51g6?codemirror=1;hidenavigation=1;theme=light;view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/x51g6?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [webgl-2d-rectangle-with-2-byte-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-byte-colors) -->
 
