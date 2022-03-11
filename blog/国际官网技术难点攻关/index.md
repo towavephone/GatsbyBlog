@@ -3,7 +3,7 @@ title: 国际官网技术难点攻关
 categories:
    - 前端
 path: /international-official-website-technical-difficulties/
-tags: 前端, 动效, 源码优化, 预研
+tags: 前端, 国际官网, 预研
 date: 2021-11-15 11:49:34
 draft: true
 ---
@@ -77,6 +77,10 @@ draft: true
 15. 视频批量压缩脚本、支持单个压缩（有声音、转 mpeg 单独压缩）
 16. loadScript 优化之路（uuid、函数缓存）
 17. 计算 calc 的实际 px 值
+18. 视频播放进度控制失效：domRef.current.currentTime = 0, https://stackoverflow.com/questions/4360060/video-streaming-with-html-5-via-node-js#18241169
+19. p7 resize 后动画定位不准的 bug
+20. useScrollDirection 封装
+21. UC 后台设置 set-cookie 失效（待解决）
 
 # 其他大纲
 
