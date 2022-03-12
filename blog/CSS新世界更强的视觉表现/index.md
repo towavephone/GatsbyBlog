@@ -1997,4 +1997,970 @@ font-family: 'Microsoft Yahei';
    \233 haha
    ```
 
-// TODO ex
+## 负延时与即时播放效果
+
+animation-delay 可以让动画延时播放，例如：
+
+```css
+animation-delay: 300ms;
+```
+
+表示动画延时 300ms 播放。
+
+需要注意的是，如果动画是无限循环的，设置的延时不会跟着循环，例如：
+
+```css
+.loading {
+   animation: spin 1s infinite;
+   animation-delay: 300ms;
+}
+
+@keyframes spin {
+   0% {
+      transform: rotate(0deg);
+   }
+
+   100% {
+      transform: rotate(360deg);
+   }
+}
+```
+
+此时 .loading 元素会在延时 300ms 后不断旋转，而不是在延时 300ms 后旋转一圈，再在延时 300ms 后旋转一圈，不断循环。
+
+想要实现每次动画循环都有延时效果，常用的方法是在自定义动画关键帧处进行设置，例如：
+
+```css
+.loading {
+   animation: spin 1s infinite;
+}
+
+@keyframes spin {
+   0%,
+   30% {
+      transform: rotate(0deg);
+   }
+
+   100% {
+      transform: rotate(360deg);
+   }
+}
+```
+
+animation-delay 属性比较经典的应用就是通过设置负值让动画即时播放，播放的位置为动画中间的某一阶段。
+
+举一个音频波形动画的案例，实现图 5-61 所示的效果，可以用来表示音频文件处于加载态或者播放态。
+
+![](res/2022-03-12-00-29-19.png)
+
+音频波形由一个一个的矩形组成，每一个矩形都会有垂直缩放的动画效果。想要形成此起彼伏的波形运动效果，最好的方法就是给每一个矩形的动画设置延时，例如（这里使用 4 个矩形示意）：
+
+```html
+<div class="loading">
+   <i></i>
+   <i></i>
+   <i></i>
+   <i></i>
+</div>
+<style>
+   .loading i {
+      display: inline-block;
+      border-left: 2px solid deepskyblue;
+      height: 2px;
+      animation: scaleUp 4s linear infinite alternate;
+      margin: 0 1px;
+   }
+
+   .loading i:nth-child(2) {
+      animation-delay: 1s;
+   }
+
+   .loading i:nth-child(3) {
+      animation-delay: 2s;
+   }
+
+   .loading i:nth-child(4) {
+      animation-delay: 3s;
+   }
+
+   @keyframes scaleUp {
+      to {
+         transform: scaleY(10);
+      }
+   }
+</style>
+```
+
+然而，真正运行的时候却发现一个比较严重的问题，由于设置了延时，动画开始执行的时候，后面的矩形都是默认的高度，如图 5-62 所示。这显然不符合预期，矩形的初始高度应该参差不齐才对。
+
+![](res/2022-03-12-00-35-12.png)
+
+要解决这个问题其实很简单，只要把延时的时间全部换成负数即可，代码如下：
+
+```css
+.negative i:nth-child(2) {
+   animation-delay: -1s;
+}
+
+.negative i:nth-child(3) {
+   animation-delay: -2s;
+}
+
+.negative i:nth-child(4) {
+   animation-delay: -3s;
+}
+```
+
+这样既保留了各个元素动画的时间差，又实现了动画效果的立即播放，且不会带来各个矩形初始状态尺寸相同的问题。
+
+[animation-delay-loading](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-delay-loading)
+
+### 准确理解 animation-delay 负值
+
+提个问题，下面代码的透明度变化是 0.75→1 还是 0.25→1？
+
+```css
+element {
+   animation: fadeIn 1s linear -0.25s;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+相信很多人都会搞错，因为容易受 JavaScript 中 splice() 或者 slice() 函数负值的作用误导。
+
+在很多语言中，负值表示序列的序号前移，或者时间线往前，于是，很多人就认为 animation-delay: -.25s 就是在整个播放时间线上往前移动 0.25s，因此透明度变化应该是 0.75→1。但实际上并不是这样，其实透明度变化是 0.25→1。
+
+以上变化其实不难理解，关键点就是理解何为“延时”，例如 animation-delay: 0.25s 表示动画在 0.25s 之后从 0% 开始播放，那 animation-delay: -0.25s 显然就表示在 0.25s 之前就已经从 0% 开始播放，即动画真正播放的时候动画已经执行了 0.25s，因此，我们可见的变化就是 0.25→1 这段过程。
+
+## reverse 和 alternate 关键字的区别和应用
+
+animation-direction 属性可以用来控制动画的方向，其本质上是通过控制 @keyframes 规则中定义的动画关键帧执行的方向来实现的。该属性语法如下：
+
+```css
+animation-direction: normal; /* 初始值 */
+animation-direction: reverse;
+animation-direction: alternate;
+animation-direction: alternate-reverse;
+```
+
+其中，reverse 和 alternate 这两个关键字都有“相反”的意思，不同之处在于，reverse 关键字是让每一轮动画执行的方向相反，而 alternate 关键字是让下一轮动画的执行方向和上一轮动画的执行方向相反。
+
+举个例子，实现一个常见的淡入淡出动画效果，这里设置动画播放 2 次：
+
+```css
+.element {
+   /* fadeIn 动画执行 2 次 */
+   animation: fadeIn 1s 2;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+先讲一下这一语法中的几个关键点。
+
+- animation-direction 属性值如果是 normal，那么动画执行的方向是 0%→100%、0%→100%，每一轮的动画方向都是正常的。
+- animation-direction 属性值如果是 reverse，那么动画执行的方向是 100%→0%、100%→0%，每一轮的动画方向都是相反的。
+- animation-direction 属性值如果是 alternate，那么动画执行的方向是 0%→100%、100%→0%，每 2n + 1 轮的动画方向是相反的。
+- animation-direction 属性值如果是 alternate-reverse，那么动画执行的方向是 100%→0%，0%→100%，每 2n 轮的动画方向是相反的。
+
+由此可见，reverse 和 alternate 关键字的区别是让动画反向播放的轮数不同。从效果表现来看，alternate 关键字的动画效果表现为来回交替播放，这也是为什么 alternate 关键字要被命名为 “alternate”（交替的、来回的）。
+
+### reverse 关键字的应用场景
+
+我有个朋友以前做过一件很傻的事情，就是在一个项目中，有的图形需要顺时针旋转，有的图形需要逆时针旋转（类似图 5-32 所示使用锥形渐变实现的加载图形），于是，我这个朋友就定义了两个旋转动画：
+
+```css
+@keyframes spin {
+   from {
+      transform: rotate(0deg);
+   }
+
+   to {
+      transform: rotate(360deg);
+   }
+}
+
+@keyframes spin2 {
+   from {
+      transform: rotate(360deg);
+   }
+
+   to {
+      transform: rotate(0deg);
+   }
+}
+```
+
+然后：
+
+```css
+.turntable {
+   animation: spin 5s 5;
+}
+
+.loading {
+   animation: spin2 1s infinite;
+}
+```
+
+这就是 CSS 动画相关知识不扎实的体现，虽然效果是正常的，但代码实在烦琐。其实无须再额外定义一个逆时针动画，直接使用 reverse 关键字即可，代码如下：
+
+```css
+.turntable {
+   animation: spin 5s 5;
+}
+
+.loading {
+   animation: spin 1s reverse infinite;
+}
+
+@keyframes spin {
+   from {
+      transform: rotate(0deg);
+   }
+
+   to {
+      transform: rotate(360deg);
+   }
+}
+```
+
+### alternate 关键字的应用场景
+
+先看反例，实现一个钟摆运动。有一些对 CSS 动画不太熟悉的开发者会通过自定义动画关键帧来实现：
+
+```css
+.clock-pendulum {
+   transform-origin: top;
+   animation: pendulum 2s infinite;
+}
+
+@keyframes pendulum {
+   0%,
+   100% {
+      transform: rotate(10deg);
+   }
+
+   50% {
+      transform: rotate(-10deg);
+   }
+}
+```
+
+乍一看好像效果还行，其实是有问题的，除了代码烦琐且需要额外计算之外，最大的问题在于运动效果并不准确，因为此时一个动画周期是 10deg→−10deg→10deg。对于钟摆运动，元素两次到达 0deg 的位置时运动速度最快，但是目前的 CSS 时间函数是无法同时指定两处加速点的，因此，上面这种自以为是的用法是无论如何也不可能实现真实的钟摆运动的。
+
+唯一且最佳的实现方法就是使用 alternate 关键字，同时使用 ease-in-out 作为时间函数，要知道钟摆运动是使用 ease-in-out 时间函数最具代表性的案例。代码示意如下：
+
+```css
+.clock-pendulum {
+   transform-origin: top;
+   animation: pendulum 1s infinite alternate ease-in-out;
+}
+
+@keyframes pendulum {
+   0% {
+      transform: rotate(-10deg);
+   }
+
+   100% {
+      transform: rotate(10deg);
+   }
+}
+```
+
+[animation-alternate-clock](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-alternate-clock)
+
+不过，凡事无绝对，有些动画需要通过在动画帧中自定义实现，而无法通过 alternate 关键字实现。那么，什么类型的动画无法通过 alternate 关键字实现呢？就是那种来回时间不一致的动画，典型代表就是“呼吸动画”，人的呼吸是吸气快，呼气慢，时间为 3 ～ 7s。这一类模拟人体呼吸节奏的动画都是通过调整 @keyframes 自定义关键帧中间状态的时间来实现的。例如，下面 opacity: 1 的状态就不在 50% 的位置，而是在 70% 的位置：
+
+```css
+.breath {
+   animation: breath 7s infinite;
+}
+
+@keyframes breath {
+   0%,
+   100% {
+      opacity: 0;
+   }
+
+   70% {
+      opacity: 1;
+   }
+}
+```
+
+### 关于 alternate-reverse
+
+alternate-reverse 关键字的作用是让动画第一次反向播放，然后不断来回播放。
+
+alternate-reverse 关键字不能写作 reverse-alternate，这样写是不合法的。至于为何将“alternate”写在“reverse”的前面，可能是按照首字母排序的吧。
+
+## 动画播放次数可以是小数
+
+动画播放的次数是可以任意指定的，很多人并不知道。我们可以使用 animation-iteration-count 属性任意指定动画播放的次数，甚至是小数。例如：
+
+```css
+.element {
+   animation: fadeIn 1s linear both;
+   animation-iteration-count: 1.5;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+动画播放的进度为 0%→100%、0%→50%，也就是在第二轮播放的时候，播放到一半就会停止，此时元素的透明度是 0.5。
+
+大家千万不要误认为 animation-iteration-count 的属性值不能为小数，该属性对小数也是可以精确解析的，这一点和 z-index 属性不一样。对比两个属性的正式语法就可以看出差别了：
+
+```css
+animation-iteration-count: infinite | <number>
+z-index: auto | <integer>
+```
+
+animation-iteration-count 支持的是 `<number>` 数值类型，而 z-index 支持的是 `<integer>` 整数类型。animation-iteration-count 的中文意思是“动画—迭代—数目”，初始值是 1，表示动画播放 1 次就结束了。
+
+### 小数值的作用
+
+小数值的应用场景虽然不多，但是一旦用起来，会让人非常愉悦，因为这非常体现 CSS 技术。例如，淡出效果的 CSS 关键帧代码如下：
+
+```css
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+页面中有些元素处于禁用态，透明度只有 40%，此时，使用完整的 fadeIn 动画就不合适（因为动画帧中的样式优先级太高，会覆盖 40% 透明度）。于是不少人会重新定义一个禁用元素的淡出动画：
+
+```css
+@keyframes disableFadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 0.4;
+   }
+}
+```
+
+其实大可不必，还是使用 fadeIn 动画，只要把播放次数调整为小数即可。对于 ease 时间函数，透明度提高到 40% 只需要 25% 的完整动画时间，因此，我们只需要播放 0.25 次即可，CSS 代码如下：
+
+```css
+.visible {
+   animation: fadeIn 0.25s both;
+}
+
+.visible:disabled {
+   animation: fadeIn 1s 0.25 both;
+}
+```
+
+HTML 代码如下：
+
+```html
+<input value="可用" /> <input value="禁用" disabled />
+```
+
+效果如图 5-63 所示，可以看到禁用态输入框的透明度只有 40%。
+
+![](res/2022-03-12-01-20-27.png)
+
+[animation-iteration-count](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-iteration-count)
+
+如果只希望使用淡出动画的后半截，则使用 animation-iteration-count 小数值的方法就不管用了。
+
+此时可以使用 animation-delay 负属性值实现我们想要的效果：
+
+```css
+.visible-second-half {
+   animation: fadeIn 1s -0.25s;
+}
+```
+
+如果只希望使用淡出动画的中间部分，可以同时使用 animation-iteration-count 小数值和 animation-delay 负时间值。例如，选取中间 50% 的时间区域：
+
+```css
+.visible-middle-part {
+   animation: fadeIn 1s -0.25s 0.75;
+}
+```
+
+### 关于 infinite
+
+关键字属性值 infinite 表示无限，作用是让动画一刻不停地无限播放，钟摆运动或者 loading 旋转就属于这样的动画。
+
+### 关于值范围
+
+animation-iteration-count 的属性值不能是负数，否则会被认为不合法，但是可以是 0，表示动画一次也不播放。因此，如果想要重置 animation 属性，可以使用 animation: 0，比使用 animation: none 的代码少。
+
+## forwards 和 backwards 属性值究竟是什么意思
+
+animation-fill-mode 属性的字面意思是“动画填充模式”，主要用来定义动画在执行时间之外应用的值。
+
+animation-fill-mode 属性的语法如下：
+
+```css
+animation-fill-mode: none; /* 默认值 */
+animation-fill-mode: forwards;
+animation-fill-mode: backwards;
+animation-fill-mode: both;
+```
+
+其中 none 是默认值，表示动画开始之前和动画结束之后不会对元素应用 @keyframes 规则中定义的任何样式。例如：
+
+```css
+.element {
+   opacity: 0.5;
+   animation: fadeIn 2s 1s;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+此时的 .element 元素的透明度变化过程如下。
+
+1. 透明度 0.5 保持 1s。
+2. 透明度从 0.5 突变到 0，然后透明度从 0 逐渐过渡到 1，过程持续 2s。
+3. 透明度从 1 突变到 0.5，并保持不变。
+
+实际上，这里的 .element 元素的透明度无论设置为多少，都会有透明度突变的糟糕体验，这显然不是我们想要的，因此需要使用 animation-fill-mode 属性优化动画效果。但 forwards 和 backwards 这两个关键字属性值不太好理解，下面详细讲解一下。
+
+### forwards 和 backwards 的含义
+
+forwards 是“前进”的意思，表示动画结束后（什么时候结束由 animation-iteration-count 属性决定），元素将应用当前动画结束时的属性值。例如：
+
+```css
+.element {
+   opacity: 0.5;
+   animation: fadeIn 2s 1s forwards;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+此时的 .element 元素在动画结束之后会使用 100% 这一帧的透明度属性值，因此透明度变化过程如下。
+
+1. 透明度 0.5 保持 1s。
+2. 透明度从 0.5 突变到 0，然后透明度从 0 逐渐过渡到 1，过程持续 2s。
+3. 透明度一直保持为 1（forwards 的作用）。
+
+backwards 是“后退”的意思，表示在动画开始之前，元素将应用当前动画第一轮播放的第一帧的属性值。例如：
+
+```css
+.element {
+   opacity: 0.5;
+   animation: fadeIn 2s 1s backwards;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+此时的 .element 元素在动画开始执行之前会使用 0% 这一帧的透明度属性值，因此透明度变化过程如下。
+
+1. 透明度为 0 并保持 1s 不变（backwards 的作用）。
+2. 透明度由 0 逐渐过渡到 1，过程持续 2s。
+3. 透明度从 1 突变到 0.5，并保持不变。
+
+有人可能会奇怪，forwards 语义包含“前”，为什么应用的却是最后一帧样式？而 backwards 语义包含“后”，为什么应用的却是第一帧样式？
+
+这是因为这里的 forwards 指动画向前，backwards 指动画向后。如果把时间画在一把尺子上，则动画所经过的时间就是这把尺子的一部分，如图 5-64 红色部分所示，可以看到，动画向前的方向是动画的结束位置；动画向后的方向是动画的开始位置。也就是说 forwards 表示动画的结束，backwards 表示动画的开始。
+
+![](res/2022-03-12-01-37-50.png)
+
+因此，forwards 的“前进”指的是最后一帧继续前进的样式，backwards 的“后退”指的是第一帧还要后退的样式。
+
+### forwards 和 backwards 的细节
+
+由于动画的最后一帧是由 animation-direction 和 animation-iteration-count 属性共同决定的，因此 forwards 有时候对应的是 @keyframes 规则中的 to 或 100% 对应的帧，有时候对应的是 @keyframes 规则中的 from 或 0% 对应的帧，具体对应细节如下表。
+
+| animation-direction          | animation-iteration-count | 最后一个关键帧 |
+| :--------------------------- | :------------------------ | :------------- |
+| normal                       | 奇数或偶数（不包括 0）    | 100% 或 to     |
+| reverse                      | 奇数或偶数（不包括 0）    | 0% 或 from     |
+| alternate                    | 正偶数                    | 0% 或 from     |
+| alternate                    | 奇数                      | 100% 或 to     |
+| alternate-reverse            | 正偶数                    | 100% 或 to     |
+| alternate-reverse            | 奇数                      | 0% 或 from     |
+| normal 或 alternate          | 0                         | 0% 或 from     |
+| reverse 或 alternate-reverse | 0                         | 100% 或 to     |
+
+而 backwards 只取决于 animation-direction 的属性值，因为 backwards 设置的是动画第一次播放的第一帧的状态，与 animation-iteration-count 次数没有任何关系，具体对应细节如下表所示。
+
+| animation-direction          | 第一个关键帧 |
+| :--------------------------- | :----------- |
+| normal 或 alternate          | 0% 或 from   |
+| reverse 或 alternate-reverse | 100% 或 to   |
+
+可以看出，其实 animation-iteration-count 的属性值为 0 的时候，forwards 等同于 backwards。
+
+### 记不住 forwards 和 backwards 怎么办
+
+一个知识点往往需要反复阅读与实践才能记忆深刻，所以如果不常写 CSS 代码，则一段时间后记不清应该使用 forwards 还是 backwards 是很正常的，这个时候干脆就使用 both 关键字代替。
+
+animation-fill-mode: both 可以让元素的动画在延时等待时保持第一帧的样式，在动画结束后保持最后一帧的样式，适用于绝大多数的开发场景。例如：
+
+```css
+.element {
+   opacity: 0.5;
+   animation: fadeIn 2s 1s both;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+此时的 .element 元素的透明度变化过程如下。
+
+1. 透明度为 0 并保持 1s 不变（等同于 backwards 的作用）。
+2. 透明度从 0 逐渐过渡到 1，时间持续 2s。
+3. 透明度保持为 1 不变（等同于 forwards 的作用）。
+
+可以看到元素的透明度变化过程很流畅、很自然。
+
+还有一点小小的建议，依赖 CSS 动画保持元素的显隐状态有功能上的风险，例如动画如果没执行，元素就永远显示不出来。因此，常规的 CSS 语句里的元素样式也要同步变化，例如下面的元素显示是通过添加类名 .active 触发的，此时需要同时设置 opacity: 1，代码如下：
+
+```css
+.element {
+   opacity: 0;
+}
+
+.element.active {
+   opacity: 1;
+   animation: fadeIn 2s 1s both;
+}
+
+@keyframes fadeIn {
+   0% {
+      opacity: 0;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+```
+
+## 如何暂停和重启 CSS 动画
+
+CSS 动画是可以暂停的。
+
+使用 animation-play-state 属性可以控制 CSS 动画的播放和暂停，语法如下：
+
+```css
+/* 播放 */
+animation-play-state: running;
+/* 暂停 */
+animation-play-state: paused;
+```
+
+只要设置 animation-play-state 的属性值为 paused 就可以让一个正在播放的 CSS 动画暂停。举个例子，使用 CSS Sprites 背景图和 animation 属性实现一个可暂停的动图效果，CSS 代码如下：
+
+```css
+.love {
+   width: 100px;
+   height: 100px;
+   background: url(heart-animation.png) no-repeat;
+   background-size: 2900%;
+   animation: heart-burst steps(28) 0.8s infinite both;
+}
+
+.stop {
+   animation-play-state: paused;
+}
+
+@keyframes heart-burst {
+   0% {
+      background-position: 0%;
+   }
+
+   100% {
+      background-position: 100%;
+   }
+}
+```
+
+[animation-play-state](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-play-state)
+
+点击演示页面中间区域的按钮，会给 .love 元素添加类名 .stop，此时就会看到类似 GIF 动图的“心花怒放”效果动画瞬间被暂停了，如图 5-65 所示。
+
+![](res/2022-03-12-15-07-20.png)
+
+相比传统的 GIF 动图，这种使用 animation 实现的动图效果，支持无损 PNG，图像质量更高，而且可以随时播放和暂停。
+
+配合 animation-delay 负值，动画暂停可以让元素停留在动画的任一时段，我们可以利用这一特性解决一些 CSS 难题。例如，希望设置 50% 透明度的 deepskyblue 色值就可以这样处理：
+
+```css
+p {
+   animation: opacityColor 1s -0.5s linear paused;
+}
+
+@keyframes opacityColor {
+   0% {
+      color: transparent;
+   }
+
+   100% {
+      color: deepskyblue;
+   }
+}
+```
+
+此时 `<p>` 元素的 color 色值就是 50% 透明度的 deepskyblue。
+
+### CSS 动画重启
+
+这里顺便讲一下如何重启 CSS 动画，例如：
+
+```html
+<div class="element active"></div>
+<style>
+   .element.active {
+      animation: fadeIn 2s 1s both;
+   }
+
+   @keyframes fadeIn {
+      0% {
+         opacity: 0;
+      }
+
+      100% {
+         opacity: 1;
+      }
+   }
+</style>
+```
+
+想要 CSS 动画重新执行一遍，可以使用下面的 JavaScript 代码（假设 .element 元素的 DOM 对象是 ele）：
+
+```js
+ele.classList.remove('active');
+ele.offsetWidth; // 触发重绘
+ele.classlist.add('active');
+```
+
+如果不是重新执行动画，而是让已经暂停的动画继续播放，则设置 animation-play-state 属性值为 running 即可。
+
+## 深入理解 steps() 函数
+
+animation-timing-function 的属性值由 cubic-bezier() 函数和 steps() 函数组成。steps() 函数可以让动画效果不连续，就像楼梯，与之相对应的 cubic-bezier() 函数则更像是平滑的无障碍坡道，如图 5-66 所示。
+
+![](res/2022-03-12-15-18-09.png)
+
+cubic-bezier() 函数在 5.3.2 节已经详细介绍过，这里专门深入介绍 steps() 函数及其相对应的关键字。
+
+学习 steps() 函数有一定的难度，主要是容易分不清楚 start 和 end。
+
+常见的 steps() 函数用法示例如下：
+
+```css
+steps(5, end);
+steps(2, start);
+```
+
+语法表示就是：
+
+```css
+steps(number, position);
+```
+
+先讲一下这一语法中的几个关键点。
+
+- number 指数值，且是整数值，这个很好理解，表示把动画分成了多少段。假设有如下 @keyframes 规则，定义了一段从 0 ～ 100px 的位移：
+
+   ```css
+   @keyframes move {
+      0% {
+         left: 0;
+      }
+
+      100% {
+         left: 100px;
+      }
+   }
+   ```
+
+   同时 number 参数的值是 5，则相当于把这段移动的距离分成了 5 段，如图 5-67 所示。
+
+   ![](res/2022-03-12-15-25-07.png)
+
+- position 指关键字属性值，是可选参数，表示动画跳跃执行是在时间段的开始还是结束。其支持众多关键字值，这里先了解一下传统的 start 和 end 关键字。
+- start 表示在时间段的开头处跳跃。
+- end 表示在时间段的结束处跳跃，是默认值。
+
+### 深入理解 start 和 end 关键字
+
+steps() 函数本质上是一个阶跃函数，阶跃函数是一种特殊的连续时间函数，可以实现从 0 突变到 1 的过程。图 5-68 所示的 steps(1, start)、steps(1, end)、steps(3, start)、steps(3, end) 就是阶跃函数。
+
+通过分析图 5-68 所示内容，我们可以得到对 start 和 end 关键字的进一步解释。
+
+![](res/2022-03-12-15-38-46.png)
+
+- start：表示直接开始，也就是时间段才开始，就已经执行了一个距离段。动画执行的 5 个分段点是下面这 5 个，起始点被忽略，因为时间一开始直接就到了第二个点，如图 5-69 所示。
+
+   ![](res/2022-03-12-15-43-15.png)
+
+- end：表示戛然而止，也就是时间段一结束，当前动画执行就停止。于是，动画执行的 5 个分段点是下面这 5 个，结束点被忽略，因为在要执行结束点的时候已经没时间了，如图 5-70 所示。
+
+   ![](res/2022-03-12-15-44-26.png)
+
+然而，上述的分析是站在函数的角度和时间的角度进行的，虽然仔细琢磨一下也能理解，但是由于这并不符合人的主观视角和实际感知，一段时间后，认知就会发生混乱。
+
+混乱的原因在于认知失调。steps(5) 是把动画时间段分成 5 段，对这个点的认识应该都没有问题，关键是对 steps(5, start) 的认识，看到这里是 start，几乎所有人的第一反应就是动画应用的样式是对应时间段开始的样式，不然怎么叫作“start”呢？可现实真是残酷，steps(5, start) 应用的样式不是 5 个时间段的 start 样式，而是 5 个时间段的 end 样式，例如 left: 0 到 left: 100px 的位移，最终元素表现出来的位移是 20px、40px、60px、80px 和 100px。
+
+steps(5, end) 也是反直觉的表现，其应用的是 5 个时间段的 start 样式，而不是字面上的 end 样式，例如 left: 0 到 left: 100px 的位移，最终元素表现出来的位移是 0px、20px、40px、60px 和 80px。
+
+[animation-timing-function-start-end](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-timing-function-start-end)
+
+大家可以看到，以 20px 为一个分段，start 的位置在分段的结束处，而 end 的位置在分段的开始处，图 5-71 所示的就是执行 5 次 step() 的位置示意图。
+
+因此，为了避免认知混乱，当需要用到 steps() 函数的时候，无须思考过于抽象的阶跃函数及其准确含义，只需要记住符合直觉认知的这么一句话：“一切都是反的。start 不是开始，而是结束；end 不是结束，而是开始。”
+
+![](res/2022-03-12-15-53-41.png)
+
+这样，至少使用 start 和 end 关键字的时候不会犯错，至于相反的原因，可以参考图 5-68 所示的 steps() 阶跃函数慢慢理解。
+
+## animation-fill-mode 属性与 steps() 函数同时设置会怎样
+
+animation-fill-mode 属性和 steps() 函数同时使用，可能会影响元素的断点表现。例如，下面这个语句：
+
+```css
+animation: move 5s forwards steps(5, end);
+```
+
+forwards 关键字会使动画停留在动画关键帧最后一帧的状态。于是，图 5-72 所示的 6 个分段点都会执行，整个动画停止在第六个分段点上，也就是由于设置了 animation-fill-mode，因此虽然将时间分成了 5 段，但是视觉表现上却是元素总共移动了 6 个位置。
+
+![](res/2022-03-12-15-57-11.png)
+
+这显然不是我们想要的，怎么处理呢？可以减少分段个数和减小动画运动的跨度，调整如下：
+
+```css
+@keyframes move {
+   0% {
+      left: 0;
+   }
+
+   100% {
+      left: 80px;
+   }
+}
+```
+
+也就是将终点从 100px 改成 80px，同时将 CSS 调用改成：
+
+```css
+animation: move 5s forwards steps(4, end);
+```
+
+也就是将原来的 steps(5, end) 改成 steps(4, end)，最后将 100% 这一帧交给 forwards。
+
+### step-start 和 step-end 关键字
+
+step-start 和 step-end 是 steps() 函数的简化关键字，注意，是 step-\*，step 后面没有 s。step-start 等同于 steps(1, start)，表示“一步到位”；step-end 等同于 steps(1, end) 或者 steps(1)，表示“延时到位”。
+
+之所以专门设置两个关键字 step-start 和 step-end，不是因为这两个关键字常用，而是因为这两个关键字实用。它们可以让动画按照设定的关键帧步进变化，特别适合非等分的步进场景。例如实现一个打点动画，CSS 代码如下：
+
+```html
+正在加载中<dot>...</dot>
+<style>
+   dot {
+      display: inline-block;
+      height: 1em;
+      line-height: 1;
+      vertical-align: -0.25em;
+      overflow: hidden;
+   }
+
+   dot::before {
+      display: block;
+      content: '...\A..\A.';
+      white-space: pre-wrap;
+      animation: dot 3s infinite step-start both;
+   }
+
+   @keyframes dot {
+      33% {
+         transform: translateY(-2em);
+      }
+
+      66% {
+         transform: translateY(-1em);
+      }
+   }
+</style>
+```
+
+效果如图 5-73 所示。
+
+![](res/2022-03-12-16-05-40.png)
+
+[animation-step-start-loading](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-step-start-loading)
+
+在这个例子中，如果你想通过在 @keyframes 规则中设置好 0% 和 100% 的位置，再使用 steps(2) 或 steps(3) 进行位置划分实现这个效果，你会发现位置总是对不上。其实完全不用这么麻烦的，手动设置好断点的位置，然后使用一个 step-start 关键字就搞定了，无须计算，无须微调，就算把 33% 改成 50% 功能也是正常的，只是打点速度不均匀而已，定位字符点绝对没问题。
+
+这就是 step-start 和 step-end 关键字的精妙作用，可以让任意自定义的 CSS 关键帧步进呈现，很实用。
+
+### 新的 jump-start、jump-end、jump-none 和 jump-both 关键字
+
+从 2019 年开始，Chrome 浏览器和 Firefox 浏览器开始陆续支持 jump- 开头的用在 steps() 函数中的关键字。下面先介绍一下 jump-start、jump-end、jump-none 和 jump-both 关键字的含义。
+
+- jump-start：动画开始时就发生跳跃，和 start 关键字的表现一样。
+- jump-end：动画结束时发生跳跃，和 end 关键字的表现一样。
+- jump-none：动画开始时和结束时都不发生跳跃，然后中间部分等分跳跃。
+- jump-both：动画开始时和结束时都发生跳跃。
+
+假设时间函数分为 3 段，则 jump-start、jump-end、jump-none 和 jump-both 关键字对应的阶跃函数如图 5-74 所示。
+
+![](res/2022-03-12-16-12-40.png)
+
+目前 jump-开头的这几个关键字的兼容性还不太好，在生产环境中还无法使用，就不进一步展开讲解了。
+
+### 标签嵌套与动画实现的小技巧
+
+遇到某些属性被占用，或者动画场景复杂的情况，可以试试使用标签嵌套来实现。例如，某个悬浮提示框的居中定位是使用 transform 属性实现的：
+
+```css
+.toast {
+   position: absolute;
+   left: 50%;
+   top: 50%;
+   transform: translate(-50%, -50%);
+}
+```
+
+同时希望提示框出现的时候有放大的动画效果，也就是应用下面的 CSS 动画：
+
+```css
+@keyframes scaleUp {
+   from {
+      transform: scale(0);
+   }
+
+   to {
+      transform: scale(1);
+   }
+}
+```
+
+很显然，此时 transform 属性冲突了，怎么办？很简单，使用标签进行嵌套就好了：
+
+```html
+<div class="toast">
+   <div class-="content">提示内容</div>
+</div>
+<style>
+   .toast {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+   }
+
+   .content {
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.75);
+      animation: scaleUp 300ms;
+   }
+</style>
+```
+
+同样，我们还可以通过元素嵌套，分别应用动画实现更复杂的动画效果，典型的例子就是动画时间函数分解实现抛物线运动效果。
+
+在页面中点击“加入购物车”按钮，就会看到有商品以抛物线运动的方式飞向购物车，效果如图 5-75 所示。
+
+![](res/2022-03-12-16-19-46.png)
+
+[animation-nested-tag](embedded-codesandbox://css-new-world-stronger-visual-performance/animation-nested-tag)
+
+假设飞出去的元素的 HTML 代码结构如下：
+
+```html
+<div class="fly-item">
+   <img src="./book.jpg" />
+</div>
+```
+
+实现抛物线效果的关键 CSS 代码如下：
+
+```css
+.fly-item,
+.fly-item > img {
+   position: absolute;
+   transition: transform 0.5s;
+}
+
+.fly-item {
+   transition-timing-function: linear;
+}
+
+.fly-item > img {
+   transition-timing-function: cubic-bezier(0.55, 0, 0.85, 0.36);
+}
+```
+
+其中，父元素 .fly-item 只负责横向线性运动，子元素 `<img>` 只负责纵向运动，只不过纵向运动是先慢后快的。
+
+将纵向运动和横向运动合并，就产生了抛物线运动的视觉效果。大家可以想象一下扔铅球，铅球水平飞行的速度其实近似匀速，但是受到重力的影响，铅球下落的速度是越来越快的，于是抛物线效果就产生了。
+
+类似的通过标签嵌套实现动画效果的例子还有很多，在这里就不一一列举了，重要的是思路和意识，希望大家遇到类似场景时能够想到这样的小技巧。

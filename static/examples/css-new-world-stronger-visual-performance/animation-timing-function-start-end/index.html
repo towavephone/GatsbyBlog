@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>steps() start 和 end 表现示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo h4 {
+        margin: 0.5em 0 0.375em;
+      }
+
+      .container {
+        width: 101px;
+        height: 30px;
+        margin: auto;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV8AAAASCAMAAADL2i21AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MEExMTRDRjY4REUxMTFFQUJGMEVFQUE5NkJBRjBEQTciIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MEExMTRDRjc4REUxMTFFQUJGMEVFQUE5NkJBRjBEQTciPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDowQTExNENGNDhERTExMUVBQkYwRUVBQTk2QkFGMERBNyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDowQTExNENGNThERTExMUVBQkYwRUVBQTk2QkFGMERBNyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PoMWiMQAAAAJUExURf///wAAADMzMxPH9rIAAABGSURBVHja7NCxCQAwDANBJfsPnRlcKGC4L4wbNZerZjmZZjFZ0OLL14IvX758+fLlS4vvNl9f46PwwdepHQp8V/uq2RNgAEUjBZOtw/UqAAAAAElFTkSuQmCC)
+          no-repeat;
+      }
+
+      .start,
+      .end {
+        display: block;
+        width: 20px;
+        height: 20px;
+        margin-left: -10px;
+        border-radius: 50%;
+        background-color: deepskyblue;
+        background-image: radial-gradient(2px, red 2px, transparent 3px);
+        opacity: 0.6;
+        position: relative;
+        animation: move 5s linear infinite;
+      }
+
+      .start {
+        animation-timing-function: steps(5, start);
+      }
+
+      .end {
+        animation-timing-function: steps(5, end);
+      }
+
+      @keyframes move {
+        0% {
+          left: 0;
+        }
+
+        100% {
+          left: 100px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>steps(5, start)</h4>
+      <div class="container">
+        <i class="start"></i>
+      </div>
+
+      <h4>steps(5, end)</h4>
+      <div class="container">
+        <i class="end"></i>
+      </div>
+    </div>
+  </body>
+</html>

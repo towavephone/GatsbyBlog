@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>animation-delay 负值与音频波形 loading 效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .loading {
+        height: 30px;
+        zoom: 4;
+      }
+
+      .loading i {
+        display: inline-block;
+        border-left: 2px solid deepskyblue;
+        height: 2px;
+        animation: scaleUp 4s linear infinite alternate;
+        margin: 0 1px;
+      }
+
+      .loading i:nth-child(2) {
+        animation-delay: 1s;
+      }
+
+      .loading i:nth-child(3) {
+        animation-delay: 2s;
+      }
+
+      .loading i:nth-child(4) {
+        animation-delay: 3s;
+      }
+
+      .negative i:nth-child(2) {
+        animation-delay: -1s;
+      }
+
+      .negative i:nth-child(3) {
+        animation-delay: -2s;
+      }
+
+      .negative i:nth-child(4) {
+        animation-delay: -3s;
+      }
+
+      @keyframes scaleUp {
+        to {
+          transform: scaleY(10);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>
+        正延时（注意动画初期）
+      </h4>
+      <div class="loading">
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+      </div>
+      <h4>
+        负延时
+      </h4>
+      <div class="loading negative">
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+      </div>
+      <p class="remind">
+        // 演示目的，播放时间调得较慢，刷新页面对比效果
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>step-start 实现点点点打点动画效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      dot {
+        display: inline-block;
+        height: 1em;
+        line-height: 1;
+        vertical-align: -0.25em;
+        text-align: left;
+        overflow: hidden;
+      }
+
+      dot::before {
+        display: block;
+        content: '...\A..\A.';
+        white-space: pre-wrap;
+        animation: dot 3s infinite step-start both;
+      }
+
+      @keyframes dot {
+        33% {
+          transform: translateY(-2em);
+        }
+
+        66% {
+          transform: translateY(-1em);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">正在加载中<dot>...</dot></div>
+  </body>
+</html>
