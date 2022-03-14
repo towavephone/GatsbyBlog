@@ -211,3 +211,7 @@ await Promise.all(nodes);
 
 1. 复制功能需考虑兼容性、复制性能，可参考[JS 复制文字到剪切板的极简实现及扩展](https://www.zhangxinxu.com/wordpress/2021/10/js-copy-paste-clipboard/)
 2. 代码实时查看编辑借助于第三方服务不够稳定，可自行搭建第三方服务或者参照 [live-editor](https://github.com/gfxfundamentals/live-editor) 自建本地编辑器，必要时具有分享功能
+
+// TODO
+
+1. 博客 sanbox 插件忽略文件实现，支持 post 上传文件
