@@ -8,7 +8,7 @@ date: 2022-3-14 16:04:24
 draft: true
 ---
 
-## 需求背景
+# 需求背景
 
 完成官网 1.0 的上线，实现动效、多语言、多平台适配等等功能
 
@@ -18,7 +18,7 @@ draft: true
 
 ### 需求背景
 
-需要完成如下所示的动效
+实现如下所示动效
 
 ```video
 autoplay: true
@@ -443,6 +443,190 @@ export default AnimationTitle
 #### react-spring
 
 #### react-gsap
+
+## 数字滚动展示
+
+### 需求背景
+
+实现如下所示动效
+
+```video
+autoplay: true
+loop: true
+muted: true
+controls: false
+name: 数字滚动展示动效
+src: "/examples/international-official-website-technical-difficulties/number-change-display.mp4"
+span: 6
+width: 100%
+```
+
+### 核心代码
+
+选型过程同上，这里直接看代码
+
+```tsx
+import React, {
+  ReactNode,
+  useRef,
+  useEffect
+} from 'react'
+import classnames from 'classnames'
+import { a, useTrail, useSprings, useSpringRef } from '@react-spring/web'
+import { useInViewport } from 'ahooks'
+
+import { delayFunc } from '@/utils'
+
+import PageStyles from './index.module.less'
+
+interface TitleContent {
+  title: string
+}
+
+interface NumberContent {
+  number: string
+  unit: string
+  precision?: number
+  render?: (value: number) => string
+}
+
+interface CommonDataItem {
+  hint: string
+}
+
+type DataItem = CommonDataItem & (TitleContent | NumberContent)
+
+interface Props {
+  data: DataItem[]
+  className?: string
+  delay?: number
+}
+
+const CarConfiguration = ({
+  data,
+  className,
+  delay = 300
+}: Props) => {
+  const [trails, trailsApi] = useTrail(data.length, () => ({
+    opacity: 0,
+    y: 40
+  }))
+
+  const springsRef = useSpringRef()
+  const springs = useSprings(
+    data.length,
+    data.map((item) => ({
+      ref: springsRef,
+      from: {
+        number: 0
+      },
+      to: {
+        number: Number((item as NumberContent).number)
+      }
+    }))
+  )
+
+  const domRef = useRef()
+  const [inViewPort] = useInViewport(domRef)
+  useEffect(() => {
+    const startAnimation = async () => {
+      await delayFunc(delay)
+      trailsApi.start({
+        y: 0,
+        opacity: 1
+      })
+      await delayFunc(1200)
+      springsRef.start()
+    }
+
+    const reverseAnimation = () => {
+      trailsApi.start({
+        y: 40,
+        opacity: 0
+      });
+      [springsRef].forEach((item) => {
+        item && item.start({
+          reverse: true
+        })
+      })
+    }
+
+    if (inViewPort) {
+      startAnimation()
+    } else {
+      reverseAnimation()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inViewPort])
+
+  return (
+    <div ref={domRef} className={classnames(PageStyles.configuration, className, 'car-configuration')}>
+      {
+        trails.map((style, index) => {
+          const item = data[index]
+          let title: ReactNode = (item as TitleContent).title
+          const titleComponent = <><span className={PageStyles.configurationTitle} key={Math.random()} dangerouslySetInnerHTML={{ __html: (item as TitleContent).title }} />
+            <span className={PageStyles.unit} key={Math.random()} dangerouslySetInnerHTML={{ __html: (item as any).unit }} /></>
+          const numberItem = item as NumberContent
+          if (!title && numberItem.number) {
+            const renderFunc = numberItem.render ? numberItem.render : (value: number) => value.toFixed(numberItem.precision || 0)
+            title = (
+              <>
+                <a.span>{springs[index].number.to(renderFunc)}</a.span>
+                <span className={PageStyles.unit} key={Math.random()} dangerouslySetInnerHTML={{ __html: numberItem.unit }} />
+              </>
+            )
+          }
+          return (
+            <>
+              <a.div
+                key={index}
+                className={classnames(PageStyles.configurationItem, 'car-configuration-item')}
+                style={style}
+              >
+                {
+                  typeof title === 'string'
+                    ? titleComponent
+                    : <div className={PageStyles.configurationTitle}>{title} </div>}
+                <div className={PageStyles.configurationHint}>{item.hint}</div>
+              </a.div>
+              {
+                index < trails.length - 1 && <a.div
+                  key={index}
+                  className={PageStyles.divider}
+                  style={style}
+                />
+              }
+            </>
+          )
+        })
+      }
+    </div>
+  )
+}
+
+export default CarConfiguration
+```
+
+### 运行效果
+
+## 固定页面滚动展示
+
+### 需求背景
+
+实现如下所示的动效
+
+## 视频同步、缩放
+
+### 需求背景
+
+实现如下所示的动效
+
+### 核心代码
+
+```tsx
+
+```
 
 ## scroll 动画选型过程：
 
