@@ -442,7 +442,11 @@ export default AnimationTitle
 
 #### react-spring
 
+[line-by-line-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-spring)
+
 #### react-gsap
+
+[line-by-line-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-gsap)
 
 ## 数字滚动展示
 
@@ -2592,16 +2596,19 @@ return (
       <td>自动播放</td>
       <td>默认自动循环静音播放</td>
       <td>playStrategy = 'autoPlay'，默认不用传</td>
+      <td></td>
    </tr>
    <tr>
       <td>点击播放</td>
       <td>点击循环静音播放、带自定义播放图标</td>
       <td>playStrategy = 'clickPlay'</td>
+      <td></td>
    </tr>
    <tr>
       <td>按住播放</td>
       <td>按住循环播放、带自定义播放图标、带播放进度条显示</td>
       <td>playStrategy = 'pressHoldPlay'</td>
+      <td></td>
    </tr>
    <tr>
       <td>点击视频弹窗播放</td>
@@ -2640,21 +2647,25 @@ return (
       <td>悬停播放</td>
       <td>鼠标悬浮循环静音播放视频，离开时回到初始状态</td>
       <td>playStrategy = 'mouseOverPlay'</td>
+      <td></td>
    </tr>
    <tr>
       <td>进度控制</td>
       <td>控制视频进度</td>
       <td>playStrategy = 'progressControl'，传递 progress（百分比，以 1 为单位）控制视频进度</td>
+      <td></td>
    </tr>
    <tr>
       <td>点击播放（带控制条，播放状态控制）</td>
       <td>点击后播放一次视频、自带控制条、初始播放状态控制</td>
       <td>playStrategy = 'clickPlayWithControl'，传递 playing 控制初始播放状态</td>
+      <td></td>
    </tr>
    <tr>
       <td>进入视口播放一次</td>
       <td>完全 100% 看到视频从头开始播放一次（每次看到视频就会触发）</td>
       <td>playStrategy = 'inViewportPlay'</td>
+      <td></td>
    </tr>
    <tr>
       <td>h5</td>
@@ -2694,16 +2705,22 @@ return (
             </li>
          </ol>
       </td>
+      <td></td>
    </tr>
    <tr>
       <td rowspan="2">图片</td>
       <td>pc</td>
       <td>正常展示</td>
+      <td></td>
+      <td></td>
+      <td></td>
    </tr>
    <tr>
       <td>h5</td>
       <td>弹窗展示</td>
       <td>点击弹窗后展示，等比例放大，宽度自适应（弹窗图片的左右切换实现难度大，之后再做）</td>
+      <td></td>
+      <td></td>
    </tr>
 </table>
 
@@ -2839,10 +2856,17 @@ export default useDisplayerModal;
 1. 生成唯一性的 uuid 来判断这个脚本是否加载，以实现只加载一次脚本的功能
 2. 由于 loadScript 方法会在同一个页面同一 src 多次调用，实际上判断脚本是否加载并不能完美实现（会导致同一脚本多次加载），考虑使用函数缓存实现
 
-### 核心方法
+### 核心代码
 
 ```ts
 import { memoize } from 'lodash';
+
+type loadScriptOptions = Partial<Omit<HTMLScriptElement, 'src' | 'async'>> & {
+  attributesMap?: {
+    [key: string]: any
+  }
+  [key: string]: any
+}
 
 // 异步加载单个脚本
 async function loadSingleScript(src: string, options: loadScriptOptions = {}) {
@@ -3013,7 +3037,7 @@ export function disableBodyScroll({ savePosition = false } = {}) {
 1. 页面固定动效多次用到百分比转换，需要封装函数便于使用、理解
 2. 后期可能会实现缓动函数，需要提前封装便于修改
 
-### 核心方法
+### 核心代码
 
 ```ts
 interface GetAnimateProgressProps {
