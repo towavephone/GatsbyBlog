@@ -621,6 +621,8 @@ export default CarConfiguration;
 
 ### 运行效果
 
+[number-roll-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/number-roll-react-spring)
+
 ## 视频进度同步 / 缩放动效
 
 ### 需求背景
