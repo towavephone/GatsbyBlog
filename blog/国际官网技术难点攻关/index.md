@@ -442,11 +442,11 @@ export default AnimationTitle
 
 #### react-spring
 
-[line-by-line-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-spring)
+[line-by-line-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-spring?view=preview)
 
 #### react-gsap
 
-[line-by-line-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-gsap)
+[line-by-line-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-gsap?view=preview)
 
 ## 数字滚动展示
 
@@ -621,7 +621,344 @@ export default CarConfiguration;
 
 ### 运行效果
 
-[number-roll-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/number-roll-react-spring)
+[number-change-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/number-change-display-react-spring?view=preview)
+
+## 固定页面滚动控制
+
+### 需求背景
+
+实现要点：
+
+1. 随着鼠标滚轮滚动而触发的动效（跟随鼠标滚动，鼠标停顿时，动效也会停顿）
+2. 需要固定页面
+
+实现如下所示的动效：
+
+<video src="/examples/international-official-website-technical-difficulties/fix-page-scroll-display.mp4" loop muted autoplay width="100%"></video>
+
+### 选型过程
+
+| 选型 | 优点 | 缺点 |
+| :-- | :-- | :-- |
+| [ScrollMagic](https://github.com/janpaepke/ScrollMagic) | 官网例子满足需求 | 需要封装成 react |
+| [react-scrollmagic](https://github.com/bitworking/react-scrollmagic) | <ol><li>可在 react 中直接使用</li><li>提供固定页面的百分比可完美用于 react-gsap 动效</li></ol> | <ol><li>滑动过快会出现“抖动”</li><li>不能实现切屏 + 固定页面同时存在的效果</li></ol> |
+| [react-gsap](https://github.com/bitworking/react-gsap) + scrollTrigger | 解决了“抖动”问题 | react-gsap 暴露的 api 不够底层，实现切屏 + 固定页面较困难 |
+| [gsap](https://github.com/greensock/GSAP) + scrollTrigger | 解决了以上的所有缺点 | 代码量过多，react 下需要考虑情况较多 |
+
+### 核心代码
+
+#### react-scrollmagic
+
+web/components/reactScrollMagic/index.Stsx
+
+```tsx
+import React, { Children, cloneElement, ReactElement } from 'react'
+import { Controller as XPController, Scene, SceneProps as XPSceneProps } from 'xp-react-scrollmagic'
+
+import useStoreContext, { CLIENT_TYPE } from '@/hooks/useStoreContext'
+
+import { getWindowHeight } from '@/utils'
+
+const defaultControllerProps = {
+  // container: getDocument()?.querySelector('h')
+}
+
+const defaultSceneProps = {
+  indicators: false,
+  triggerHook: 0,
+  duration: getWindowHeight()
+}
+
+interface ProgressEventsParams {
+  progress: number
+  event: {
+    state: string
+    type: string
+  }
+}
+
+export interface SceneProps {
+  sceneProps?: (Partial<XPSceneProps> & { enableParams: boolean }) | null
+  sceneParams?: ProgressEventsParams
+}
+
+interface ControllerProps {
+  children: Array<ReactElement<SceneProps>> | ReactElement<SceneProps>
+}
+
+const ReactScrollMagic = ({
+  children
+}: ControllerProps) => {
+  const { state } = useStoreContext()
+
+  const renderChildren = Children.map(children, (item, index) => {
+    const sceneProps = {
+      ...defaultSceneProps,
+      pin: state?.clientType === CLIENT_TYPE.PC,
+      ...item.props.sceneProps
+    }
+    if (sceneProps.enableParams) {
+      const {
+        enableParams,
+        ...rest
+      } = sceneProps
+      return (
+        <Scene
+          {...rest}
+        >
+          {
+            (progress: number, event: { state: string }) => {
+              return <div>
+                {
+                  cloneElement(item, {
+                    ...item.props,
+                    sceneParams: {
+                      progress,
+                      event
+                    }
+                  })
+                }
+              </div>
+            }
+          }
+        </Scene>
+      )
+    }
+    return (
+      <Scene
+        {...sceneProps}
+      >
+        <div>
+          {item}
+        </div>
+      </Scene>
+    )
+  })
+
+  return (
+    <XPController {...defaultControllerProps}>
+      <div>
+        {renderChildren}
+      </div>
+    </XPController>
+  )
+}
+
+export default ReactScrollMagic
+```
+
+使用时：
+
+web/pages/p7/render.tsx
+
+```tsx
+import ReactScrollMagic from '@/components/reactScrollMagic';
+import { getWindowHeight } from '@/utils';
+
+<ReactScrollMagic>
+   <Sepa
+      sceneProps={{
+         enableParams: true,
+         duration: getWindowHeight() * 2 // 总共停 2 屏高度
+      }}
+   />
+</ReactScrollMagic>;
+```
+
+web/pages/p7/components/sepa/index.tsx
+
+```tsx
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
+import { Tween, PlayState } from 'react-gsap'
+
+import { l } from '@/components/lazyLoader'
+import ModelLeftText from '@/components/modelLeftText'
+import { SceneProps } from '@/components/reactScrollMagic'
+import AnimationBg from '@/components/animationBg'
+
+import useTmpComponent from '@/hooks/useTmpComponent'
+
+import { getAnimateProgresses } from '@/utils/animate'
+
+import styles from './index.module.less'
+
+const Index = ({
+  sceneParams
+}: SceneProps) => {
+  const {
+    progress = 0
+  } = sceneParams || {}
+  const { t } = useTranslation()
+  const getValue = (param: string) => t(`p7.sepa.${param}`)
+
+  const { api, Slot } = useTmpComponent()
+
+  const [animationTextProgress] = getAnimateProgresses(progress, [
+    {
+      start: 1 / 2, // 滚动到一半的时候才开始动效
+      duration: 1 / 2 // 动效的持续百分比
+    }
+  ])
+
+  return (
+    <l.div
+      src="/public/p7/sepa/p7-p4-1.jpg"
+      minSrcSet="/public/p7/sepa/p7-p4-1@mini.jpg"
+      srcSet="/public/p7/sepa/p7-p4-1@2x.jpg"
+      className={classNames('global-full-page-with-top-menu', styles.container)}
+    >
+      <Slot
+        modelType='P7'
+        pageType='SEPA'
+        buttonType='Arrow'
+        itemList={[{
+          imgList: [{
+            src: '/public/p7/d3/P7-d3-1.png',
+            srcSet: '/public/p7/d3/P7-d3-1@2x.jpg'
+          }],
+          background: 'linear-gradient(133deg, #343538 0%, #000102 100%)',
+          textData: {
+            topSubTitle: t('p7.d3.topSubTitle1'),
+            title: t('p7.d3.title1'),
+            subTitle: t('p7.d3.subTitle1')
+          }
+        }, {
+          imgList: [{
+            src: '/public/p7/d3/P7-d3-2.jpg',
+            srcSet: '/public/p7/d3/P7-d3-2@2x.jpg'
+          }],
+          background: 'linear-gradient(133deg, #343538 0%, #000102 100%)',
+          textData: {
+            topSubTitle: t('p7.d3.topSubTitle2'),
+            title: t('p7.d3.title2'),
+            subTitle: t('p7.d3.subTitle2')
+          }
+        }]}
+      />
+      <div ref={trackRef} className={classNames('body', styles.body)}>
+        <ModelLeftText
+          topSubTitle={getValue('topSubTitle')}
+          title={getValue('title')}
+          subTitle={getValue('subTitle')}
+          shortDesc={getValue('shortDesc')}
+          buttonProps={{
+            onClick: () => {
+              api.current?.open()
+            },
+            type: 'ghost'
+          }}
+        />
+      </div>
+      {
+        animationTextProgress > 0 && <AnimationBg type={2} className={styles.animationBg}>
+          <Tween
+            from={{
+              scale: 40
+            }}
+            totalProgress={animationTextProgress}
+            playState={PlayState.pause}
+          >
+            <div className={styles.animationText}>
+              {/* 这里所有国家都是这个，不需要国际化 */}
+              XPILOT
+            </div>
+          </Tween>
+        </AnimationBg>
+      }
+    </l.div>
+  )
+}
+
+export default Index
+```
+
+#### react-gsap
+
+后期需要实现 `切屏 + 固定页面` 的效果，暂未实现
+
+```tsx
+import React, { Children, cloneElement, useRef, useEffect, useState } from 'react';
+import { gsap } from 'gsap';
+import produce from 'immer';
+
+import { getDocument } from '@/utils';
+
+if (getDocument()) {
+   import('gsap/ScrollTrigger').then((component) => {
+      const ScrollTrigger = component.default;
+      gsap.registerPlugin(ScrollTrigger);
+   });
+}
+const ReactScrollMagic = ({ children }) => {
+   const revealRefs = useRef([]);
+   const [updateParams, setUpdateParams] = useState([]);
+   revealRefs.current = [];
+
+   useEffect(() => {
+      revealRefs.current.forEach((el, index) => {
+         gsap.from(el, {
+            scrollTrigger: {
+               trigger: el,
+               pin: true,
+               start: 'top top',
+               end: '+=300%',
+               markers: true,
+               anticipatePin: 2, // 滑动过快时的“防抖”参数
+               onUpdate: (self) => {
+                  console.log(
+                     self,
+                     'progress:',
+                     self.isActive,
+                     self.progress.toFixed(3),
+                     'direction:',
+                     self.direction,
+                     'velocity',
+                     self.getVelocity()
+                  );
+                  const { progress, isActive } = self;
+                  setUpdateParams(
+                     produce((draftState) => {
+                        draftState[index] = {
+                           progress,
+                           isActive
+                        };
+                     })
+                  );
+               }
+            }
+         });
+      });
+   }, []);
+
+   const addToRefs = (el, index) => {
+      if (el && !revealRefs.current.includes(el)) {
+         revealRefs.current[index] = el;
+      }
+      console.log(revealRefs.current);
+   };
+
+   return Children.map(children, (item, index) => {
+      // const sceneProps = {
+      //   ...defaultSceneProps,
+      //   ...item.props.sceneProps
+      // }
+      return (
+         <div ref={(el) => addToRefs(el, index)}>
+            {cloneElement(item, {
+               ...item.props,
+               sceneParams: updateParams[index] || {}
+            })}
+         </div>
+      );
+   });
+};
+
+export default ReactScrollMagic;
+```
+
+### 运行效果
 
 ## 视频进度同步 / 缩放动效
 
@@ -644,7 +981,7 @@ export default CarConfiguration;
 
 ### 选型过程
 
-同 `逐行显示` 的选型过程
+同 `逐行显示`、`固定页面滚动控制` 的选型过程
 
 ### 核心代码
 
@@ -1085,343 +1422,6 @@ export const evaluateCalc = (expression: string, container = getDocument()?.body
 #### p7 resize 后动画定位不准的 bug
 
 需要全部使用 rem 单位，否则 resize 后定位不准
-
-### 运行效果
-
-## 固定页面滚动控制
-
-### 需求背景
-
-实现要点：
-
-1. 随着鼠标滚轮滚动而触发的动效（跟随鼠标滚动，鼠标停顿时，动效也会停顿）
-2. 需要固定页面
-
-实现如下所示的动效：
-
-<video src="/examples/international-official-website-technical-difficulties/fix-page-scroll-display.mp4" loop muted autoplay width="100%"></video>
-
-### 选型过程
-
-| 选型 | 优点 | 缺点 |
-| :-- | :-- | :-- |
-| ScrollMagic | 官网例子满足需求 | 需要封装成 react |
-| react-scrollmagic | <ol><li>可在 react 中直接使用</li><li>提供固定页面的百分比可完美用于 react-gsap 动效</li></ol> | <ol><li>滑动过快会出现“抖动”</li><li>不能实现切屏 + 固定页面同时存在的效果</li></ol> |
-| react-gsap + scrollTrigger | 解决了“抖动”问题 | react-gsap 暴露的 api 不够底层，实现切屏 + 固定页面较困难 |
-| gsap + scrollTrigger | 解决了以上的所有缺点 | 代码量过多，react 下需要考虑情况较多 |
-
-### 核心代码
-
-#### react-scrollmagic
-
-web/components/reactScrollMagic/index.tsx
-
-```tsx
-import React, { Children, cloneElement, ReactElement } from 'react'
-import { Controller as XPController, Scene, SceneProps as XPSceneProps } from 'xp-react-scrollmagic'
-
-import useStoreContext, { CLIENT_TYPE } from '@/hooks/useStoreContext'
-
-import { getWindowHeight } from '@/utils'
-
-const defaultControllerProps = {
-  // container: getDocument()?.querySelector('h')
-}
-
-const defaultSceneProps = {
-  indicators: false,
-  triggerHook: 0,
-  duration: getWindowHeight()
-}
-
-interface ProgressEventsParams {
-  progress: number
-  event: {
-    state: string
-    type: string
-  }
-}
-
-export interface SceneProps {
-  sceneProps?: (Partial<XPSceneProps> & { enableParams: boolean }) | null
-  sceneParams?: ProgressEventsParams
-}
-
-interface ControllerProps {
-  children: Array<ReactElement<SceneProps>> | ReactElement<SceneProps>
-}
-
-const ReactScrollMagic = ({
-  children
-}: ControllerProps) => {
-  const { state } = useStoreContext()
-
-  const renderChildren = Children.map(children, (item, index) => {
-    const sceneProps = {
-      ...defaultSceneProps,
-      pin: state?.clientType === CLIENT_TYPE.PC,
-      ...item.props.sceneProps
-    }
-    if (sceneProps.enableParams) {
-      const {
-        enableParams,
-        ...rest
-      } = sceneProps
-      return (
-        <Scene
-          {...rest}
-        >
-          {
-            (progress: number, event: { state: string }) => {
-              return <div>
-                {
-                  cloneElement(item, {
-                    ...item.props,
-                    sceneParams: {
-                      progress,
-                      event
-                    }
-                  })
-                }
-              </div>
-            }
-          }
-        </Scene>
-      )
-    }
-    return (
-      <Scene
-        {...sceneProps}
-      >
-        <div>
-          {item}
-        </div>
-      </Scene>
-    )
-  })
-
-  return (
-    <XPController {...defaultControllerProps}>
-      <div>
-        {renderChildren}
-      </div>
-    </XPController>
-  )
-}
-
-export default ReactScrollMagic
-```
-
-使用时：
-
-web/pages/p7/render.tsx
-
-```tsx
-import ReactScrollMagic from '@/components/reactScrollMagic';
-import { getWindowHeight } from '@/utils';
-
-<ReactScrollMagic>
-   <Sepa
-      sceneProps={{
-         enableParams: true,
-         duration: getWindowHeight() * 2 // 总共停 2 屏高度
-      }}
-   />
-</ReactScrollMagic>;
-```
-
-web/pages/p7/components/sepa/index.tsx
-
-```tsx
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import classNames from 'classnames'
-import { Tween, PlayState } from 'react-gsap'
-
-import { l } from '@/components/lazyLoader'
-import ModelLeftText from '@/components/modelLeftText'
-import { SceneProps } from '@/components/reactScrollMagic'
-import AnimationBg from '@/components/animationBg'
-
-import useTmpComponent from '@/hooks/useTmpComponent'
-
-import { getAnimateProgresses } from '@/utils/animate'
-
-import styles from './index.module.less'
-
-const Index = ({
-  sceneParams
-}: SceneProps) => {
-  const {
-    progress = 0
-  } = sceneParams || {}
-  const { t } = useTranslation()
-  const getValue = (param: string) => t(`p7.sepa.${param}`)
-
-  const { api, Slot } = useTmpComponent()
-
-  const [animationTextProgress] = getAnimateProgresses(progress, [
-    {
-      start: 1 / 2, // 滚动到一半的时候才开始动效
-      duration: 1 / 2 // 动效的持续百分比
-    }
-  ])
-
-  return (
-    <l.div
-      src="/public/p7/sepa/p7-p4-1.jpg"
-      minSrcSet="/public/p7/sepa/p7-p4-1@mini.jpg"
-      srcSet="/public/p7/sepa/p7-p4-1@2x.jpg"
-      className={classNames('global-full-page-with-top-menu', styles.container)}
-    >
-      <Slot
-        modelType='P7'
-        pageType='SEPA'
-        buttonType='Arrow'
-        itemList={[{
-          imgList: [{
-            src: '/public/p7/d3/P7-d3-1.png',
-            srcSet: '/public/p7/d3/P7-d3-1@2x.jpg'
-          }],
-          background: 'linear-gradient(133deg, #343538 0%, #000102 100%)',
-          textData: {
-            topSubTitle: t('p7.d3.topSubTitle1'),
-            title: t('p7.d3.title1'),
-            subTitle: t('p7.d3.subTitle1')
-          }
-        }, {
-          imgList: [{
-            src: '/public/p7/d3/P7-d3-2.jpg',
-            srcSet: '/public/p7/d3/P7-d3-2@2x.jpg'
-          }],
-          background: 'linear-gradient(133deg, #343538 0%, #000102 100%)',
-          textData: {
-            topSubTitle: t('p7.d3.topSubTitle2'),
-            title: t('p7.d3.title2'),
-            subTitle: t('p7.d3.subTitle2')
-          }
-        }]}
-      />
-      <div ref={trackRef} className={classNames('body', styles.body)}>
-        <ModelLeftText
-          topSubTitle={getValue('topSubTitle')}
-          title={getValue('title')}
-          subTitle={getValue('subTitle')}
-          shortDesc={getValue('shortDesc')}
-          buttonProps={{
-            onClick: () => {
-              api.current?.open()
-            },
-            type: 'ghost'
-          }}
-        />
-      </div>
-      {
-        animationTextProgress > 0 && <AnimationBg type={2} className={styles.animationBg}>
-          <Tween
-            from={{
-              scale: 40
-            }}
-            totalProgress={animationTextProgress}
-            playState={PlayState.pause}
-          >
-            <div className={styles.animationText}>
-              {/* 这里所有国家都是这个，不需要国际化 */}
-              XPILOT
-            </div>
-          </Tween>
-        </AnimationBg>
-      }
-    </l.div>
-  )
-}
-
-export default Index
-```
-
-#### react-gsap
-
-后期需要实现 `切屏 + 固定页面` 的效果，暂未实现
-
-```tsx
-import React, { Children, cloneElement, useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import produce from 'immer';
-
-import { getDocument } from '@/utils';
-
-if (getDocument()) {
-   import('gsap/ScrollTrigger').then((component) => {
-      const ScrollTrigger = component.default;
-      gsap.registerPlugin(ScrollTrigger);
-   });
-}
-const ReactScrollMagic = ({ children }) => {
-   const revealRefs = useRef([]);
-   const [updateParams, setUpdateParams] = useState([]);
-   revealRefs.current = [];
-
-   useEffect(() => {
-      revealRefs.current.forEach((el, index) => {
-         gsap.from(el, {
-            scrollTrigger: {
-               trigger: el,
-               pin: true,
-               start: 'top top',
-               end: '+=300%',
-               markers: true,
-               anticipatePin: 2, // 滑动过快时的“防抖”参数
-               onUpdate: (self) => {
-                  console.log(
-                     self,
-                     'progress:',
-                     self.isActive,
-                     self.progress.toFixed(3),
-                     'direction:',
-                     self.direction,
-                     'velocity',
-                     self.getVelocity()
-                  );
-                  const { progress, isActive } = self;
-                  setUpdateParams(
-                     produce((draftState) => {
-                        draftState[index] = {
-                           progress,
-                           isActive
-                        };
-                     })
-                  );
-               }
-            }
-         });
-      });
-   }, []);
-
-   const addToRefs = (el, index) => {
-      if (el && !revealRefs.current.includes(el)) {
-         revealRefs.current[index] = el;
-      }
-      console.log(revealRefs.current);
-   };
-
-   return Children.map(children, (item, index) => {
-      // const sceneProps = {
-      //   ...defaultSceneProps,
-      //   ...item.props.sceneProps
-      // }
-      return (
-         <div ref={(el) => addToRefs(el, index)}>
-            {cloneElement(item, {
-               ...item.props,
-               sceneParams: updateParams[index] || {}
-            })}
-         </div>
-      );
-   });
-};
-
-export default ReactScrollMagic;
-```
 
 ### 运行效果
 
@@ -1947,6 +1947,16 @@ export default Index
 ```
 
 ### 运行效果
+
+#### pixi-apngAndGif
+
+#### ogv.js
+
+#### video
+
+见 `懒加载` 运行效果
+
+#### jsmpeg
 
 ### 优化
 
@@ -2843,7 +2853,7 @@ const useDisplayerModal = function<T>(Component: ComponentType<T>) {
 export default useDisplayerModal;
 ```
 
-## 实现效果
+## 运行效果
 
 # 其他
 
@@ -2864,11 +2874,11 @@ export default useDisplayerModal;
 import { memoize } from 'lodash';
 
 type loadScriptOptions = Partial<Omit<HTMLScriptElement, 'src' | 'async'>> & {
-  attributesMap?: {
-    [key: string]: any
-  }
-  [key: string]: any
-}
+   attributesMap?: {
+      [key: string]: any;
+   };
+   [key: string]: any;
+};
 
 // 异步加载单个脚本
 async function loadSingleScript(src: string, options: loadScriptOptions = {}) {
@@ -2980,6 +2990,8 @@ const useScrollDirection = (target: Target, shouldUpdate?: ScrollListenControlle
 export default useScrollDirection
 ```
 
+### 运行效果
+
 ## set-cookie 失效
 
 UC 浏览器下服务器端设置 set-cookie 失效即 csrf token 设置失败，进而接口请求失败，原因未知
@@ -3065,7 +3077,7 @@ export const getAnimateProgresses = (progress: number, options: GetAnimateProgre
    );
 ```
 
-## cdn 全局链接替换
+## cdn 链接替换
 
 ### 需求背景
 
@@ -3165,7 +3177,7 @@ fsExtra.mkdirpSync(path.resolve(__dirname, '../dist/node_modules'), {
 shelljs.exec('cp -r node_modules/xp-react-scrollmagic dist/node_modules/xp-react-scrollmagic');
 ```
 
-## 热更新失败
+## dangerouslySetInnerHTML 编译更新失效
 
 ### 需求背景
 
