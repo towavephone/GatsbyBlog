@@ -1,0 +1,54 @@
+body {
+  background: gray;
+  margin: 0;
+}
+
+.fullPage {
+  height: 100vh;
+}
+
+.pageContainer {
+  height: 100vh;
+  background: green;
+  position: relative;
+
+  .animationBg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    .animationText {
+      font-size: 190px;
+      line-height: 200px;
+      color: #fff;
+      position: absolute;
+      transform-origin: 65px 50%;
+
+      // @supports 规则的支持是从 Edge12 浏览器开始的，不支持 IE
+      @supports (not (height: fit-content)) and (not (inset: 0)) {
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      @supports (height: fit-content) and (not (inset: 0)) {
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        width: fit-content;
+        height: fit-content;
+      }
+
+      @supports (height: fit-content) and (inset: 0) {
+        inset: 0;
+        margin: auto;
+        width: fit-content;
+        height: fit-content;
+      }
+    }
+  }
+}

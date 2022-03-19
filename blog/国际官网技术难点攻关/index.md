@@ -960,6 +960,14 @@ export default ReactScrollMagic;
 
 ### 运行效果
 
+#### react-scrollmagic
+
+[fix-page-scroll-display-react-scrollmagic](embedded-codesandbox://international-official-website-technical-difficulties/fix-page-scroll-display-react-scrollmagic?view=preview)
+
+#### react-gsap
+
+[fix-page-scroll-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/fix-page-scroll-display-react-gsap?view=preview)
+
 ## 视频进度同步 / 缩放动效
 
 ### 需求背景
