@@ -1433,6 +1433,8 @@ export const evaluateCalc = (expression: string, container = getDocument()?.body
 
 ### 运行效果
 
+<!-- [video-sync-scale-play](embedded-codesandbox://international-official-website-technical-difficulties/video-sync-scale-play?view=preview) -->
+
 ## 序列帧滚动控制
 
 ### 需求背景
@@ -1958,13 +1960,19 @@ export default Index
 
 #### pixi-apngAndGif
 
+[video-frame-scroll-control-pixi](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-pixi?view=preview)
+
 #### ogv.js
+
+<!-- [video-frame-scroll-control-ogv](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-ogv?view=preview) -->
 
 #### video
 
 见 `懒加载` 运行效果
 
 #### jsmpeg
+
+<!-- [video-frame-scroll-control-jsmpeg](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-jsmpeg?view=preview) -->
 
 ### 优化
 
@@ -2579,6 +2587,10 @@ return (
 
 ## 运行效果
 
+### 延迟滚动
+
+<!-- [swiper-delay-scroll](embedded-codesandbox://international-official-website-technical-difficulties/swiper-delay-scroll?view=preview) -->
+
 # 懒加载
 
 ## 需求背景
@@ -2746,6 +2758,8 @@ return (
 
 ## 运行效果
 
+<!-- [lazy-load-vanilla-lazyload](embedded-codesandbox://international-official-website-technical-difficulties/lazy-load-vanilla-lazyload?view=preview) -->
+
 ## 优化方向
 
 1. 编译原理相关：利用 ts-morph、ts-morpher 自动导入 lazyloader 的 lazyElement 的 div、video、img 组件
@@ -2862,6 +2876,8 @@ export default useDisplayerModal;
 ```
 
 ## 运行效果
+
+<!-- [antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/antd-modal-hook?view=preview) -->
 
 # 其他
 
@@ -3000,6 +3016,8 @@ export default useScrollDirection
 
 ### 运行效果
 
+<!-- [use-scroll-direction-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-scroll-direction-hook?view=preview) -->
+
 ## set-cookie 失效
 
 UC 浏览器下服务器端设置 set-cookie 失效即 csrf token 设置失败，进而接口请求失败，原因未知
@@ -3095,6 +3113,7 @@ public 下的所有文件都需要放到 cdn，减少服务器的压力同时访
 
 1. 动态变量：在 midway 后端设置可读变量然后注入到前端 window 变量中，但是不能解决 midway、css 的前缀问题
 2. 静态替换：在 build 阶段对所有的 /public 替换，但是目前运维不支持，运维只在 dev 环境中才能 build，需要运维解决
+3. 静态资源 hash 处理：需要由 webpack 接管去处理
 
 ### 核心代码
 
