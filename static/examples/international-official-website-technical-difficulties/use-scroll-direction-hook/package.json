@@ -12,7 +12,8 @@
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "antd": "4.19.3",
-    "@ant-design/icons": "4.7.0"
+    "@ant-design/icons": "4.7.0",
+    "ahooks": "^3.1.5"
   },
   "devDependencies": {
     "@types/react": "^17.0.4",

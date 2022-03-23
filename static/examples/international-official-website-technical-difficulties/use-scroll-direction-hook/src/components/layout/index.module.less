@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+
+  iframe {
+    pointer-events: none;
+  }
+}
+
+.fullPage {
+  height: 100vh;
+
+  &:nth-child(2n) {
+    background: blueviolet;
+  }
+
+  &:nth-child(2n + 1) {
+    background: green;
+  }
+}
+
+.text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}

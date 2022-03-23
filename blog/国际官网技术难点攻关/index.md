@@ -2877,7 +2877,7 @@ export default useDisplayerModal;
 
 ## 运行效果
 
-<!-- [antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/antd-modal-hook?view=preview) -->
+[antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/antd-modal-hook?view=preview)
 
 # 其他
 
@@ -3016,7 +3016,7 @@ export default useScrollDirection
 
 ### 运行效果
 
-<!-- [use-scroll-direction-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-scroll-direction-hook?view=preview) -->
+[use-scroll-direction-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-scroll-direction-hook?view=preview)
 
 ## set-cookie 失效
 
