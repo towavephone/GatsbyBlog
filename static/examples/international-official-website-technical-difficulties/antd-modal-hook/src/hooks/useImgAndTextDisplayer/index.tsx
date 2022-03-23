@@ -6,19 +6,19 @@ import useDisplayerModal from '../useDisplayerModal';
 
 import styles from './index.module.less';
 
-interface ImgAndTextDisplayer {
+interface ImgAndTextDisplayerProps {
   data: string[];
 }
 
-interface ModalBodyProps extends ImgAndTextDisplayer {
+interface ModalBodyProps extends ImgAndTextDisplayerProps {
   onCancel?: () => void;
 }
 
 const ImgAndTextDisplayer = (props: ModalBodyProps) => {
   return (
     <ol>
-      {props.data.map((item) => (
-        <li>{item}</li>
+      {props.data.map((item, index) => (
+        <li key={index}>{item}</li>
       ))}
     </ol>
   );
