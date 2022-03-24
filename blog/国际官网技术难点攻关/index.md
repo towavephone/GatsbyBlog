@@ -2589,7 +2589,7 @@ return (
 
 ### 延迟滚动
 
-<!-- [swiper-delay-scroll](embedded-codesandbox://international-official-website-technical-difficulties/swiper-delay-scroll?view=preview) -->
+[swiper-delay-scroll](embedded-codesandbox://international-official-website-technical-difficulties/swiper-delay-scroll?view=preview)
 
 # 懒加载
 
