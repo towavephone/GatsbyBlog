@@ -1,0 +1,73 @@
+@media screen and (min-width: 961px) {
+  .container {
+    height: 100%;
+    background: #000;
+
+    .closeIconContainer {
+      position: fixed;
+      right: 72px;
+      top: 36px;
+      font-size: 40px;
+      cursor: pointer;
+      color: #fff;
+      line-height: 1;
+
+      .hoverIcon {
+        display: none;
+      }
+
+      &:hover {
+        .hoverIcon {
+          display: inline-block;
+        }
+
+        .icon {
+          display: none;
+        }
+      }
+    }
+
+    .fullPage {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .displayer {
+      width: 1380px;
+      height: auto;
+    }
+  }
+}
+
+@media screen and (max-width: 960px) {
+  .container {
+    height: 100%;
+    background: #000;
+
+    .closeIconContainer {
+      position: fixed;
+      right: 5.33vw;
+      top: 5.33vw;
+      font-size: 8.53vw;
+      color: #fff;
+      line-height: 1;
+
+      .hoverIcon {
+        display: none;
+      }
+    }
+
+    .fullPage {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .displayer {
+      height: auto;
+    }
+  }
+}

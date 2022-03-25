@@ -2614,7 +2614,8 @@ return (
 5. 需要封装各种使用形式的组件，为此需要合理组织文件结构，需要实现的功能大致如下
 
 <table>
-   <tr>
+  <thead>
+    <tr>
       <th>UI 类型</th>
       <th>平台</th>
       <th>策略</th>
@@ -2622,27 +2623,29 @@ return (
       <th>传递属性</th>
       <th>代码示例</th>
    </tr>
-   <tr>
+  </thead>
+  <tbody>
+    <tr>
       <td rowspan="9">视频</td>
       <td rowspan="8">pc</td>
       <td>自动播放</td>
       <td>默认自动循环静音播放</td>
       <td>playStrategy = 'autoPlay'，默认不用传</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>点击播放</td>
       <td>点击循环静音播放、带自定义播放图标</td>
       <td>playStrategy = 'clickPlay'</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>按住播放</td>
       <td>按住循环播放、带自定义播放图标、带播放进度条显示</td>
       <td>playStrategy = 'pressHoldPlay'</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>点击视频弹窗播放</td>
       <td>短视频自动循环静音播放，点击短视频后弹窗自动播放长视频一次</td>
       <td>
@@ -2674,32 +2677,32 @@ return (
             longSrc=&quot;/public/p7/xmart-os/p7-p6-1@long.mp4&quot; // 不传则取 src
          /&gt;
       </td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>悬停播放</td>
       <td>鼠标悬浮循环静音播放视频，离开时回到初始状态</td>
       <td>playStrategy = 'mouseOverPlay'</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>进度控制</td>
       <td>控制视频进度</td>
       <td>playStrategy = 'progressControl'，传递 progress（百分比，以 1 为单位）控制视频进度</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>点击播放（带控制条，播放状态控制）</td>
       <td>点击后播放一次视频、自带控制条、初始播放状态控制</td>
       <td>playStrategy = 'clickPlayWithControl'，传递 playing 控制初始播放状态</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>进入视口播放一次</td>
       <td>完全 100% 看到视频从头开始播放一次（每次看到视频就会触发）</td>
       <td>playStrategy = 'inViewportPlay'</td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>h5</td>
       <td>点击图片弹窗播放</td>
       <td>
@@ -2738,27 +2741,28 @@ return (
          </ol>
       </td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td rowspan="2">图片</td>
       <td>pc</td>
       <td>正常展示</td>
       <td></td>
       <td></td>
       <td></td>
-   </tr>
-   <tr>
+    </tr>
+    <tr>
       <td>h5</td>
       <td>弹窗展示</td>
       <td>点击弹窗后展示，等比例放大，宽度自适应（弹窗图片的左右切换实现难度大，之后再做）</td>
       <td></td>
       <td></td>
-   </tr>
+    </tr>
+  </tbody>
 </table>
 
 ## 运行效果
 
-<!-- [lazy-load-vanilla-lazyload](embedded-codesandbox://international-official-website-technical-difficulties/lazy-load-vanilla-lazyload?view=preview) -->
+[lazy-load-vanilla-lazyload](embedded-codesandbox://international-official-website-technical-difficulties/lazy-load-vanilla-lazyload?view=preview)
 
 ## 优化方向
 
@@ -2877,7 +2881,7 @@ export default useDisplayerModal;
 
 ## 运行效果
 
-[antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/antd-modal-hook?view=preview)
+[use-antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-antd-modal-hook?view=preview)
 
 # 其他
 

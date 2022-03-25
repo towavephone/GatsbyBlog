@@ -44,6 +44,8 @@ module.exports = {
       // 打印运行配置
       // const fs = require('fs');
       // fs.writeFileSync(`config-${process.env.NODE_ENV}.json`, JSON.stringify(config, null, 2));
+      // 使用 postcss.config.js
+      require('react-app-rewire-postcss')(config, true /* any truthy value will do */);
 
       return config;
     }
