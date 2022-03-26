@@ -1964,15 +1964,17 @@ export default Index
 
 #### ogv.js
 
-<!-- [video-frame-scroll-control-ogv](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-ogv?view=preview) -->
+[video-frame-scroll-control-ogv](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-ogv?view=preview)
 
 #### video
 
-见 `懒加载` 运行效果
+利用 `懒加载` 功能写出的进度控制如下：
+
+[video-frame-scroll-control-video](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-video?view=preview)
 
 #### jsmpeg
 
-<!-- [video-frame-scroll-control-jsmpeg](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-jsmpeg?view=preview) -->
+[video-frame-scroll-control-jsmpeg](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-jsmpeg?view=preview)
 
 ### 优化
 
