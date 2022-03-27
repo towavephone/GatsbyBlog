@@ -1,0 +1,115 @@
+@media screen and (min-width: 960px) {
+  .container {
+    position: relative;
+
+    :global {
+      .text-display-title,
+      .text-display-sub-title {
+        font-family: BasisGrotesque-Regular, BasisGrotesque;
+      }
+
+      .close-icon {
+        font-size: 40px;
+      }
+
+      .text-display-sub-title-container {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .topSubTitle {
+      font-size: 32px;
+      line-height: 40px;
+    }
+
+    .title {
+      margin-top: 32px;
+      font-size: 120px;
+      font-family: FuturaBT-BoldItalic, FuturaBT;
+      line-height: 100px;
+      letter-spacing: -5px;
+    }
+
+    .subTitle {
+      margin-top: 32px;
+      font-size: 18px;
+      line-height: 26px;
+    }
+
+    .shortDesc {
+      margin-top: 24px;
+      color: #969696;
+      font-size: 18px;
+      line-height: 26px;
+    }
+
+    .button {
+      margin-top: 48px;
+      padding: 0 40px;
+    }
+  }
+}
+
+@media screen and (max-width: 960px) {
+  .container {
+    text-align: center;
+
+    :global {
+      .text-display-title,
+      .text-display-sub-title {
+        font-family: BasisGrotesque-Regular, BasisGrotesque;
+      }
+
+      .close-icon {
+        font-size: 5.33vw;
+        top: -5.73vw;
+        left: 8vw;
+      }
+
+      .text-display-sub-title-container {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .topSubTitle {
+      font-size: 4.27vw;
+      line-height: 5.33vw;
+    }
+
+    .title {
+      font-family: FuturaBT-BoldItalic, FuturaBT;
+      font-size: 12vw;
+      line-height: 10.93vw;
+      margin-top: 3.2vw;
+      letter-spacing: -0.67vw;
+    }
+
+    .subTitle {
+      margin-top: 3.2vw;
+      font-size: 3.2vw;
+      line-height: 4.27vw;
+    }
+
+    .shortDesc {
+      margin-top: 6.4vw;
+      color: #3b3c48;
+      font-size: 3.2vw;
+      line-height: 4.27vw;
+    }
+
+    .button {
+      margin-top: 8.53vw;
+      width: 32.53vw;
+      height: 11.73vw;
+      border-radius: 11.73vw;
+      font-size: 3.73vw;
+      line-height: 4.8vw;
+    }
+  }
+}

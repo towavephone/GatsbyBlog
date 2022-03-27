@@ -1433,7 +1433,7 @@ export const evaluateCalc = (expression: string, container = getDocument()?.body
 
 ### 运行效果
 
-<!-- [video-sync-scale-play](embedded-codesandbox://international-official-website-technical-difficulties/video-sync-scale-play?view=preview) -->
+[video-sync-scale-play](embedded-codesandbox://international-official-website-technical-difficulties/video-sync-scale-play?view=preview)
 
 ## 序列帧滚动控制
 
@@ -2169,6 +2169,8 @@ module.exports = {
 
 ## 语言动态加载
 
+利用 `require.context` 动态读取目录下的文件内容，实现动态加载语言配置、自定义前缀功能
+
 ### 目录结构
 
 ```
@@ -2290,7 +2292,9 @@ const getValue = (param: string) => t(`p7.appDownload.${param}`);
 
 ### 核心代码
 
-```ts
+见标红部分代码：
+
+```ts{120-140}
 const { join } = require('path')
 const { getFeDir } = require('ssr-server-utils')
 const fs = require('fs')
@@ -3123,9 +3127,11 @@ public 下的所有文件都需要放到 cdn，减少服务器的压力同时访
 
 ### 核心代码
 
+以下是 `静态替换` 的核心代码，见标红部分的核心代码
+
 scripts/build.js
 
-```ts
+```ts{48-64}
 const shelljs = require('shelljs');
 const fsExtra = require('fs-extra');
 const path = require('path');

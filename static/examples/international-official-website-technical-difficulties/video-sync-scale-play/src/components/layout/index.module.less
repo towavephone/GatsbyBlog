@@ -1,0 +1,105 @@
+@media screen and (min-width: 960px) and (max-width: 1920px) {
+  html {
+    font-size: calc(12px + 2 * (100vw - 960px) / 960);
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+body iframe {
+  pointer-events: none;
+}
+
+.fullPage {
+  height: 100vh;
+}
+
+.player {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+:global {
+  // 挪威站专用布局策略，主要区别在于移动端默认不是满屏高度
+  // 针对国际站的 Learn More、MORE OPTIONS、P7 SPEC 页面特殊处理
+  .full-page,
+  .full-page-with-top-menu {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    @media screen and (min-width: 960px) {
+      height: 100vh;
+    }
+
+    .body {
+      width: 1380px;
+
+      @media screen and (max-width: 960px) {
+        width: 100%;
+      }
+    }
+  }
+
+  .full-page-with-top-menu {
+    @media screen and (min-width: 960px) {
+      padding-top: var(--top-menu-height);
+
+      // 图片最大高度不超过去掉顶部菜单栏之后的 90%，且垂直居中
+      .auto-fit-img {
+        display: flex;
+        align-items: center;
+        justify-self: center;
+
+        img {
+          max-height: calc((100vh - var(--top-menu-height)) * 0.9);
+        }
+      }
+    }
+  }
+
+  // 国际站专用布局策略，主要区别在于移动端默认是满屏高度
+  .global-full-page,
+  .global-full-page-with-top-menu {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    height: 100vh;
+
+    .body {
+      width: 1380px;
+
+      @media screen and (max-width: 960px) {
+        width: 100%;
+      }
+    }
+  }
+
+  .global-full-page-with-top-menu {
+    padding-top: var(--top-menu-height);
+
+    // 图片最大高度不超过去掉顶部菜单栏之后的 90%，且垂直居中
+    .auto-fit-img {
+      display: flex;
+      align-items: center;
+      justify-self: center;
+
+      img {
+        max-height: calc((100vh - var(--top-menu-height)) * 0.9);
+      }
+    }
+  }
+}

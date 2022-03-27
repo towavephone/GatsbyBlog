@@ -1,0 +1,147 @@
+@media screen and (min-width: 961px) {
+  .body {
+    position: relative;
+    height: 686px;
+    transform-origin: 100% 100%;
+  }
+
+  .displayerContainer {
+    .displayerContainer1,
+    .displayerContainer2,
+    .displayerContainer3 {
+      position: absolute;
+      z-index: -1;
+    }
+
+    .displayer {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .displayerContainer1 {
+      top: 162px;
+      width: 376px;
+      height: 431px;
+    }
+
+    .displayerContainer2 {
+      top: 0;
+      right: 54px;
+      width: 334px;
+      height: 245px;
+    }
+
+    .displayerContainer3 {
+      bottom: 0;
+      right: 0;
+      z-index: 2;
+      transform-origin: 100% 100%;
+      width: 454px;
+      height: 256px;
+
+      picture {
+        width: 100%;
+        height: 100%;
+
+        img {
+          max-height: fit-content;
+          object-fit: fill;
+        }
+      }
+    }
+  }
+
+  .titleContainer {
+    margin-top: 106px;
+    margin-right: 60px;
+
+    :global {
+      .close-icon {
+        left: 320px;
+        top: -16px;
+      }
+
+      .title {
+        width: 642px;
+      }
+
+      .sub-title {
+        width: 510px;
+      }
+    }
+  }
+
+  .button {
+    display: block;
+    margin: auto;
+    margin-top: 48px;
+    position: relative;
+    left: -30px;
+    padding: 0 40px;
+  }
+}
+
+@media screen and (max-width: 960px) {
+  .body {
+    padding: 16vw 5.33vw;
+
+    .button {
+      display: block;
+      margin: auto;
+      margin-top: 8vw;
+      width: 32.53vw;
+      height: 11.73vw;
+      border-radius: 11.73vw;
+      font-size: 3.73vw;
+      line-height: 4.8vw;
+    }
+  }
+
+  .displayerContainer {
+    height: 120.4vw;
+    position: relative;
+    margin-top: 6.4vw;
+    z-index: 1;
+
+    .displayerContainer1,
+    .displayerContainer2,
+    .displayerContainer3 {
+      position: absolute;
+    }
+
+    .displayer {
+      width: 100%;
+      height: 100%;
+    }
+
+    .displayerContainer1 {
+      width: 45.07vw;
+      height: 51.47vw;
+      z-index: 1;
+    }
+
+    .displayerContainer2 {
+      top: 36.53vw;
+      right: 0;
+      width: 63.33vw;
+      height: 46.53vw;
+    }
+
+    .displayerContainer3 {
+      bottom: 0;
+      transform-origin: 100% 100%;
+      width: 63.33vw;
+      height: 46.53vw;
+      z-index: -1;
+    }
+  }
+
+  .titleContainer {
+    :global {
+      .close-icon {
+        display: none;
+      }
+    }
+  }
+}
