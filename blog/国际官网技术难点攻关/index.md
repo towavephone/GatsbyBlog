@@ -260,8 +260,6 @@ export const defaultCloseIcon = (<XIcon
   name='title-x'
 />)
 
-// TODO 移动端关闭动效
-
 const AnimationTitle = (props: AnimationTitleProps) => {
   const {
     className,
@@ -1938,7 +1936,6 @@ const Index = ({
               shortDesc={getValue('shortDesc')}
               buttonProps={{
                 onClick: () => {
-                  // TODO 这里是用learn more还是用arrow
                   api?.current?.open()
                 },
                 type: 'ghost'
@@ -2553,7 +2550,7 @@ const handleContainerWheel = (element) => {
             if (parseScrollDifference === 0 && parseSpos === 0 && current === swiperRef?.current?.slides?.length - 1) {
                return
             }
-            // TODO 滑动到第一个幻灯片的顶部，暂不处理，暂时没有首屏有滚动条的情况
+            // 滑动到第一个幻灯片的顶部，暂不处理，暂时没有首屏有滚动条的情况
          }
          element.removeEventListener('wheel', handleWheel)
          element.removeEventListener('scroll', handleScroll)
