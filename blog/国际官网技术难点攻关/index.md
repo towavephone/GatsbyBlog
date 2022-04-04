@@ -647,7 +647,7 @@ export default CarConfiguration;
 
 #### react-scrollmagic
 
-web/components/reactScrollMagic/index.Stsx
+web/components/reactScrollMagic/index.tsx
 
 ```tsx
 import React, { Children, cloneElement, ReactElement } from 'react'
