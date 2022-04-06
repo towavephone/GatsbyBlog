@@ -1912,4 +1912,653 @@ while True:
         break
 ```
 
-// TODO Python 入门学习待完成：https://www.liaoxuefeng.com/wiki/1016959663602400/1017328525009056
+# 函数式编程
+
+## 高阶函数
+
+### 变量可以指向函数
+
+```py
+>>> f = abs
+>>> f(-10)
+10
+```
+
+### 函数名也是变量
+
+```py
+>>> abs = 10
+>>> abs(-10)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: 'int' object is not callable
+```
+
+> 由于 abs 函数实际上是定义在 `import builtins` 模块中的，所以要让修改 abs 变量的指向在其它模块也生效，要用 `import builtins; builtins.abs = 10`。
+
+### 传入函数
+
+一个函数就可以接收另一个函数作为参数，这种函数就称之为高阶函数
+
+```py
+def add(x, y, f):
+    return f(x) + f(y)
+
+print(add(-5, 6, abs))
+```
+
+### map
+
+```py
+>>> def f(x):
+...     return x * x
+...
+>>> r = map(f, [1, 2, 3, 4, 5, 6, 7, 8, 9])
+>>> list(r)
+[1, 4, 9, 16, 25, 36, 49, 64, 81]
+>>> list(map(str, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
+['1', '2', '3', '4', '5', '6', '7', '8', '9']
+```
+
+### reduce
+
+```py
+reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)
+```
+
+```py
+from functools import reduce
+
+DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+
+def str2int(s):
+    def fn(x, y):
+        return x * 10 + y
+    def char2num(s):
+        return DIGITS[s]
+    return reduce(fn, map(char2num, s))
+```
+
+还可以用 lambda 函数进一步简化成：
+
+```py
+from functools import reduce
+
+DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+
+def char2num(s):
+    return DIGITS[s]
+
+def str2int(s):
+    return reduce(lambda x, y: x * 10 + y, map(char2num, s))
+```
+
+### filter
+
+```py
+def is_odd(n):
+    return n % 2 == 1
+
+list(filter(is_odd, [1, 2, 4, 5, 6, 9, 10, 15]))
+# 结果: [1, 5, 9, 15]
+```
+
+注意到 filter() 函数返回的是一个 Iterator，也就是一个惰性序列，所以要强迫 filter() 完成计算结果，需要用 list() 函数获得所有结果并返回 list。
+
+#### 用 filter 求素数
+
+```py
+def _odd_iter():
+    n = 1
+    while True:
+        n = n + 2
+        yield n
+
+def _not_divisible(n):
+    # def _can_be_devided(x):
+    #    return x % n > 0
+    return lambda x: x % n > 0
+
+def primes():
+    yield 2
+    it = _odd_iter() # 初始序列
+    while True:
+        n = next(it) # 返回序列的第一个数
+        yield n
+        it = filter(_not_divisible(n), it) # 构造新序列
+
+# 打印 1000 以内的素数:
+for n in primes():
+    if n < 1000:
+        print(n)
+    else:
+        break
+```
+
+### sort
+
+```py
+>>> sorted([36, 5, -12, 9, -21])
+[-21, -12, 5, 9, 36]
+>>> sorted([36, 5, -12, 9, -21], key=abs) # 自定义排序
+[5, 9, -12, -21, 36]
+>>> sorted(['bob', 'about', 'Zoo', 'Credit']) # 按照 ASCII 的大小比较
+['Credit', 'Zoo', 'about', 'bob']
+>>> sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower) # 忽略大小写的排序
+['about', 'bob', 'Credit', 'Zoo']
+>>> sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower, reverse=True) # 倒序
+['Zoo', 'Credit', 'bob', 'about']
+```
+
+## 返回函数
+
+### 函数作为返回值
+
+高阶函数除了可以接受函数作为参数外，还可以把函数作为结果值返回。
+
+```py
+def lazy_sum(*args):
+    def sum():
+        ax = 0
+        for n in args:
+            ax = ax + n
+        return ax
+    return sum
+
+>>> f = lazy_sum(1, 3, 5, 7, 9)
+>>> f
+<function lazy_sum.<locals>.sum at 0x101c6ed90>
+>>> f()
+25
+```
+
+每次调用都会返回一个新的函数，即使传入相同的参数，f1() 和 f2() 的调用结果互不影响。
+
+```py
+>>> f1 = lazy_sum(1, 3, 5, 7, 9)
+>>> f2 = lazy_sum(1, 3, 5, 7, 9)
+>>> f1==f2
+False
+```
+
+### 闭包
+
+```py
+def count():
+    fs = []
+    for i in range(1, 4):
+        def f():
+             return i*i
+        fs.append(f)
+    return fs
+
+f1, f2, f3 = count()
+
+>>> f1()
+9
+>>> f2()
+9
+>>> f3()
+9
+```
+
+类似于 js，python 也有闭包，解决方式同 js
+
+```py
+def count():
+    def f(j):
+        def g():
+            return j*j
+        return g
+    fs = []
+    for i in range(1, 4):
+        fs.append(f(i)) # f(i) 立刻被执行，因此 i 的当前值被传入 f()
+    return fs
+
+>>> f1, f2, f3 = count()
+>>> f1()
+1
+>>> f2()
+4
+>>> f3()
+9
+```
+
+### nonlocal
+
+使用闭包，就是内层函数引用了外层函数的局部变量。如果只是读外层变量的值，我们会发现返回的闭包函数调用一切正常：
+
+```py
+def inc():
+    x = 0
+    def fn():
+        # 仅读取 x 的值:
+        return x + 1
+    return fn
+
+f = inc()
+print(f()) # 1
+print(f()) # 1
+```
+
+但是，如果对外层变量赋值，由于 Python 解释器会把 x 当作函数 fn() 的局部变量，它会报错：
+
+```py
+def inc():
+    x = 0
+    def fn():
+        # nonlocal x # 去掉注释可以正常运行
+        x = x + 1 # 不加 nonlocal，这里会报错，会被当成 fn 的局部变量
+        return x
+    return fn
+
+f = inc()
+print(f()) # 1
+print(f()) # 2
+```
+
+原因是 x 作为局部变量并没有初始化，直接计算 x+1 是不行的。但我们其实是想引用 inc() 函数内部的 x，所以需要在 fn() 函数内部加一个 nonlocal x 的声明。加上这个声明后，解释器把 fn() 的 x 看作外层函数的局部变量，它已经被初始化了，可以正确计算 x+1。
+
+## 匿名函数
+
+```py
+>>> list(map(lambda x: x * x, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
+[1, 4, 9, 16, 25, 36, 49, 64, 81]
+```
+
+匿名函数类似于
+
+```py
+def f(x):
+    return x * x
+```
+
+匿名函数有个限制，就是只能有一个表达式，不用写 return，返回值就是该表达式的结果。
+
+用匿名函数有个好处，因为函数没有名字，不必担心函数名冲突。此外，匿名函数也是一个函数对象，也可以把匿名函数赋值给一个变量，再利用变量来调用该函数：
+
+```py
+>>> f = lambda x: x * x
+>>> f
+<function <lambda> at 0x101c6ef28>
+>>> f(5)
+25
+```
+
+同样，也可以把匿名函数作为返回值返回，比如：
+
+```py
+def build(x, y):
+    return lambda: x * x + y * y
+```
+
+## 装饰器
+
+由于函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数。
+
+```py
+>>> def now():
+...     print('2015-3-25')
+...
+>>> f = now
+>>> f()
+2015-3-25
+```
+
+函数对象有一个 `__name__` 属性，可以拿到函数的名字：
+
+```py
+>>> now.__name__
+'now'
+>>> f.__name__
+'now'
+```
+
+假设我们要增强 now() 函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改 now() 函数的定义，这种在代码运行期间动态增加功能的方式，称之为“装饰器”（Decorator）。
+
+```py
+def log(func):
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+```
+
+观察上面的 log，因为它是一个 decorator，所以接受一个函数作为参数，并返回一个函数。我们要借助 Python 的 @ 语法，把 decorator 置于函数的定义处：
+
+```py
+@log
+def now():
+    print('2015-3-25')
+```
+
+调用 now() 函数，不仅会运行 now() 函数本身，还会在运行 now() 函数前打印一行日志：
+
+```py
+>>> now()
+call now():
+2015-3-25
+```
+
+把 @log 放到 now() 函数的定义处，相当于执行了语句：
+
+```py
+now = log(now)
+```
+
+如果 decorator 本身需要传入参数，那就需要编写一个返回 decorator 的高阶函数，写出来会更复杂。比如，要自定义 log 的文本：
+
+```py
+def log(text):
+    def decorator(func):
+        def wrapper(*args, **kw):
+            print('%s %s():' % (text, func.__name__))
+            return func(*args, **kw)
+        return wrapper
+    return decorator
+```
+
+这个 3 层嵌套的 decorator 用法如下：
+
+```py
+@log('execute')
+def now():
+    print('2015-3-25')
+
+>>> now()
+execute now():
+2015-3-25
+```
+
+和两层嵌套的 decorator 相比，3 层嵌套的效果是这样的：
+
+```py
+>>> now = log('execute')(now)
+```
+
+我们来剖析上面的语句，首先执行 `log('execute')`，返回的是 decorator 函数，再调用返回的函数，参数是 now 函数，返回值最终是 wrapper 函数。
+
+以上两种 decorator 的定义都没有问题，但还差最后一步。因为我们讲了函数也是对象，它有 `__name__` 等属性，但你去看经过 decorator 装饰之后的函数，它们的 `__name__` 已经从原来的 now 变成了 wrapper：
+
+```py
+>>> now.__name__
+'wrapper'
+```
+
+因为返回的那个 wrapper() 函数名字就是 wrapper，所以，需要把原始函数的 `__name__` 等属性复制到 wrapper() 函数中，否则，有些依赖函数签名的代码执行就会出错。
+
+不需要编写 `wrapper.__name__ = func.__name__` 这样的代码，Python 内置的 functools.wraps 就是干这个事的，所以，一个完整的 decorator 的写法如下：
+
+```py
+import functools
+
+def log(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+```
+
+或者针对带参数的 decorator：
+
+```py
+import functools
+
+def log(text):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kw):
+            print('%s %s():' % (text, func.__name__))
+            return func(*args, **kw)
+        return wrapper
+    return decorator
+```
+
+## 偏函数
+
+```py
+>>> import functools
+>>> int2 = functools.partial(int, base=2)
+>>> int2('1000000')
+64
+>>> int2('1010101')
+85
+```
+
+所以，简单总结 functools.partial 的作用就是，把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数，调用这个新函数会更简单。
+
+注意到上面的新的 int2 函数，仅仅是把 base 参数重新设定默认值为 2，但也可以在函数调用时传入其他值：
+
+```py
+>>> int2('1000000', base=10)
+1000000
+```
+
+最后，创建偏函数时，实际上可以接收函数对象、`*args` 和 `**kw` 这 3 个参数，当传入：
+
+```py
+int2 = functools.partial(int, base=2)
+```
+
+实际上固定了 int() 函数的关键字参数 base，也就是：
+
+```py
+int2('10010')
+```
+
+相当于：
+
+```py
+kw = { 'base': 2 }
+int('10010', **kw)
+```
+
+# 模块
+
+使用模块有什么好处？
+
+最大的好处是大大提高了代码的可维护性。其次，编写代码不必从零开始。当一个模块编写完毕，就可以被其他地方引用。我们在编写程序的时候，也经常引用其他模块，包括 Python 内置的模块和来自第三方的模块。
+
+使用模块还可以避免函数名和变量名冲突。相同名字的函数和变量完全可以分别存在不同的模块中，因此，我们自己在编写模块时，不必考虑名字会与其他模块冲突。但是也要注意，尽量不要与内置函数名字冲突。点[这里](https://docs.python.org/3/library/functions.html#built-in-functions)查看 Python 的所有内置函数。
+
+如果不同的人编写的模块名相同怎么办？为了避免模块名冲突，Python 又引入了按目录来组织模块的方法，称为包（Package）。
+
+举个例子，一个 abc.py 的文件就是一个名字叫 abc 的模块，一个 xyz.py 的文件就是一个名字叫 xyz 的模块。
+
+现在，假设我们的 abc 和 xyz 这两个模块名字与其他模块冲突了，于是我们可以通过包来组织模块，避免冲突。方法是选择一个顶层包名，比如 mycompany，按照如下目录存放：
+
+```
+mycompany
+├─ __init__.py
+├─ abc.py
+└─ xyz.py
+```
+
+引入了包以后，只要顶层的包名不与别人冲突，那所有模块都不会与别人冲突。现在，abc.py 模块的名字就变成了 mycompany.abc，类似的，xyz.py 的模块名变成了 mycompany.xyz。
+
+请注意，每一个包目录下面都会有一个 `__init__.py` 的文件，这个文件是必须存在的，否则，Python 就把这个目录当成普通目录，而不是一个包。`__init__.py` 可以是空文件，也可以有 Python 代码，因为 `__init__.py` 本身就是一个模块，而它的模块名就是 mycompany。
+
+类似的，可以有多级目录，组成多级层次的包结构。比如如下的目录结构：
+
+```
+mycompany
+ ├─ web
+ │  ├─ __init__.py
+ │  ├─ utils.py
+ │  └─ www.py
+ ├─ __init__.py
+ ├─ abc.py
+ └─ utils.py
+```
+
+文件 www.py 的模块名就是 mycompany.web.www，两个文件 utils.py 的模块名分别是 mycompany.utils 和 mycompany.web.utils
+
+> 自己创建模块时要注意命名，不能和 Python 自带的模块名称冲突。例如，系统自带了 sys 模块，自己的模块就不可命名为 sys.py，否则将无法导入系统自带的 sys 模块。
+
+## 使用模块
+
+Python 本身就内置了很多非常有用的模块，只要安装完毕，这些模块就可以立刻使用。
+
+我们以内建的 sys 模块为例，编写一个 hello 的模块：
+
+```py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+' a test module '
+
+__author__ = 'Michael Liao'
+
+import sys
+
+def test():
+    args = sys.argv
+    if len(args)==1:
+        print('Hello, world!')
+    elif len(args)==2:
+        print('Hello, %s!' % args[1])
+    else:
+        print('Too many arguments!')
+
+if __name__=='__main__':
+    test()
+```
+
+第 1 行和第 2 行是标准注释，第 1 行注释可以让这个 hello.py 文件直接在 Unix/Linux/Mac 上运行，第 2 行注释表示 .py 文件本身使用标准 UTF-8 编码；
+
+第 4 行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；
+
+第 6 行使用 `__author__` 变量把作者写进去，这样当你公开源代码后别人就可以瞻仰你的大名；
+
+以上就是 Python 模块的标准文件模板，当然也可以全部删掉不写，但是，按标准办事肯定没错。
+
+后面开始就是真正的代码部分。
+
+你可能注意到了，使用 sys 模块的第一步，就是导入该模块：
+
+```py
+import sys
+```
+
+导入 sys 模块后，我们就有了变量 sys 指向该模块，利用 sys 这个变量，就可以访问 sys 模块的所有功能。
+
+sys 模块有一个 argv 变量，用 list 存储了命令行的所有参数。argv 至少有一个元素，因为第一个参数永远是该 .py 文件的名称，例如：
+
+运行 python3 hello.py 获得的 sys.argv 就是 `['hello.py']`；
+
+运行 python3 hello.py Michael 获得的 sys.argv 就是 `['hello.py', 'Michael']`。
+
+最后，注意到这两行代码：
+
+```py
+if __name__=='__main__':
+    test()
+```
+
+当我们在命令行运行 hello 模块文件时，Python 解释器把一个特殊变量 `__name__` 置为 `__main__`，而如果在其他地方导入该 hello 模块时，if 判断将失败，因此，这种 if 测试可以让一个模块通过命令行运行时执行一些额外的代码，最常见的就是运行测试。
+
+我们可以用命令行运行 hello.py 看看效果：
+
+```
+$ python3 hello.py
+Hello, world!
+$ python3 hello.py Michael
+Hello, Michael!
+```
+
+如果启动 Python 交互环境，再导入 hello 模块：
+
+```
+$ python3
+Python 3.4.3 (v3.4.3:9b73f1c3e601, Feb 23 2015, 02:52:03)
+[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import hello
+>>>
+```
+
+导入时，没有打印 Hello, word!，因为没有执行 test() 函数。
+
+调用 hello.test() 时，才能打印出 Hello, word!：
+
+```py
+>>> hello.test()
+Hello, world!
+```
+
+### 作用域
+
+在一个模块中，我们可能会定义很多函数和变量，但有的函数和变量我们希望给别人使用，有的函数和变量我们希望仅仅在模块内部使用。在 Python 中，是通过 `_` 前缀来实现的。
+
+正常的函数和变量名是公开的（public），可以被直接引用，比如：abc，x123，PI 等；
+
+类似 `__xxx__` 这样的变量是特殊变量，可以被直接引用，但是有特殊用途，比如上面的 `__author__`，`__name__` 就是特殊变量，hello 模块定义的文档注释也可以用特殊变量 `__doc__` 访问，我们自己的变量一般不要用这种变量名；
+
+类似 `_xxx` 和 `__xxx` 这样的函数或变量就是非公开的（private），不应该被直接引用，比如 `_abc`，`__abc` 等；
+
+之所以我们说，private 函数和变量“不应该”被直接引用，而不是“不能”被直接引用，是因为 Python 并没有一种方法可以完全限制访问 private 函数或变量，但是，从编程习惯上不应该引用 private 函数或变量。
+
+private 函数或变量不应该被别人引用，那它们有什么用呢？请看例子：
+
+```py
+def _private_1(name):
+    return 'Hello, %s' % name
+
+def _private_2(name):
+    return 'Hi, %s' % name
+
+def greeting(name):
+    if len(name) > 3:
+        return _private_1(name)
+    else:
+        return _private_2(name)
+```
+
+我们在模块里公开 greeting() 函数，而把内部逻辑用 private 函数隐藏起来了，这样，调用 greeting() 函数不用关心内部的 private 函数细节，这也是一种非常有用的代码封装和抽象的方法，即：
+
+外部不需要引用的函数全部定义成 private，只有外部需要引用的函数才定义为 public。
+
+## 安装第三方模块
+
+安装 Pillow 的命令就是
+
+```
+pip install Pillow
+```
+
+### 安装常用模块
+
+推荐直接使用 [Anaconda](https://www.anaconda.com/products/distribution)，内置了许多非常有用的第三方库
+
+### 模块搜索路径
+
+当我们试图加载一个模块时，Python 会在指定的路径下搜索对应的 .py 文件，如果找不到，就会报错：
+
+```
+>>> import mymodule
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: No module named mymodule
+```
+
+默认情况下，Python 解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在 sys 模块的 path 变量中：
+
+```py
+>>> import sys
+>>> sys.path
+['', '/Library/Frameworks/Python.framework/Versions/3.6/lib/python36.zip', '/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6', ..., '/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages']
+```
+
+如果我们要添加自己的搜索目录，有两种方法：
+
+1. 直接修改 sys.path，添加要搜索的目录，但是运行结束后失效。
+
+   ```py
+   >>> import sys
+   >>> sys.path.append('/Users/michael/my_py_scripts')
+   ```
+
+2. 设置环境变量 PYTHONPATH，该环境变量的内容会被自动添加到模块搜索路径中。设置方式与设置 Path 环境变量类似。注意只需要添加你自己的搜索路径，Python 自己本身的搜索路径不受影响。
+
+// TODO Python 入门学习待完成
