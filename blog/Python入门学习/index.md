@@ -3749,4 +3749,1090 @@ class Student(object):
     __repr__ = __str__
 ```
 
+### `__iter__`
+
+如果一个类想被用于 for ... in 循环，类似 list 或 tuple 那样，就必须实现一个 `__iter__()` 方法，该方法返回一个迭代对象，然后，Python 的 for 循环就会不断调用该迭代对象的 `__next__()` 方法拿到循环的下一个值，直到遇到 StopIteration 错误时退出循环。
+
+我们以斐波那契数列为例，写一个 Fib 类，可以作用于 for 循环：
+
+```py
+class Fib(object):
+    def __init__(self):
+        self.a, self.b = 0, 1 # 初始化两个计数器 a，b
+
+    def __iter__(self):
+        return self # 实例本身就是迭代对象，故返回自己
+
+    def __next__(self):
+        self.a, self.b = self.b, self.a + self.b # 计算下一个值
+        if self.a > 100000: # 退出循环的条件
+            raise StopIteration()
+        return self.a # 返回下一个值
+```
+
+现在，试试把 Fib 实例作用于 for 循环：
+
+```py
+>>> for n in Fib():
+...     print(n)
+...
+1
+1
+2
+3
+5
+...
+46368
+75025
+```
+
+### `__getitem__`
+
+Fib 实例虽然能作用于 for 循环，看起来和 list 有点像，但是，把它当成 list 来使用还是不行，比如，取第 5 个元素：
+
+```py
+>>> Fib()[5]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: 'Fib' object does not support indexing
+```
+
+要表现得像 list 那样按照下标取出元素，需要实现 `__getitem__()` 方法：
+
+```py
+class Fib(object):
+    def __getitem__(self, n):
+        a, b = 1, 1
+        for x in range(n):
+            a, b = b, a + b
+        return a
+```
+
+现在，就可以按下标访问数列的任意一项了：
+
+```py
+>>> f = Fib()
+>>> f[0]
+1
+>>> f[1]
+1
+>>> f[2]
+2
+>>> f[3]
+3
+>>> f[10]
+89
+>>> f[100]
+573147844013817084101
+```
+
+但是 list 有个神奇的切片方法：
+
+```py
+>>> list(range(100))[5:10]
+[5, 6, 7, 8, 9]
+```
+
+对于 Fib 却报错。原因是 `__getitem__()` 传入的参数可能是一个 int，也可能是一个切片对象 slice，所以要做判断：
+
+```py
+class Fib(object):
+    def __getitem__(self, n):
+        if isinstance(n, int): # n 是索引
+            a, b = 1, 1
+            for x in range(n):
+                a, b = b, a + b
+            return a
+        if isinstance(n, slice): # n 是切片
+            start = n.start
+            stop = n.stop
+            if start is None:
+                start = 0
+            a, b = 1, 1
+            L = []
+            for x in range(stop):
+                if x >= start:
+                    L.append(a)
+                a, b = b, a + b
+            return L
+```
+
+现在试试 Fib 的切片：
+
+```py
+>>> f = Fib()
+>>> f[0:5]
+[1, 1, 2, 3, 5]
+>>> f[:10]
+[1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+```
+
+但是没有对 step 参数作处理：
+
+```py
+>>> f[:10:2]
+[1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+```
+
+也没有对负数作处理，所以，要正确实现一个 `__getitem__()` 还是有很多工作要做的。
+
+此外，如果把对象看成 dict，`__getitem__()` 的参数也可能是一个可以作 key 的 object，例如 str。
+
+与之对应的是 `__setitem__()` 方法，把对象视作 list 或 dict 来对集合赋值。最后，还有一个 `__delitem__()` 方法，用于删除某个元素。
+
+总之，通过上面的方法，我们自己定义的类表现得和 Python 自带的 list、tuple、dict 没什么区别，这完全归功于动态语言的“鸭子类型”，不需要强制继承某个接口。
+
+### `__getattr__`
+
+正常情况下，当我们调用类的方法或属性时，如果不存在，就会报错。比如定义 Student 类：
+
+```py
+class Student(object):
+
+    def __init__(self):
+        self.name = 'Michael'
+```
+
+调用 name 属性，没问题，但是，调用不存在的 score 属性，就有问题了：
+
+```py
+>>> s = Student()
+>>> print(s.name)
+Michael
+>>> print(s.score)
+Traceback (most recent call last):
+  ...
+AttributeError: 'Student' object has no attribute 'score'
+```
+
+错误信息很清楚地告诉我们，没有找到 score 这个 attribute。
+
+要避免这个错误，除了可以加上一个 score 属性外，Python 还有另一个机制，那就是写一个 `__getattr__()` 方法，动态返回一个属性。修改如下：
+
+```py
+class Student(object):
+
+    def __init__(self):
+        self.name = 'Michael'
+
+    def __getattr__(self, attr):
+        if attr=='score':
+            return 99
+```
+
+当调用不存在的属性时，比如 score，Python 解释器会试图调用 `__getattr__(self, 'score')` 来尝试获得属性，这样，我们就有机会返回 score 的值：
+
+```py
+class Student(object):
+
+    def __init__(self):
+        self.name = 'Michael'
+
+    def __getattr__(self, attr):
+        if attr=='score':
+            return 99
+```
+
+当调用不存在的属性时，比如 score，Python 解释器会试图调用 `__getattr__(self, 'score')` 来尝试获得属性，这样，我们就有机会返回 score 的值：
+
+```py
+>>> s = Student()
+>>> s.name
+'Michael'
+>>> s.score
+99
+```
+
+返回函数也是完全可以的：
+
+```py
+class Student(object):
+
+    def __getattr__(self, attr):
+        if attr=='age':
+            return lambda: 25
+```
+
+只是调用方式要变为：
+
+```py
+>>> s.age()
+25
+```
+
+注意，只有在没有找到属性的情况下，才调用 `__getattr__`，已有的属性，比如 name，不会在 `__getattr__` 中查找。
+
+此外，注意到任意调用如 s.abc 都会返回 None，这是因为我们定义的 `__getattr__` 默认返回就是 None。要让 class 只响应特定的几个属性，我们就要按照约定，抛出 AttributeError 的错误：
+
+```py
+class Student(object):
+
+    def __getattr__(self, attr):
+        if attr=='age':
+            return lambda: 25
+        raise AttributeError('\'Student\' object has no attribute \'%s\'' % attr)
+```
+
+这实际上可以把一个类的所有属性和方法调用全部动态化处理了，不需要任何特殊手段。
+
+这种完全动态调用的特性有什么实际作用呢？作用就是，可以针对完全动态的情况作调用。
+
+举个例子：
+
+现在很多网站都搞 REST API，比如新浪微博、豆瓣啥的，调用 API 的 URL 类似：
+
+- `http://api.server/user/friends`
+- `http://api.server/user/timeline/list`
+
+如果要写 SDK，给每个 URL 对应的 API 都写一个方法，那得累死，而且，API 一旦改动，SDK 也要改。
+
+利用完全动态的 `__getattr__`，我们可以写出一个链式调用：
+
+```py
+class Chain(object):
+
+    def __init__(self, path=''):
+        self._path = path
+
+    def __getattr__(self, path):
+        return Chain('%s/%s' % (self._path, path))
+
+    def __str__(self):
+        return self._path
+
+    __repr__ = __str__
+```
+
+试试：
+
+```py
+>>> Chain().status.user.timeline.list
+'/status/user/timeline/list'
+```
+
+这样，无论 API 怎么变，SDK 都可以根据 URL 实现完全动态的调用，而且，不随 API 的增加而改变！
+
+还有些 REST API 会把参数放到 URL 中，比如 GitHub 的 API：
+
+```
+GET /users/:user/repos
+```
+
+调用时，需要把 :user 替换为实际用户名。如果我们能写出这样的链式调用：
+
+```py
+Chain().users('michael').repos
+```
+
+就可以非常方便地调用 API 了。
+
+```py
+class Chain(object):
+    def __init__(self, path=''):
+       self.__path = path
+
+   def __getattr__(self, path):
+       return Chain('%s/%s' % (self.__path, path))
+
+   def __call__(self, path):
+       return Chain('%s/%s' % (self.__path, path))
+
+   def __str__(self):
+       return self.__path
+
+   __repr__ = __str__
+
+print(Chain().users('michael').repos) # /users/michael/repos
+```
+
+### `__call__`
+
+一个对象实例可以有自己的属性和方法，当我们调用实例方法时，我们用 instance.method() 来调用。能不能直接在实例本身上调用呢？在 Python 中，答案是肯定的。
+
+任何类，只需要定义一个 `__call__()` 方法，就可以直接对实例进行调用。请看示例：
+
+```py
+class Student(object):
+    def __init__(self, name):
+        self.name = name
+
+    def __call__(self):
+        print('My name is %s.' % self.name)
+```
+
+调用方式如下：
+
+```py
+>>> s = Student('Michael')
+>>> s() # self 参数不要传入
+My name is Michael.
+```
+
+`__call__()` 还可以定义参数。对实例进行直接调用就好比对一个函数进行调用一样，所以你完全可以把对象看成函数，把函数看成对象，因为这两者之间本来就没啥根本的区别。
+
+如果你把对象看成函数，那么函数本身其实也可以在运行期动态创建出来，因为类的实例都是运行期创建出来的，这么一来，我们就模糊了对象和函数的界限。
+
+那么，怎么判断一个变量是对象还是函数呢？其实，更多的时候，我们需要判断一个对象是否能被调用，能被调用的对象就是一个 Callable 对象，比如函数和我们上面定义的带有 `__call__()` 的类实例：
+
+```py
+>>> callable(Student())
+True
+>>> callable(max)
+True
+>>> callable([1, 2, 3])
+False
+>>> callable(None)
+False
+>>> callable('str')
+False
+```
+
+通过 callable() 函数，我们就可以判断一个对象是否是“可调用”对象。
+
+### 小结
+
+Python 的 class 允许定义许多定制方法，可以让我们非常方便地生成特定的类。
+
+## 使用元类
+
+### type()
+
+动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是运行时动态创建的。
+
+比方说我们要定义一个 Hello 的 class，就写一个 hello.py 模块：
+
+```py
+class Hello(object):
+    def hello(self, name='world'):
+        print('Hello, %s.' % name)
+```
+
+当 Python 解释器载入 hello 模块时，就会依次执行该模块的所有语句，执行结果就是动态创建出一个 Hello 的 class 对象，测试如下：
+
+```py
+>>> from hello import Hello
+>>> h = Hello()
+>>> h.hello()
+Hello, world.
+>>> print(type(Hello))
+<class 'type'>
+>>> print(type(h))
+<class 'hello.Hello'>
+```
+
+type() 函数可以查看一个类型或变量的类型，Hello 是一个 class，它的类型就是 type，而 h 是一个实例，它的类型就是 class Hello。
+
+我们说 class 的定义是运行时动态创建的，而创建 class 的方法就是使用 type() 函数。
+
+type() 函数既可以返回一个对象的类型，又可以创建出新的类型，比如，我们可以通过 type() 函数创建出 Hello 类，而无需通过 class Hello(object)... 的定义：
+
+```py
+>>> def fn(self, name='world'): # 先定义函数
+...     print('Hello, %s.' % name)
+...
+>>> Hello = type('Hello', (object,), dict(hello=fn)) # 创建 Hello class
+>>> h = Hello()
+>>> h.hello()
+Hello, world.
+>>> print(type(Hello))
+<class 'type'>
+>>> print(type(h))
+<class '__main__.Hello'>
+```
+
+要创建一个 class 对象，type() 函数依次传入 3 个参数：
+
+1. class 的名称；
+2. 继承的父类集合，注意 Python 支持多重继承，如果只有一个父类，别忘了 tuple 的单元素写法；
+3. class 的方法名称与函数绑定，这里我们把函数 fn 绑定到方法名 hello 上。
+
+通过 type() 函数创建的类和直接写 class 是完全一样的，因为 Python 解释器遇到 class 定义时，仅仅是扫描一下 class 定义的语法，然后调用 type() 函数创建出 class。
+
+正常情况下，我们都用 class Xxx... 来定义类，但是，type() 函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。
+
+### metaclass
+
+除了使用 type() 动态创建类以外，要控制类的创建行为，还可以使用 metaclass。
+
+metaclass，直译为元类，简单的解释就是：
+
+当我们定义了类以后，就可以根据这个类创建出实例，所以先定义类，然后创建实例。
+
+但是如果我们想创建出类呢？那就必须根据 metaclass 创建出类，所以先定义 metaclass，然后创建类。
+
+连接起来就是：先定义 metaclass，就可以创建类，最后创建实例。
+
+所以，metaclass 允许你创建类或者修改类。换句话说，你可以把类看成是 metaclass 创建出来的“实例”。
+
+metaclass 是 Python 面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用 metaclass 的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。
+
+我们先看一个简单的例子，这个 metaclass 可以给我们自定义的 MyList 增加一个 add 方法：
+
+定义 ListMetaclass，按照默认习惯，metaclass 的类名总是以 Metaclass 结尾，以便清楚地表示这是一个 metaclass：
+
+```py
+# metaclass 是类的模板，所以必须从 `type` 类型派生：
+class ListMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        attrs['add'] = lambda self, value: self.append(value)
+        return type.__new__(cls, name, bases, attrs)
+```
+
+有了 ListMetaclass，我们在定义类的时候还要指示使用 ListMetaclass 来定制类，传入关键字参数 metaclass：
+
+```py
+class MyList(list, metaclass=ListMetaclass):
+    pass
+```
+
+当我们传入关键字参数 metaclass 时，魔术就生效了，它指示 Python 解释器在创建 MyList 时，要通过 `ListMetaclass.__new__()` 来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。
+
+`__new__()` 方法接收到的参数依次是：
+
+1. 当前准备创建的类的对象；
+2. 类的名字；
+3. 类继承的父类集合；
+4. 类的方法集合。
+
+测试一下 MyList 是否可以调用 add() 方法：
+
+```py
+>>> L = MyList()
+>>> L.add(1)
+>> L
+[1]
+```
+
+而普通的 list 没有 add() 方法：
+
+```py
+>>> L2 = list()
+>>> L2.add(1)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'list' object has no attribute 'add'
+```
+
+动态修改有什么意义？直接在 MyList 定义中写上 add() 方法不是更简单吗？正常情况下，确实应该直接写，通过 metaclass 修改纯属变态。
+
+但是，总会遇到需要通过 metaclass 修改类定义的。ORM 就是一个典型的例子。
+
+ORM 全称 “Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作 SQL 语句。
+
+要编写一个 ORM 框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。
+
+让我们来尝试编写一个 ORM 框架。
+
+编写底层模块的第一步，就是先把调用接口写出来。比如，使用者如果使用这个 ORM 框架，想定义一个 User 类来操作对应的数据库表 User，我们期待他写出这样的代码：
+
+```py
+class User(Model):
+    # 定义类的属性到列的映射：
+    id = IntegerField('id')
+    name = StringField('username')
+    email = StringField('email')
+    password = StringField('password')
+
+# 创建一个实例：
+u = User(id=12345, name='Michael', email='test@orm.org', password='my-pwd')
+# 保存到数据库：
+u.save()
+```
+
+其中，父类 Model 和属性类型 StringField、IntegerField 是由 ORM 框架提供的，剩下的魔术方法比如 save() 全部由父类 Model 自动完成。虽然 metaclass 的编写会比较复杂，但 ORM 的使用者用起来却异常简单。
+
+现在，我们就按上面的接口来实现该 ORM。
+
+首先来定义 Field 类，它负责保存数据库表的字段名和字段类型：
+
+```py
+class Field(object):
+
+    def __init__(self, name, column_type):
+        self.name = name
+        self.column_type = column_type
+
+    def __str__(self):
+        return '<%s:%s>' % (self.__class__.__name__, self.name)
+```
+
+在 Field 的基础上，进一步定义各种类型的 Field，比如 StringField，IntegerField 等等：
+
+```py
+class StringField(Field):
+
+    def __init__(self, name):
+        super(StringField, self).__init__(name, 'varchar(100)')
+
+class IntegerField(Field):
+
+    def __init__(self, name):
+        super(IntegerField, self).__init__(name, 'bigint')
+```
+
+下一步，就是编写最复杂的 ModelMetaclass 了：
+
+```py
+class ModelMetaclass(type):
+
+    def __new__(cls, name, bases, attrs):
+        if name=='Model':
+            return type.__new__(cls, name, bases, attrs)
+        print('Found model: %s' % name)
+        mappings = dict()
+        for k, v in attrs.items():
+            if isinstance(v, Field):
+                print('Found mapping: %s ==> %s' % (k, v))
+                mappings[k] = v
+        for k in mappings.keys():
+            attrs.pop(k)
+        attrs['__mappings__'] = mappings # 保存属性和列的映射关系
+        attrs['__table__'] = name # 假设表名和类名一致
+        return type.__new__(cls, name, bases, attrs)
+```
+
+以及基类 Model：
+
+```py
+class Model(dict, metaclass=ModelMetaclass):
+
+    def __init__(self, **kw):
+        super(Model, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def save(self):
+        fields = []
+        params = []
+        args = []
+        for k, v in self.__mappings__.items():
+            fields.append(v.name)
+            params.append('?')
+            args.append(getattr(self, k, None))
+        sql = 'insert into %s (%s) values (%s)' % (self.__table__, ','.join(fields), ','.join(params))
+        print('SQL: %s' % sql)
+        print('ARGS: %s' % str(args))
+```
+
+当用户定义一个 class User(Model) 时，Python 解释器首先在当前类 User 的定义中查找 metaclass，如果没有找到，就继续在父类 Model 中查找 metaclass，找到了，就使用 Model 中定义的 metaclass 的 ModelMetaclass 来创建 User 类，也就是说，metaclass 可以隐式地继承到子类，但子类自己却感觉不到。
+
+在 ModelMetaclass 中，一共做了几件事情：
+
+1. 排除掉对 Model 类的修改；
+2. 在当前类（比如 User）中查找定义的类的所有属性，如果找到一个 Field 属性，就把它保存到一个 `__mappings__` 的 dict 中，同时从类属性中删除该 Field 属性，否则，容易造成运行时错误（实例的属性会遮盖类的同名属性）；
+3. 把表名保存到 `__table__` 中，这里简化为表名默认为类名。
+
+在 Model 类中，就可以定义各种操作数据库的方法，比如 save()，delete()，find()，update() 等等。
+
+我们实现了 save() 方法，把一个实例保存到数据库中。因为有表名，属性到字段的映射和属性值的集合，就可以构造出 INSERT 语句。
+
+编写代码试试：
+
+```py
+u = User(id=12345, name='Michael', email='test@orm.org', password='my-pwd')
+u.save()
+```
+
+输出如下：
+
+```py
+Found model: User
+Found mapping: email ==> <StringField:email>
+Found mapping: password ==> <StringField:password>
+Found mapping: id ==> <IntegerField:uid>
+Found mapping: name ==> <StringField:username>
+SQL: insert into User (password,email,username,id) values (?,?,?,?)
+ARGS: ['my-pwd', 'test@orm.org', 'Michael', 12345]
+```
+
+可以看到，save() 方法已经打印出了可执行的 SQL 语句，以及参数列表，只需要真正连接到数据库，执行该 SQL 语句，就可以完成真正的功能。
+
+不到 100 行代码，我们就通过 metaclass 实现了一个精简的 ORM 框架，是不是非常简单？
+
+### 小结
+
+metaclass 是 Python 中非常具有魔术性的对象，它可以改变类创建时的行为。这种强大的功能使用起来务必小心。
+
+# 错误、调试和测试
+
+## 错误处理
+
+### try
+
+```py
+try:
+    print('try...')
+    r = 10 / 0
+    print('result:', r)
+except ZeroDivisionError as e:
+    print('except:', e)
+finally:
+    print('finally...')
+print('END')
+```
+
+当我们认为某些代码可能会出错时，就可以用 try 来运行这段代码，如果执行出错，则后续代码不会继续执行，而是直接跳转至错误处理代码，即 except 语句块，执行完 except 后，如果有 finally 语句块，则执行 finally 语句块，至此，执行完毕。
+
+上面的代码在计算 10 / 0 时会产生一个除法运算错误：
+
+```py
+try...
+except: division by zero
+finally...
+END
+```
+
+从输出可以看到，当错误发生时，后续语句 `print('result:', r)` 不会被执行，except 由于捕获到 ZeroDivisionError，因此被执行。最后，finally 语句被执行。然后，程序继续按照流程往下走。
+
+如果把除数 0 改成 2，则执行结果如下：
+
+```py
+try...
+result: 5
+finally...
+END
+```
+
+由于没有错误发生，所以 except 语句块不会被执行，但是 finally 如果有，则一定会被执行（可以没有 finally 语句）。
+
+你还可以猜测，错误应该有很多种类，如果发生了不同类型的错误，应该由不同的 except 语句块处理。没错，可以有多个 except 来捕获不同类型的错误：
+
+```py
+try:
+    print('try...')
+    r = 10 / int('a')
+    print('result:', r)
+except ValueError as e:
+    print('ValueError:', e)
+except ZeroDivisionError as e:
+    print('ZeroDivisionError:', e)
+finally:
+    print('finally...')
+print('END')
+```
+
+int() 函数可能会抛出 ValueError，所以我们用一个 except 捕获 ValueError，用另一个 except 捕获 ZeroDivisionError。
+
+此外，如果没有错误发生，可以在 except 语句块后面加一个 else，当没有错误发生时，会自动执行 else 语句：
+
+```py
+try:
+    print('try...')
+    r = 10 / int('2')
+    print('result:', r)
+except ValueError as e:
+    print('ValueError:', e)
+except ZeroDivisionError as e:
+    print('ZeroDivisionError:', e)
+else:
+    print('no error!')
+finally:
+    print('finally...')
+print('END')
+```
+
+Python 的错误其实也是 class，所有的错误类型都继承自 BaseException，所以在使用 except 时需要注意的是，它不但捕获该类型的错误，还把其子类也“一网打尽”。比如：
+
+```py
+try:
+    foo()
+except ValueError as e:
+    print('ValueError')
+except UnicodeError as e:
+    print('UnicodeError')
+```
+
+第二个 except 永远也捕获不到 UnicodeError，因为 UnicodeError 是 ValueError 的子类，如果有，也被第一个 except 给捕获了。
+
+Python 所有的错误都是从 BaseException 类派生的，常见的错误类型和继承关系看[这里](https://docs.python.org/3/library/exceptions.html#exception-hierarchy)
+
+使用 try...except 捕获错误还有一个巨大的好处，就是可以跨越多层调用，比如函数 main() 调用 bar()，bar() 调用 foo()，结果 foo() 出错了，这时，只要 main() 捕获到了，就可以处理：
+
+```py
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar('0')
+    except Exception as e:
+        print('Error:', e)
+    finally:
+        print('finally...')
+
+```
+
+也就是说，不需要在每个可能出错的地方去捕获错误，只要在合适的层次去捕获错误就可以了。这样一来，就大大减少了写 try...except...finally 的麻烦。
+
+### 调用栈
+
+如果错误没有被捕获，它就会一直往上抛，最后被 Python 解释器捕获，打印一个错误信息，然后程序退出。来看看 err.py：
+
+```py
+# err.py:
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    bar('0')
+
+main()
+```
+
+执行，结果如下：
+
+```bash
+$ python3 err.py
+Traceback (most recent call last): # 错误的跟踪信息
+  File "err.py", line 11, in <module> # 调用 main() 出错了，在代码文件 err.py 的第 11 行代码，但原因是第 9 行
+    main()
+  File "err.py", line 9, in main # 调用 bar('0') 出错了，在代码文件 err.py 的第 9 行代码，但原因是第 6 行
+    bar('0')
+  File "err.py", line 6, in bar # 原因是 return foo(s) * 2 这个语句出错了，但这还不是最终原因，继续往下看
+    return foo(s) * 2
+  File "err.py", line 3, in foo # 原因是 return 10 / int(s) 这个语句出错了，这是错误产生的源头，因为下面打印了：ZeroDivisionError: division by zero
+    return 10 / int(s)
+ZeroDivisionError: division by zero
+```
+
+出错并不可怕，可怕的是不知道哪里出错了。解读错误信息是定位错误的关键，如上面的代码注释
+
+### 记录错误
+
+如果不捕获错误，自然可以让 Python 解释器来打印出错误堆栈，但程序也被结束了。既然我们能捕获错误，就可以把错误堆栈打印出来，然后分析错误原因，同时，让程序继续执行下去。
+
+Python 内置的 logging 模块可以非常容易地记录错误信息：
+
+```py
+# err_logging.py
+
+import logging
+
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar('0')
+    except Exception as e:
+        logging.exception(e)
+
+main()
+print('END')
+```
+
+同样是出错，但程序打印完错误信息后会继续执行，并正常退出：
+
+```bash
+$ python3 err_logging.py
+ERROR:root:division by zero
+Traceback (most recent call last):
+  File "err_logging.py", line 13, in main
+    bar('0')
+  File "err_logging.py", line 9, in bar
+    return foo(s) * 2
+  File "err_logging.py", line 6, in foo
+    return 10 / int(s)
+ZeroDivisionError: division by zero
+END
+```
+
+通过配置，logging 还可以把错误记录到日志文件里，方便事后排查。
+
+### 抛出错误
+
+因为错误是 class，捕获一个错误就是捕获到该 class 的一个实例。因此，错误并不是凭空产生的，而是有意创建并抛出的。Python 的内置函数会抛出很多类型的错误，我们自己编写的函数也可以抛出错误。
+
+如果要抛出错误，首先根据需要，可以定义一个错误的 class，选择好继承关系，然后，用 raise 语句抛出一个错误的实例：
+
+```py
+# err_raise.py
+class FooError(ValueError):
+    pass
+
+def foo(s):
+    n = int(s)
+    if n==0:
+        raise FooError('invalid value: %s' % s)
+    return 10 / n
+
+foo('0')
+```
+
+执行，可以最后跟踪到我们自己定义的错误：
+
+```bash
+$ python3 err_raise.py
+Traceback (most recent call last):
+  File "err_throw.py", line 11, in <module>
+    foo('0')
+  File "err_throw.py", line 8, in foo
+    raise FooError('invalid value: %s' % s)
+__main__.FooError: invalid value: 0
+```
+
+只有在必要的时候才定义我们自己的错误类型。如果可以选择 Python 已有的内置的错误类型（比如 ValueError，TypeError），尽量使用 Python 内置的错误类型。
+
+最后，我们来看另一种错误处理的方式：
+
+```py
+# err_reraise.py
+def foo(s):
+    n = int(s)
+    if n==0:
+        raise ValueError('invalid value: %s' % s)
+    return 10 / n
+
+def bar():
+    try:
+        foo('0')
+    except ValueError as e:
+        print('ValueError!')
+        raise
+
+bar()
+```
+
+在 bar() 函数中，我们明明已经捕获了错误，但是，打印一个 ValueError! 后，又把错误通过 raise 语句抛出去了，这不有病么？
+
+其实这种错误处理方式不但没病，而且相当常见。捕获错误目的只是记录一下，便于后续追踪。但是，由于当前函数不知道应该怎么处理该错误，所以，最恰当的方式是继续往上抛，让顶层调用者去处理。好比一个员工处理不了一个问题时，就把问题抛给他的老板，如果他的老板也处理不了，就一直往上抛，最终会抛给 CEO 去处理。
+
+raise 语句如果不带参数，就会把当前错误原样抛出。此外，在 except 中 raise 一个 Error，还可以把一种类型的错误转化成另一种类型：
+
+```py
+try:
+    10 / 0
+except ZeroDivisionError:
+    raise ValueError('input error!')
+```
+
+只要是合理的转换逻辑就可以，但是，决不应该把一个 IOError 转换成毫不相干的 ValueError。
+
+### 小结
+
+Python 内置的 try...except...finally 用来处理错误十分方便。出错时，会分析错误信息并定位错误发生的代码位置才是最关键的。
+
+程序也可以主动抛出错误，让调用者来处理相应的错误。但是，应该在文档中写清楚可能会抛出哪些错误，以及错误产生的原因。
+
+## 调试
+
+第一种方法简单直接粗暴有效，就是用 print() 把可能有问题的变量打印出来看看：
+
+```py
+def foo(s):
+    n = int(s)
+    print('>>> n = %d' % n)
+    return 10 / n
+
+def main():
+    foo('0')
+
+main()
+```
+
+执行后在输出中查找打印的变量值：
+
+```bash
+$ python err.py
+>>> n = 0
+Traceback (most recent call last):
+  ...
+ZeroDivisionError: integer division or modulo by zero
+```
+
+用 print() 最大的坏处是将来还得删掉它，想想程序里到处都是 print()，运行结果也会包含很多垃圾信息。所以，我们又有第二种方法。
+
+### 断言
+
+凡是用 print() 来辅助查看的地方，都可以用断言（assert）来替代：
+
+```py
+def foo(s):
+    n = int(s)
+    assert n != 0, 'n is zero!'
+    return 10 / n
+
+def main():
+    foo('0')
+```
+
+assert 的意思是，表达式 n != 0 应该是 True，否则，根据程序运行的逻辑，后面的代码肯定会出错。
+
+如果断言失败，assert 语句本身就会抛出 AssertionError：
+
+```bash
+$ python err.py
+Traceback (most recent call last):
+  ...
+AssertionError: n is zero!
+```
+
+程序中如果到处充斥着 assert，和 print() 相比也好不到哪去。不过，启动 Python 解释器时可以用 -O 参数来关闭 assert：
+
+```bash
+$ python -O err.py
+Traceback (most recent call last):
+  ...
+ZeroDivisionError: division by zero
+```
+
+> 注意：断言的开关“-O”是英文大写字母 O，不是数字 0。
+
+关闭后，你可以把所有的 assert 语句当成 pass 来看。
+
+### logging
+
+把 print() 替换为 logging 是第 3 种方式，和 assert 比，logging 不会抛出错误，而且可以输出到文件：
+
+```py
+import logging
+
+s = '0'
+n = int(s)
+logging.info('n = %d' % n)
+print(10 / n)
+```
+
+logging.info() 就可以输出一段文本。运行，发现除了 ZeroDivisionError，没有任何信息。怎么回事？
+
+别急，在 import logging 之后添加一行配置再试试：
+
+```py
+import logging
+logging.basicConfig(level=logging.INFO)
+```
+
+看到输出了：
+
+```bash
+$ python err.py
+INFO:root:n = 0
+Traceback (most recent call last):
+  File "err.py", line 8, in <module>
+    print(10 / n)
+ZeroDivisionError: division by zero
+```
+
+这就是 logging 的好处，它允许你指定记录信息的级别，有 debug，info，warning，error 等几个级别，当我们指定 level=INFO 时，logging.debug 就不起作用了。同理，指定 level=WARNING 后，debug 和 info 就不起作用了。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。
+
+logging 的另一个好处是通过简单的配置，一条语句可以同时输出到不同的地方，比如 console 和文件。
+
+### pdb
+
+第 4 种方式是启动 Python 的调试器 pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：
+
+```py
+# err.py
+s = '0'
+n = int(s)
+print(10 / n)
+```
+
+然后启动：
+
+```bash
+$ python -m pdb err.py
+> /Users/michael/Github/learn-python3/samples/debug/err.py(2)<module>()
+-> s = '0'
+```
+
+以参数 `-m pdb` 启动后，pdb 定位到下一步要执行的代码 `-> s = '0'`。输入命令 l 来查看代码：
+
+```py
+(Pdb) l
+  1     # err.py
+  2  -> s = '0'
+  3     n = int(s)
+  4     print(10 / n)
+```
+
+输入命令 n 可以单步执行代码：
+
+```bash
+(Pdb) n
+> /Users/michael/Github/learn-python3/samples/debug/err.py(3)<module>()
+-> n = int(s)
+(Pdb) n
+> /Users/michael/Github/learn-python3/samples/debug/err.py(4)<module>()
+-> print(10 / n)
+```
+
+任何时候都可以输入命令 p 变量名来查看变量：
+
+```bash
+(Pdb) p s
+'0'
+(Pdb) p n
+0
+```
+
+输入命令 q 结束调试，退出程序：
+
+```bash
+(Pdb) q
+```
+
+这种通过 pdb 在命令行调试的方法理论上是万能的，但实在是太麻烦了，如果有一千行代码，要运行到第 999 行得敲多少命令啊。还好，我们还有另一种调试方法。
+
+### pdb.set_trace()
+
+这个方法也是用 pdb，但是不需要单步执行，我们只需要 import pdb，然后，在可能出错的地方放一个 pdb.set_trace()，就可以设置一个断点：
+
+```py
+# err.py
+import pdb
+
+s = '0'
+n = int(s)
+pdb.set_trace() # 运行到这里会自动暂停
+print(10 / n)
+```
+
+运行代码，程序会自动在 pdb.set_trace() 暂停并进入 pdb 调试环境，可以用命令 p 查看变量，或者用命令 c 继续运行：
+
+```bash
+$ python err.py
+> /Users/michael/Github/learn-python3/samples/debug/err.py(7)<module>()
+-> print(10 / n)
+(Pdb) p n
+0
+(Pdb) c
+Traceback (most recent call last):
+  File "err.py", line 7, in <module>
+    print(10 / n)
+ZeroDivisionError: division by zero
+```
+
+这个方式比直接启动 pdb 单步调试效率要高很多，但也高不到哪去。
+
+### IDE
+
+如果要比较爽地设置断点、单步执行，就需要一个支持调试功能的 IDE。
+
+### 小结
+
+写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。
+
+虽然用 IDE 调试起来比较方便，但是最后你会发现，logging 才是终极武器。
+
+## 单元测试
+
+## 文档测试
+
 // TODO Python 入门学习待完成
