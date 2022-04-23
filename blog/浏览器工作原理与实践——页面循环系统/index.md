@@ -3,7 +3,7 @@ title: 浏览器工作原理与实践——页面循环系统
 date: 2021-7-5 15:32:26
 categories:
   - 前端
-tags: 前端, 浏览器, 高级前端
+tags: 前端, 浏览器, 高级前端, 读书笔记
 path: /browser-working-principle-cycle-system/
 ---
 

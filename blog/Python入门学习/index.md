@@ -2,7 +2,7 @@
 title: Python入门学习
 date: 2022-04-02 16:40:55
 path: /python-introduce-learn/
-tags: 后端, python
+tags: 后端, python, 读书笔记
 ---
 
 # 背景资料

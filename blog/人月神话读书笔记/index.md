@@ -3,7 +3,7 @@ title: 人月神话读书笔记
 date: 2021-9-25 14:47:15
 categories:
   - 软件工程
-tags: 软件工程, 人月神话
+tags: 软件工程, 人月神话, 读书笔记
 path: /man-moon-myth-notes/
 ---
 

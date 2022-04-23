@@ -3,7 +3,7 @@ title: WebGL 理论基础——基础概念
 date: 2021-11-12 00:32:53
 categories:
    - 前端
-tags: 前端, 可视化, WebGL
+tags: 前端, 可视化, WebGL, 读书笔记
 path: /webgl-fundamental-base-concept/
 ---
 

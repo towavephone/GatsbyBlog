@@ -2,7 +2,7 @@
 title: CSS新世界从增强已有的CSS属性开始
 date: 2021-12-22 23:14:14
 path: /css-new-world-enhance-existing-css/
-tags: 前端, CSS, CSS新世界
+tags: 前端, CSS, CSS新世界, 读书笔记
 ---
 
 CSS 新世界中有大量的 CSS 新特性源自对 CSS2.1 中已有的 CSS 属性的增强，本章内容所讲述的就是在已有 CSS 属性上新增的那些 CSS 新特性

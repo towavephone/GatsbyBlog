@@ -3,7 +3,7 @@ title: 图解HTTP读书笔记
 date: 2018-3-29 15:39:17
 categories:
   - 面试
-tags: 面试, 计算机网络
+tags: 面试, 计算机网络, 读书笔记
 path: /http-reading-notes/
 ---
 

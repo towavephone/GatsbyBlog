@@ -4,7 +4,7 @@ date: 2018-3-15 14:30:11
 categories:
   - 面试
 path: /stack-queue-java/
-tags: 面试, 数据结构
+tags: 面试, 数据结构, 读书笔记
 ---
 
 ## 下压栈

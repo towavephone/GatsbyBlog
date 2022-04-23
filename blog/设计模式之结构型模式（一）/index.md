@@ -3,7 +3,7 @@ title: 设计模式之结构型模式（一）
 categories:
   - 面试
 path: /design-pattern-structure-1/
-tags: 面试, 设计模式
+tags: 面试, 设计模式, 读书笔记
 date: 2018-04-19 00:04:24
 ---
 

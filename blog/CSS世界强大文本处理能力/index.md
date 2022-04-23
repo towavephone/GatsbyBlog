@@ -2,7 +2,7 @@
 title: CSS世界强大文本处理能力
 date: 2021-12-14 14:07:08
 path: /css-world-text-processing/
-tags: 前端, CSS, CSS世界
+tags: 前端, CSS, CSS世界, 读书笔记
 ---
 
 # line-height 的另外一个朋友 font-size

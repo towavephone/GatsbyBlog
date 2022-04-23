@@ -2,7 +2,7 @@
 title: CSS世界的层叠规则
 date: 2020-1-10 10:19:55
 path: /css-world-stacking-rule/
-tags: 前端, CSS, CSS世界
+tags: 前端, CSS, CSS世界, 读书笔记
 ---
 
 所谓“层叠规则”，指的是当网页中的元素发生层叠时的表现规则。

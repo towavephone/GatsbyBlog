@@ -3,7 +3,7 @@ title: 排序算法java实现
 date: 2018-3-16 18:35:03
 categories:
   - 面试
-tags: 面试, 算法
+tags: 面试, 算法, 读书笔记
 path: /sort-java/
 ---
 

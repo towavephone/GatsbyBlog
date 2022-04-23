@@ -2,7 +2,7 @@
 title: 代码可读性
 categories:
   - 面试
-tags: 面试, 编码实践, 代码可读性
+tags: 面试, 编码实践, 代码可读性, 读书笔记
 path: /code-readability/
 date: 2018-04-04 13:26:44
 ---

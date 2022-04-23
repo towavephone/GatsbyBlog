@@ -2,7 +2,7 @@
 title: 操作系统原理读书笔记
 categories:
   - 面试
-tags: 面试, 操作系统, 后端
+tags: 面试, 操作系统, 后端, 读书笔记
 path: /os-principle/
 date: 2018-04-01 10:23:49
 ---

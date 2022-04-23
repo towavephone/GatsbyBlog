@@ -3,7 +3,7 @@ title: 浏览器工作原理与实践——浏览器中的页面
 date: 2021-7-7 09:41:05
 categories:
   - 前端
-tags: 前端, 浏览器, 高级前端
+tags: 前端, 浏览器, 高级前端, 读书笔记
 path: /browser-working-principle-page/
 ---
 

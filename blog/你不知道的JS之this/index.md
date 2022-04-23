@@ -2,7 +2,7 @@
 title: 你不知道的JS之this
 categories:
   - 前端
-tags: 前端, JS, 你不知道的JS
+tags: 前端, JS, 你不知道的JS, 读书笔记
 path: /you-dont-know-js-this/
 date: 2018-5-27 14:34:18
 ---

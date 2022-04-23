@@ -4,7 +4,7 @@ date: 2018-3-20 13:58:04
 categories:
   - 面试
 path: /find-java/
-tags: 面试, 算法
+tags: 面试, 算法, 读书笔记
 ---
 
 ## 无序链表的顺序查找

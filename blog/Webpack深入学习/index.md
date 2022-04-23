@@ -3,7 +3,7 @@ title: Webpack 深入学习
 date: 2021-9-1 18:12:15
 categories:
   - 前端
-tags: 前端, webpack, 前端构建工具
+tags: 前端, webpack, 前端构建工具, 读书笔记
 path: /webpack-deep-learn/
 ---
 

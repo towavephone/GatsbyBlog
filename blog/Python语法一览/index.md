@@ -2,7 +2,7 @@
 title: Python语法一览
 date: 2022-04-18 14:16:27
 path: /python-syntax-overview/
-tags: 后端, python
+tags: 后端, python, 读书笔记
 ---
 
 # 版本一

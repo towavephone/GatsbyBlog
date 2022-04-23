@@ -2,7 +2,7 @@
 title: 代码重构
 categories:
   - 面试
-tags: 面试, 编码实践, 代码重构
+tags: 面试, 编码实践, 代码重构, 读书笔记
 path: /code-restructure/
 date: 2018-04-04 13:11:28
 ---

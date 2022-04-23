@@ -4,7 +4,7 @@ date: 2018-11-9 10:09:28
 categories:
   - 版本控制工具
 path: /git-flight-rules/
-tags: Git, git 飞行规则
+tags: Git, git 飞行规则, 读书笔记
 ---
 
 ## 前言

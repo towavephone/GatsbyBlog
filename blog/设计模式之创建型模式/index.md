@@ -3,7 +3,7 @@ title: 设计模式之创建型模式
 categories:
   - 面试
 path: /design-pattern-construction/
-tags: 面试, 设计模式
+tags: 面试, 设计模式, 读书笔记
 date: 2018-04-19 00:03:47
 ---
 

@@ -3,7 +3,7 @@ title: 数据库系统原理
 categories:
   - 面试
 path: /database-principle/
-tags: 面试, 数据库, 后端
+tags: 面试, 数据库, 后端, 读书笔记
 date: 2018-04-03 15:09:47
 ---
 

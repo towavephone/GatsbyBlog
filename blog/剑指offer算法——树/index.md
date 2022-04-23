@@ -3,7 +3,7 @@ title: 剑指offer算法题——树
 date: 2018-2-25 14:59:45
 categories:
   - 面试
-tags: 面试, 算法
+tags: 面试, 算法, 读书笔记
 path: /offer-binary-tree/
 ---
 

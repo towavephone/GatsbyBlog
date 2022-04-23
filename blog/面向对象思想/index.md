@@ -3,7 +3,7 @@ title: 面向对象思想
 categories:
   - 面试
 path: /object-oriented-thinking/
-tags: 面试, 面向对象
+tags: 面试, 面向对象, 读书笔记
 date: 2018-04-02 17:54:51
 ---
 

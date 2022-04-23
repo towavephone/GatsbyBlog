@@ -2,7 +2,7 @@
 title: CSS世界内联元素与流
 date: 2018-9-21 16:52:43
 path: /css-world-inline-element-flow/
-tags: 前端, CSS, CSS世界
+tags: 前端, CSS, CSS世界, 读书笔记
 ---
 
 块级元素负责结构，内联元素接管内容，而 CSS 世界是面向图文混排，也就是内联元素设计的，由此可见，本章内容在整个 CSS 世界体系中占有非常重要的位置。

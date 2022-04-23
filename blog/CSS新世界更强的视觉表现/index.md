@@ -2,7 +2,7 @@
 title: CSS新世界更强的视觉表现
 date: 2022-2-13 00:55:25
 path: /css-new-world-stronger-visual-performance/
-tags: 前端, CSS, CSS新世界
+tags: 前端, CSS, CSS新世界, 读书笔记
 ---
 
 本章介绍 CSS 渐变、CSS 3D 变换、CSS 过渡和 CSS 动画这 4 部分内容，如果没有专门说明，相关 CSS 属性均是被 IE10+ 浏览器支持的。本章介绍的这些 CSS 属性都非常实用，且细节众多，读者需要反复阅读才能理解。

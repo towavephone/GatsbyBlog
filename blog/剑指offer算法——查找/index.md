@@ -3,7 +3,7 @@ title: 剑指offer算法题——查找
 date: 2018-2-8 22:04:33
 categories:
   - 面试
-tags: 面试, 算法
+tags: 面试, 算法, 读书笔记
 path: /offer-find/
 ---
 

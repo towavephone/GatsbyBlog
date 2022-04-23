@@ -3,7 +3,7 @@ title: JavaScript语言精髓与编程实践——语法
 date: 2021-9-26 17:45:33
 categories:
   - 前端
-tags: 前端, JS
+tags: 前端, JS, 读书笔记
 path: /javascript-essence-practice-grammar/
 ---
 

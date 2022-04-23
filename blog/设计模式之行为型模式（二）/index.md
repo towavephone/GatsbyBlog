@@ -4,7 +4,7 @@ categories:
   - 面试
 date: 2018-04-19 00:04:42
 path: /design-pattern-behavior-2/
-tags: 面试, 设计模式
+tags: 面试, 设计模式, 读书笔记
 ---
 
 ## 备忘录模式(Memento)

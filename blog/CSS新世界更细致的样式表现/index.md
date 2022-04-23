@@ -2,7 +2,7 @@
 title: CSS新世界更细致的样式表现
 date: 2022-1-19 11:12:44
 path: /css-new-world-detailed-style-performance/
-tags: 前端, CSS, CSS新世界
+tags: 前端, CSS, CSS新世界, 读书笔记
 ---
 
 随着显示器的不断升级，人们对 Web 产品的视觉效果的要求也越来越高，如半透明、圆角、阴影等效果。于是，这些细致的样式表现就率先加入了 CSS 新世界中。本章将介绍这些 CSS 新属性的细节知识，并且这些 CSS 属性都非常实用，值得读者反复阅读、深入学习。

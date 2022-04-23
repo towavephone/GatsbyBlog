@@ -2,7 +2,7 @@
 title: 你不知道的JS作用域与闭包
 categories:
   - 前端
-tags: 前端, JS, 你不知道的JS
+tags: 前端, JS, 你不知道的JS, 读书笔记
 path: /you-dont-know-js-scope-closure/
 date: 2018-5-26 17:18:46
 ---

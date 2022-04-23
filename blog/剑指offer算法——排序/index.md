@@ -3,7 +3,7 @@ title: 剑指offer算法题——排序
 date: 2018-2-25 17:18:54
 categories:
   - 面试
-tags: 面试, 算法
+tags: 面试, 算法, 读书笔记
 path: /offer-sort/
 ---
 
