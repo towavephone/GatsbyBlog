@@ -716,3 +716,185 @@ My number is 1.235
 1. 采用 % 操作符把值填充到 C 风格的格式字符串时会遇到许多问题，而且这种写法比较烦琐。
 2. str.format 方法专门用一套迷你语言来定义它的格式说明符，这套语言给我们提供了一些有用的概念，但是在其他方面，这个方法还是存在与 C 风格的格式字符串一样的多种缺点，所以我们也应该避免使用它。
 3. f-string 采用新的写法，将值填充到字符串之中，解决了 C 风格的格式字符串所带来的最大问题。f-string 是个简洁而强大的机制，可以直接在格式说明符里嵌入任意 Python 表达式。
+
+## 第 5 条：用辅助函数取代复杂的表达式
+
+Python 的语法相当简明，所以有时只用一条表达式就能实现许多逻辑。例如，要把 URL 之中的查询字符串拆分成键值对，那么只需要使用 parse_qs 函数就可以了。下面的例子会解析查询字符串之中的每个参数，并把这些参数跟它们所对应的整数值放到一份字典（dict）里面。
+
+```py
+from urllib.parse import parse_qs
+my_values = parse_qs('red=5&blue=0&green=',
+                     keep_blank_values=True)
+print(repr(my_values))
+
+>>>
+{'red': ['5'], 'blue': ['0'], 'green': ['']}
+```
+
+在解析查询字符串时，可以发现，有的参数可能带有多个值，有的参数可能只有一个值，还有的参数可能是空白值，另外也会遇到根本没提供这个参数的情况。下面这三行代码分别通过 get 方法查询结果字典里面的三个参数，这刚好对应三种不同的情况：
+
+```py
+from urllib.parse import parse_qs
+my_values = parse_qs('red=5&blue=0&green=',
+                     keep_blank_values=True)
+
+print('Red:         ', my_values.get('red'))
+print('Green:       ', my_values.get('green'))
+print('Opacity:     ', my_values.get('opacity'))
+
+>>>
+Red:          ['5']
+Green:        ['']
+Opacity:      None
+```
+
+如果能把参数缺失与参数为空白值这两种情况都默认当成 0，那就更好了。但这样一个小小的逻辑，似乎不值得专门写 if 语句或辅助函数，所以有人会直接用 Boolean 表达式实现。
+
+Boolean 表达式用 Python 的语法写起来很简单，因为 Python 在对这种表达式求值的时候，会把空白字符串、空白 list 以及 0 值，全都当成 False 看待。所以，只需要把 get 方法查到的结果放在 or 操作符的左边，并且在右边写上 0 就行了。这样的话，只要左边的子表达式为 False，那么整个表达式的值自然就被评估为右边那个表达式的值，也就是 0。
+
+```py
+from urllib.parse import parse_qs
+my_values = parse_qs('red=5&blue=0&green=',
+                     keep_blank_values=True)
+
+# For query string 'red=5&blue=0&green='
+red = my_values.get('red', [''])[0] or 0
+green = my_values.get('green', [''])[0] or 0
+opacity = my_values.get('opacity', [''])[0] or 0
+print(f'Red:     {red!r}')
+print(f'Green:   {green!r}')
+print(f'Opacity: {opacity!r}')
+
+>>>
+Red:     '5'
+Green:   0
+Opacity: 0
+```
+
+表达式写成这样，看起来很别扭，而且它并没有完全实现我们想要的效果，因为我们还得保证解析出来的参数值是能够直接参与数学运算的整数。于是，需要通过内置的 int() 把这种表达式所解析出来的字符串转换成整数。
+
+```py
+red = int(my_values.get('red', [''])[0] or 0)
+```
+
+现在的代码比原来更难读了，因为看上去比原来还要乱。这种代码让人觉得很可怕：如果你是第一次阅读该代码，那必须得把整个表达式逐层拆分，才能明白这行代码的意思，这要花很长时间。代码当然应该写得短一些，但并不意味着非得挤成一行。
+
+Python 可以用 if/else 结构实现三元的条件表达式，这样写比刚才那种写法更清晰，且能保持代码简短。
+
+```py
+red_str = my_values.get('red', [''])
+red = int(red_str[0]) if red_str[0] else 0
+```
+
+但在我们这个例子里，这种写法还是不如完整的多行 if/else 结构好，虽然要多写几行，但非常容易看懂。
+
+```py
+green_str = my_values.get('green', [''])
+if green_str[0]:
+    green = int(green_str[0])
+else:
+    green = 0
+```
+
+如果要反复使用这套逻辑，那还是写成辅助函数比较好，即使像下面这个例子一样只用两三次，也还是值得这样做。
+
+```py
+def get_first_int(values, key, default=0):
+    found = values.get(key, [''])
+    if found[0]:
+        return int(found[0])
+    return default
+```
+
+### 总结
+
+1. Python 的语法很容易把复杂的意思挤到同一行表达式里，这样写很难懂。
+2. 复杂的表达式，尤其是那种需要重复使用的复杂表达式，应该写到辅助函数里面。
+3. 用 if/else 结构写成的条件表达式，要比用 or 与 and 写成的 Boolean 表达式更好懂。
+
+## 第 6 条：把数据结构直接拆分到多个变量里，不要专门通过下标访问
+
+Python 内置的元组（tuple）类型可以创建不可变的序列，把许多元素依次保存起来。最简单的用法是只用元组保存两个值，例如字典里面的键值对。
+
+```py
+snack_calories = {
+    'chips': 140,
+    'popcorn': 80,
+    'nuts': 190,
+}
+items = tuple(snack_calories.items())
+print(items)
+
+>>>
+(('chips', 140), ('popcorn', 80), ('nuts', 190))
+```
+
+我们可以用整数作下标，通过下标来访问元组里面对应的元素。
+
+```py
+item = ('Peanut butter', 'Jelly')
+first = item[0]
+second = item[1]
+print(first, 'and', second)
+
+>>>
+Peanut butter and Jelly
+```
+
+创建好 tuple 之后，就不能通过下标给其中的元素赋新值了。
+
+```py
+pair = ('Chocolate', 'Peanut butter')
+pair[0] = 'Honey'
+
+>>>
+Traceback ...
+TypeError: 'tuple' object does not support item assignment
+```
+
+Python 还有一种写法，叫作拆分（unpacking）。这种写法让我们只用一条语句，就可以把元组里面的元素分别赋给多个变量。
+
+```py
+item = ('Peanut butter', 'Jelly')
+first, second = item  # Unpacking
+print(first, 'and', second)
+
+>>>
+Peanut butter and Jelly
+```
+
+通过 unpacking 来赋值要比通过下标去访问元组内的元素更清晰，而且这种写法所需的代码量通常比较少。当然，赋值操作的左边除了可以罗列单个变量，也可以写成列表、序列或任意深度的可迭代对象（iterable）。
+
+```py
+favorite_snacks = {
+    'salty': ('pretzels', 100),
+    'sweet': ('cookies', 180),
+    'veggie': ('carrots', 20),
+}
+
+((typel, (namel, cals1)),
+ (type2, (name2, cals2)),
+ (type3, (name3, cals3))) = favorite_snacks.items()
+print(f'Favorite {typel} is {namel} with {cals1} calories')
+print(f'Favorite {type2} is {name2} with {cals2} calories')
+print(f'Favorite {type3} is {name3} with {cals3} calories')
+
+>>>
+Favorite salty is pretzels with 100 calories
+Favorite sweet is cookies with 180 calories
+Favorite veggie is carrots with 20 calories
+```
+
+```py
+snacks = [('bacon', 350), ('donut', 240), ('muffin', 190)]
+
+for rank, (name, calories) in enumerate(snacks, 1):
+    print(f'#{rank}: {name} has {calories} calories')
+
+>>>
+#1: bacon has 350 calories
+#2: donut has 240 calories
+#3: muffin has 190 calories
+```
+
+这才是符合 Python 风格的写法（Pythonic 式的写法），我们不需要再通过下标逐层访问了。这种写法可以节省篇幅，而且比较容易理解。
