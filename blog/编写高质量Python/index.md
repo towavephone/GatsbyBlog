@@ -898,3 +898,382 @@ for rank, (name, calories) in enumerate(snacks, 1):
 ```
 
 这才是符合 Python 风格的写法（Pythonic 式的写法），我们不需要再通过下标逐层访问了。这种写法可以节省篇幅，而且比较容易理解。
+
+## 第 7 条：尽量用 enumerate 取代 range
+
+Python 内置的 range 函数适合用来迭代一系列整数。
+
+```py
+from random import randint
+
+random_bits = 0
+for i in range(32):
+    if randint(0, 1):
+        random_bits |= 1 << i
+print(bin(random_bits))
+
+>>>
+0b100101010010000001011011010011
+```
+
+如果要迭代的是某种数据结构，例如字符串列表，那么可以直接在这个序列上面迭代，用不着专门通过 range 设定一个取值范围，然后把这个范围里的每个整数值，依次当成下标来访问列表中的元素。
+
+```py
+flavor_list = ['vanilla', 'chocolate', 'pecan', 'strawberry']
+
+for flavor in flavor_list:
+    print(f'{flavor} is delicious')
+
+>>>
+vanilla is delicious
+chocolate is delicious
+pecan is delicious
+strawberry is delicious
+```
+
+当然有的时候，在迭代 list 的过程中也需要知道当前处理的这个元素在 list 里的位置。例如，我把爱吃的冰激淋口味写在 flavor_list 列表里面，在打印每种口味时，我还想指出这种口味在自己心目中的排名。为了实现这样的功能，我们可以用传统的 range 方式来实现。
+
+```py
+flavor_list = ['vanilla', 'chocolate', 'pecan', 'strawberry']
+
+for i in range(len(flavor_list)):
+    flavor = flavor_list[i]
+    print(f'{i+1}: {flavor}')
+
+>>>
+1: vanilla
+2: chocolate
+3: pecan
+4: strawberry
+```
+
+`range(len(flavor_list))` 的写法太过复杂，可以用 enumerate 代替。enumerate 能够把任何一种迭代器（iterator）封装成惰性生成器（lazy generator，参见第 30 条）
+
+```py
+flavor_list = ['vanilla', 'chocolate', 'pecan', 'strawberry']
+
+it = enumerate(flavor_list)
+print(next(it))
+print(next(it))
+
+>>>
+(0, 'vanilla')
+(1, 'chocolate')
+```
+
+```py
+flavor_list = ['vanilla', 'chocolate', 'pecan', 'strawberry']
+
+for i, flavor in enumerate(flavor_list):
+    print(f'{i + 1}: {flavor}')
+
+>>>
+1: vanilla
+2: chocolate
+3: pecan
+4: strawberry
+```
+
+另外，还可以通过 enumerate 的第二个参数指定起始序号，这样就不用在每次打印的时候去调整了。例如，本例可以从 1 开始计算。
+
+```py
+for i, flavor in enumerate(flavor_list, 1):
+    print(f'{i + 1}: {flavor}')
+```
+
+### 总结
+
+1. enumerate 函数可以用简洁的代码迭代 iterator，而且可以指出当前这轮循环的序号。
+2. 不要先通过 range 指定下标的取值范围，然后用下标去访问序列，而是应该直接用 enumerate 函数迭代。
+3. 可以通过 enumerate 的第二个参数指定起始序号（默认为 0）。
+
+## 第 8 条：用 zip 函数同时遍历两个迭代器
+
+写 Python 代码时，经常会根据某份列表中的对象创建许多与这份列表有关的新列表。下面这样的列表推导机制，可以把表达式运用到源列表的每个元素上面，从而生成一份派生列表（参见第 27 条）。
+
+```py
+names = ['Cecilia', 'Lise', 'Marie']
+counts = [len(n) for n in names]
+print(counts)
+
+>>>
+[7, 4, 5]
+```
+
+派生列表中的元素与源列表中对应位置上面的元素有着一定的关系。如果想同时遍历这两份列表，那可以根据源列表的长度做迭代。
+
+```py
+names = ['Cecilia', 'Lise', 'Marie']
+counts = [len(n) for n in names]
+
+longest_name = None
+max_count = 0
+for i in range(len(names)):
+    count = counts[i]
+    if count > max_count:
+        longest_name = names[i]
+        max_count = count
+
+print(longest_name)
+
+>>>
+Cecilia
+```
+
+这种写法的问题在于，整个循环代码看起来很乱。我们要通过下标访问 names 与 counts 这两个列表里的元素，所以表示下标的那个循环变量 i 在循环体里必须出现两次，这让代码变得不太好懂。改用 enumerate 实现（参见第 7 条）会稍微好一些，但仍然不够理想。
+
+为了把代码写得更清楚，可以用 Python 内置的 zip 函数来实现。这个函数能把两个或更多的 iterator 封装成惰性生成器（lazy generator）。
+
+```py
+for name, count in zip(names, counts):
+    if count > max_count:
+        longest_name = name
+        max_count = count
+```
+
+zip 每次只从它封装的那些迭代器里面各自取出一个元素，所以即便源列表很长，程序也不会因为占用内存过多而崩溃。但是，如果输入 zip 的那些列表的长度不一致，那就得小心了。例如，我给 names 列表里又添加了一个名字，但是忘了把它的长度更新到 counts 列表之中。在这种情况下，用 zip 同时遍历这两份列表，会产生奇怪的结果。
+
+```py
+names = ['Cecilia', 'Lise', 'Marie']
+counts = [len(n) for n in names]
+
+longest_name = None
+max_count = 0
+for name, count in zip(names, counts):
+    if count > max_count:
+        longest_name = name
+        max_count = count
+
+names.append('Rosalind')
+for name, count in zip(names, counts):
+    print(name)
+
+>>>
+Cecilia
+Lise
+Marie
+```
+
+zip 函数只要其中任何一个迭代器处理完毕，它就不再往下走了。于是，循环的次数实际上等于最短的那份列表所具备的长度。一般情况下，我们都是根据某份列表推导出其他几份列表，然后把这些列表一起封装到 zip 里面，由于这些列表长度相同，因此不会遇到刚才的问题。
+
+在列表长度不同的情况下，zip 函数的提前终止行为可能跟你想实现的效果不一样。所以，如果无法确定这些列表的长度相同，那就不要把它们传给 zip，而是应该传给另一个叫作 `zip_longest` 的函数，这个函数位于内置的 itertools 模块里。
+
+```py
+import itertools
+
+names = ['Cecilia', 'Lise', 'Marie']
+counts = [len(n) for n in names]
+
+longest_name = None
+max_count = 0
+for name, count in zip(names, counts):
+    if count > max_count:
+        longest_name = name
+        max_count = count
+
+names.append('Rosalind')
+
+for name, count in itertools.zip_longest(names, counts):
+    print(f'{name}: {count}')
+
+>>>
+Cecilia: 7
+Lise: 4
+Marie: 5
+Rosalind: None
+```
+
+如果其中有些列表已经遍历完了，那么 `zip_longest` 会用当初传给 fillvalue 参数的那个值来填补空缺（本例中空缺的为字符串 `'Rosalind'` 的长度值），默认的参数值是 None。
+
+### 总结
+
+1. 内置的 zip 函数可以同时遍历多个迭代器。
+2. zip 会创建惰性生成器，让它每次只生成一个元组，所以无论输入的数据有多长，它都是一个一个处理的。
+3. 如果提供的迭代器的长度不一致，那么只要其中任何一个迭代完毕，zip 就会停止。如果想按最长的那个迭代器来遍历，那就改用内置的 itertools 模块中的 `zip_longest` 函数。
+
+## 第 9 条：不要在 for 与 while 循环后面写 else 块
+
+Python 的循环有一项大多数编程语言都不支持的特性，即可以把 else 块紧跟在整个循环结构的后面。
+
+```py
+for i in range(3):
+    print('Loop', i)
+else:
+    print('Else block!')
+
+>>>
+Loop 0
+Loop 1
+Loop 2
+Else block!
+```
+
+如果循环没有从头到尾执行完（也就是循环提前终止了），那么 else 块里的代码是不会执行的。在循环中使用 break 语句实际上会跳过 else 块。这个与实际想象中的功能差别较大
+
+```py
+for i in range(3):
+    print('Loop', i)
+    if i == 1:
+        break
+else:
+    print('Else block!')
+
+>>>
+Loop 0
+Loop 1
+```
+
+还有一个奇怪的地方是，如果对空白序列做 for 循环，那么程序立刻就会执行 else 块。
+
+```py
+for x in []:
+    print('Never runs')
+else:
+    print('For Else block!')
+
+>>>
+For Else block!
+```
+
+while 循环也是这样，如果首次循环就遇到 False，那么程序也会立刻运行 else 块。
+
+```py
+while False:
+    print('Never runs')
+else:
+    print('While Else block!')
+
+>>>
+While Else block!
+```
+
+把 else 设计成这样，是想让你利用它实现搜索逻辑。例如，如果要判断两个数是否互质（也就是除了 1 之外，是不是没有别的数能够同时整除它们），就可以用这种结构实现。先把有可能同时整除它们的数逐个试一遍，如果全都试过之后还是没找到这样的数，那么循环就会从头到尾执行完（这意味着循环没有因为 break 而提前跳出），然后程序就会执行 else 块里的代码。
+
+```py
+a = 4
+b = 9
+
+for i in range(2, min(a, b) + 1):
+    print('Testing', i)
+    if a % i == 0 and b % i == 0:
+        print('Not coprime')
+        break
+else:
+    print('Coprime')
+
+>>>
+Testing 2
+Testing 3
+Testing 4
+Coprime
+```
+
+实际工作中，会改用辅助函数完成计算。这样的辅助函数有两种常见的写法。
+
+1. 只要发现某个条件成立，就立刻返回，如果始终都没碰到这种情况，那么循环就会完整地执行，让程序返回函数末尾的那个值作为默认返回值。
+
+   ```py
+   def coprime(a, b):
+    for i in range(2, min(a, b) + 1):
+        if a % i == 0 and b % i == 0:
+            return False
+    return True
+
+   assert coprime(4, 9)
+   assert not coprime(3, 6)
+   ```
+
+2. 用变量来记录循环过程中有没有碰到这样的情况，如果有，那就用 break 提前跳出循环，如果没有，循环就会完整地执行，无论如何，最后都返回这个变量的值。
+
+   ```py
+   def coprime_alternate(a, b):
+    is_coprime = True
+    for i in range(2, min(a, b) + 1):
+        if a % i == 0 and b % i == 0:
+            is_coprime = False
+            break
+    return is_coprime
+
+   assert coprime_alternate(4, 9)
+   assert not coprime_alternate(3, 6)
+   ```
+
+for/else 或 while/else 结构本身虽然可以实现某些逻辑表达，但它带来的困惑，已经盖过了它的好处。
+
+### 总结
+
+1. Python 有种特殊的语法，可以把 else 块紧跟在整个 for 循环或 while 循环的后面。
+2. 只有在整个循环没有因为 break 提前跳出的情况下，else 块才会执行
+3. 把 else 块紧跟在整个循环后面，会让人不太容易看出这段代码的意思，所以要避免这样写。
+
+## 第 10 条：用赋值表达式减少重复代码
+
+赋值表达式（assignment expression）是 Python3.8 新引入的语法，它会用到海象操作符（walrus operator）。这种写法可以解决某些持续已久的代码重复问题。
+
+这种表达式很有用，可以在普通的赋值语句无法应用的场合实现赋值，例如可以用在条件表达式的 if 语句里面。赋值表达式的值，就是赋给海象操作符左侧那个标识符的值。
+
+举个例子。如果有一筐新鲜水果要给果汁店做食材，那我们就可以这样定义其中的内容：
+
+```py
+fresh_fruit = {
+    'apple': 10,
+    'banana': 8,
+    'lemon': 5,
+}
+
+def make_lemonade(count):
+    pass
+
+def out_of_stock():
+    pass
+
+count = fresh_fruit.get('lemon', 0)
+if count:
+    make_lemonade(count)
+else:
+    out_of_stock()
+```
+
+这段代码看上去虽然简单，但还是显得有点儿松散，因为 count 变量虽然定义在整个 if/else 结构之上，然而只有 if 语句才会用到它，else 块根本就不需要使用这个变量。所以，这种写法让人误以为 count 是个重要的变量，if 和 else 都要用到它，但实际上并非如此。
+
+我们在 Python 里面经常要先获取某个值，然后判断它是否非零，如果是就执行某段代码。对于这种用法，我们以前总是要通过各种技巧，来避免 count 这样的变量重复出现在代码之中，这些技巧有时会让代码变得比较难懂（参考第 5 条里面提到的那些技巧）。Python 引入赋值表达式正是为了解决这样的问题。下面改用海象操作符来写：
+
+```py
+if count := fresh_fruit.get('lemon', 0):
+    make_lemonade(count)
+else:
+    out_of_stock()
+```
+
+新代码虽然只省了一行，但读起来却清晰很多，因为这种写法明确体现出 count 变量只与 if 块有关。这个赋值表达式先把 `:=` 右边的值赋给左边的 count 变量，然后对自身求值，也就是把变量的值当成整个表达式的值。由于表达式紧跟着 if，程序会根据它的值是否非零来决定该不该执行 if 块。这种先赋值再判断的做法，正是海象操作符想要表达的意思。
+
+```py
+fresh_fruit = {
+    'apple': 10,
+    'banana': 8,
+    'lemon': 5,
+}
+
+def make_cider(count):
+    pass
+
+count = fresh_fruit.get('apple', 0)
+
+if count >= 4:
+    make_cider(count)
+else:
+    out_of_stock()
+```
+
+同理以上代码可以修改如下：
+
+```py
+if (count := fresh_fruit.get('apple', 0)) >= 4:
+    make_lemonade(count)
+else:
+    out_of_stock()
+```
+
+与刚才那个例子一样，修改之后的代码也比原来少了一行。但是这次，我们还要注意另外一个现象：赋值表达式本身是放在一对括号里面的。为什么要这样做呢？因为我们要在 if 语句里面把这个表达式的结果跟 4 这个值相比较。刚才柠檬汁的例子没有加括号，因为那时只凭赋值表达式本身的值就能决定 if/else 的走向：只要表达式的值不是 0，程序就进入 if 分支。但是这次不行，这次要把这个赋值表达式放在更大的表达式里面，所以必须用括号把它括起来。当然，在没有必要加括号的情况下，还是尽量别加括号比较好。
+
+还有一种类似的逻辑也会出现刚才说的重复代码，这指的是：我们要根据情况给某个变量赋予不同的值，紧接着要用这个变量做参数来调用某个函数。例如，若顾客要点香蕉冰沙，那我们首先得把香蕉切成好几份，然后用其中的两份来制作这道冰沙。如果不够两份，那就抛出香蕉不足（OutOfBananas）异常。下面用传统的写法实现这种逻辑：
