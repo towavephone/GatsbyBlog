@@ -88,8 +88,9 @@ function webglInit() {
       y: 用来设定视口的左下角垂直坐标。默认值：0
       width: 用来设定视口的宽度。默认值：canvas 的宽度
       height: 用来设定视口的高度。默认值：canvas 的高度
-      当你第一次创建 WebGL 上下文的时候，视口的大小和 canvas 的大小是匹配的。然而，如果你重新改变了canvas的大小，你需要告诉 WebGL 上下文设定新的视口，因此这里作为初次创建这行代码可以省略
-    */
+      当你第一次创建 WebGL 上下文的时候，视口的大小和 canvas 的大小是匹配的。
+      然而，如果你重新改变了canvas的大小，你需要告诉 WebGL 上下文设定新的视口，因此这里作为初次创建这行代码可以省略
+   */
   context.viewport(0, 0, context.canvas.width, context.canvas.height);
   return context;
 }
@@ -101,9 +102,14 @@ function webglInit() {
 
 ```js
 const gl = webglInit();
-// 创建顶点着色器 语法 gl.createShader(type) 此处 type 为枚举型值为 gl.VERTEX_SHADER 或 gl.FRAGMENT_SHADER 两者中的一个
+// 创建顶点着色器
+// 语法 gl.createShader(type)
+// 此处 type 为枚举型值为 gl.VERTEX_SHADER 或 gl.FRAGMENT_SHADER 两者中的一个
 const vShader = gl.createShader(gl.VERTEX_SHADER);
-// 编写顶点着色器的 GLSL 代码 语法 gl.shaderSource(shader, source); shader - 用于设置程序代码的 webglShader（着色器对象) source - 包含 GLSL 程序代码的字符串
+// 编写顶点着色器的 GLSL 代码
+// 语法 gl.shaderSource(shader, source)
+// shader：用于设置程序代码的 webglShader（着色器对象) 
+// source：包含 GLSL 程序代码的字符串
 gl.shaderSource(
   vShader,
   `

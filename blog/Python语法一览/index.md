@@ -1647,3 +1647,5 @@ def open_file(name):
 with open_file('some_file') as f:
     f.write('hola!')
 ```
+
+// TODO https://py.eastlakeside.cn/book/FunctionalProgramming/README.html

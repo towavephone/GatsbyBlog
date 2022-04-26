@@ -1,6 +1,6 @@
 ---
 title: WebGL 理论基础——基础概念
-date: 2021-11-12 00:32:53
+date: 2022-04-26 11:03:10
 categories:
    - 前端
 tags: 前端, 可视化, WebGL, 读书笔记
@@ -13,7 +13,7 @@ path: /webgl-fundamental-base-concept/
 
 WebGL 经常被当成 3D API，人们总想“我可以使用 WebGL 和一些神奇的东西做出炫酷的 3D 作品”。事实上 WebGL 仅仅是一个光栅化引擎，它可以根据你的代码绘制出点，线和三角形。想要利用 WebGL 完成更复杂任务，取决于你能否提供合适的代码，组合使用点，线和三角形代替实现。
 
-WebGL 在电脑的 GPU 中运行。因此你需要使用能够在 GPU 上运行的代码。这样的代码需要提供成对的方法。每对方法中一个叫顶点着色器，另一个叫片断着色器，并且使用一种和 C 或 C++类似的强类型的语言 GLSL（GL 着色语言），每一对组合起来称作一个 program（着色程序）。
+WebGL 在电脑的 GPU 中运行。因此你需要使用能够在 GPU 上运行的代码。这样的代码需要提供成对的方法。每对方法中一个叫顶点着色器，另一个叫片断着色器，并且使用一种和 C 或 C++ 类似的强类型的语言 GLSL（GL 着色语言），每一对组合起来称作一个 program（着色程序）。
 
 顶点着色器的作用是计算顶点的位置。根据计算出的一系列顶点位置，WebGL 可以对点，线和三角形在内的一些图元进行光栅化处理。当对这些图元进行光栅化处理时需要使用片断着色器方法。片断着色器的作用是计算出当前绘制图元中每个像素的颜色值。
 
@@ -804,8 +804,8 @@ var colorLocation = gl.getAttribLocation(program, 'a_color');
 一旦知道了属性的地址，在绘制前还需要发出三个命令。
 
 ```js
-gl.enableVertexAttribArray(location); // 这个命令是告诉WebGL我们想从缓冲中提供数据。
-gl.bindBuffer(gl.ARRAY_BUFFER, someBuffer); // 这个命令是将缓冲绑定到 ARRAY_BUFFER 绑定点，它是WebGL内部的一个全局变量。
+gl.enableVertexAttribArray(location); // 这个命令是告诉 WebGL 我们想从缓冲中提供数据。
+gl.bindBuffer(gl.ARRAY_BUFFER, someBuffer); // 这个命令是将缓冲绑定到 ARRAY_BUFFER 绑定点，它是 WebGL 内部的一个全局变量。
 gl.vertexAttribPointer(location, numComponents, typeOfData, normalizeFlag, strideToNextPieceOfData, offsetIntoBuffer);
 ```
 
@@ -826,11 +826,11 @@ gl.vertexAttribPointer(location, numComponents, typeOfData, normalizeFlag, strid
 我们来修改之前代码实现。当我们告诉 WebGL 如何获取颜色数据时将这样
 
 ```js{3-4}
-// 告诉颜色属性如何从colorBuffer中提取数据 (ARRAY_BUFFER)
+// 告诉颜色属性如何从 colorBuffer 中提取数据 (ARRAY_BUFFER)
 var size = 4; // 每次迭代使用四个单位数据
-var type = gl.UNSIGNED_BYTE; // 数据类型是8位的 UNSIGNED_BYTE 类型。
+var type = gl.UNSIGNED_BYTE; // 数据类型是 8 位的 UNSIGNED_BYTE 类型。
 var normalize = true; // 标准化数据
-var stride = 0; // 0 = 移动距离 * 单位距离长度sizeof(type)
+var stride = 0; // 0 = 移动距离 * 单位距离长度 sizeof(type)
 // 每次迭代跳多少距离到下一个数据
 var offset = 0; // 从缓冲的起始处开始
 gl.vertexAttribPointer(colorLocation, size, type, normalize, stride, offset);
