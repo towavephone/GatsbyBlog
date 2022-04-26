@@ -2,7 +2,7 @@
 title: WebGL 理论基础——基础概念
 date: 2022-04-26 11:03:10
 categories:
-   - 前端
+  - 前端
 tags: 前端, 可视化, WebGL, 读书笔记
 path: /webgl-fundamental-base-concept/
 ---
@@ -70,16 +70,16 @@ var attributes = {};
 var gl_Position;
 
 function drawArrays(_, offset, count) {
-   var stride = 4;
-   var size = 4;
-   for (var i = 0; i < count; ++i) {
-      // 从 positionBuffer 复制接下来 4 个值给 a_position 属性
-      const start = offset + i * stride;
-      attributes.a_position = positionBuffer.slice(start, start + size);
-      runVertexShader(); // 运行顶点着色器
-      // ...
-      doSomethingWith_gl_Position();
-   }
+  var stride = 4;
+  var size = 4;
+  for (var i = 0; i < count; ++i) {
+    // 从 positionBuffer 复制接下来 4 个值给 a_position 属性
+    const start = offset + i * stride;
+    attributes.a_position = positionBuffer.slice(start, start + size);
+    runVertexShader(); // 运行顶点着色器
+    // ...
+    doSomethingWith_gl_Position();
+  }
 }
 ```
 
@@ -119,8 +119,8 @@ var canvas = document.querySelector('#c');
 ```js
 var gl = canvas.getContext('webgl');
 if (!gl) {
-   // 你不能使用 WebGL！
-   // ...
+  // 你不能使用 WebGL！
+  // ...
 }
 ```
 
@@ -129,27 +129,27 @@ if (!gl) {
 ```html
 <script id="vertex-shader-2d" type="notjs">
 
-   // 一个属性变量，将会从缓冲中获取数据
-   attribute vec4 a_position;
+  // 一个属性变量，将会从缓冲中获取数据
+  attribute vec4 a_position;
 
-   // 所有着色器都有一个 main 方法
-   void main() {
+  // 所有着色器都有一个 main 方法
+  void main() {
 
-     // gl_Position 是一个顶点着色器主要设置的变量
-     gl_Position = a_position;
-   }
+    // gl_Position 是一个顶点着色器主要设置的变量
+    gl_Position = a_position;
+  }
 </script>
 
 <script id="fragment-shader-2d" type="notjs">
 
-   // 片断着色器没有默认精度，所以我们需要设置一个精度
-   // mediump 是一个不错的默认值，代表 medium precision（中等精度）
-   precision mediump float;
+  // 片断着色器没有默认精度，所以我们需要设置一个精度
+  // mediump 是一个不错的默认值，代表 medium precision（中等精度）
+  precision mediump float;
 
-   void main() {
-     // gl_FragColor 是一个片断着色器主要设置的变量
-     gl_FragColor = vec4(1, 0, 0.5, 1); // 返回“红紫色”
-   }
+  void main() {
+    // gl_FragColor 是一个片断着色器主要设置的变量
+    gl_FragColor = vec4(1, 0, 0.5, 1); // 返回“红紫色”
+  }
 </script>
 ```
 
@@ -160,16 +160,16 @@ if (!gl) {
 ```js
 // 创建着色器方法，输入参数：渲染上下文，着色器类型，数据源
 function createShader(gl, type, source) {
-   var shader = gl.createShader(type); // 创建着色器对象
-   gl.shaderSource(shader, source); // 提供数据源
-   gl.compileShader(shader); // 编译 -> 生成着色器
-   var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-   if (success) {
-      return shader;
-   }
+  var shader = gl.createShader(type); // 创建着色器对象
+  gl.shaderSource(shader, source); // 提供数据源
+  gl.compileShader(shader); // 编译 -> 生成着色器
+  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return shader;
+  }
 
-   console.log(gl.getShaderInfoLog(shader));
-   gl.deleteShader(shader);
+  console.log(gl.getShaderInfoLog(shader));
+  gl.deleteShader(shader);
 }
 ```
 
@@ -187,17 +187,17 @@ var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
 ```js
 function createProgram(gl, vertexShader, fragmentShader) {
-   var program = gl.createProgram();
-   gl.attachShader(program, vertexShader); // 添加顶点着色器
-   gl.attachShader(program, fragmentShader); // 添加片元着色器
-   gl.linkProgram(program); // 连接 program 中的着色器
-   var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-   if (success) {
-      return program;
-   }
+  var program = gl.createProgram();
+  gl.attachShader(program, vertexShader); // 添加顶点着色器
+  gl.attachShader(program, fragmentShader); // 添加片元着色器
+  gl.linkProgram(program); // 连接 program 中的着色器
+  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (success) {
+    return program;
+  }
 
-   console.log(gl.getProgramInfoLog(program));
-   gl.deleteProgram(program);
+  console.log(gl.getProgramInfoLog(program));
+  gl.deleteProgram(program);
 }
 ```
 
@@ -352,23 +352,23 @@ WebGL 将会把它们从裁剪空间转换到屏幕空间并在屏幕空间绘�
 
 ```html
 <script id="vertex-shader-2d" type="notjs">
-   // attribute vec4 a_position;
-   attribute vec2 a_position;
+  // attribute vec4 a_position;
+  attribute vec2 a_position;
 
-   uniform vec2 u_resolution;
+  uniform vec2 u_resolution;
 
-   void main() {
-     // 从像素坐标转换到 0.0 到 1.0
-     vec2 zeroToOne = a_position / u_resolution;
+  void main() {
+    // 从像素坐标转换到 0.0 到 1.0
+    vec2 zeroToOne = a_position / u_resolution;
 
-     // 再把 0->1 转换 0->2
-     vec2 zeroToTwo = zeroToOne * 2.0;
+    // 再把 0->1 转换 0->2
+    vec2 zeroToTwo = zeroToOne * 2.0;
 
-     // 把 0->2 转换到 -1->+1 (裁剪空间)
-     vec2 clipSpace = zeroToTwo - 1.0;
+    // 把 0->2 转换到 -1->+1 (裁剪空间)
+    vec2 clipSpace = zeroToTwo - 1.0;
 
-     gl_Position = vec4(clipSpace, 0, 1);
-   }
+    gl_Position = vec4(clipSpace, 0, 1);
+  }
 </script>
 ```
 
@@ -432,13 +432,13 @@ gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
 ```html
 <script id="fragment-shader-2d" type="notjs">
-   precision mediump float;
+  precision mediump float;
 
-   uniform vec4 u_color;
+  uniform vec4 u_color;
 
-   void main() {
-     gl_FragColor = u_color;
-   }
+  void main() {
+    gl_FragColor = u_color;
+  }
 </script>
 ```
 
@@ -447,36 +447,36 @@ gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 ```js
 var colorUniformLocation = gl.getUniformLocation(program, 'u_color');
 {
-   // ...
-   // 绘制 50 个随机颜色矩形
-   for (var ii = 0; ii < 50; ++ii) {
-      // 创建一个随机矩形并将写入位置缓冲
-      // 因为位置缓冲是我们绑定在 ARRAY_BUFFER 绑定点上的最后一个缓冲
-      setRectangle(gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300));
+  // ...
+  // 绘制 50 个随机颜色矩形
+  for (var ii = 0; ii < 50; ++ii) {
+    // 创建一个随机矩形并将写入位置缓冲
+    // 因为位置缓冲是我们绑定在 ARRAY_BUFFER 绑定点上的最后一个缓冲
+    setRectangle(gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300));
 
-      // 设置一个随机颜色
-      gl.uniform4f(colorUniformLocation, Math.random(), Math.random(), Math.random(), 1);
+    // 设置一个随机颜色
+    gl.uniform4f(colorUniformLocation, Math.random(), Math.random(), Math.random(), 1);
 
-      // 绘制矩形
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-   }
+    // 绘制矩形
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
 }
 
 // 返回 0 到 range 范围内的随机整数
 function randomInt(range) {
-   return Math.floor(Math.random() * range);
+  return Math.floor(Math.random() * range);
 }
 
 // 用参数生成矩形顶点并写进缓冲
 function setRectangle(gl, x, y, width, height) {
-   var x1 = x;
-   var x2 = x + width;
-   var y1 = y;
-   var y2 = y + height;
+  var x1 = x;
+  var x2 = x + width;
+  var y1 = y;
+  var y2 = y + height;
 
-   // 注意: gl.bufferData(gl.ARRAY_BUFFER, ...) 将会影响到当前绑定点 ARRAY_BUFFER 的绑定缓冲
-   // 目前我们只有一个缓冲，如果我们有多个缓冲，我们需要先将所需缓冲绑定到 ARRAY_BUFFER
-   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
+  // 注意: gl.bufferData(gl.ARRAY_BUFFER, ...) 将会影响到当前绑定点 ARRAY_BUFFER 的绑定缓冲
+  // 目前我们只有一个缓冲，如果我们有多个缓冲，我们需要先将所需缓冲绑定到 ARRAY_BUFFER
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
 }
 ```
 
@@ -520,7 +520,7 @@ gl.drawArrays(primitiveType, offset, count);
 ```js
 // 定义一个三角形填充到缓冲里
 function setGeometry(gl) {
-   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, -100, 150, 125, -175, 100]), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, -100, 150, 125, -175, 100]), gl.STATIC_DRAW);
 }
 ```
 
@@ -529,12 +529,12 @@ function setGeometry(gl) {
 ```js
 // 绘制场景
 function drawScene() {
-   // ...
-   // 绘制几何体
-   var primitiveType = gl.TRIANGLES;
-   var offset = 0;
-   var count = 3;
-   gl.drawArrays(primitiveType, offset, count);
+  // ...
+  // 绘制几何体
+  var primitiveType = gl.TRIANGLES;
+  var offset = 0;
+  var count = 3;
+  gl.drawArrays(primitiveType, offset, count);
 }
 ```
 
@@ -686,20 +686,20 @@ setColors(gl);
 // 给矩形的两个三角形
 // 设置颜色值并发到缓冲
 function setColors(gl) {
-   // 生成两个随机颜色
-   var r1 = Math.random();
-   var b1 = Math.random();
-   var g1 = Math.random();
+  // 生成两个随机颜色
+  var r1 = Math.random();
+  var b1 = Math.random();
+  var g1 = Math.random();
 
-   var r2 = Math.random();
-   var b2 = Math.random();
-   var g2 = Math.random();
+  var r2 = Math.random();
+  var b2 = Math.random();
+  var g2 = Math.random();
 
-   gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([r1, b1, g1, 1, r1, b1, g1, 1, r1, b1, g1, 1, r2, b2, g2, 1, r2, b2, g2, 1, r2, b2, g2, 1]),
-      gl.STATIC_DRAW
-   );
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([r1, b1, g1, 1, r1, b1, g1, 1, r1, b1, g1, 1, r2, b2, g2, 1, r2, b2, g2, 1, r2, b2, g2, 1]),
+    gl.STATIC_DRAW
+  );
 }
 ```
 
@@ -742,37 +742,37 @@ gl.drawArrays(primitiveType, offset, count);
 // 给矩形的两个三角形
 // 设置颜色值并发到缓冲
 function setColors(gl) {
-   // 给每个顶点定义不同的颜色
-   gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([
-         Math.random(),
-         Math.random(),
-         Math.random(),
-         1,
-         Math.random(),
-         Math.random(),
-         Math.random(),
-         1,
-         Math.random(),
-         Math.random(),
-         Math.random(),
-         1,
-         Math.random(),
-         Math.random(),
-         Math.random(),
-         1,
-         Math.random(),
-         Math.random(),
-         Math.random(),
-         1,
-         Math.random(),
-         Math.random(),
-         Math.random(),
-         1
-      ]),
-      gl.STATIC_DRAW
-   );
+  // 给每个顶点定义不同的颜色
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1,
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1,
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1,
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1,
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1,
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1
+    ]),
+    gl.STATIC_DRAW
+  );
 }
 ```
 
@@ -780,7 +780,7 @@ function setColors(gl) {
 
 <iframe src="https://codesandbox.io/embed/5ohcj?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
-<!-- 
+<!--
 [webgl-2d-rectangle-with-random-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-random-colors) -->
 
 上例还演示了使用多个属性并且通过顶点着色器向片断着色器传值。如果你看了处理图片的例子，那里面还用了另外一个属性传递纹理坐标。
@@ -842,50 +842,111 @@ gl.vertexAttribPointer(colorLocation, size, type, normalize, stride, offset);
 // 给矩形的两个三角形
 // 设置颜色值并发到缓冲
 function setColors(gl) {
-   // 设置两个随机颜色
-   var r1 = Math.random() * 256; // 0 到 255.99999 之间
-   var b1 = Math.random() * 256; // 这些数据
-   var g1 = Math.random() * 256; // 在存入缓冲时
-   var r2 = Math.random() * 256; // 将被截取成
-   var b2 = Math.random() * 256; // Uint8Array 类型
-   var g2 = Math.random() * 256;
+  // 设置两个随机颜色
+  var r1 = Math.random() * 256; // 0 到 255.99999 之间
+  var b1 = Math.random() * 256; // 这些数据
+  var g1 = Math.random() * 256; // 在存入缓冲时
+  var r2 = Math.random() * 256; // 将被截取成
+  var b2 = Math.random() * 256; // Uint8Array 类型
+  var g2 = Math.random() * 256;
 
-   gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Uint8Array([
-         // Uint8Array
-         r1,
-         b1,
-         g1,
-         255,
-         r1,
-         b1,
-         g1,
-         255,
-         r1,
-         b1,
-         g1,
-         255,
-         r2,
-         b2,
-         g2,
-         255,
-         r2,
-         b2,
-         g2,
-         255,
-         r2,
-         b2,
-         g2,
-         255
-      ]),
-      gl.STATIC_DRAW
-   );
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Uint8Array([
+      // Uint8Array
+      r1,
+      b1,
+      g1,
+      255,
+      r1,
+      b1,
+      g1,
+      255,
+      r1,
+      b1,
+      g1,
+      255,
+      r2,
+      b2,
+      g2,
+      255,
+      r2,
+      b2,
+      g2,
+      255,
+      r2,
+      b2,
+      g2,
+      255
+    ]),
+    gl.STATIC_DRAW
+  );
 }
 ```
 
 <iframe src="https://codesandbox.io/embed/x51g6?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [webgl-2d-rectangle-with-2-byte-colors](embedded-codesandbox://webgl-fundamental-base-concept/webgl-2d-rectangle-with-2-byte-colors) -->
+
+# WebGL 着色器和 GLSL
+
+我们之前提到过着色器和 GLSL，但是没有涉及细节，你可能已经对此有所了解，但以防万一，这里将详细讲解着色器和 GLSL。
+
+在工作原理中我们提到，WebGL 每次绘制需要两个着色器，一个顶点着色器和一个片断着色器，每一个着色器都是一个方法。一个顶点着色器和一个片断着色器链接在一起放入一个着色程序中（或者只叫程序）。一个典型的 WebGL 应用会有多个着色程序。
+
+## 顶点着色器
+
+一个顶点着色器的工作是生成裁剪空间坐标值，通常是以下的形式
+
+```cpp
+void main() {
+   gl_Position = doMathToMakeClipspaceCoordinates
+}
+```
+
+每个顶点调用一次（顶点）着色器，每次调用都需要设置一个特殊的全局变量 gl_Position， 该变量的值就是裁减空间坐标值。
+
+顶点着色器需要的数据，可以通过以下三种方式获得
+
+1. Attributes 属性 (从缓冲中获取的数据)
+2. Uniforms 全局变量 (在一次绘制中对所有顶点保持一致值)
+3. Textures 纹理 (从像素或纹理元素中获取的数据)
+
+### Attributes 属性
+
+最常用的方法是缓冲和属性，在工作原理中讲到了缓冲和属性，你可以创建缓冲
+
+```js
+var buf = gl.createBuffer();
+```
+
+将数据存入缓冲
+
+```js
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, someData, gl.STATIC_DRAW);
+```
+
+然后初始化的时候，在你制作的（着色）程序中找到属性所在地址
+
+```js
+var positionLoc = gl.getAttribLocation(someShaderProgram, 'a_position');
+```
+
+在渲染的时候告诉 WebGL 怎么从缓冲中获取数据传递给属性
+
+```js
+// 开启从缓冲中获取数据
+gl.enableVertexAttribArray(positionLoc);
+
+var numComponents = 3; // (x, y, z)
+var type = gl.FLOAT; // 32 位浮点数据
+var normalize = false; // 不标准化
+var offset = 0; // 从缓冲起始位置开始获取
+var stride = 0; // 到下一个数据跳多少位内存
+// 0 = 使用当前的单位个数和单位长度（ 3 * Float32Array.BYTES_PER_ELEMENT ）
+
+gl.vertexAttribPointer(positionLoc, numComponents, type, false, stride, offset);
+```
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-shaders-and-glsl.html
