@@ -651,7 +651,7 @@ WebGL 先获得顶点着色器中计算的三个颜色值，在光栅化三角�
 
 利用这三个值进行插值后传进每个像素运行的片断着色器中。
 
-<iframe src="https://codesandbox.io/embed/zi15x?codemirror=1&hidenavigation=1&theme=light&view=split" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/zi15x?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [fragment-shader-anim](embedded-codesandbox://webgl-fundamental-base-concept/fragment-shader-anim?view=preview) -->
 
@@ -1330,4 +1330,6 @@ vec4 m = vec4(
 
 # WebGL State Diagram
 
-// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-shaders-and-glsl.html
+<iframe src="https://codesandbox.io/embed/8gqf5w?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-state-diagram](embedded-codesandbox://webgl-fundamental-base-concept/webgl-state-diagram) -->
