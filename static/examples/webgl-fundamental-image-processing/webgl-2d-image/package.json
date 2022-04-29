@@ -1,0 +1,11 @@
+{
+  "name": "webgl-2d-image",
+  "version": "1.0.0",
+  "description": "webgl-2d-image",
+  "scripts": {
+    "start": "http-server ."
+  },
+  "dependencies": {
+    "http-server": "14.1.0"
+  }
+}
