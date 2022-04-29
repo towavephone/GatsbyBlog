@@ -72,6 +72,7 @@
     function main() {
       var image = new Image();
       image.src = '/GATSBY_PUBLIC_DIR/images/leaves.jpg'; // MUST BE SAME DOMAIN!!!
+      image.crossOrigin = 'anonymous';
       image.onload = function() {
         render(image);
       };

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "http-server ."
   },
+  "main": "index.html",
   "dependencies": {
     "http-server": "14.1.0"
   }
