@@ -142,7 +142,7 @@ gl_FragColor = texture2D(u_image, v_texCoord).bgra;
 ```js
 // ...
 
-var textureSizeLocation = gl.getUniformLocation(program, "u_textureSize");
+var textureSizeLocation = gl.getUniformLocation(program, 'u_textureSize');
 
 // ...
 
@@ -155,3 +155,104 @@ gl.uniform2f(textureSizeLocation, image.width, image.height);
 可以和上方没有模糊处理的图片对比一下。
 
 [webgl-2d-image-blend](embedded-codesandbox://webgl-fundamental-image-processing/webgl-2d-image-blend?view=preview)
+
+知道了怎么获取像素值，现在我们来做一些图片处理常用的卷积内核。在这个例子中我们将使用 3×3 的内核，卷积内核就是一个 3×3 的矩阵，矩阵中的每一项代表当前处理的像素和周围 8 个像素的乘法因子，相乘后将结果加起来除以内核权重（内核中所有值的和或 1.0，取二者中较大者），这有一个不错的[相关文章](https://docs.gimp.org/2.6/en/plug-in-convmatrix.html)，这里是 C++ 实现的一些[具体代码](https://www.codeproject.com/KB/graphics/ImageConvolution.aspx)。
+
+我们将在片断着色器中计算卷积，所以创建一个新的片断着色器。
+
+```js
+<script id="fragment-shader-2d" type="x-shader/x-fragment">
+   precision mediump float;
+
+   // 纹理
+   uniform sampler2D u_image;
+   uniform vec2 u_textureSize;
+   uniform float u_kernel[9];
+   uniform float u_kernelWeight;
+
+   // 从顶点着色器传入的纹理坐标
+   varying vec2 v_texCoord;
+
+   void main() {
+      vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
+      vec4 colorSum =
+         texture2D(u_image, v_texCoord + onePixel * vec2(-1, -1)) * u_kernel[0] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(0, -1)) * u_kernel[1] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(1, -1)) * u_kernel[2] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(-1, 0)) * u_kernel[3] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(0, 0)) * u_kernel[4] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(1, 0)) * u_kernel[5] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(-1, 1)) * u_kernel[6] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(0, 1)) * u_kernel[7] +
+         texture2D(u_image, v_texCoord + onePixel * vec2(1, 1)) * u_kernel[8];
+
+      // 只把 rgb 值求和除以权重
+      // 将阿尔法值设为 1.0
+      gl_FragColor = vec4((colorSum / u_kernelWeight).rgb, 1.0);
+   }
+</script>
+```
+
+在 JavaScript 中我们需要提供卷积内核和它的权重
+
+```js
+function computeKernelWeight(kernel) {
+  var weight = kernel.reduce(function(prev, curr) {
+    return prev + curr;
+  });
+  return weight <= 0 ? 1 : weight;
+}
+
+// ...
+var kernelLocation = gl.getUniformLocation(program, 'u_kernel[0]');
+var kernelWeightLocation = gl.getUniformLocation(program, 'u_kernelWeight');
+// ...
+var edgeDetectKernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1];
+
+gl.uniform1fv(kernelLocation, edgeDetectKernel);
+gl.uniform1f(kernelWeightLocation, computeKernelWeight(edgeDetectKernel));
+// ...
+```
+
+看！可以用下拉菜单选择不同的卷积内核。
+
+[webgl-2d-image-3x3-convolution](embedded-codesandbox://webgl-fundamental-image-processing/webgl-2d-image-3x3-convolution?view=preview)
+
+## 为什么 u_image 没有设置还能正常运行？
+
+全局变量默认为 0 所以 `u_image` 默认使用纹理单元 0。纹理单元 0 默认为当前活跃纹理，所以调用 bindTexture 会将纹理绑定到单元 0。
+
+WebGL 有一个纹理单元队列，每个 sampler 全局变量的值对应着一个纹理单元，它会从对应的单元寻找纹理数据，你可以将纹理设置到你想用的纹理单元。
+
+例如：
+
+```js
+var textureUnitIndex = 6; // 用单元 6
+var u_imageLoc = gl.getUniformLocation(program, 'u_image');
+gl.uniform1i(u_imageLoc, textureUnitIndex);
+```
+
+为了将纹理设置在不同的单元你可以调用 gl.activeTexture。 例如
+
+```js
+// 绑定纹理到单元 6
+gl.activeTexture(gl.TEXTURE6);
+gl.bindTexture(gl.TEXTURE_2D, someTexture);
+```
+
+这样也可以
+
+```js
+var textureUnitIndex = 6; // 使用纹理单元 6
+// 绑定纹理到单元 6
+gl.activeTexture(gl.TEXTURE0 + textureUnitIndex);
+gl.bindTexture(gl.TEXTURE_2D, someTexture);
+```
+
+所有支持 WebGL 的环境，在片断着色器中至少有 8 个纹理单元，顶点着色器中可以是 0 个。所以如果你使用超过 8 个纹理单元就应该调用 `gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)` 查看单元个数，或者调用 `gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)` 查看顶点着色器中可以用几个纹理单元。超过 99% 的机器在顶点着色器中至少有 4 个纹理单元。
+
+## 在 GLSL 中为什么变量的前缀都是 `a_`, `u_` 或 `v_`？
+
+那只是一个命名约定，不是强制要求的。但是对我来说可以轻松通过名字知道值从哪里来，`a_` 代表属性，值从缓冲中提供；`u_` 代表全局变量，直接对着色器设置；`v_` 代表可变量，是从顶点着色器的顶点中插值来出来的
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-image-processing-continued.html
