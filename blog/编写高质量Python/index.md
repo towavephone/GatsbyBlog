@@ -1,6 +1,6 @@
 ---
 title: 编写高质量Python
-date: 2022-04-22 11:37:33
+date: 2022-05-05 10:09:56
 path: /writing-high-quality-python/
 tags: 后端, python, 读书笔记
 ---
@@ -1277,5 +1277,306 @@ else:
 与刚才那个例子一样，修改之后的代码也比原来少了一行。但是这次，我们还要注意另外一个现象：赋值表达式本身是放在一对括号里面的。为什么要这样做呢？因为我们要在 if 语句里面把这个表达式的结果跟 4 这个值相比较。刚才柠檬汁的例子没有加括号，因为那时只凭赋值表达式本身的值就能决定 if/else 的走向：只要表达式的值不是 0，程序就进入 if 分支。但是这次不行，这次要把这个赋值表达式放在更大的表达式里面，所以必须用括号把它括起来。当然，在没有必要加括号的情况下，还是尽量别加括号比较好。
 
 还有一种类似的逻辑也会出现刚才说的重复代码，这指的是：我们要根据情况给某个变量赋予不同的值，紧接着要用这个变量做参数来调用某个函数。例如，若顾客要点香蕉冰沙，那我们首先得把香蕉切成好几份，然后用其中的两份来制作这道冰沙。如果不够两份，那就抛出香蕉不足（OutOfBananas）异常。下面用传统的写法实现这种逻辑：
+
+```py
+def slice_bananas(count):
+    pass
+
+
+class OutofBananas(Exception):
+    pass
+
+
+def make_smoothies(count):
+    pass
+
+
+fresh_fruit = {
+    'apple': 10,
+    'banana': 8,
+    'lemon': 5,
+}
+
+pieces = 0
+count = fresh_fruit.get('banana', 0)
+if count >= 2:
+    pieces = slice_bananas(count)
+
+try:
+    smoothies = make_smoothies(pieces)
+except OutofBananas:
+    out_of_stock()
+```
+
+还有一种传统的写法也很常见，就是把 if/else 结构上方那条 pieces = 0 的赋值语句移动到 else 块中。
+
+```py
+count = fresh_fruit.get('banana', 0)
+if count >= 2:
+    pieces = slice_bananas(count)
+else:
+    pieces = 0
+
+try:
+    smoothies = make_smoothies(pieces)
+except OutofBananas:
+    out_of_stock()
+```
+
+这种写法看上去稍微有点儿怪，因为 if 与 else 这两个分支都给 pieces 变量定义了初始值。根据 Python 的作用域规则，这种分别定义变量初始值的写法是成立的（参见第 21 条）。虽说成立，但这样写看起来比较别扭，所以很多人喜欢用第一种写法，也就是在进入 if/else 结构之前，先把 pieces 的初始值给设置好。
+
+改用海象操作符来实现，可以少写一行代码，而且能够压低 count 变量的地位，让它只出现在 if 块里，这样我们就能更清楚地意识到 pieces 变量才是整段代码的重点。
+
+```py
+pieces = 0
+if (count := fresh_fruit.get('banana', 0)) >= 2:
+    pieces = slice_bananas(count)
+
+try:
+    smoothies = make_smoothies(pieces)
+except OutofBananas:
+    out_of_stock()
+```
+
+对于在 if 与 else 分支里面分别定义 pieces 变量的写法来说，海象操作符也能让代码变得清晰，因为这次不用再把 count 变量放到整个 if/else 块的上方了。
+
+```py
+if (count := fresh_fruit.get('banana', 0)) >= 2:
+    pieces = slice_bananas(count)
+else:
+    pieces = 0
+
+try:
+    smoothies = make_smoothies(pieces)
+except OutofBananas:
+    out_of_stock()
+```
+
+Python 新手经常会遇到这样一种困难，就是找不到好办法来实现 switch/case 结构。最接近这种结构的做法是在 if/else 结构里面继续嵌套 if/else 结构，或者使用 if/elif/else 结构。
+
+例如，我们想按照一定的顺序自动给客人制作饮品，这样就不用点餐了。下面这段逻辑先判断能不能做香蕉冰沙，如果不能，就做苹果汁，还不行，就做柠檬汁：
+
+```py
+count = fresh_fruit.get('banana', 0)
+if count >= 2:
+    pieces = slice_bananas(count)
+    to_enjoy = make_smoothies(pieces)
+else:
+    count = fresh_fruit.get('apple', 0)
+    if count >= 4:
+        to_enjoy = make_cider(count)
+    else:
+        count = fresh_fruit.get('lemon', 0)
+        if count:
+            to_enjoy = make_lemonade(count)
+        else:
+            to_enjoy = 'Nothing'
+```
+
+这种难看的写法其实在 Python 代码里特别常见。幸好现在有了海象操作符，让我们能够轻松地模拟出很接近 switch/case 的方案。
+
+```py
+if (count := fresh_fruit.get('banana', 0)) >= 2:
+    pieces = slice_bananas(count)
+    to_enjoy = make_smoothies(pieces)
+elif (count := fresh_fruit.get('apple', 0)) >= 4:
+    to_enjoy = make_cider(count)
+elif count := fresh_fruit.get('lemon', 0):
+    to_enjoy = make_lemonade(count)
+else:
+    to_enjoy = 'Nothing'
+```
+
+这个版本只比原来短五行，但是看起来却清晰得多，因为嵌套深度与缩进层数都变少了。只要碰到刚才那种难看的结构，我们就应该考虑能不能改用海象操作符来写。
+
+Python 新手还会遇到一个困难，就是缺少 do/while 循环结构。例如，我们要把新来的水果做成果汁并且装到瓶子里面，直到水果用完为止。下面先用普通的 while 循环来实现：
+
+```py
+def pick_fruit():
+    pass
+
+
+def make_juice(fruit, count):
+    pass
+
+
+bottles = []
+fresh_fruit = pick_fruit()
+while fresh_fruit:
+    for fruit, count in fresh_fruit.items():
+        batch = make_juice(fruit, count)
+        bottles.extend(batch)
+    fresh_fruit = pick_fruit()
+```
+
+这种写法必须把 `fresh_fruit = pick_fruit()` 写两次，第一次是在进入 while 循环之前，因为我们要给 `fresh_fruit` 设定初始值，第二次是在 while 循环体的末尾，因为我们得把下一轮需要处理的水果列表填充到 `fresh_fruit` 里面。如果想复用这行代码，可以考虑 loop-and-a-half 模式。这个模式虽然能消除重复，但是会让 while 循环看起来很笨，因为它成了无限循环，程序只能通过 break 语句跳出这个循环。
+
+```py
+bottles = []
+while True:
+   fresh_fruit = pick_fruit()
+   if not fresh_fruit:
+      break
+    for fruit, count in fresh_fruit.items():
+        batch = make_juice(fruit, count)
+        bottles.extend(batch)
+```
+
+有了海象操作符，就不需要使用 `loop-and-a-half` 模式了，我们可以在每轮循环的开头给 `fresh_fruit` 变量赋值，并根据变量的值来决定要不要继续循环。这个写法简单易读，所以应该成为首选方案。
+
+```py
+bottles = []
+while fresh_fruit := pick_fruit():
+    for fruit, count in fresh_fruit.items():
+        batch = make_juice(fruit, count)
+        bottles.extend(batch)
+```
+
+在其他一些场合，赋值表达式也能缩减重复代码（参见第 29 条）。总之，如果某个表达式或赋值操作多次出现在一组代码里面，那就可以考虑用赋值表达式把这段代码改得简单一些。
+
+### 总结
+
+1. 赋值表达式通过海象操作符（:=）给变量赋值，并且让这个值成为这条表达式的结果，于是，我们可以利用这项特性来缩减代码。如果赋值表达式是大表达式里的一部分，就得用一对括号把它括起来。
+2. 虽说 Python 不支持 switch/case 与 do/while 结构，但可以利用赋值表达式清晰地模拟出这种逻辑。
+
+# 列表与字典
+
+## 第 11 条：学会对序列做切片
+
+Python 有这样一种写法，可以从序列里面切割（slice）出一部分内容，让我们能够轻松地获取原序列的某个子集合。最简单的用法就是切割内置的 list、str 与 bytes。其实，凡是实现了 `__getitem__` 与 `__setitem__` 这两个特殊方法的类都可以切割（参见第 43 条）。
+
+最基本的写法是用 `somelist[start:end]` 这一形式来切割，也就是从 start 开始一直取到 end 这个位置，但不包含 end 本身的元素。
+
+```py
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+print('Middle two:   ', a[3:5])
+print('All but ends: ', a[1:7])
+
+>>>
+Middle two:    ['d', 'e']
+All but ends:  ['b', 'c', 'd', 'e', 'f', 'g']
+```
+
+如果是从头开始切割列表，那就应该省略冒号左侧的下标 0，这样看起来更清晰。
+
+```py
+assert a[:5] == a[0:5]
+```
+
+如果一直取到列表末尾，那就应该省略冒号右侧的下标，因为用不着专门把它写出来。
+
+```py
+assert a[5:] == a[5:len(a)]
+```
+
+用负数作下标表示从列表末尾往前算。下面这些切割方式，即便是刚看到这段代码的人也应该能明白是什么意思。
+
+```py
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+print(a[:]) # ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+print(a[:5]) # ['a', 'b', 'c', 'd', 'e']
+print(a[:-1]) # ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+print(a[4:]) # ['e', 'f', 'g', 'h']
+print(a[-3:]) # ['f', 'g', 'h']
+print(a[2:5]) # ['c', 'd', 'e']
+print(a[2:-1]) # ['c', 'd', 'e', 'f', 'g']
+print(a[-3:-1]) # ['f', 'g']
+```
+
+如果起点与终点所确定的范围超出了列表的边界，那么系统会自动忽略不存在的元素。利用这项特性，很容易就能构造出一个最多只有若干元素的输入序列，例如：
+
+```py
+first_twenty_items = a[:20]
+last_twenty_items = a[-20:]
+```
+
+切割时所用的下标可以越界，但是直接访问列表时却不行，那样会让程序抛出异常。
+
+```py
+a[20]
+
+>>>
+Traceback ...
+IndexError: list index out of range
+```
+
+切割出来的列表是一份全新的列表。即便把某个元素换掉，也不会影响原列表中的相应位置。那个位置上的元素还是旧值。
+
+```py
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+b = a[3:]
+print('Before:', b)
+b[1] = 99
+print('After: ', b)
+print('No change:', a)
+
+>>>
+Before: ['d', 'e', 'f', 'g', 'h']
+After:  ['d', 99, 'f', 'g', 'h']
+No change: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+```
+
+切片可以出现在赋值符号的左侧，表示用右侧那些元素把原列表中位于这个范围之内的元素换掉。与 unpacking 形式的赋值不同，这种赋值不要求等号两边所指定的元素个数必须相同（如果是做 unpacking，那么等号左侧用来接收数值的变量个数必须与等号右边所提供的数值个数一致，例如 `a, b = c[:2]`，参见第 6 条）。在原列表中，位于切片范围之前和之后的那些元素会予以保留，但是列表的长度可能有所变化。例如在下面这个例子中，列表会变短，因为赋值符号右侧只提供了 3 个值，但是左侧那个切片却涵盖了 5 个值，列表会比原来少两个元素。
+
+```py
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+print('Before ', a)
+a[2:7] = [99, 22, 14]
+print('After  ', a)
+
+>>>
+Before  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+After   ['a', 'b', 99, 22, 14, 'h']
+```
+
+下面这段代码会使列表变长，因为赋值符号右侧的元素数量比左侧那个切片所涵盖的元素数量要多。
+
+```py
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+print('Before ', a)
+a[2:3] = [47, 11]
+print('After  ', a)
+
+>>>
+Before  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+After   ['a', 'b', 47, 11, 'd', 'e', 'f', 'g', 'h']
+```
+
+起止位置都留空的切片，如果出现在赋值符号右侧，那么表示给这个列表做副本，这样制作出来的新列表内容和原列表相同，但身份不同。
+
+```py
+b = a[:]
+assert b == a and b is not a
+```
+
+把不带起止下标的切片放在赋值符号左边，表示是用右边那个列表的副本把左侧列表的全部内容替换掉（注意，左侧列表依然保持原来的身份，系统不会分配新的列表）。
+
+```py
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+b = a
+c = a[:]
+print('Before a', a)
+print('Before b', b)
+print('Before c', b)
+a[:] = [101, 102, 103]
+assert b is a and c is not a  # Still the same list object
+print('After a ', a)  # Now has different contents
+print('After b ', b)  # Same list, so same contents as a
+print('After c ', c)  # Not same list, same contents as a
+
+>>>
+Before a ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+Before b ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+Before c ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+After a  [101, 102, 103]
+After b  [101, 102, 103]
+After c  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+```
+
+### 总结
+
+1. 切片要尽可能写得简单一些：如果从头开始选取，就省略起始下标 0；如果选到序列末尾，就省略终止下标。
+2. 切片允许起始下标或终止下标越界，所以很容易就能表达“取开头多少个元素”（例如 `a[:20]`）或“取末尾多少个元素”（例如 `a[-20:0]`）等含义，而不用担心切片是否真有这么多元素。
+3. 把切片放在赋值符号的左侧可以将原列表中这段范围内的元素用赋值符号右侧的元素替换掉，但可能会改变原列表的长度。
 
 // TODO 编写高质量代码待完成
