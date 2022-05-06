@@ -872,10 +872,10 @@ favorite_snacks = {
     'veggie': ('carrots', 20),
 }
 
-((typel, (namel, cals1)),
+((type1, (name1, cals1)),
  (type2, (name2, cals2)),
  (type3, (name3, cals3))) = favorite_snacks.items()
-print(f'Favorite {typel} is {namel} with {cals1} calories')
+print(f'Favorite {type1} is {name1} with {cals1} calories')
 print(f'Favorite {type2} is {name2} with {cals2} calories')
 print(f'Favorite {type3} is {name3} with {cals3} calories')
 
@@ -931,7 +931,7 @@ pecan is delicious
 strawberry is delicious
 ```
 
-当然有的时候，在迭代 list 的过程中也需要知道当前处理的这个元素在 list 里的位置。例如，我把爱吃的冰激淋口味写在 flavor_list 列表里面，在打印每种口味时，我还想指出这种口味在自己心目中的排名。为了实现这样的功能，我们可以用传统的 range 方式来实现。
+当然有的时候，在迭代 list 的过程中也需要知道当前处理的这个元素在 list 里的位置。例如，我把爱吃的冰激淋口味写在 `flavor_list` 列表里面，在打印每种口味时，我还想指出这种口味在自己心目中的排名。为了实现这样的功能，我们可以用传统的 range 方式来实现。
 
 ```py
 flavor_list = ['vanilla', 'chocolate', 'pecan', 'strawberry']
@@ -1578,5 +1578,263 @@ After c  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 1. 切片要尽可能写得简单一些：如果从头开始选取，就省略起始下标 0；如果选到序列末尾，就省略终止下标。
 2. 切片允许起始下标或终止下标越界，所以很容易就能表达“取开头多少个元素”（例如 `a[:20]`）或“取末尾多少个元素”（例如 `a[-20:0]`）等含义，而不用担心切片是否真有这么多元素。
 3. 把切片放在赋值符号的左侧可以将原列表中这段范围内的元素用赋值符号右侧的元素替换掉，但可能会改变原列表的长度。
+
+## 第 12 条：不要在切片里同时指定起止下标与步进
+
+除了基本的切片写法（参见第 11 条）外，Python 还有一种特殊的步进切片形式，也就是 somelist[start\:end\:stride]。这种形式会在每 n 个元素里面选取一个，这样很容易就能把奇数位置上的元素与偶数位置上的元素分别通过 `x[::2]` 与 `x[1::2]` 选取出来。
+
+```py
+x = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
+odds = x[::2]
+evens = x[1::2]
+print(odds)
+print(evens)
+
+>>>
+['red', 'yellow', 'blue']
+['orange', 'green', 'purple']
+```
+
+带有步进的切片经常会引发意外的效果，并且使程序出现 bug。例如，Python 里面有个常见的技巧，就是把 -1 当成步进值对 bytes 类型的字符串做切片，这样就能将字符串反转过来。
+
+```py
+x = b'mongoose'
+y = x[::-1]
+print(y)
+
+>>>
+b'esoognom'
+```
+
+Unicode 形式的字符串也可以这样反转（参见第 3 条）。
+
+```py
+x = '多喝水'
+y = x[::-1]
+print(y)
+
+>>>
+水喝多
+```
+
+但如果把这种字符串编码成 UTF-8 标准的字节数据，就不能用这个技巧来反转了。
+
+```py
+x = '多喝水'
+x = x.encode('utf-8')
+y = x[::-1]
+z = y.decode('utf-8')
+
+>>>
+Traceback ...
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb4 in position 0: invalid start byte
+```
+
+除了 -1 之外，用其他负数做步进值，有没有意义呢？请看下面的例子：
+
+```py
+x = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+print(x[::2])  # ['a', 'c', 'e', 'g']
+print(x[::-2])  # ['h', 'f', 'd', 'b']
+```
+
+上例中，`::2` 表示从头开始往后选，每两个元素里面选一个。`::-2` 的含义稍微有点儿绕，表示从末尾开始往前选，每两个元素里面选一个。
+
+同时使用起止下标与步进会让切片很难懂。方括号里面写三个值显得太过拥挤，读起来不大容易，而且在指定了步进值（尤其是负数步进值）的时候，我们必须很仔细地考虑：这究竟是从前往后取，还是从后往前取？
+
+为了避免这个问题，笔者建议大家不要把起止下标和步进值同时写在切片里。如果必须指定步进，那么尽量采用正数，而且要把起止下标都留空。即便必须同时使用步进值与起止下标，也应该考虑分成两次来写。
+
+```py
+y = x[::2]  # ['a', 'c', 'e', 'g']
+z = y[1:-1] # ['c', 'e']
+```
+
+像刚才那样先隔位选取然后再切割，会让程序多做一次浅拷贝（shallow copy）。所以，应该把最能缩减列表长度的那个切片操作放在前面。如果程序实在没有那么多时间或内存去分两步操作，那么可以改用内置的 itertools 模块中的 islice 方法（参见第 36 条），这个方法用起来更清晰，因为它的起止位置与步进值都不能是负数。
+
+### 总结
+
+1. 同时指定切片的起止下标与步进值理解起来会很困难。
+2. 如果要指定步进值，那就省略起止下标，而且最好采用正数作为步进值，尽量别用负数。
+3. 不要把起始位置、终止位置与步进值全都写在同一个切片操作里。如果必须同时使用这三项指标，那就分两次来做（其中一次隔位选取，另一次做切割），也可以改用 itertools 内置模块里的 islice 方法。
+
+## 第 13 条：通过带星号的 unpacking 操作来捕获多个元素，不要用切片
+
+基本的 unpacking 操作（参见第 6 条）有一项限制，就是必须提前确定需要拆解的序列的长度。例如，销售汽车的时候，我们可能会把每辆车的车龄写在一份列表中，然后按照从大到小的顺序排列好。如果试着通过基本的 unpacking 操作获取其中最旧的两辆车，那么程序运行时会出现异常。
+
+```py
+car_ages = [0, 9, 4, 8, 7, 20, 19, 1, 6, 15]
+car_ages_descending = sorted(car_ages, reverse=True)
+oldest, second_oldest = car_ages_descending
+
+>>>
+Traceback ...
+ValueError: too many values to unpack (expected 2)
+```
+
+Python 新手经常通过下标与切片（参见第 11 条）来处理这个问题。例如，可以明确通过下标把最旧和第二旧的那两辆车取出来，然后把其余的车放到另一份列表中。
+
+```py
+car_ages = [0, 9, 4, 8, 7, 20, 19, 1, 6, 15]
+car_ages_descending = sorted(car_ages, reverse=True)
+oldest = car_ages_descending[0]
+second_oldest = car_ages_descending[1]
+others = car_ages_descending[2:]
+print(oldest, second_oldest, others)
+
+>>>
+20 19 [15, 9, 8, 7, 6, 4, 1, 0]
+```
+
+这样做没问题，但是下标与切片会让代码看起来很乱。而且，用这种办法把序列中的元素分成多个子集合，其实很容易出错，因为我们通常容易把下标多写或少写一个位置。例如，若修改了其中一行，但却忘了更新另一行，那就会遇到这种错误。
+
+这个问题通过带星号的表达式（starred expression）来解决会更好一些，这也是一种 unpacking 操作，它可以把无法由普通变量接收的那些元素全都囊括进去。下面用带星号的 unpacking 操作改写刚才那段代码，这次既不用取下标，也不用做切片。
+
+```py
+car_ages = [0, 9, 4, 8, 7, 20, 19, 1, 6, 15]
+car_ages_descending = sorted(car_ages, reverse=True)
+oldest, second_oldest, *others = car_ages_descending
+print(oldest, second_oldest, others)
+
+>>>
+20 19 [15, 9, 8, 7, 6, 4, 1, 0]
+```
+
+这样写简短易读，而且不容易出错，因为它不要求我们在修改完其中一个下标之后，还必须记得同步更新其他的下标。
+
+这种带星号的表达式可以出现在任意位置，所以它能够捕获序列中的任何一段元素。
+
+```py
+car_ages = [0, 9, 4, 8, 7, 20, 19, 1, 6, 15]
+car_ages_descending = sorted(car_ages, reverse=True)
+oldest, *others, youngest = car_ages_descending
+print(oldest, youngest, others)
+*others, second_youngest, youngest = car_ages_descending
+print(youngest, second_youngest, others)
+
+>>>
+20 0 [19, 15, 9, 8, 7, 6, 4, 1]
+0 1 [20, 19, 15, 9, 8, 7, 6, 4]
+```
+
+只不过，在使用这种写法时，至少要有一个普通的接收变量与它搭配，否则就会出现 SyntaxError。例如不能像下面这样，只使用带星号的表达式而不搭配普通变量。
+
+```py
+car_ages = [0, 9, 4, 8, 7, 20, 19, 1, 6, 15]
+car_ages_descending = sorted(car_ages, reverse=True)
+*others = car_ages_descending
+
+>>>
+SyntaxError: starred assignment target must be in a list or tuple
+```
+
+另外，对于单层结构来说，同一级里面最多只能出现一次带星号的 unpacking。
+
+```py
+first, *middle, *second_middle, last = [1, 2, 3, 4]
+
+>>>
+SyntaxError: two starred expressions in assignment
+```
+
+如果要拆解的结构有很多层，那么同一级的不同部分里面可以各自出现带星号的 unpacking 操作。当然笔者并不推荐这种写法（类似的建议参见第 19 条）。这里举这样一个例子，是想帮助大家理解这种带星号的表达式可以实现怎样的拆分效果。
+
+```py
+car_inventory = {
+    'Downtown': ('Silver Shadow', 'Pinto', 'DMC'),
+    'Airport': ('Skyline', 'Viper', 'Gremlin', 'Nova'),
+}
+
+((loc1, (best1, *rest1)),
+ (loc2, (best2, *rest2))) = car_inventory.items()
+print(f'Best at {loc1} is {best1}, {len(rest1)} others')
+print(f'Best at {loc2} is {best2}, {len(rest2)} others')
+
+>>>
+Best at Downtown is Silver Shadow, 2 others
+Best at Airport is Skyline, 3 others
+```
+
+带星号的表达式总会形成一份列表实例。如果要拆分的序列里已经没有元素留给它了，那么列表就是空白的。如果能提前确定有待处理的序列里至少会有 N 个元素，那么这项特性就相当有用。
+
+```py
+short_list = [1, 2]
+first, second, *rest = short_list
+print(first, second, rest)
+
+>>>
+1 2 []
+```
+
+unpacking 操作也可以用在迭代器上，但是这样写与把数据拆分到多个变量里面的那种基本写法相比，并没有太大优势。例如，我可以先构造长度为 2 的取值范围（range），并把它封装在 it 这个迭代器里，然后将其中的值拆分到 first 与 second 这两个变量里。但这样写还不如直接使用形式相符的静态列表（例如[1, 2]），那样更简单。
+
+```py
+it = iter(range(1, 3))
+first, second = it
+print(f'{first} and {second}')
+
+>>>
+1 and 2
+```
+
+对迭代器做 unpacking 操作的好处，主要体现在带星号的用法上面，它使迭代器的拆分值更清晰。例如，这里有个生成器，每次可以从含有整个一周的汽车订单的 CSV 文件中取出一行数据。
+
+```py
+def generate_csv():
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    # ...
+```
+
+我们可以用下标和切片来处理这个生成器所给出的结果，但这样写需要很多行代码，而且看着比较混乱。
+
+```py
+def generate_csv():
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    # ...
+
+
+all_csv_rows = list(generate_csv())
+header = all_csv_rows[0]
+rows = all_csv_rows[1:]
+print('CSV Header:', header)
+print('Row count:', len(rows))
+
+>>>
+CSV Header: ('Date', 'Make', 'Model', 'Year', 'Price')
+Row count: 4
+```
+
+利用带星号的 unpacking 操作，我们可以把第一行（表头）单独放在 header 变量里，同时把迭代器所给出的其余内容合起来表示成 rows 变量。这样写就清楚多了。
+
+```py
+def generate_csv():
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    yield ('Date', 'Make', 'Model', 'Year', 'Price')
+    # ...
+
+
+it = list(generate_csv())
+header, *rows = it
+print('CSV Header:', header)
+print('Row count:', len(rows))
+
+>>>
+CSV Header: ('Date', 'Make', 'Model', 'Year', 'Price')
+Row count: 4
+```
+
+带星号的这部分总是会形成一份列表，所以要注意，这有可能耗尽计算机的全部内存并导致程序崩溃。首先必须确定系统有足够的内存可以存储拆分出来的结果数据，然后才可以对迭代器使用带星号的 unpacking 操作（还有另一种做法，参见第 31 条）。
+
+### 总结
+
+1. 拆分数据结构并把其中的数据赋给变量时，可以用带星号的表达式，将结构中无法与普通变量相匹配的内容捕获到一份列表里。
+2. 这种带星号的表达式可以出现在赋值符号左侧的任意位置，它总是会形成一份含有零个或多个值的列表。
+3. 在把列表拆解成互相不重叠的多个部分时，这种带星号的 unpacking 方式比较清晰，而通过下标与切片来实现的方式则很容易出错。
 
 // TODO 编写高质量代码待完成
