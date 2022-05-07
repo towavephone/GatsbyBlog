@@ -1837,4 +1837,131 @@ Row count: 4
 2. 这种带星号的表达式可以出现在赋值符号左侧的任意位置，它总是会形成一份含有零个或多个值的列表。
 3. 在把列表拆解成互相不重叠的多个部分时，这种带星号的 unpacking 方式比较清晰，而通过下标与切片来实现的方式则很容易出错。
 
+## 第 14 条：用 sort 方法的 key 参数来表示复杂的排序逻辑
+
+内置的列表类型提供了名叫 sort 的方法，可以根据多项指标给 list 实例中的元素排序。在默认情况下，sort 方法总是按照自然升序排列列表内的元素。例如，如果列表中的元素都是整数，那么它就按数值从小到大排列。
+
+```py
+numbers = [93, 86, 11, 68, 70]
+numbers.sort()
+print(numbers)
+
+>>>
+[11, 68, 70, 86, 93]
+```
+
+这里定义了一个 Tool 类表示各种建筑工具，它带有 `__repr__` 方法，因此我们能把这个类的实例打印成字符串。
+
+如果仅仅这样写，那么这个由该类的对象所构成的列表是没办法用 sort 方法排序的，因为 sort 方法发现，排序所需要的特殊方法并没有定义在 Tool 类中。
+
+```py
+class Tool:
+    def __init__(self, name, weight):
+        self.name = name
+        self.weight = weight
+
+    def __repr__(self):
+        return f'Tool({self.name!r}, {self.weight})'
+
+
+tools = [
+    Tool('level', 3.5),
+    Tool('hammer', 1.25),
+    Tool('screwdriver', 0.5),
+    Tool('chisel', 0.25),
+]
+
+tools.sort()
+
+>>>
+Traceback ...
+TypeError: '<' not supported between instances of 'Tool' and 'Tool'
+```
+
+下面用 lambda 关键字定义这样的一个函数，把它传给 sort 方法的 key 参数，让我们能够按照 name 的字母顺序排列这些 Tool 对象。
+
+```py
+class Tool:
+    def __init__(self, name, weight):
+        self.name = name
+        self.weight = weight
+
+    def __repr__(self):
+        return f'Tool({self.name!r}, {self.weight})'
+
+
+tools = [
+    Tool('level', 3.5),
+    Tool('hammer', 1.25),
+    Tool('screwdriver', 0.5),
+    Tool('chisel', 0.25),
+]
+
+print('Unsorted:', repr(tools))
+tools.sort(key=lambda x: x.name)
+print('\nSorted:', tools)
+
+>>>
+Unsorted: [Tool('level', 3.5), Tool('hammer', 1.25), Tool('screwdriver', 0.5), Tool('chisel', 0.25)]
+
+Sorted: [Tool('chisel', 0.25), Tool('hammer', 1.25), Tool('level', 3.5), Tool('screwdriver', 0.5)]
+```
+
+有时我们可能需要用多个标准来排序。可以利用元组的特性：如果两个元组的首个元素相等，就比较第二个元素，如果仍然相等，就继续往下比较。
+
+```py
+class Tool:
+    def __init__(self, name, weight):
+        self.name = name
+        self.weight = weight
+
+    def __repr__(self):
+        return f'Tool({self.name!r}, {self.weight})'
+
+
+power_tools = [
+    Tool('drill', 4),
+    Tool('circular saw', 5),
+    Tool('jackhammer', 40),
+    Tool('sander', 4),
+]
+
+power_tools.sort(key=lambda x: (x.weight, x.name))
+print(power_tools)
+
+power_tools.sort(key=lambda x: (x.weight, x.name), reverse=True)
+print(power_tools)
+
+>>>
+[Tool('drill', 4), Tool('sander', 4), Tool('circular saw', 5), Tool('jackhammer', 40)]
+[Tool('jackhammer', 40), Tool('circular saw', 5), Tool('sander', 4), Tool('drill', 4)]
+```
+
+这种做法有个缺点，就是 key 函数所构造的这个元组只能按同一个排序方向来对比它所表示的各项指标（要是升序，就都得是升序；要是降序，就都得是降序），可以利用以下方法实现不同方向的排序
+
+```py
+power_tools.sort(key=lambda x: (-x.weight, x.name))
+print(power_tools)
+```
+
+但是 str 类型不支持一元减操作符，可以通过多次调用 sort 方法实现不同方向的排序，这里利用了 sort 方法是稳定排序算法的原理
+
+```py
+power_tools.sort(key=lambda x: x.name)  # Name ascending
+power_tools.sort(key=lambda x: x.weight, reverse=True)  # Weight descending
+print(power_tools)
+```
+
+无论有多少项排序指标都可以按照这种思路来实现，而且每项指标可以分别按照各自的方向来排，不用全都是升序或全都是降序。只需要倒着写即可，也就是把最主要的那项排序指标放在最后一轮处理。在上面的例子中，首要指标是重量降序，次要指标是名称升序，所以先按名称升序排列，然后按重量降序排列。
+
+尽管这两种思路都能实现同样的效果，但只调用一次 sort，还是要比多次调用 sort 更为简单。所以，在实现多个指标按不同方向排序时，应该优先考虑让 key 函数返回元组，并对元组中的相应指标取相反数。只有在万不得已的时候，才可以考虑多次调用 sort 方法。
+
+### 总结
+
+1. 列表的 sort 方法可以根据自然顺序给其中的字符串、整数、元组等内置类型的元素进行排序。
+2. 普通对象如果通过特殊方法定义了自然顺序，那么也可以用 sort 方法来排列，但这样的对象并不多见。
+3. 可以把辅助函数传给 sort 方法的 key 参数，让 sort 根据这个函数所返回的值来排列元素顺序，而不是根据元素本身来排列。
+4. 如果排序时要依据的指标有很多项，可以把它们放在一个元组中，让 key 函数返回这样的元组。对于支持一元减操作符的类型来说，可以单独给这项指标取反，让排序算法在这项指标上按照相反的方向处理。
+5. 如果这些指标不支持一元减操作符，可以多次调用 sort 方法，并在每次调用时分别指定 key 函数与 reverse 参数。最次要的指标放在第一轮处理，然后逐步处理更为重要的指标，首要指标放在最后一轮处理。
+
 // TODO 编写高质量代码待完成
