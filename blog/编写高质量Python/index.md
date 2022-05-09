@@ -1964,4 +1964,111 @@ print(power_tools)
 4. 如果排序时要依据的指标有很多项，可以把它们放在一个元组中，让 key 函数返回这样的元组。对于支持一元减操作符的类型来说，可以单独给这项指标取反，让排序算法在这项指标上按照相反的方向处理。
 5. 如果这些指标不支持一元减操作符，可以多次调用 sort 方法，并在每次调用时分别指定 key 函数与 reverse 参数。最次要的指标放在第一轮处理，然后逐步处理更为重要的指标，首要指标放在最后一轮处理。
 
+## 第 15 条：不要过分依赖给字典添加条目时所用的顺序
+
+在 Python 3.5 与之前的版本中，迭代字典（dict）时所看到的顺序好像是任意的，不一定与当初把这些键值对添加到字典时的顺序相同。
+
+```py
+# Python 3.5
+baby_names = {
+    'cat': 'kitten',
+    'dog': 'puppy',
+}
+
+print(baby_names)
+
+>>>
+{'dog': 'puppy', 'cat': 'kitten'}
+```
+
+之所以出现这种效果，是因为字典类型以前是用哈希表算法来实现的（这个算法通过内置的 hash 函数与一个随机的种子数来运行，而该种子数会在每次启动 Python 解释器时确定）。所以，这样的机制导致这些键值对在字典中的存放顺序不一定会与添加时的顺序相同，而且每次运行程序的时候，存放顺序可能都不一样。
+
+从 Python 3.6 开始，字典会保留这些键值对在添加时所用的顺序，而且 Python 3.7 版的语言规范正式确立了这条规则。于是，在新版的 Python 里，总是能够按照当初创建字典时的那套顺序来遍历这些键值对。
+
+```py
+baby_names = {
+    'cat': 'kitten',
+    'dog': 'puppy',
+}
+
+print(baby_names)
+
+>>>
+{'cat': 'kitten', 'dog': 'puppy'}
+```
+
+在 Python 3.5 与之前的版本中，dict 所提供的许多方法（包括 keys、values、items 与 popitem 等）都不保证固定的顺序，所以让人觉得好像是随机处理的。
+
+```py
+baby_names = {
+    'cat': 'kitten',
+    'dog': 'puppy',
+}
+
+# Python 3.5
+print(list(baby_names.keys()))
+print(list(baby_names.values()))
+print(list(baby_names.items()))
+print(baby_names.popitem())  # Randomly chooses an item
+
+>>>
+['dog', 'cat']
+['puppy', 'kitten']
+[('dog', 'puppy'), ('cat', 'kitten')]
+('dog', 'puppy')
+```
+
+在新版的 Python 中，这些方法已经可以按照当初添加键值对时的顺序来处理了。
+
+```py
+baby_names = {
+    'cat': 'kitten',
+    'dog': 'puppy',
+}
+
+print(list(baby_names.keys()))
+print(list(baby_names.values()))
+print(list(baby_names.items()))
+print(baby_names.popitem())  # Randomly chooses an item
+
+>>>
+['cat', 'dog']
+['kitten', 'puppy']
+[('cat', 'kitten'), ('dog', 'puppy')]
+('dog', 'puppy')
+```
+
+这项变化对 Python 中那些依赖字典类型及其实现细节的特性产生了很多影响。
+
+函数的关键字参数（包括万能的 `**kwargs` 参数，参见第 23 条），以前是按照近乎随机的顺序出现的，这使函数调用操作变得很难调试。
+
+```py
+# Python 3.5
+def my_func(**kwargs):
+    for key, value in kwargs.items():
+        print('%s = %s' % (key, value))
+
+
+my_func(goose='gosling', kangaroo='joey')
+
+>>>
+kangaroo = joey
+goose = gosling
+```
+
+现在，这些关键字参数总是能够保留调用函数时所指定的那套顺序。
+
+```py
+def my_func(**kwargs):
+    for key, value in kwargs.items():
+        print('%s = %s' % (key, value))
+
+
+my_func(goose='gosling', kangaroo='joey')
+
+>>>
+goose = gosling
+kangaroo = joey
+```
+
 // TODO 编写高质量代码待完成
