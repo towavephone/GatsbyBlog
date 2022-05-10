@@ -252,4 +252,137 @@ function drawScene() {
 
 你可以对比上方例子中使用 JavaScript 更新所有点的情况。
 
-// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-2d-rotation.html
+# WebGL 二维旋转
+
+首先我想向你介绍一个叫做 `单位圆` 的东西，一个圆有一个半径，圆的半径是圆心到圆边缘的距离，单位圆是半径为 1.0 的圆。
+
+![](res/2022-05-10-10-43-30.png)
+
+当你拖拽蓝色圆点的时候 X 和 Y 会改变，它们是那一点在圆上的坐标，在最上方时 Y 是 1 并且 X 是 0，在最右边的时候 X 是 1 并且 Y 是 0。
+
+如果你还记得三年级的数学知识，数字和 1 相乘结果不变。例如 `123 * 1 = 123`，那么，单位圆半径为 1.0 的圆也是 1 的一种形式，它是旋转的 1。所以你可以把一些东西和单位圆相乘，除了发生一些魔法和旋转之外，某种程度上和乘以 1 相似。
+
+我们将从单位元上任取一点，并将该点的 X 和 Y 与之前例子中的几何体相乘，以下是新的着色器。
+
+```js
+<script id="vertex-shader-2d" type="x-shader/x-vertex">
+   attribute vec2 a_position;
+
+   uniform vec2 u_resolution;
+   uniform vec2 u_translation;
+   uniform vec2 u_rotation;
+
+   void main() {
+      // 旋转位置
+      vec2 rotatedPosition = vec2(
+         a_position.x * u_rotation.y + a_position.y * u_rotation.x,
+         a_position.y * u_rotation.y - a_position.x * u_rotation.x
+      );
+
+      // 加上平移
+      vec2 position = rotatedPosition + u_translation;
+   }
+</script>
+```
+
+更新 JavaScript，传递两个值进去。
+
+```js
+// ...
+
+var rotationLocation = gl.getUniformLocation(program, 'u_rotation');
+
+// ...
+
+var rotation = [0, 1];
+
+// ...
+
+// 绘制场景
+function drawScene() {
+  // ...
+
+  // 设置平移
+  gl.uniform2fv(translationLocation, translation);
+
+  // 设置旋转
+  gl.uniform2fv(rotationLocation, rotation);
+
+  // 绘制几何体
+  var primitiveType = gl.TRIANGLES;
+  var offset = 0;
+  var count = 18; // 6 个三角形组成 'F', 每个三角形 3 个点
+  gl.drawArrays(primitiveType, offset, count);
+}
+```
+
+这是结果，拖动圆形手柄来旋转或拖动滑块来平移。
+
+<iframe src="https://codesandbox.io/embed/6g8g2i?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-2d-geometry-rotation](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-rotation?view=preview) -->
+
+为什么会这样？来看看数学公式。
+
+```cpp
+rotatedX = a_position.x * u_rotation.y + a_position.y * u_rotation.x;
+rotatedY = a_position.y * u_rotation.y - a_position.x * u_rotation.x;
+```
+
+假如你想旋转一个矩形，在开始旋转之前矩形右上角坐标是 3.0, 9.0，让我们在单位圆上以十二点方向为起点顺时针旋转 30 度后取一个点。
+
+![](res/2022-05-10-11-21-43.png)
+
+圆上该点的位置是 0.50 和 0.87
+
+```
+3.0 * 0.87 + 9.0 * 0.50 = 7.1
+9.0 * 0.87 - 3.0 * 0.50 = 6.3
+```
+
+这个结果正好是我们需要的结果
+
+![](res/2022-05-10-11-22-51.png)
+
+顺时针 60 度也一样
+
+![](res/2022-05-10-11-23-18.png)
+
+圆上该点的位置是 0.87 和 0.50。
+
+```
+3.0 * 0.50 + 9.0 * 0.87 = 9.3
+9.0 * 0.50 - 3.0 * 0.87 = 1.9
+```
+
+你会发现在我们顺时针旋转到右边的过程中，X 变大 Y 变小。如果我们继续旋转超过 90 度后，X 变小 Y 变大，这种形式形成了旋转。
+
+单位圆上的点还有一个名字，叫做正弦和余弦。所以对于任意给定角，我们只需要求出正弦和余弦，像这样
+
+```js
+function printSineAndCosineForAnAngle(angleInDegrees) {
+  var angleInRadians = (angleInDegrees * Math.PI) / 180;
+  var s = Math.sin(angleInRadians);
+  var c = Math.cos(angleInRadians);
+  console.log('s = ' + s + ' c = ' + c);
+}
+```
+
+如果把代码复制到 JavaScript 控制台，然后输入 `printSineAndCosignForAngle(30)`，会打印出 `s = 0.49 c = 0.87`(注意：我对结果四舍五入了)。
+
+如果你把这些组合起来，就可以对几何体旋转任意角度，使用时只需要设置旋转的角度。
+
+```js
+// ...
+var angleInRadians = (angleInDegrees * Math.PI) / 180;
+rotation[0] = Math.sin(angleInRadians);
+rotation[1] = Math.cos(angleInRadians);
+```
+
+这里有一个设置角度的版本，拖动滑块来旋转或平移。
+
+[webgl-2d-geometry-rotation-angle](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-rotation-angle?view=preview)
+
+这并不是旋转常用的方式，请继续阅读
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-2d-scale.html
