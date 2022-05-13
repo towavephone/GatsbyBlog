@@ -385,4 +385,74 @@ rotation[1] = Math.cos(angleInRadians);
 
 这并不是旋转常用的方式，请继续阅读
 
-// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-2d-scale.html
+# WebGL 二维缩放
+
+缩放和平移一样简单，让我们将位置乘以期望的缩放值，这是前例中的变化部分。
+
+```js{7,10-11,15-16}
+<script id="vertex-shader-2d" type="x-shader/x-vertex">
+   attribute vec2 a_position;
+
+   uniform vec2 u_resolution;
+   uniform vec2 u_translation;
+   uniform vec2 u_rotation;
+   uniform vec2 u_scale;
+
+   void main() {
+      // 缩放
+      vec2 scaledPosition = a_position * u_scale;
+
+      // 旋转
+      vec2 rotatedPosition = vec2(
+         scaledPosition.x * u_rotation.y + scaledPosition.y * u_rotation.x,
+         scaledPosition.y * u_rotation.y - scaledPosition.x * u_rotation.x);
+
+      // 平移
+      vec2 position = rotatedPosition + u_translation;
+   }
+</script>
+```
+
+然后需要在 JavaScript 中绘制的地方设置缩放量。
+
+```js{3,7,21-22}
+// ...
+
+var scaleLocation = gl.getUniformLocation(program, 'u_scale');
+
+// ...
+
+var scale = [1, 1];
+
+// ...
+
+// 绘制场景
+function drawScene() {
+  // ...
+
+  // 设置平移
+  gl.uniform2fv(translationLocation, translation);
+
+  // 设置旋转
+  gl.uniform2fv(rotationLocation, rotation);
+
+  // 设置缩放
+  gl.uniform2fv(scaleLocation, scale);
+
+  // 绘制几何体
+  var primitiveType = gl.TRIANGLES;
+  var offset = 0;
+  var count = 18; // 6 个三角形组成 'F', 每个三角形 3 个点
+  gl.drawArrays(primitiveType, offset, count);
+}
+```
+
+现在我们有了缩放，拖动滑块试试。
+
+[webgl-2d-geometry-scale](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-scale?view=preview)
+
+值得一提的是，缩放值为负数的时候会翻转几何体。
+
+接下来我们将复习神奇的矩阵，这三种操作将包含在一个矩阵中，并表现为一种常用形式。
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-2d-matrices.html

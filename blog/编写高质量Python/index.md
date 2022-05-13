@@ -1174,10 +1174,10 @@ Coprime
 
    ```py
    def coprime(a, b):
-    for i in range(2, min(a, b) + 1):
-        if a % i == 0 and b % i == 0:
-            return False
-    return True
+      for i in range(2, min(a, b) + 1):
+         if a % i == 0 and b % i == 0:
+               return False
+      return True
 
    assert coprime(4, 9)
    assert not coprime(3, 6)
@@ -1187,12 +1187,12 @@ Coprime
 
    ```py
    def coprime_alternate(a, b):
-    is_coprime = True
-    for i in range(2, min(a, b) + 1):
-        if a % i == 0 and b % i == 0:
-            is_coprime = False
-            break
-    return is_coprime
+      is_coprime = True
+      for i in range(2, min(a, b) + 1):
+         if a % i == 0 and b % i == 0:
+               is_coprime = False
+               break
+      return is_coprime
 
    assert coprime_alternate(4, 9)
    assert not coprime_alternate(3, 6)
@@ -2070,5 +2070,249 @@ my_func(goose='gosling', kangaroo='joey')
 goose = gosling
 kangaroo = joey
 ```
+
+另外，类也会利用字典来保存这个类的实例所具备的一些数据。在早前版本的 Python 中，对象（object）中的字段看上去好像是按随机顺序出现的。
+
+```py
+class MyClass:
+    def __init__(self):
+        self.alligator = 'hatchling'
+        self.elephant = 'calf'
+
+
+a = MyClass()
+for key, value in a.__dict__.items():
+    print('%s = %s' % (key, value))
+
+>>>
+# Python 3.5
+elephant = calf
+alligator = hatchling
+
+# Python > 3.5
+alligator = hatchling
+elephant = calf
+```
+
+现在的 Python 语言规范已经要求，字典必须保留添加键值对时所依照的顺序。所以，我们可以利用这样的特征来实现一些功能，而且可以把它融入自己给类和函数所设计的 API 中。
+
+> 其实，内置的 collections 模块早就提供了这种能够保留插入顺序的字典，叫作 OrderedDict。它的行为跟（Python 3.7 以来的）标准 dict 类型很像，但性能上有很大区别。如果要频繁插入或弹出键值对（例如要实现 least-recently-used 缓存），那么 OrderedDict 可能比标准的 Python dict 类型更合适（如何判断是否应该换用这种类型，请参见第 70 条）。
+
+处理字典的时候，不能总是假设所有的字典都能保留键值对插入时的顺序。在 Python 中，我们很容易就能定义出特制的容器类型，并且让这些容器也像标准的 list 与 dict 等类型那样遵守相关的协议（参见第 43 条）。Python 不是静态类型的语言，大多数代码都以鸭子类型（duck typing）机制运作（也就是说，对象支持什么样的行为，就可以当成什么样的数据使用，而不用执着于它在类体系中的地位）。这种特性可能会产生意想不到的问题。
+
+例如，现在要写一个程序，统计各种小动物的受欢迎程度。我们可以设定一个字典，把每种动物和它得到的票数关联起来。
+
+```py
+votes = {
+    'otter': 1281,
+    'polar bear': 587,
+    'fox': 863,
+}
+```
+
+现在定义一个函数来处理投票数据。用户可以把空的字典传给这个函数，这样的话，它就会把每个动物及其排名放到这个字典中。这种字典可以充当数据模型，给带有用户界面（UI）的元素提供数据。
+
+```py
+def populate_ranks(votes, ranks):
+    names = list(votes.keys())
+    names.sort(key=votes.get, reverse=True)
+    for i, name in enumerate(names, 1):
+        ranks[name] = i
+```
+
+我们还需要写一个函数来查出人气最高的动物。这个函数假定 populate_ranks 总是会按照升序向字典写入键值对，这样第一个出现在字典里的就应该是排名最靠前的动物。
+
+```py
+def get_winner(ranks):
+    return next(iter(ranks))
+```
+
+下面来验证刚才设计的函数，看它们能不能实现想要的结果。
+
+```py
+votes = {
+    'otter': 1281,
+    'polar bear': 587,
+    'fox': 863,
+}
+
+
+def populate_ranks(votes, ranks):
+    names = list(votes.keys())
+    names.sort(key=votes.get, reverse=True)
+    for i, name in enumerate(names, 1):
+        ranks[name] = i
+
+
+def get_winner(ranks):
+    return next(iter(ranks))
+
+
+ranks = {}
+populate_ranks(votes, ranks)
+print(ranks)
+winner = get_winner(ranks)
+print(winner)
+
+>>>
+{'otter': 1, 'fox': 2, 'polar bear': 3}
+otter
+```
+
+结果没有问题。但是，假设现在的需求变了，我们现在想要按照字母顺序在 UI 中显示，而不是像原来那样按照名次显示。为了实现这种效果，我们用内置的 collections.abc 模块定义这样一个类。这个类的功能和字典一样，而且会按照字母顺序迭代其中的内容。
+
+```py
+from collections.abc import MutableMapping
+
+
+class SortedDict(MutableMapping):
+    def __init__(self):
+        self.data = {}
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __delitem__(self, key):
+        del self.data[key]
+
+    def __iter__(self):
+        keys = list(self.data.keys())
+        keys.sort()
+        for key in keys:
+            yield key
+
+    def __len__(self):
+        return len(self.data)
+
+
+votes = {
+    'otter': 1281,
+    'polar bear': 587,
+    'fox': 863,
+}
+
+
+def populate_ranks(votes, ranks):
+    names = list(votes.keys())
+    names.sort(key=votes.get, reverse=True)
+    for i, name in enumerate(names, 1):
+        ranks[name] = i
+
+
+def get_winner(ranks):
+    return next(iter(ranks))
+
+
+sorted_ranks = SortedDict()
+populate_ranks(votes, sorted_ranks)
+print(sorted_ranks.data)
+winner = get_winner(sorted_ranks)
+print(winner)
+
+>>>
+{'otter': 1, 'fox': 2, 'polar bear': 3}
+fox
+```
+
+没有得到预期的结果，为什么会这样呢？因为 `get_winner` 函数总是假设，迭代字典时的顺序应该跟 `populate_ranks` 函数当初向字典中插入数据时的顺序一样。但是这次，我们用的是 SortedDict 实例，而不是标准的 dict 实例，所以这项假设不成立。因此，函数返回的数据是按字母顺序排列时最先出现的那个数据，也就是 `'fox'`，有以下 3 种解决方案：
+
+1. 重新实现 `get_winner` 函数，使它不再假设 ranks 字典总是能按照固定的顺序来迭代。这是最保险、最稳妥的一种方案。
+
+   ```py
+   def get_winner(ranks):
+      for name, rank in ranks.items():
+         if rank == 1:
+               return name
+
+   winner = get_winner(sorted_ranks)
+   print(winner)
+
+   >>>
+   otter
+   ```
+
+2. 在函数开头先判断 ranks 是不是预期的那种标准字典（dict）。如果不是，就抛出异常。这个办法的运行性能要比刚才那种好。
+
+   ```py
+   def get_winner(ranks):
+      if not isinstance(ranks, dict):
+         raise TypeError('must provide a dict instance')
+      return next(iter(ranks))
+
+   get_winner(sorted_ranks)
+
+   >>>
+   Traceback ...
+   TypeError: must provide a dict instance
+   ```
+
+3. 通过类型注解（type annotation）来保证传给 `get_winner` 函数的确实是个真正的 dict 实例，而不是那种行为跟标准字典类似的 MutableMapping（参见第 90 条）。下面就采用严格（strict）模式，针对含有注解的代码运行 mypy 工具。
+
+   ```py
+   from typing import Dict, MutableMapping
+
+   def populate_ranks(votes: Dict[str, int],
+                     ranks: Dict[str, int]) -> None:
+      names = list(votes.keys())
+      names.sort(key=votes.get, reverse=True)
+      for i, name in enumerate(names, 1):
+         ranks[name] = i
+
+   def get_winner(ranks: Dict[str, int]) -> str:
+      return next(iter(ranks))
+
+   class SortedDict(MutableMapping[str, int]):
+      def __init__(self):
+         self.data = {}
+
+      def __getitem__(self, key):
+         return self.data[key]
+
+      def __setitem__(self, key, value):
+         self.data[key] = value
+
+      def __delitem__(self, key):
+         del self.data[key]
+
+      def __iter__(self):
+         keys = list(self.data.keys())
+         keys.sort()
+         for key in keys:
+               yield key
+
+      def __len__(self):
+         return len(self.data)
+
+   votes = {
+      'otter': 1281,
+      'polar bear': 587,
+      'fox': 863,
+   }
+
+   sorted_ranks = SortedDict()
+   populate_ranks(votes, sorted_ranks)
+   print(sorted_ranks.data)
+   winner = get_winner(sorted_ranks)
+   print(winner)
+
+   $ python3 -m mypy --strict test.py
+   test.py:42: error: Argument 2 to "populate_ranks" has incompatible type "SortedDict"; expected "Dict[str, int]"
+   test.py:44: error: Argument 1 to "get_winner" has incompatible type "SortedDict"; expected "Dict[str, int]"
+   ```
+
+   这样可以检查出类型不相符的问题，mypy 会标出错误的用法，指出函数要求的是 dict，但传入的却是 MutableMapping。这个方案既能保证静态类型准确，又不会影响程序的运行效率。
+
+### 要点
+
+1. 从 Python 3.7 版开始，我们就可以确信迭代标准的字典时所看到的顺序跟这些键值对插入字典时的顺序一致。
+2. 在 Python 代码中，我们很容易就能定义跟标准的字典很像但本身并不是 dict 实例的对象。对于这种类型的对象，不能假设迭代时看到的顺序必定与插入时的顺序相同。
+3. 如果不想把这种跟标准字典很相似的类型也当成标准字典来处理，那么可以考虑这样三种办法。
+
+   1. 不要依赖插入时的顺序编写代码；
+   2. 在程序运行时明确判断它是不是标准的字典；
+   3. 给代码添加类型注解并做静态分析。
 
 // TODO 编写高质量代码待完成
