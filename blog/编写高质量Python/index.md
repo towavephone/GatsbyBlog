@@ -2305,7 +2305,7 @@ fox
 
    这样可以检查出类型不相符的问题，mypy 会标出错误的用法，指出函数要求的是 dict，但传入的却是 MutableMapping。这个方案既能保证静态类型准确，又不会影响程序的运行效率。
 
-### 要点
+### 总结
 
 1. 从 Python 3.7 版开始，我们就可以确信迭代标准的字典时所看到的顺序跟这些键值对插入字典时的顺序一致。
 2. 在 Python 代码中，我们很容易就能定义跟标准的字典很像但本身并不是 dict 实例的对象。对于这种类型的对象，不能假设迭代时看到的顺序必定与插入时的顺序相同。
@@ -2314,5 +2314,61 @@ fox
    1. 不要依赖插入时的顺序编写代码；
    2. 在程序运行时明确判断它是不是标准的字典；
    3. 给代码添加类型注解并做静态分析。
+
+## 第 16 条：用 get 处理键不在字典中的情况，不要使用 in 与 KeyError
+
+```py
+counters = {
+    'pumpernickel': 2,
+    'sourdough': 1,
+}
+
+key = 'wheat'
+
+if key not in counters:
+    counters[key] = 0
+counters[key] += 1
+
+if key in counters:
+    counters[key] += 1
+else:
+    counters[key] = 1
+
+try:
+    counters[key] += 1
+except KeyError:
+    counters[key] = 1
+```
+
+使用 get 来优化
+
+```py
+counters = {
+    'pumpernickel': 2,
+    'sourdough': 1,
+}
+
+key = 'wheat'
+
+count = counters.get(key, 0)
+counters[key] = count + 1
+```
+
+如果使用 setdefault 改写是有问题的，这会有一次访问、两次赋值操作
+
+而且 setdefault 不管是否有这个键，都会执行默认值的分配，这会造成比较大的性能开销
+
+```py
+count = counters.setdefault(key, 0)
+counters[key] = count + 1
+```
+
+只有与键相关联的默认值构造起来开销很低且可以变化，而且不用担心异常问题（例如 list 实例）。在这种情况下可以使用 setdefault，然而一般也优先考虑使用 defaultdict 取代 dict
+
+### 总结
+
+1. 有四种办法可以处理键不在字典中的情况：in 表达式、KeyError 异常、get 方法与 setdefault 方法。
+2. 如果跟键相关联的值是像计数器这样的基本类型，那么 get 方法就是最好的方案；如果是那种构造起来开销比较大，或是容易出异常的类型，那么可以把这个方法与赋值表达式结合起来使用。
+3. 即使看上去最应该使用 setdefault 方案，也不一定要真的使用 setdefault 方案，而是可以考虑用 defaultdict 取代普通的 dict。
 
 // TODO 编写高质量代码待完成
