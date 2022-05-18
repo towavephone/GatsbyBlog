@@ -2363,6 +2363,20 @@ count = counters.setdefault(key, 0)
 counters[key] = count + 1
 ```
 
+缓解性能问题的话，可以用 get 方法加赋值表达式，也可以直接用 defaultdict
+
+```py
+names = votes.get(key)
+if names is None:
+    votes[key] = names = []
+names.append(who)
+
+# 或者使用赋值表达式
+if (names := votes.get(key)) is None:
+    votes[key] = names = []
+names.append(who)
+```
+
 只有与键相关联的默认值构造起来开销很低且可以变化，而且不用担心异常问题（例如 list 实例）。在这种情况下可以使用 setdefault，然而一般也优先考虑使用 defaultdict 取代 dict
 
 ### 总结
@@ -2370,5 +2384,175 @@ counters[key] = count + 1
 1. 有四种办法可以处理键不在字典中的情况：in 表达式、KeyError 异常、get 方法与 setdefault 方法。
 2. 如果跟键相关联的值是像计数器这样的基本类型，那么 get 方法就是最好的方案；如果是那种构造起来开销比较大，或是容易出异常的类型，那么可以把这个方法与赋值表达式结合起来使用。
 3. 即使看上去最应该使用 setdefault 方案，也不一定要真的使用 setdefault 方案，而是可以考虑用 defaultdict 取代普通的 dict。
+
+## 第 17 条：用 defaultdict 处理内部状态中缺失的元素，而不要用 setdefault
+
+通过 setdefault 方案把新的城市添加到对应的集合里，这要比利用 get 方法与赋值表达式（Python3.8 的新特性）来实现的方案短很多。
+
+```py
+visits = {
+    'Mexico': {'Tulum', 'Puerto Vallarta'},
+    'Japan': {'Hakone'},
+}
+
+visits.setdefault('France', set()).add('Arles')  # Short
+if (japan := visits.get('Japan')) is None:  # Long
+    visits['Japan'] = japan = set()
+japan.add('Kyoto')
+
+print(visits)
+
+>>>
+{'Mexico': {'Tulum', 'Puerto Vallarta'}, 'Japan': {'Kyoto', 'Hakone'}, 'France': {'Arles'}}
+```
+
+如果程序所访问的这个字典需要由你自己明确地创建，那又该怎么写？
+
+```py
+class Visits:
+    def __init__(self):
+        self.data = {}
+
+    def add(self, country, city):
+        city_set = self.data.setdefault(country, set())
+        city_set.add(city)
+
+
+visits = Visits()
+visits.add('Russia', 'Yekaterinburg')
+visits.add('Tanzania', 'Zanzibar')
+print(visits.data)
+
+>>>
+{'Russia': {'Yekaterinburg'}, 'Tanzania': {'Zanzibar'}}
+```
+
+以上代码有以下问题
+
+1. 调用了名字很怪的 setdefault 方法，很难让人理解发生了什么
+2. 每次调用 add 方法，都会构造新的 set 实例
+
+改用 defaultdict 可以解决以上问题，它会在键缺失的情况下，自动添加这个键以及键所对应的默认值，每次发现键不存在时，该字典都会调用这个函数返回一份新的默认值
+
+```py
+from collections import defaultdict
+
+
+class Visits:
+    def __init__(self):
+        self.data = defaultdict(set)
+
+    def add(self, country, city):
+        self.data[country].add(city)
+
+
+visits = Visits()
+visits.add('England', 'Bath')
+visits.add('England', 'London')
+print(visits.data)
+
+>>>
+defaultdict(<class 'set'>, {'England': {'Bath', 'London'}})
+```
+
+### 总结
+
+1. 如果你管理的字典可能需要添加任意的键，那么应该考虑能否用内置的 collections 模块中的 defaultdict 实例来解决问题。
+2. 如果这种键名比较随意的字典是别人传给你的，你无法把它创建成 defaultdict，那么应该考虑通过 get 方法访问其中的键值。然而，在个别情况下，也可以考虑改用 setdefault 方法，因为那样写更短。
+
+## 第 18 条：学会利用 `__missing__` 构造依赖键的默认值
+
+```py
+pictures = {}
+path = 'profile_1234.png'
+if (handle := pictures.get(path)) is None:
+    try:
+        handle = open(path, 'a+b')
+    except OSError:
+        print(f'Failed to open path {path}')
+        raise
+    else:
+        pictures[path] = handle
+
+handle.seek(0)
+image_data = handle.read()
+```
+
+如果改成 setdefault
+
+```py
+pictures = {}
+path = 'profile_1234.png'
+try:
+    handle = pictures.setdefault(path, open(path, 'a+b'))
+except OSError:
+    print(f'Failed to open path {path}')
+    raise
+else:
+    handle.seek(0)
+
+image_data = handle.read()
+```
+
+然而使用 setdefault 实现会有以下问题
+
+1. 即便图片的路径名已经在字典里了，程序也还是得调用内置的 open 函数创建文件句柄，于是导致这个程序要给已经创建过 handle 的那份文件再度创建 handle（两者可能相互冲突）
+2. 如果 try 块抛出异常，那我们可能无法判断这个异常是 open 函数导致的，还是 setdefault 方法导致的，因为这两次调用全都写在了同一行代码里
+
+理论上可以使用 defaultdict 优化，但是 defaultdict 的第二个函数不能传参
+
+```py
+from collections import defaultdict
+
+
+def open_picture(profile_path):
+    try:
+        return open(profile_path, 'a+b')
+    except OSError:
+        print(f'Failed to open path {profile_path}')
+        raise
+
+
+path = 'profile_1234.png'
+pictures = defaultdict(open_picture)
+handle = pictures[path]
+handle.seek(0)
+image_data = handle.read()
+
+>>>
+Traceback ...
+TypeError: open_picture() missing 1 required positional argument: 'profile_path'
+```
+
+可以通过继承 dict 类型并实现 `__missing__` 特殊方法来解决这个问题
+
+```py
+def open_picture(profile_path):
+    try:
+        return open(profile_path, 'a+b')
+    except OSError:
+        print(f'Failed to open path {profile_path}')
+        raise
+
+
+class Pictures(dict):
+    def __missing__(self, key):
+        value = open_picture(key)
+        self[key] = value
+        return value
+
+
+path = 'profile_1234.png'
+pictures = Pictures()
+handle = pictures[path]
+handle.seek(0)
+image_data = handle.read()
+```
+
+### 总结
+
+1. 如果创建默认值需要较大的开销，或者可能抛出异常，那就不适合用 dict 类型的 setdefault 方法实现。
+2. 传给 defaultdict 的函数必须是不需要参数的函数，所以无法创建出需要依赖键名的默认值。
+3. 如果要构造的默认值必须根据键名来确定，那么可以定义自己的 dict 子类并实现 `__missing__` 方法。
 
 // TODO 编写高质量代码待完成

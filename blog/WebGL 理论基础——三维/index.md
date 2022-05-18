@@ -422,3 +422,119 @@ gl.vertexAttribPointer(colorLocation, size, type, normalize, stride, offset);
 现在我们得到这个。
 
 [webgl-3d-step3](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step3?view=preview)
+
+它好像把 'F' 的所有部分都按照提供的顺序显示出来了，正面，背面，侧面等等。有时候这并不是想要的结果，在背面的物体反而被绘制出来了。
+
+![](res/polygon-drawing-order.gif)
+
+红色部分是 'F' 的正面，但是因为它在数据的前部所以最先被绘制出来，然后它后面的面绘制后挡住了它。例如紫色部分实际上是 'F' 的背面，由于它在数据中是第二个所以第二个被画出来。
+
+WebGL 中的三角形有正反面的概念，正面三角形的顶点顺序是逆时针方向，反面三角形是顺时针方向。
+
+![](res/2022-05-18-11-30-35.png)
+
+WebGL 可以只绘制正面或反面三角形，可以这样开启
+
+```js
+gl.enable(gl.CULL_FACE);
+```
+
+将它放在 drawScene 方法里，开启这个特性后 WebGL 默认“剔除”背面三角形，"剔除"在这里是“不用绘制”的花哨叫法。
+
+对于 WebGL 而言，一个三角形是顺时针还是逆时针是根据裁剪空间中的顶点顺序判断的，换句话说，WebGL 是根据你在顶点着色器中运算后提供的结果来判定的，这就意味着如果你把一个顺时针的三角形沿 X 轴缩放 -1，它将会变成逆时针，或者将顺时针的三角形旋转 180 度后变成逆时针。由于我们没有开启 CULL_FACE，所以可以同时看到顺时针（正面）和逆时针（反面）三角形。现在开启了，任何时候正面三角形无论是缩放还是旋转的原因导致翻转了，WebGL 就不会绘制它。这件事很有用，因为通常情况下你只需要看到你正面对的面。
+
+开启 CULL_FACE 后得到
+
+[webgl-3d-step4](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step4?view=preview)
+
+结果证明，大多数三角形朝向都是错的，旋转的时候你会看到背面的三角形，幸好它很容易解决，我们只需要看看哪些是三角形是反的，然后交换它们的两个顶点。例如一个反的三角形
+
+```
+  1,   2,   3,
+ 40,  50,  60,
+700, 800, 900,
+```
+
+只需要交换后两个顶点的位置
+
+```
+  1,   2,   3,
+700, 800, 900,
+ 40,  50,  60,
+```
+
+通过修正朝向错误后得到
+
+[webgl-3d-step5](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step5?view=preview)
+
+这很接近实际效果了但是还有一个问题，即使所有三角形的朝向是正确的，然后背面的被剔除了，有些应该在背面的部分还是出现在了前面。
+
+深度缓冲有时也叫 Z-Buffer，是一个存储像素深度的矩形，一个深度像素对应一个着色像素，在绘制图像时组合使用。当 WebGL 绘制每个着色像素时也会写入深度像素，它的值基于顶点着色器返回的 Z 值，就像我们将 X 和 Y 转换到裁剪空间一样，Z 也在裁剪空间或者 (-1 到 +1)。这个值会被转换到深度空间( 0 到 +1)，WebGL 绘制一个着色像素之前会检查对应的深度像素，如果对应的深度像素中的深度值小于当前像素的深度值，WebGL 就不会绘制新的颜色。反之它会绘制片断着色器提供的新颜色并更新深度像素中的深度值。这也意味着在其他像素后面的像素不会被绘制。
+
+我们可以像这样开启这个特性
+
+```js
+gl.enable(gl.DEPTH_TEST);
+```
+
+在开始绘制前还需要清除深度缓冲为 1.0。
+
+```js
+// 绘制场景
+function drawScene() {
+  // ...
+
+  // 清空画布和深度缓冲
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // ...
+}
+```
+
+现在得到
+
+[webgl-3d-step6](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step6?view=preview)
+
+这才是三维！
+
+还有一件小事，在大多数三维数学库中没有负责像素空间与裁剪空间转换的 projection 方法。代替的是叫做 ortho 或 orthographic 的方法，它看起来像这样
+
+```js
+var m4 = {
+  orthographic: function(left, right, bottom, top, near, far) {
+    return [
+      2 / (right - left),
+      0,
+      0,
+      0,
+      0,
+      2 / (top - bottom),
+      0,
+      0,
+      0,
+      0,
+      2 / (near - far),
+      0,
+
+      (left + right) / (left - right),
+      (bottom + top) / (bottom - top),
+      (near + far) / (near - far),
+      1
+    ];
+  }
+};
+```
+
+和我们简单的 projection 方法不同的是正射投影有更多的参数可以传递，左，右，上，下，近和远，给我们更灵活的选择。为了用这个方法实现之前的投影，需要这样调用
+
+```js
+var left = 0;
+var right = gl.canvas.clientWidth;
+var bottom = gl.canvas.clientHeight;
+var top = 0;
+var near = 400;
+var far = -400;
+m4.orthographic(left, right, bottom, top, near, far);
+```
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-perspective.html
