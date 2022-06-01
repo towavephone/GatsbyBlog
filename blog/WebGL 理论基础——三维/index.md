@@ -856,4 +856,98 @@ matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
 >
 > 同样的将 `X` 从 45 移动到 -150。过去视图表示的范围是 0 到 400 个单位，现在它表示的 -1 到 +1 个单位。
 
+# WebGL 三维相机
+
+在上篇文章中我们将 F 移动到了视锥中，原因是 `m4.perspective` 默认将相机放在了原点 `(0, 0, 0)` 并且视锥的范围是 `-zNear` 到 `-zFar`。
+
+将物体移动到视场中可能并不是正确的方法，在实际生活中通常是移动相机去拍摄建筑物。
+
+<iframe src="https://codesandbox.io/embed/rsob1c?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=0" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [camera-move-camera](embedded-codesandbox://webgl-fundamental-3d/camera-move-camera?view=preview&initialpath=?mode=0) -->
+
+将物体移动到相机前面并不是常见做法。
+
+<iframe src="https://codesandbox.io/embed/rsob1c?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=1" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [camera-move-camera](embedded-codesandbox://webgl-fundamental-3d/camera-move-camera?view=preview&initialpath=?mode=1) -->
+
+但在上节中由于投影的原因物体需要在 -Z 轴上，我们通过将相机移动到原点，物体移动到相机前来保持原始的相对位置。
+
+<iframe src="https://codesandbox.io/embed/rsob1c?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=2" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [camera-move-camera](embedded-codesandbox://webgl-fundamental-3d/camera-move-camera?view=preview&initialpath=?mode=2) -->
+
+高效的将物体移动到相机前是非常重要的。最简单的方式是使用一个“逆向”矩阵，计算逆矩阵的数学原理比较复杂但概念很简单，逆就是你想通过一个值去抵消一个值。例如，123 的逆就是 -123，一个缩放为 5 的缩放矩阵的逆是缩放为 1/5 或 0.2 的缩放矩阵，一个绕 X 轴旋转 30° 的旋转矩阵的逆是绕 X 旋转 -30°。
+
+目前为止我们使用过平移，旋转和缩放去控制 'F' 的位置和姿态，将这些矩阵相乘后得到一个矩阵，可以将物体从原始位置移动到期望的位置，大小和姿态。我们可以对相机进行同样的操作，一旦有了相机从原点移动旋转到目标位置的矩阵后，就可以计算出它的逆矩阵，利用这个逆矩阵可以不动相机，将物体从相反的方向移动到相机前。
+
+让我们来做一个三维场景，像上图一样有一圈 'F' 。
+
+首先，由于 5 个物体使用的是同一个投影矩阵，所以我们将投影矩阵的计算放在循环外
+
+```js
+// 计算投影矩阵
+var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+var zNear = 1;
+var zFar = 2000;
+var projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
+```
+
+接着计算相机矩阵，这个矩阵代表的是相机在世界坐标中的位置和姿态。下方的代码计算的是看向原点，在半径为 `radius * 1.5` 的圆上移动的相机。
+
+<iframe src="https://codesandbox.io/embed/rsob1c?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=3" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [camera-move-camera](embedded-codesandbox://webgl-fundamental-3d/camera-move-camera?view=preview&initialpath=?mode=3) -->
+
+```js
+var numFs = 5;
+var radius = 200;
+
+// 计算相机的矩阵
+var cameraMatrix = m4.yRotation(cameraAngleRadians);
+cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius * 1.5);
+```
+
+然后通过相机矩阵计算“视图矩阵”，视图矩阵是将所有物体以相反于相机的方向运动，尽管相机还是在原点但是相对关系是期望的。我们可以使用 inverse 方法计算逆矩阵（完全对立的转换矩阵），在这个例子中提供的是绕原点转动的矩阵，它的逆矩阵是移动相机以外的所有物体，好像相机在原点一样。
+
+```js
+// 通过相机矩阵计算视图矩阵
+var viewMatrix = m4.inverse(cameraMatrix);
+```
+
+现在将视图矩阵和投影矩阵结合在一起
+
+```js
+// 计算组合矩阵
+var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+```
+
+最后绘制一圈 F，将每个 F 乘以视图投影矩阵，然后旋转和向外平移 radius 个单位。
+
+```js
+for (var ii = 0; ii < numFs; ++ii) {
+  var angle = (ii * Math.PI * 2) / numFs;
+  var x = Math.cos(angle) * radius;
+  var y = Math.sin(angle) * radius;
+
+  // 从视图投影矩阵开始
+  // 计算 F 的矩阵
+  var matrix = m4.translate(viewProjectionMatrix, x, 0, y);
+
+  // 设置矩阵
+  gl.uniformMatrix4fv(matrixLocation, false, matrix);
+
+  // 获得几何体
+  var primitiveType = gl.TRIANGLES;
+  var offset = 0;
+  var count = 16 * 6;
+  gl.drawArrays(primitiveType, offset, count);
+}
+```
+
+一个绕 F 旋转的相机。拖动 cameraAngle 滑块移动相机。
+
+[webgl-3d-camera](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera?view=preview)
+
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-camera.html
