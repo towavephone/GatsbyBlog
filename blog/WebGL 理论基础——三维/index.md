@@ -950,4 +950,157 @@ for (var ii = 0; ii < numFs; ++ii) {
 
 [webgl-3d-camera](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera?view=preview)
 
-// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-camera.html
+这样做没什么问题，但是有时利用旋转和平移去移动相机，让它到达期望的位置并看向期望的方向并不容易。例如你想让它总是看向一个特定的 F，而相机又在绕一圈 F 旋转，这时计算会变的相当复杂。
+
+幸好这有一个简单的方法，我们可以同时定义相机位置和朝向，然后矩阵就可以将相机放在那，基于矩阵这个工作就会变得非常简单。
+
+首先我们需要知道相机的期望位置，将它叫做 cameraPosition，然后需要知道看向或对准的目标位置，将它叫做 target。如果将 target 减去 cameraPosition 就会得到相机的朝向，将它叫做 zAxis。由于我们知道相机看向的是 -Z 方向，所以可以用另一种方式相减 `cameraPosition - target`，将结果单位化后直接赋给矩阵的 z 区域。
+
+```
++----+----+----+----+
+|    |    |    |    |
++----+----+----+----+
+|    |    |    |    |
++----+----+----+----+
+| Zx | Zy | Zz |    |
++----+----+----+----+
+|    |    |    |    |
++----+----+----+----+
+```
+
+矩阵的这个区域代表的是 Z 轴。在这个例子中相机的 Z-axis 进行了单位化，单位化也就是一个做一个类似 1.0 的矢量，如果你回到二维旋转的文章，那里讲到的单位圆在二维旋转中用法，在三维中需要一个单位球，单位向量表示单位球上的点。
+
+<iframe src="https://codesandbox.io/embed/d8lusx?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=0" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [cross-product-diagram](embedded-codesandbox://webgl-fundamental-3d/cross-product-diagram?view=preview&initialpath=?mode=0) -->
+
+这些信息还不够，只给了一个单位圆上点，如何来确定物体的姿态呢？这就需要填充矩阵的其他区域，尤其是 X 轴和 Y 轴。通常情况下我们知道它们互相垂直，如果再知道哪里是上方，在该例中是 `(0, 1, 0)`，就可以使用“叉乘”去计算矩阵的 X 轴和 Y 轴。
+
+我不知道叉乘的数学意义是什么，但我知道将两个单位向量叉乘后可以得到一个和它们都垂直的向量。换句话说，如果你有一个向量指向东南方，一个向量指向上方，叉乘后会得到一个指向西南方或东北方的矢量，因为这两个矢量都和东南方和上方垂直，相乘的顺序不同得到结果相反。
+
+在任何情况下我们可以通过叉乘 zAxis 和 up 得到相机的 xAxis。
+
+<iframe src="https://codesandbox.io/embed/d8lusx?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=1" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [cross-product-diagram](embedded-codesandbox://webgl-fundamental-3d/cross-product-diagram?view=preview&initialpath=?mode=1) -->
+
+现在我们有了 xAxis，可以叉乘 zAxis 和 xAxis 得到相机的 yAxis。
+
+<iframe src="https://codesandbox.io/embed/d8lusx?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?mode=2" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [cross-product-diagram](embedded-codesandbox://webgl-fundamental-3d/cross-product-diagram?view=preview&initialpath=?mode=2) -->
+
+现在将三个轴插入矩阵中，会给我们提供一个从 cameraPosition 指向 target 的转换，只需要再加上 position
+
+```
++----+----+----+----+
+| Xx | Xy | Xz |  0 |  <- x axis
++----+----+----+----+
+| Yx | Yy | Yz |  0 |  <- y axis
++----+----+----+----+
+| Zx | Zy | Zz |  0 |  <- z axis
++----+----+----+----+
+| Tx | Ty | Tz |  1 |  <- 相机位置
++----+----+----+----+
+```
+
+这是计算叉乘的代码
+
+```js
+function cross(a, b) {
+  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+}
+```
+
+这是向量相减的代码
+
+```js
+function subtractVectors(a, b) {
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+```
+
+这是单位化向量的代码
+
+```js
+function normalize(v) {
+  var length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  // 确定不会除以 0
+  if (length > 0.00001) {
+    return [v[0] / length, v[1] / length, v[2] / length];
+  } else {
+    return [0, 0, 0];
+  }
+}
+```
+
+这是计算“朝向”矩阵的代码
+
+```js
+var m4 = {
+  lookAt: function(cameraPosition, target, up) {
+    var zAxis = normalize(subtractVectors(cameraPosition, target));
+    var xAxis = normalize(cross(up, zAxis));
+    var yAxis = normalize(cross(zAxis, xAxis));
+
+    return [
+      xAxis[0],
+      xAxis[1],
+      xAxis[2],
+      0,
+      yAxis[0],
+      yAxis[1],
+      yAxis[2],
+      0,
+      zAxis[0],
+      zAxis[1],
+      zAxis[2],
+      0,
+      cameraPosition[0],
+      cameraPosition[1],
+      cameraPosition[2],
+      1
+    ];
+  }
+};
+```
+
+这是在移动过程中朝向某个确切的 'F' 的用法。
+
+```js
+// ...
+
+// 计算第一个 F 的位置
+var fPosition = [radius, 0, 0];
+
+// 计算相机在圆上的位置矩阵
+var cameraMatrix = m4.yRotation(cameraAngleRadians);
+cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius * 1.5);
+
+// 获得矩阵中相机的位置
+var cameraPosition = [cameraMatrix[12], cameraMatrix[13], cameraMatrix[14]];
+
+var up = [0, 1, 0];
+
+// 计算相机的朝向矩阵
+var cameraMatrix = m4.lookAt(cameraPosition, fPosition, up);
+
+// 通过相机矩阵获得视图矩阵
+var viewMatrix = m4.inverse(cameraMatrix);
+
+// ...
+```
+
+[webgl-3d-camera-look-at](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera-look-at?view=preview)
+
+拖动滑块观察相机是如何追踪单个 'F' 的。
+
+你也可以对其他东西使用 lookAt 方法而不只是相机。通常是让角色视线跟着某人，将炮塔指向目标，让物体沿着路径移动。你可以算出物体当前在路径上的位置和不久后的位置，然后将这两个值放入 lookAt 方法，可以让物体沿着路径移动并且朝着路径的方向。
+
+## lookAt 标准
+
+大多数三维数学库都有 lookAt 方法，通常它是用于计算 `视图矩阵` 而不是 `相机矩阵`。换句话说这个矩阵将所有物体移动到相机前而不是将相机移动到物体前。
+
+我发现它并不好用，前面指出一个 lookAt 方法有很多用处，当你需要视图矩阵的时候只需要调用 inverse 方法，但当你想要让角色跟随另一个角色或者炮台跟随目标的时候，在我看来 lookAt 方法返回世界坐标中的朝向和位置转换会好一些。
+
+[webgl-3d-camera-look-at-heads](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera-look-at-heads?view=preview)

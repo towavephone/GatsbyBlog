@@ -2555,4 +2555,100 @@ image_data = handle.read()
 2. 传给 defaultdict 的函数必须是不需要参数的函数，所以无法创建出需要依赖键名的默认值。
 3. 如果要构造的默认值必须根据键名来确定，那么可以定义自己的 dict 子类并实现 `__missing__` 方法。
 
+# 函数
+
+## 第 19 条：不要把函数返回的多个数值拆分到三个以上的变量中
+
+unpacking 机制允许 Python 函数返回一个以上的值（参见第 6 条）。
+
+```js
+def get_stats(numbers):
+    minimum = min(numbers)
+    maximum = max(numbers)
+    return minimum, maximum
+
+
+lengths = [63, 73, 72, 60, 67, 66, 71, 61, 72, 70]
+minimum, maximum = get_stats(lengths)  # Two return values
+print(f'Min: {minimum}, Max: {maximum}')
+
+>>>
+Min: 60, Max: 73
+```
+
+```js
+first, second = 1, 2
+assert first == 1
+assert second == 2
+
+
+def my_function():
+    return 1, 2
+
+
+first, second = my_function()
+assert first == 1
+assert second == 2
+```
+
+在返回多个值的时候，可以用带星号的表达式接收那些没有被普通变量捕获到的值（参见第 13 条）
+
+```py
+def get_avg_ratio(numbers):
+    average = sum(numbers) / len(numbers)
+    scaled = [x / average for x in numbers]
+    scaled.sort(reverse=True)
+    return scaled
+
+
+lengths = [63, 73, 72, 60, 67, 66, 71, 61, 72, 70]
+longest, *middle, shortest = get_avg_ratio(lengths)
+print(f'Longest:  {longest:>4.0%}')
+print(f'Shortest: {shortest:>4.0%}')
+
+>>>
+Longest:  108%
+Shortest:  89%
+```
+
+```py
+def get_stats(numbers):
+    minimum = min(numbers)
+    maximum = max(numbers)
+    count = len(numbers)
+    average = sum(numbers)/count
+    sorted_numbers = sorted(numbers)
+    middle = count // 2
+    if count % 2 == 0:
+        lower = sorted_numbers[middle - 1]
+        upper = sorted_numbers[middle]
+        median = (lower + upper)/2
+    else:
+        median = sorted_numbers[middle]
+    return minimum, maximum, average, median, count
+
+
+lengths = [63, 73, 72, 60, 67, 66, 71, 61, 72, 70]
+minimum, maximum, average, median, count = get_stats(lengths)
+print(f'Min: {minimum}, Max: {maximum}')
+print(f'Average: {average}, Median: {median}, Count: {count}')
+
+>>>
+Min: 60, Max: 73
+Average: 67.5, Median: 68.5, Count: 10
+```
+
+上面的写法有 2 个问题：
+
+1. 函数返回的五个值都是数字，所以很容易就会搞错顺序
+2. 调用函数并拆分返回值的那行代码会写得比较长
+
+为避免这些问题，我们不应该把函数返回的多个值拆分到三个以上的变量里。一个三元组最多只拆成三个普通变量，或两个普通变量与一个万能变量（带星号的变量）。当然用于接收的变量个数也可以比这更少。假如要拆分的值确实很多，那最好还是定义一个轻便的类或 namedtuple（参见第 37 条），并让函数返回这样的实例。
+
+### 总结
+
+1. 函数可以把多个值合起来通过一个元组返回给调用者，以便利用 Python 的 unpacking 机制去拆分。
+2. 对于函数返回的多个值，可以把普通变量没有捕获到的那些值全都捕获到一个带星号的变量里。
+3. 把返回的值拆分到四个或四个以上的变量是很容易出错的，所以最好不要那么写，而是应该通过小类或 namedtuple 实例完成。
+
 // TODO 编写高质量代码待完成
