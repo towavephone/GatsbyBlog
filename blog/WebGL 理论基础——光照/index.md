@@ -434,4 +434,208 @@ gl.vertexAttribPointer(normalLocation, size, type, normalize, stride, offset);
 
 首先在顶点着色器中只将法向量传递给片断着色器
 
-// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-lighting-directional.html
+```glsl
+attribute vec4 a_position;
+// attribute vec4 a_color;
+attribute vec3 a_normal;
+
+uniform mat4 u_matrix;
+
+// varying vec4 v_color;
+varying vec3 v_normal;
+
+void main() {
+  // 将位置和矩阵相乘
+  gl_Position = u_matrix * a_position;
+
+  // // 将颜色传到片断着色器
+  // v_color = a_color;
+
+  // 将法向量传到片断着色器
+  v_normal = a_normal;
+}
+```
+
+然后在片断着色器中将法向量和光照方向点乘
+
+```glsl
+precision mediump float;
+
+// 从顶点着色器中传入的值
+// varying vec4 v_color;
+varying vec3 v_normal;
+
+uniform vec3 u_reverseLightDirection;
+uniform vec4 u_color;
+
+void main() {
+   // 由于 v_normal 是插值出来的，有可能不是单位向量，
+   // 可以用 normalize 将其单位化。
+   vec3 normal = normalize(v_normal);
+
+   float light = dot(normal, u_reverseLightDirection);
+
+   gl_FragColor = u_color;
+
+   // 将颜色部分（不包括 alpha）和光照相乘
+   gl_FragColor.rgb *= light;
+}
+```
+
+然后找到 `u_color` 和 `u_reverseLightDirection` 的位置。
+
+```js
+// 寻找全局变量
+var matrixLocation = gl.getUniformLocation(program, 'u_matrix');
+var colorLocation = gl.getUniformLocation(program, 'u_color');
+var reverseLightDirectionLocation = gl.getUniformLocation(program, 'u_reverseLightDirection');
+```
+
+为它们赋值
+
+```js
+// 设置矩阵
+gl.uniformMatrix4fv(matrixLocation, false, worldViewProjectionMatrix);
+
+// 设置使用的颜色
+gl.uniform4fv(colorLocation, [0.2, 1, 0.2, 1]); // green
+
+// 设置光线方向
+gl.uniform3fv(reverseLightDirectionLocation, m4.normalize([0.5, 0.7, 1]));
+```
+
+我们之前用到的 normalize 会将原向量转换为单位向量。例子中的 x = 0.5 说明光线是从右往左照，y = 0.7 说明光线从上方往下照，z = 1 说明光线从在场景前方。对应的值表示光源大多指向场景，在靠右方和上方一点的位置。
+
+这是结果
+
+[webgl-3d-lighting-directional](embedded-codesandbox://webgl-fundamental-light/webgl-3d-lighting-directional?view=preview)
+
+如果你旋转了 F 就会发现，F 虽然旋转了但是光照没变，我们希望随着 F 的旋转正面总是被照亮的。
+
+为了解决这个问题就需要在物体重定向时重定向法向量，和位置一样我们也可以将向量和矩阵相乘，这个矩阵显然是 world 矩阵，现在我们只传了一个矩阵 `u_matrix`，所以先来改成传递两个矩阵，一个叫做 `u_world` 的世界矩阵，另一个叫做 `u_worldViewProjection` 也就是我们现在的 `u_matrix`。
+
+```glsl
+attribute vec4 a_position;
+attribute vec3 a_normal;
+
+uniform mat4 u_worldViewProjection;
+uniform mat4 u_world;
+
+varying vec3 v_normal;
+
+void main() {
+  // 将位置和矩阵相乘
+  gl_Position = u_worldViewProjection * a_position;
+
+  // 重定向法向量并传递给片断着色器
+  v_normal = mat3(u_world) * a_normal;
+}
+```
+
+注意到我们将 `a_normal` 与 `mat3(u_world)` 相乘，那是因为法向量是方向所以不用关心位移，矩阵的左上 3x3 部分才是控制姿态的。
+
+找到全局变量
+
+```js
+// 寻找全局变量
+var worldViewProjectionLocation = gl.getUniformLocation(program, 'u_worldViewProjection');
+var worldLocation = gl.getUniformLocation(program, 'u_world');
+```
+
+然后更新它们
+
+```js
+// 设置矩阵
+gl.uniformMatrix4fv(worldViewProjectionLocation, false, worldViewProjectionMatrix);
+gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+```
+
+[webgl-3d-lighting-directional-world](embedded-codesandbox://webgl-fundamental-light/webgl-3d-lighting-directional-world?view=preview)
+
+旋转后就会发现面对 F 的面总是被照亮的。
+
+这里有一个问题我不知道如何表述所以就用图解展示，我们用 normal 和 u_world 相乘去重定向法向量，如果世界矩阵被缩放了怎么办？事实是会得到错误的法向量。
+
+[normals-scaled](embedded-codesandbox://webgl-fundamental-light/normals-scaled?view=preview)
+
+我从没想弄清为什么，但解决办法就是对世界矩阵求逆并转置，用这个矩阵就会得到正确的结果。
+
+在图解里中间的紫色球体是未缩放的，左边的红色球体用的世界矩阵并缩放了，你可以看出有些不太对劲。右边蓝色的球体用的是世界矩阵求逆并转置后的矩阵。
+
+点击图解循环观察不同的表示形式，你会发现在缩放严重时左边的（世界矩阵）法向量和表面没有保持垂直关系，而右边的（世界矩阵求逆并转置）一直保持垂直。最后一种模式是将它们渲染成红色，你会发现两个球体的光照结果相差非常大，基于可视化的结果可以得出使用世界矩阵求逆转置是对的。
+
+修改代码让示例使用这种矩阵，首先更新着色器，理论上我们可以直接更新 `u_world` 的值，但是最好将它重命名以表示它真正的含义，防止混淆。
+
+```glsl
+attribute vec4 a_position;
+attribute vec3 a_normal;
+
+uniform mat4 u_worldViewProjection;
+uniform mat4 u_worldInverseTranspose;
+
+varying vec3 v_normal;
+
+void main() {
+  // 将位置和矩阵相乘
+  gl_Position = u_worldViewProjection * a_position;
+
+  // 重定向法向量并传递给片断着色器
+  v_normal = mat3(u_worldInverseTranspose) * a_normal;
+}
+```
+
+然后找到它
+
+```js
+// var worldLocation = gl.getUniformLocation(program, 'u_world');
+var worldInverseTransposeLocation = gl.getUniformLocation(program, 'u_worldInverseTranspose');
+```
+
+更新它
+
+```js
+var worldViewProjectionMatrix = m4.multiply(viewProjectionMatrix, worldMatrix);
+var worldInverseMatrix = m4.inverse(worldMatrix);
+var worldInverseTransposeMatrix = m4.transpose(worldInverseMatrix);
+
+// 设置矩阵
+gl.uniformMatrix4fv(worldViewProjectionLocation, false, worldViewProjectionMatrix);
+// gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+gl.uniformMatrix4fv(worldInverseTransposeLocation, false, worldInverseTransposeMatrix);
+```
+
+这是转置的代码
+
+```js
+var m4 = {
+  transpose: function(m) {
+    return [m[0], m[4], m[8], m[12], m[1], m[5], m[9], m[13], m[2], m[6], m[10], m[14], m[3], m[7], m[11], m[15]];
+  }
+
+  // ...
+};
+```
+
+由于我们并没有进行缩放，所以没有明显的变化，但防患于未然。
+
+[webgl-3d-lighting-directional-worldinversetranspose](embedded-codesandbox://webgl-fundamental-light/webgl-3d-lighting-directional-worldinversetranspose?view=preview)
+
+## `mat3(u_worldInverseTranspose) * a_normal` 的可选方案
+
+之前的着色器中出现了这样的代码
+
+```js
+v_normal = mat3(u_worldInverseTranspose) * a_normal;
+```
+
+我们也可以这样做
+
+```js
+v_normal = (u_worldInverseTranspose * vec4(a_normal, 0)).xyz;
+```
+
+由于 w 在相乘前被赋值为 0，所以在相乘后负责平移的部分与 0 相乘被移除了。我认为这可能是更常用的方式，mat3 的做法只是对我来说更简洁但我经常用前一种方法。
+
+当然另一种解决方案是将 `u_worldInverseTranspose` 直接构造成 mat3。这有两个不能这么做的理由，第一个是我们可能需要一个完整的 `u_worldInverseTranspose` 对象传递一个 mat4 给还要给其他地方使用，另一个是我们在 JavaScript 中的所有矩阵方法都是针对 4x4 的矩阵，如果没有其他特别的需求，没有必要构造一个 3x3 的矩阵，或者是把 4x4 转换成 3x3。
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-lighting-point.html
