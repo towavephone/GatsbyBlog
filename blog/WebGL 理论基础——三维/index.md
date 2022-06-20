@@ -215,7 +215,9 @@ newZ = y * -s + z * c;
 
 它们提供这些旋转方式。
 
-[axis-diagram](embedded-codesandbox://webgl-fundamental-3d/axis-diagram?view=preview)
+<iframe src="https://codesandbox.io/embed/bhlktz?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [axis-diagram](embedded-codesandbox://webgl-fundamental-3d/axis-diagram?view=preview) -->
 
 同样的我们将实现一些简单的方法
 
@@ -287,7 +289,9 @@ gl.uniformMatrix4fv(matrixLocation, false, matrix);
 
 这是结果
 
-[webgl-3d-step1](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step1?view=preview)
+<iframe src="https://codesandbox.io/embed/81z8xd?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-step1](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step1?view=preview) -->
 
 我们遇到的第一个问题是 F 在三维中过于扁平，所以很难看出三维效果。解决这个问题的方法是将它拉伸成三维几何体。现在的 F 是由三个矩形组成，每个矩形两个三角形。让它变三维需要 16 个矩形。三个矩形在正面，三个背面，一个左侧，四个右侧，两个上侧，三个底面。
 
@@ -307,7 +311,9 @@ gl.drawArrays(primitiveType, offset, count);
 
 这是对应结果
 
-[webgl-3d-step2](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step2?view=preview)
+<iframe src="https://codesandbox.io/embed/06sn49?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-step2](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step2?view=preview) -->
 
 拖动滑块很难看出它是三维的，让我们给矩形上不同的颜色。需要在顶点着色器中添加一个属性和一个可变量，将颜色值传到片断着色器中。
 
@@ -421,7 +427,9 @@ gl.vertexAttribPointer(colorLocation, size, type, normalize, stride, offset);
 
 现在我们得到这个。
 
-[webgl-3d-step3](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step3?view=preview)
+<iframe src="https://codesandbox.io/embed/ebud7i?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-step3](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step3?view=preview) -->
 
 它好像把 'F' 的所有部分都按照提供的顺序显示出来了，正面，背面，侧面等等。有时候这并不是想要的结果，在背面的物体反而被绘制出来了。
 
@@ -445,7 +453,9 @@ gl.enable(gl.CULL_FACE);
 
 开启 CULL_FACE 后得到
 
-[webgl-3d-step4](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step4?view=preview)
+<iframe src="https://codesandbox.io/embed/lmtm5y?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-step4](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step4?view=preview) -->
 
 结果证明，大多数三角形朝向都是错的，旋转的时候你会看到背面的三角形，幸好它很容易解决，我们只需要看看哪些是三角形是反的，然后交换它们的两个顶点。例如一个反的三角形
 
@@ -465,7 +475,9 @@ gl.enable(gl.CULL_FACE);
 
 通过修正朝向错误后得到
 
-[webgl-3d-step5](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step5?view=preview)
+<iframe src="https://codesandbox.io/embed/pfgtxt?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-step5](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step5?view=preview) -->
 
 这很接近实际效果了但是还有一个问题，即使所有三角形的朝向是正确的，然后背面的被剔除了，有些应该在背面的部分还是出现在了前面。
 
@@ -493,7 +505,9 @@ function drawScene() {
 
 现在得到
 
-[webgl-3d-step6](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step6?view=preview)
+<iframe src="https://codesandbox.io/embed/ts2ymi?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-step6](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-step6?view=preview) -->
 
 这才是三维！
 
@@ -618,7 +632,9 @@ function drawScene() {
 }
 ```
 
-[webgl-3d-perspective](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective?view=preview)
+<iframe src="https://codesandbox.io/embed/pokxmd?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-perspective](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective?view=preview) -->
 
 如果效果不明显，可以将 "fudgeFactor" 滑块从 1.0 拖到 0.0 来对比没添加这些代码之前的样子。
 
@@ -651,7 +667,9 @@ function drawScene() {
 
 看他们多像。
 
-[webgl-3d-perspective-w](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective-w?view=preview)
+<iframe src="https://codesandbox.io/embed/1jhg42?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-perspective-w](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective-w?view=preview) -->
 
 为什么 WebGL 会自动除以 W ？因为使用矩阵的魔力，可以用把值从 z 传值到 w 。
 
@@ -787,7 +805,9 @@ matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
 
 和之前的很像。
 
-[webgl-3d-perspective-w-matrix](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective-w-matrix?view=preview)
+<iframe src="https://codesandbox.io/embed/b0ky3t?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-perspective-w-matrix](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective-w-matrix?view=preview) -->
 
 这只是展示了除以 Z 值获可以实现透视投影，以及在 WebGL 中简单实现。
 
@@ -820,7 +840,9 @@ var m4 = {
 
 这是矩阵的图解。
 
-[frustum-diagram](embedded-codesandbox://webgl-fundamental-3d/frustum-diagram?view=preview)
+<iframe src="https://codesandbox.io/embed/5sl3lw?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [frustum-diagram](embedded-codesandbox://webgl-fundamental-3d/frustum-diagram?view=preview) -->
 
 正方体所在的有四个侧面的椎体叫做“视锥”，矩阵将视锥中的空间转换到裁剪空间中，zNear 决定了被正面切割的位置，zFar 决定被背面切割的位置。将 zNear 设置为 23 就会看到正方体正面被切割，将 zFar 设置为 24 就会看到正方体背面被切割。
 
@@ -844,7 +866,9 @@ matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
 
 结果在这里。
 
-[webgl-3d-perspective-matrix](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective-matrix?view=preview)
+<iframe src="https://codesandbox.io/embed/y9yucf?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-perspective-matrix](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-perspective-matrix?view=preview) -->
 
 我们讲了矩阵乘法，视角和自定义 Z 范围。还有很多没讲完，但这篇文章已经很长了，所以接下来继续讲相机。
 
@@ -948,7 +972,9 @@ for (var ii = 0; ii < numFs; ++ii) {
 
 一个绕 F 旋转的相机。拖动 cameraAngle 滑块移动相机。
 
-[webgl-3d-camera](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera?view=preview)
+<iframe src="https://codesandbox.io/embed/2cxg3w?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-camera](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera?view=preview) -->
 
 这样做没什么问题，但是有时利用旋转和平移去移动相机，让它到达期望的位置并看向期望的方向并不容易。例如你想让它总是看向一个特定的 F，而相机又在绕一圈 F 旋转，这时计算会变的相当复杂。
 
@@ -1091,7 +1117,9 @@ var viewMatrix = m4.inverse(cameraMatrix);
 // ...
 ```
 
-[webgl-3d-camera-look-at](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera-look-at?view=preview)
+<iframe src="https://codesandbox.io/embed/9uxqkz?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-camera-look-at](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera-look-at?view=preview) -->
 
 拖动滑块观察相机是如何追踪单个 'F' 的。
 
@@ -1103,4 +1131,6 @@ var viewMatrix = m4.inverse(cameraMatrix);
 
 我发现它并不好用，前面指出一个 lookAt 方法有很多用处，当你需要视图矩阵的时候只需要调用 inverse 方法，但当你想要让角色跟随另一个角色或者炮台跟随目标的时候，在我看来 lookAt 方法返回世界坐标中的朝向和位置转换会好一些。
 
-[webgl-3d-camera-look-at-heads](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera-look-at-heads?view=preview)
+<iframe src="https://codesandbox.io/embed/51gr6f?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [webgl-3d-camera-look-at-heads](embedded-codesandbox://webgl-fundamental-3d/webgl-3d-camera-look-at-heads?view=preview) -->
