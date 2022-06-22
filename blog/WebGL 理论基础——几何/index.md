@@ -25,13 +25,13 @@ path: /webgl-fundamental-geometry/
 
 这就是四个点
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=0) -->
 
 从 0 到 1 之间选一个数（叫做 t），其中 0 是起点，1 是终点。然后在每个线段中计算出与 t 相关的点，`P1 P2`, `P2 P3`, `P3 P4`。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=1" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=1" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=1) -->
 
@@ -41,19 +41,19 @@ path: /webgl-fundamental-geometry/
 
 对这些结果点做同样的操作，计算 t 对应的 `Q1 Q2` 和 `Q2 Q3` 之间的点。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=2" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=2" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=2) -->
 
 最后在 `R1 R2` 中计算出与 t 相关的点。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=3" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=3" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=3) -->
 
 红点的位置就构成了一个曲线。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=4" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=4" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=4) -->
 
@@ -108,7 +108,7 @@ function getPointsOnBezierCurve(points, offset, numPoints) {
 
 注意：`v2.mult` 和 `v2.add` 是我加入的二维点运算辅助方法。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showPoints=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showPoints=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=0%26showCurve=true%26showPoints=true) -->
 
@@ -116,7 +116,7 @@ function getPointsOnBezierCurve(points, offset, numPoints) {
 
 拆分的部分比较简单，如果我们再看看不同级别的拆分，对于任意值的 `t, P1, Q1, R1`, 红点构成一个曲线，终点是红点。`红点, R2, Q3, P4` 构成一个曲线。换句话说我们可以将曲线从任意位置分成两段，并且和原曲线相同。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=4%26show2Curves=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=4%26show2Curves=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=4%26show2Curves=true) -->
 
@@ -185,7 +185,7 @@ function getPointsOnBezierCurveWithSplitting(points, offset, tolerance, newPoint
 }
 ```
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showTolerance=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showTolerance=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=0%26showCurve=true%26showTolerance=true) -->
 
@@ -230,7 +230,7 @@ function simplifyPoints(points, start, end, epsilon, newPoints) {
 
 这是结果，调整距离查看添加或删除的点。
 
-<iframe src="https://codesandbox.io/embed/sz315s?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showDistance=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showDistance=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=0%26showCurve=true%26showDistance=true) -->
 
