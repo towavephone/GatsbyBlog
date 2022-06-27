@@ -792,4 +792,340 @@ const mat = m4.axisRotation(userSuppliedAxis, angle);
 
 哪种方式更好其实取决于你自己和你的需求，我认为我会优先选择灵活的方式，然后运行太慢时再去考虑优化。
 
+# WebGL 加载 .obj 文件
+
+Wavefront 的 .obj 文件是网上最常用的 3D 文件格式。它们并不是难以解析的格式，所以让我们试试。这能够提供一个解析 3D 文件的有用例子。
+
+> 该 .obj 解析器不会面面俱到或者完美，也不保证能够处理所有 .obj 文件。这只是一个练习。如果你使用该程序并遇到问题，下面的链接可能会对你有帮助。
+>
+> 我找到的有关 .obj 文件的[文档](http://paulbourke.net/dataformats/obj/)。 不过[这里](https://www.loc.gov/preservation/digital/formats/fdd/fdd000507.shtml)链接了很多其它相关文档。
+
+让我们看一个简单的例子。下面是从 blender 默认场景中导出的 cube.obj：
+
+```obj
+# Blender v2.80 (sub 75) OBJ File: ''
+# www.blender.org
+mtllib cube.mtl
+o Cube
+v 1.000000 1.000000 -1.000000
+v 1.000000 -1.000000 -1.000000
+v 1.000000 1.000000 1.000000
+v 1.000000 -1.000000 1.000000
+v -1.000000 1.000000 -1.000000
+v -1.000000 -1.000000 -1.000000
+v -1.000000 1.000000 1.000000
+v -1.000000 -1.000000 1.000000
+vt 0.375000 0.000000
+vt 0.625000 0.000000
+vt 0.625000 0.250000
+vt 0.375000 0.250000
+vt 0.375000 0.250000
+vt 0.625000 0.250000
+vt 0.625000 0.500000
+vt 0.375000 0.500000
+vt 0.625000 0.750000
+vt 0.375000 0.750000
+vt 0.625000 0.750000
+vt 0.625000 1.000000
+vt 0.375000 1.000000
+vt 0.125000 0.500000
+vt 0.375000 0.500000
+vt 0.375000 0.750000
+vt 0.125000 0.750000
+vt 0.625000 0.500000
+vt 0.875000 0.500000
+vt 0.875000 0.750000
+vn 0.0000 1.0000 0.0000
+vn 0.0000 0.0000 1.0000
+vn -1.0000 0.0000 0.0000
+vn 0.0000 -1.0000 0.0000
+vn 1.0000 0.0000 0.0000
+vn 0.0000 0.0000 -1.0000
+usemtl Material
+s off
+f 1/1/1 5/2/1 7/3/1 3/4/1
+f 4/5/2 3/6/2 7/7/2 8/8/2
+f 8/8/3 7/7/3 5/9/3 6/10/3
+f 6/10/4 2/11/4 4/12/4 8/13/4
+f 2/14/5 1/15/5 3/16/5 4/17/5
+f 6/18/6 5/19/6 1/20/6 2/11/6
+```
+
+即使不看文档我们也能发现 v 开始的行表示顶点，vt 开始的行表示纹理坐标，vn 开始的行表示法线。接下来就是理解剩下的代表什么。
+
+看起来 .obj 文件是文本文件，所以我们要做的第一件事就是加载文本文件。幸运的是，如果使用 async/await 这将是一件很简单的事。
+
+```js
+async function main() {
+  // ...
+
+  const response = await fetch('resources/models/cube/cube.obj');
+  const text = await response.text();
+}
+```
+
+接着，我们可以一行一行地解析，每行都是下面的形式:
+
+```
+keyword data data data ...
+```
+
+每行的开头是 keyword，data 由空格隔开。以 `#` 开头的行是注释。
+
+接着，用代码来解析每一行，跳过空白行和注释，然后根据 keyword 调用对应的函数。
+
+```js
+function parseOBJ(text) {
+  const keywords = {};
+
+  const keywordRE = /(\w*)(?: )*(.*)/;
+  const lines = text.split('\n');
+  for (let lineNo = 0; lineNo < lines.length; ++lineNo) {
+    const line = lines[lineNo].trim();
+    if (line === '' || line.startsWith('#')) {
+      continue;
+    }
+    const m = keywordRE.exec(line);
+    if (!m) {
+      continue;
+    }
+    const [, keyword, unparsedArgs] = m;
+    const parts = line.split(/\s+/).slice(1);
+    const handler = keywords[keyword];
+    if (!handler) {
+      console.warn('unhandled keyword:', keyword, ' at line', lineNo + 1);
+      continue;
+    }
+    handler(parts, unparsedArgs);
+  }
+}
+```
+
+注意：我们去除了每行开头和结尾的空格。我不知道这是否有必要，但是我觉得没有坏处。我们用 `/\s+/` 将每行以空格分割。同样地我不知道这是否有必要，data 之间会有多于一个空格吗？是否可以是制表符？不知道，但是这样看起来更安全。
+
+另外，我们将每行的第一部分作为 keyword，然后找到对应的函数调用，并将 keyword 后面的 data 传给该函数。所以接下来我们只要完成这些函数。
+
+之前，我们猜测了 v，vt 和 vn 的含义。文档表明 f 代表“面”或多边形，每部分数据代表了顶点、纹理坐标以及法线。
+
+如果一个索引是正数，表示从序列 1 开始的偏移。如果索引是负数，表示从序列结尾开始的偏移。索引的顺序是：顶点/纹理坐标/法线，只有顶点是必要的。
+
+```
+f 1 2 3             # 只包含顶点索引
+f 1/1 2/2 3/3       # 包含顶点索引和纹理坐标索引
+f 1/1/1 2/2/2 3/3/3 # 包含顶点索引、纹理坐标索引和法线索引
+f 1//1 2//2 3//3    # 包含顶点索引和法线索引
+```
+
+f 可以有多于 3 个顶点，比如 4 个顶点代表四边形。WebGL 只能绘制三角形，所以需要将数据转换成三角形。标准并没有规定说一个面可以有多于 4 个顶点，也没有说面必须是凹的或凸的。但暂时让我们假设面是凹的。
+
+通常在 WebGL 中，我们不单独说明顶点、纹理坐标和法线，`WebGL 顶点` 代表了包含了代表该顶点的顶点坐标、纹理坐标、法线的数据集合。例如，要绘制一个立方体，WebGL 需要 36 个顶点，每个面是两个三角形，每个三角形是 3 个顶点，6 个面每个面 2 个三角形，每个三角形 3 个顶点 = 36 个顶点。尽管一个立方体只有 8 个不重复的顶点和 6 条不重复的法线。所以，我们需要读取面的顶点索引来生成包含了顶点位置、纹理坐标、法线的 `WebGL 顶点`。
+
+所以，根据上面的描述，我们可以像下面这样解析：
+
+```js
+function parseOBJ(text) {
+  // 因为索引是从 1 开始的，所以填充索引为 0 的位置
+  const objPositions = [[0, 0, 0]];
+  const objTexcoords = [[0, 0]];
+  const objNormals = [[0, 0, 0]];
+
+  // 和 `f` 一样的索引顺序
+  const objVertexData = [objPositions, objTexcoords, objNormals];
+
+  // 和 `f` 一样的索引顺序
+  let webglVertexData = [
+    [], // 顶点
+    [], // 纹理坐标
+    [] // 法线
+  ];
+
+  function addVertex(vert) {
+    const ptn = vert.split('/');
+    ptn.forEach((objIndexStr, i) => {
+      if (!objIndexStr) {
+        return;
+      }
+      const objIndex = parseInt(objIndexStr);
+      const index = objIndex + (objIndex >= 0 ? 0 : objVertexData[i].length);
+      webglVertexData[i].push(...objVertexData[i][index]);
+    });
+  }
+
+  const keywords = {
+    v(parts) {
+      objPositions.push(parts.map(parseFloat));
+    },
+    vn(parts) {
+      objNormals.push(parts.map(parseFloat));
+    },
+    vt(parts) {
+      objTexcoords.push(parts.map(parseFloat));
+    },
+    f(parts) {
+      const numTriangles = parts.length - 2;
+      for (let tri = 0; tri < numTriangles; ++tri) {
+        addVertex(parts[0]);
+        addVertex(parts[tri + 1]);
+        addVertex(parts[tri + 2]);
+      }
+    }
+  };
+}
+```
+
+上面的代码创建了 3 个数组来保存从 object 文件中解析出来的顶点位置、纹理坐标和法线。同时创建了 3 个数组来保存 WebGL 的顶点。为了方便引用，数组的顺序和 f 中索引的顺序是一样的。
+
+例如下面的 f 行
+
+```
+f 1/2/3/ 4/5/6 7/8/9
+```
+
+像 4/5/6 表示对这个面的一个顶点使用“顶点 4”，“纹理坐标 5”，“法线 6”。我们将顶点、纹理坐标、法线数据放进 objVertexData 数组，这样就能简单的表示为：对 webglData 的第 i 项，使用 objData 第 i 个数组中的第 n 个元素。 这样会简化我们的代码。
+
+在函数的结尾返回我们构建的数据
+
+```js
+// ...
+
+return {
+  position: webglVertexData[0],
+  texcoord: webglVertexData[1],
+  normal: webglVertexData[2]
+};
+```
+
+接下来要做的就是将数据绘制出来。首先我们使用三维方向光源中着色器的变体。
+
+```js
+const vs = `
+   attribute vec4 a_position;
+   attribute vec3 a_normal;
+   
+   uniform mat4 u_projection;
+   uniform mat4 u_view;
+   uniform mat4 u_world;
+   
+   varying vec3 v_normal;
+   
+   void main() {
+      gl_Position = u_projection * u_view * u_world * a_position;
+      v_normal = mat3(u_world) * a_normal;
+   }
+`;
+
+const fs = `
+   precision mediump float;
+   
+   varying vec3 v_normal;
+   
+   uniform vec4 u_diffuse;
+   uniform vec3 u_lightDirection;
+   
+   void main () {
+      vec3 normal = normalize(v_normal);
+      float fakeLight = dot(u_lightDirection, normal) * .5 + .5;
+      gl_FragColor = vec4(u_diffuse.rgb * fakeLight, u_diffuse.a);
+   }
+`;
+```
+
+然后使用来自码少趣多中的代码加载模型
+
+```js
+async function main() {
+  // 获取 WebGL 渲染上下文
+  /** @type {HTMLCanvasElement} */
+  const canvas = document.querySelector('#canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) {
+    return;
+  }
+
+  // ... shaders ...
+
+  // 编译、链接着色器，查找属性和全局变量位置
+  const meshProgramInfo = webglUtils.createProgramInfo(gl, [vs, fs]);
+
+  const data = await loadOBJ('resources/models/cube/cube.obj');
+
+  // 数据是像这样命名的：
+  //
+  // {
+  //   position: [...],
+  //   texcoord: [...],
+  //   normal: [...],
+  // }
+  //
+  // 因为这些数组的名称和顶点着色器中的属性对应，所以我们可以将数据直接传进
+  // 来自“码少趣多”文章中的 `createBufferInfoFromArrays`。
+
+  // 通过调用 gl.createBuffer, gl.bindBuffer, gl.bufferData 为每个数组创建缓冲
+  const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+}
+```
+
+然后绘制数据
+
+```js
+const cameraTarget = [0, 0, 0];
+const cameraPosition = [0, 0, 4];
+const zNear = 0.1;
+const zFar = 50;
+
+function degToRad(deg) {
+  return (deg * Math.PI) / 180;
+}
+
+function render(time) {
+  time *= 0.001; // 转成秒
+
+  webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
+
+  const fieldOfViewRadians = degToRad(60);
+  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+  const projection = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
+
+  const up = [0, 1, 0];
+  // 通过 lookAt 计算 camera 矩阵
+  const camera = m4.lookAt(cameraPosition, cameraTarget, up);
+
+  // 通过 camera 矩阵创建 view 矩阵
+  const view = m4.inverse(camera);
+
+  const sharedUniforms = {
+    u_lightDirection: m4.normalize([-1, 3, 5]),
+    u_view: view,
+    u_projection: projection
+  };
+
+  gl.useProgram(meshProgramInfo.program);
+
+  // 调用 gl.uniform
+  webglUtils.setUniforms(meshProgramInfo, sharedUniforms);
+
+  // 调用 gl.bindBuffer, gl.enableVertexAttribArray, gl.vertexAttribPointer
+  webglUtils.setBuffersAndAttributes(gl, meshProgramInfo, bufferInfo);
+
+  // 调用 gl.uniform
+  webglUtils.setUniforms(meshProgramInfo, {
+    u_world: m4.yRotation(time),
+    u_diffuse: [1, 0.7, 0.5, 1]
+  });
+
+  // 调用 gl.drawArrays or gl.drawElements
+  webglUtils.drawBufferInfo(gl, bufferInfo);
+
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+```
+
+这样，我们就能看到模型被加载和绘制。
+
+[webgl-load-obj-cube](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-cube?view=preview)
+
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-load-obj.html
