@@ -798,7 +798,7 @@ Wavefront 的 .obj 文件是网上最常用的 3D 文件格式。它们并不是
 
 > 该 .obj 解析器不会面面俱到或者完美，也不保证能够处理所有 .obj 文件。这只是一个练习。如果你使用该程序并遇到问题，下面的链接可能会对你有帮助。
 >
-> 我找到的有关 .obj 文件的[文档](http://paulbourke.net/dataformats/obj/)。 不过[这里](https://www.loc.gov/preservation/digital/formats/fdd/fdd000507.shtml)链接了很多其它相关文档。
+> 我找到的有关 .obj 文件的[文档](http://paulbourke.net/dataformats/obj/)。不过[这里](https://www.loc.gov/preservation/digital/formats/fdd/fdd000507.shtml)链接了很多其它相关文档。
 
 让我们看一个简单的例子。下面是从 blender 默认场景中导出的 cube.obj：
 
@@ -1127,5 +1127,388 @@ requestAnimationFrame(render);
 这样，我们就能看到模型被加载和绘制。
 
 [webgl-load-obj-cube](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-cube?view=preview)
+
+关于未处理 keyword 的信息，它们是什么作用呢？
+
+usemtl 是这之中最重要的。它指明了后面出现的所有几何体都使用指定的材质。例如，你有一个车辆的模型，你可能会希望车窗是透明的，保险杠是金属反光的。窗是透明的，保险杠是反光的，所以它们需要和车体不一样的绘制方法。usemtl 标签标记了这部分信息。
+
+因为我们需要单独绘制这些部分，所以我们需要修改代码，每次遇到 usemtl 我们就创建一个新的 webgl 数据集。
+
+首先，添加代码
+
+```js{17-44}
+function parseOBJ(text) {
+  // 因为索引是从 1 开始的，所以填充索引为 0 的位置
+  const objPositions = [[0, 0, 0]];
+  const objTexcoords = [[0, 0]];
+  const objNormals = [[0, 0, 0]];
+
+  // 和 `f` 一样的索引顺序
+  const objVertexData = [objPositions, objTexcoords, objNormals];
+
+  // 和 `f` 一样的索引顺序
+  let webglVertexData = [
+    [], // 顶点
+    [], // 纹理坐标
+    [] // 法线
+  ];
+
+  const geometries = [];
+  let geometry;
+  let material = 'default';
+
+  function newGeometry() {
+    // 如果有存在的几何体并且不是空的，销毁
+    if (geometry && geometry.data.position.length) {
+      geometry = undefined;
+    }
+  }
+
+  function setGeometry() {
+    if (!geometry) {
+      const position = [];
+      const texcoord = [];
+      const normal = [];
+      webglVertexData = [position, texcoord, normal];
+      geometry = {
+        material,
+        data: {
+          position,
+          texcoord,
+          normal
+        }
+      };
+      geometries.push(geometry);
+    }
+  }
+
+  // ...
+}
+```
+
+接着当我们在处理 keywords 的时候，在合适的地方调用它们，包括添加 o keyword 的函数。
+
+```js{14,22-25}
+// ...
+
+const keywords = {
+  v(parts) {
+    objPositions.push(parts.map(parseFloat));
+  },
+  vn(parts) {
+    objNormals.push(parts.map(parseFloat));
+  },
+  vt(parts) {
+    objTexcoords.push(parts.map(parseFloat));
+  },
+  f(parts) {
+    setGeometry();
+    const numTriangles = parts.length - 2;
+    for (let tri = 0; tri < numTriangles; ++tri) {
+      addVertex(parts[0]);
+      addVertex(parts[tri + 1]);
+      addVertex(parts[tri + 2]);
+    }
+  },
+  usemtl(parts, unparsedArgs) {
+    material = unparsedArgs;
+    newGeometry();
+  }
+};
+
+// ...
+```
+
+usemtl 不是必要的，如果在文件中没有 usemtl，我们想要有默认的几何体。所以在 f 函数中我们调用了 setGeometry 来创建。
+
+最后我们返回 geometries 对象数组，每个对象包含 name 和 data。
+
+```js
+// ...
+
+// return {
+//   position: webglVertexData[0],
+//   texcoord: webglVertexData[1],
+//   normal: webglVertexData[2]
+// };
+return geometries;
+```
+
+同时，我们需要处理纹理坐标或法线缺失的情况。
+
+```js{1-4}
+// 移除空数组
+for (const geometry of geometries) {
+  geometry.data = Object.fromEntries(Object.entries(geometry.data).filter(([, array]) => array.length > 0));
+}
+
+return {
+  materialLibs,
+  geometries
+};
+```
+
+让我们继续 keywords，根据官方规范，mtllib 指定了包含材质信息的独立的一个或多个文件。不幸的是，在实际应用中，文件名中可以包含空格，但 .obj 格式中并没有提供逃逸字符来使用空格或引号。理想情况应该使用能解决这些问题的、良好定义的格式，比如 json、xml 或 yaml 等，但 .obj 格式诞生的比它们都早。
+
+稍后我们在处理加载文件。先让我们把它加到加载器里以便之后可以使用。
+
+```js{3,9-11,15-19}
+function parseOBJ(text) {
+  // ...
+  const materialLibs = [];
+
+  // ...
+
+  const keywords = {
+    // ...
+    mtllib(parts, unparsedArgs) {
+      materialLibs.push(unparsedArgs);
+    }
+    // ...
+  };
+
+  // return geometries;
+  return {
+    materialLibs,
+    geometries
+  };
+}
+```
+
+o 指定表明了接下来的条目属于命名为 "object" 的对象。但我们并不清楚如何使用它。文件中能只包含 o 而没有 usemtl 吗？先假设可以。
+
+```js{4,15,29-32}
+function parseOBJ(text) {
+  // ...
+  let material = 'default';
+  let object = 'default';
+
+  // ...
+
+  function setGeometry() {
+    if (!geometry) {
+      const position = [];
+      const texcoord = [];
+      const normal = [];
+      webglVertexData = [position, texcoord, normal];
+      geometry = {
+        object,
+        material,
+        data: {
+          position,
+          texcoord,
+          normal
+        }
+      };
+      geometries.push(geometry);
+    }
+  }
+
+  const keywords = {
+    // ...
+    o(parts, unparsedArgs) {
+      object = unparsedArgs;
+      newGeometry();
+    }
+    // ...
+  };
+}
+```
+
+s 指定了一个 smoothing group。我觉得这是我们可以忽略的。它们通常在建模程序中用来自动生成顶点法线。顶点法线的计算，需要先计算每个面的法线，而每个面的法线可以很容易使用叉乘得到，这部分已经在三维相机中提到了。对于任意顶点，我们可以对该顶点所在的面取均值。但是有时我们想要一条边时，我们需要能够告诉程序忽略一些面。Smoothing groups 让我们指定计算顶点法线时哪些面需要被包含。关于如何计算几何体的顶点法线，可以看 `WebGL 三维几何加工` 作为例子。
+
+在我们的例子中，我们先忽略它。假设大部分 .obj 文件内部都包含法线，所以一般不需要 smoothing groups。一般在模型库中才会有它，以便你想要编辑或重新生成法线。
+
+```js{1,5}
+const noop = () => {};
+
+const keywords = {
+  // ...
+  s: noop
+  // ...
+};
+```
+
+目前为止我们还剩一个 keyword：g 代表组 (group)。通常它只是一些元数据。Objects 可以存在于多个 group 中。因为它会出现在我们接下来的文件中，所以我们先添加支持代码，尽管现在并不使用。
+
+```js{3,13,29-32}
+function parseOBJ(text) {
+  // ...
+  let groups = ['default'];
+  // ...
+  function setGeometry() {
+    if (!geometry) {
+      const position = [];
+      const texcoord = [];
+      const normal = [];
+      webglVertexData = [position, texcoord, normal];
+      geometry = {
+        object,
+        groups,
+        material,
+        data: {
+          position,
+          texcoord,
+          normal
+        }
+      };
+      geometries.push(geometry);
+    }
+  }
+
+  // ...
+
+  const keywords = {
+    // ...
+    g(parts) {
+      groups = parts;
+      newGeometry();
+    }
+    // ...
+  };
+}
+```
+
+现在我们创建了多个几何体的集合，我们需要改变我们的初始化代码来为每一个几何体创建 WebGLBuffers。同时我们也会创建一个随机的颜色，这样就能方便地分辨不同的部分。
+
+```js{1-2,4-5,7,21-26}
+// const response = await fetch('resources/models/cube/cube.obj');
+const response = await fetch('resources/models/chair/chair.obj');
+const text = await response.text();
+// const data = parseOBJ(text);
+const obj = parseOBJ(text);
+
+const parts = obj.geometries.map(({ data }) => {
+  // 数据是像这样命名的：
+  //
+  // {
+  //   position: [...],
+  //   texcoord: [...],
+  //   normal: [...],
+  // }
+  //
+  // 因为这些数组的名称和顶点着色器中的属性对应，所以我们可以将数据直接传进
+  // 来自“码少趣多”文章中的 `createBufferInfoFromArrays`。
+
+  // 通过调用 gl.createBuffer, gl.bindBuffer, gl.bufferData 为每个数组创建缓冲
+  const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+  return {
+    material: {
+      u_diffuse: [Math.random(), Math.random(), Math.random(), 1]
+    },
+    bufferInfo
+  };
+});
+```
+
+我们从加载一个立方体换成了椅子
+
+![](res/2022-06-28-14-35-39.png)
+
+要渲染，我们只需要循环绘制每个部分
+
+```js{9-10,12,17-20}
+function render(time) {
+  // ...
+
+  gl.useProgram(meshProgramInfo.program);
+
+  // 调用 gl.uniform
+  webglUtils.setUniforms(meshProgramInfo, sharedUniforms);
+
+  // 对整个空间矩阵进行一次计算
+  const u_world = m4.yRotation(time);
+
+  for (const { bufferInfo, material } of parts) {
+    // 调用 gl.bindBuffer, gl.enableVertexAttribArray, gl.vertexAttribPointer
+    webglUtils.setBuffersAndAttributes(gl, meshProgramInfo, bufferInfo);
+    // 调用 gl.uniform
+    webglUtils.setUniforms(meshProgramInfo, {
+      // u_world: m4.yRotation(time),
+      // u_diffuse: [1, 0.7, 0.5, 1],
+      u_world,
+      u_diffuse: material.u_diffuse
+    });
+    // 调用 gl.drawArrays or gl.drawElements
+    webglUtils.drawBufferInfo(gl, bufferInfo);
+  }
+
+  // ...
+}
+```
+
+[webgl-load-obj](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj?view=preview)
+
+如果我们试着把物体放中间是不是更好？
+
+为了把物体放中间我们需要计算物体的范围，即顶点的最小和最大位置。首先我们需要一个函数，计算给定多个位置中的最小和最大位置
+
+```js
+function getExtents(positions) {
+  const min = positions.slice(0, 3);
+  const max = positions.slice(0, 3);
+  for (let i = 3; i < positions.length; i += 3) {
+    for (let j = 0; j < 3; ++j) {
+      const v = positions[i + j];
+      min[j] = Math.min(v, min[j]);
+      max[j] = Math.max(v, max[j]);
+    }
+  }
+  return { min, max };
+}
+```
+
+然后我们遍历几何体的每个部分，并且得到对应的范围
+
+```js
+function getGeometriesExtents(geometries) {
+  return geometries.reduce(
+    ({ min, max }, { data }) => {
+      const minMax = getExtents(data.position);
+      return {
+        min: min.map((min, ndx) => Math.min(minMax.min[ndx], min)),
+        max: max.map((max, ndx) => Math.max(minMax.max[ndx], max))
+      };
+    },
+    {
+      min: Array(3).fill(Number.POSITIVE_INFINITY),
+      max: Array(3).fill(Number.NEGATIVE_INFINITY)
+    }
+  );
+}
+```
+
+接着，我们需要计算物体的平移距离，以便能将它的中心放在原点，同时计算原点和 camera 的距离，保证能完全看到物体。
+
+```js
+// const cameraTarget = [0, 0, 0];
+// const cameraPosition = [0, 0, 4];
+// const zNear = 0.1;
+// const zFar = 50;
+const extents = getGeometriesExtents(obj.geometries);
+const range = m4.subtractVectors(extents.max, extents.min);
+// 移动物体的距离，使得其中心在原点
+const objOffset = m4.scaleVector(m4.addVectors(extents.min, m4.scaleVector(range, 0.5)), -1);
+const cameraTarget = [0, 0, 0];
+// 计算移动 camera 的距离，以便我们能完全看到物体
+const radius = m4.length(range) * 1.2;
+const cameraPosition = m4.addVectors(cameraTarget, [0, 0, radius]);
+// 设置合适于物体大小的 zNear 和 zFar 值
+const zNear = radius / 100;
+const zFar = radius * 3;
+```
+
+上面，我们也设置了适合显示物体的 zNear 和 zFar 值。
+
+只需要使用 objOffset 来将物体平移到原点。
+
+```js
+// 将整个空间矩阵重新计算一次
+const u_world = m4.yRotation(time);
+let u_world = m4.yRotation(time);
+u_world = m4.translate(u_world, ...objOffset);
+```
+
+[webgl-load-obj-w-extents](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-w-extents?view=preview)
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-load-obj.html
