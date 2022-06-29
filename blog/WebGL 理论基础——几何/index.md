@@ -1511,4 +1511,327 @@ u_world = m4.translate(u_world, ...objOffset);
 
 [webgl-load-obj-w-extents](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-w-extents?view=preview)
 
-// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-load-obj.html
+有些非标准的 .obj 文件包含了顶点的颜色值，它们将额外的值放在了每个顶点位置的后面
+
+```
+// 标准
+v <x> <y> <z>
+// 非标准
+v <x> <y> <z> <red> <green> <blue>
+```
+
+由 [Oleaf](https://sketchfab.com/homkahom0) 创建的 [Book - Vertex chameleon study by CC-BY-NC](https://sketchfab.com/3d-models/book-vertex-chameleon-study-51b0b3bdcd844a9e951a9ede6f192da8) 使用了顶点颜色。
+
+让我们看看能不能添加代码来支持显示顶点颜色。
+
+我们需要在有顶点位置、法线和纹理坐标的地方添加一些代码
+
+```js{6,9,16,26-27,36}
+function parseOBJ(text) {
+  // 因为索引是从 1 开始的，所以填充索引为 0 的位置
+  const objPositions = [[0, 0, 0]];
+  const objTexcoords = [[0, 0]];
+  const objNormals = [[0, 0, 0]];
+  const objColors = [[0, 0, 0]];
+
+  // 和 `f` 一样的索引顺序
+  const objVertexData = [objPositions, objTexcoords, objNormals, objColors];
+
+  // 和 `f` 一样的索引顺序
+  let webglVertexData = [
+    [], // 顶点
+    [], // 纹理坐标
+    [], // 法线
+    [] // 颜色
+  ];
+
+  // ...
+
+  function setGeometry() {
+    if (!geometry) {
+      const position = [];
+      const texcoord = [];
+      const normal = [];
+      const color = [];
+      webglVertexData = [position, texcoord, normal, color];
+      geometry = {
+        object,
+        groups,
+        material,
+        data: {
+          position,
+          texcoord,
+          normal,
+          color
+        }
+      };
+      geometries.push(geometry);
+    }
+  }
+}
+```
+
+这使得我们的代码有一点不通用。
+
+```js{3-10}
+const keywords = {
+  v(parts) {
+    // objPositions.push(parts.map(parseFloat));
+    // 如果超过 3 个值，就是顶点颜色
+    if (parts.length > 3) {
+      objPositions.push(parts.slice(0, 3).map(parseFloat));
+      objColors.push(parts.slice(3).map(parseFloat));
+    } else {
+      objPositions.push(parts.map(parseFloat));
+    }
+  }
+  // ...
+};
+```
+
+然后当我们读取到 f 面的时候，调用 addVertex，我们需要获取顶点的颜色
+
+```js{10-13}
+function addVertex(vert) {
+  const ptn = vert.split('/');
+  ptn.forEach((objIndexStr, i) => {
+    if (!objIndexStr) {
+      return;
+    }
+    const objIndex = parseInt(objIndexStr);
+    const index = objIndex + (objIndex >= 0 ? 0 : objVertexData[i].length);
+    webglVertexData[i].push(...objVertexData[i][index]);
+    // 如果这是位置索引并且解析到了颜色值，将顶点的颜色值复制到 webgl 顶点的颜色中
+    if (i === 0 && objColors.length > 1) {
+      geometry.data.color.push(...objColors[index]);
+    }
+  });
+}
+```
+
+接着，我们需要更改我们的着色器来使用顶点颜色
+
+```js{4,11,16,24,32-34}
+const vs = `
+   attribute vec4 a_position;
+   attribute vec3 a_normal;
+   attribute vec4 a_color;
+   
+   uniform mat4 u_projection;
+   uniform mat4 u_view;
+   uniform mat4 u_world;
+   
+   varying vec3 v_normal;
+   varying vec4 v_color;
+   
+   void main() {
+      gl_Position = u_projection * u_view * u_world * a_position;
+      v_normal = mat3(u_world) * a_normal;
+      v_color = a_color;
+   }
+`;
+
+const fs = `
+   precision mediump float;
+   
+   varying vec3 v_normal;
+   varying vec4 v_color;
+   
+   uniform vec4 u_diffuse;
+   uniform vec3 u_lightDirection;
+   
+   void main () {
+      vec3 normal = normalize(v_normal);
+      float fakeLight = dot(u_lightDirection, normal) * .5 + .5;
+      // gl_FragColor = vec4(u_diffuse.rgb * fakeLight, u_diffuse.a);
+      vec4 diffuse = u_diffuse * v_color;
+      gl_FragColor = vec4(diffuse.rgb * fakeLight, diffuse.a);
+   }
+`;
+```
+
+就如上面提到的，我不确定这个非标准版本的 .obj 文件能否在每个顶点颜色中包含 alpha 值。我们的 helper library 根据我们传入的数据自动创建缓冲区。它假设每个元素有多少个组成部分。对于名字中包含 position 或 normal 的，默认每个元素包含 3 个组成部分。对于名字中包含 texcoord 的，默认每个元素 2 个组成部分。其它的每个元素默认 4 个组成部分。这样的话，如果我们的颜色仅包含 r、g、b，每个元素三个组成部分，我们需要传参给它。
+
+```js{13-16}
+const parts = obj.geometries.map(({ data }) => {
+  // 数据是像这样命名的：
+  //
+  // {
+  //   position: [...],
+  //   texcoord: [...],
+  //   normal: [...],
+  // }
+  //
+  // 因为这些数组的名称和顶点着色器中的属性对应，所以我们可以将数据直接传进
+  // 来自“码少趣多”文章中的 `createBufferInfoFromArrays`。
+
+  if (data.position.length === data.color.length) {
+    // 是 3，helper library 默认是 4 所以我们需要告诉程序只有 3 个
+    data.color = { numComponents: 3, data: data.color };
+  }
+
+  // 通过调用 gl.createBuffer, gl.bindBuffer, gl.bufferData 为每个数组创建缓冲
+  const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+  return {
+    material: {
+      u_diffuse: [Math.random(), Math.random(), Math.random(), 1]
+    },
+    bufferInfo
+  };
+});
+```
+
+我们也希望能够处理更常见的没有顶点颜色的情况。在 WebGL 基础概念和 WebGL 属性中我们提到了属性通常从缓冲中获取值。但我们也可以将属性设置成常量。没有的值使用默认常量。
+
+```js
+gl.disableVertexAttribArray(someAttributeLocation); // 使用常量
+const value = [1, 2, 3, 4];
+gl.vertexAttrib4fv(someAttributeLocation, value); // 使用给定的值
+```
+
+如果将属性的值设为 `{value:[1, 2, 3, 4]}`，我们的 helper library 为我们处理了这种情况。当检查到没有顶点颜色时，默认将顶点颜色属性设置成白色。
+
+```js{13,18-21}
+const parts = obj.geometries.map(({ data }) => {
+  // 数据是像这样命名的：
+  //
+  // {
+  //   position: [...],
+  //   texcoord: [...],
+  //   normal: [...],
+  // }
+  //
+  // 因为这些数组的名称和顶点着色器中的属性对应，所以我们可以将数据直接传进
+  // 来自“码少趣多”文章中的 `createBufferInfoFromArrays`。
+
+  if (data.color) {
+    if (data.position.length === data.color.length) {
+      // 是 3，helper library 默认是 4 所以我们需要告诉程序只有 3 个
+      data.color = { numComponents: 3, data: data.color };
+    }
+  } else {
+    // 没有顶点颜色，使用白色
+    data.color = { value: [1, 1, 1, 1] };
+  }
+
+  // ...
+});
+```
+
+我们也不能使用随机颜色
+
+```js{8-9}
+const parts = obj.geometries.map(({ data }) => {
+  // ...
+
+  // 通过调用 gl.createBuffer, gl.bindBuffer, gl.bufferData 为每个数组创建缓冲
+  const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+  return {
+    material: {
+      // u_diffuse: [Math.random(), Math.random(), Math.random(), 1],
+      u_diffuse: [1, 1, 1, 1]
+    },
+    bufferInfo
+  };
+});
+```
+
+这样，我们就能带顶点颜色的 .obj 文件了。
+
+[webgl-load-obj-w-vertex-colors](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-w-vertex-colors?view=preview)
+
+至于解析和使用材质，看下一篇。
+
+## 一些注意点
+
+- 这个加载器是不完整的
+
+   你可以阅读更多关于 .obj 格式。有大量的功能上面的代码是不支持的。同时，代码也没有经过大量 .obj 文件的测试，所以可能有很多未知的 bug。也就是说，我假设了大多数在线的 .obj 文件只使用了上面提到的功能，所以这部分代码说不定是一个有用的例子。
+
+- 这个加载器没有进行错误检查
+
+   例如：vt 可以有 3 个值而不仅仅是 2 个。3 个值是给 3D 纹理使用的，不普遍所以我没有处理。如果你确实想要用它解析 3D 纹理座标，你需要修改着色器来处理 3D 纹理，修改生成 WebGLBuffers (调用 createBufferInfoFromArrays)的代码，告诉它每个 UV 座标有 3 个组成部分。
+
+- 假设数据是一致的
+
+   我不知道是否会出现同一个文件中一些 f 有 3 个条目而另一些只有 2 个条目会。如果有可能，上面的代码没有处理这种情况。
+
+   这段代码同样假设了所有顶点座标都有 x、y、z。如果出现有些顶点座标有 x、y、z，有些顶点座标只有 x、y，而有些则有 x、y、z、r、g、b，我们需要重构代码。
+
+- 可以将所有数据放进一个缓冲里
+
+   上面的代码将顶点位置、纹理座标、法线放进了不同的缓冲。你也可以将它们交错的放进一个缓冲中：pos, uv, nrm, pos, uv, nrm, ... 这样的话就需要改变设置属性的方式。
+
+   更进一步，你甚至可以将所有部分的所有数据放进同一个缓冲里，而不是每个部分、每个类型的数据一个缓冲。
+
+   我不考虑这些因为我觉得它们没有那么重要，同时它们也会使得代码变得复杂。
+
+- 可以重建顶点的索引
+
+   上面的代码将顶点展开放进了三个数组中。我们可以重建顶点的索引。尤其当我们将所有顶点数据放进一个共享的缓冲中，或至少每个类型有一个单独的共享缓冲时，对于每个 f 面，可以将索引转换到一个正数（负数变换到正确的正数），那么对于每个顶点，数据集就变成了一个或多个 id。所以，只要记下 id 到索引的映射关系就能查找到对应的索引。
+
+   ```js
+   const idToIndexMap = {};
+   const webglIndices = [];
+   
+   function addVertex(vert) {
+      const ptn = vert.split('/');
+      // 首先将所有索引转换成正数
+      const indices = ptn.forEach((objIndexStr, i) => {
+         if (!objIndexStr) {
+            return;
+         }
+         const objIndex = parseInt(objIndexStr);
+         return objIndex + (objIndex >= 0 ? 0 : objVertexData[i].length);
+      });
+      // 现在检查已存在的顶点位置、纹理座标、法线组合
+      const id = indices.join(',');
+      let vertIndex = idToIndexMap[id];
+      if (!vertIndex) {
+         vertIndex = webglVertexData[0].length / 3;
+         idToIndexMap[id] = vertexIndex;
+         indices.forEach((index, i) => {
+            if (index !== undefined) {
+            webglVertexData[i].push(...objVertexData[i][index]);
+            }
+         })
+      }
+      webglIndices.push(vertexIndex);
+   }
+   ```
+
+   或者，如果你觉得重要你可以重排索引。
+
+- 这段代码没有处理只有顶点座标，或只有顶点座标和纹理座标的情况
+
+   这段代码假设法线存在。就像我们在三维几何加工里做的，如果法线不存在，我们可以生成它，考虑到如果我们需要 smoothing group。或者我们也可以不使用也不计算法线的不同着色器。
+
+- 你不应该使用 .obj 文件
+
+   老实说，我认为你不应该使用 .obj 文件。我写这篇文章是作为一个例子。如果你可以从一个文件中获取顶点数据，你可以为任意格式的文件写导入器。
+
+   .obj 文件的问题包括：
+
+   - 不支持光线或视角
+
+      如果你加载大量部件（比如景观中的树、灌木、石头），你不需要视角或光线，这可能没问题。但文件如果提供选项让你能够原样导入作者创建的整个场景会更好。
+
+   - 没有层级，没有场景图
+
+      如果你想要导入一辆车，你会希望车轮能够转向，并能够绕着中心点旋转。这对 .obj 文件来说是不可能的，因为 .obj 不包含场景图。更好的文件格式包含这些数据，如果你想要能够旋转的部件、滑动窗户、开门、移动角色的腿等，这会很有用。
+
+   - 不支持动画或蒙皮
+
+      相比于其它的，我们更想要蒙皮，但 .obj 并没有蒙皮或者动画相关内容。如果你不需要这些，可能没什么问题。但我更偏向一种能包含更多内容的格式。
+
+   - .obj 不支持更多现代的材质
+
+      材质一般来说针对于特定的引擎，但至少对于一些基于物理的材质渲染各引擎是共通的，据我所知 .obj 文件并不支持。
+
+   - .obj 需要解析
+
+      除非你在写一个通用的查看器让用户上传 .obj 文件，通常最佳的做法是使用一个不太需要解析的文件格式。.gltf 是一种为 WebGL 设计的文件格式。它使用 JSON，你可以轻松地加载。对于二进制数据，它使用能直接加载进 GPU 的格式，一般不需要将数字解析成数组。
+
+      如果你想使用 .obj 文件，最佳实践是先将它转换成其它文件格式，然后在你的页面中使用。
+
+// TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-load-obj-w-mtl.html
