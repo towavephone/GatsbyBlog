@@ -19,6 +19,8 @@ path: /webgl-fundamental-geometry/
 
 那么该怎么做呢？首先我们要通过某种方式生成一个曲线，计算曲线上的点。然后使用矩阵运算将这些点按照某个轴旋转，构建出三角形网格。
 
+## 贝塞尔曲线
+
 计算机中常用的曲线就是贝塞尔曲线，你可能在一些编辑器例如 Adobe Illustrator 或 Inkscape 或 Affinity Designer 中编辑过贝塞尔曲线。
 
 贝塞尔曲线或三次贝塞尔曲线由 4 个点组成，2 个端点，2 个“控制点”。
@@ -233,6 +235,8 @@ function simplifyPoints(points, start, end, epsilon, newPoints) {
 <iframe src="https://codesandbox.io/embed/5s188r?codemirror=1&hidenavigation=1&theme=light&view=preview&initialpath=?maxDepth=0%26showCurve=true%26showDistance=true" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
 
 <!-- [bezier-curve-diagram](embedded-codesandbox://webgl-fundamental-geometry/bezier-curve-diagram?view=preview&initialpath=?maxDepth=0%26showCurve=true%26showDistance=true) -->
+
+## 保龄球
 
 回到保龄球瓶，我们可以将上方的代码整理一下，需要添加和移除点，锁定和解锁控制点， 撤销等等。但是这有一个简单的方式，我们可以使用一个上方提到的编辑器，我使用这个在线编辑器。
 
@@ -468,6 +472,8 @@ function lathePoints(
 ![](res/2022-06-23-11-22-57.png)
 
 法向量和切线垂直所以从切线很容易求出法向量。
+
+## 烛台
 
 但是，假设我们想要做一个烛台，有这样一个框架。
 
@@ -800,6 +806,8 @@ Wavefront 的 .obj 文件是网上最常用的 3D 文件格式。它们并不是
 >
 > 我找到的有关 .obj 文件的[文档](http://paulbourke.net/dataformats/obj/)。不过[这里](https://www.loc.gov/preservation/digital/formats/fdd/fdd000507.shtml)链接了很多其它相关文档。
 
+## 立方体
+
 让我们看一个简单的例子。下面是从 blender 默认场景中导出的 cube.obj：
 
 ```obj
@@ -1127,6 +1135,8 @@ requestAnimationFrame(render);
 这样，我们就能看到模型被加载和绘制。
 
 [webgl-load-obj-cube](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-cube?view=preview)
+
+## 椅子
 
 关于未处理 keyword 的信息，它们是什么作用呢？
 
@@ -1511,6 +1521,8 @@ u_world = m4.translate(u_world, ...objOffset);
 
 [webgl-load-obj-w-extents](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-w-extents?view=preview)
 
+## 书
+
 有些非标准的 .obj 文件包含了顶点的颜色值，它们将额外的值放在了每个顶点位置的后面
 
 ```
@@ -1833,5 +1845,324 @@ const parts = obj.geometries.map(({ data }) => {
       除非你在写一个通用的查看器让用户上传 .obj 文件，通常最佳的做法是使用一个不太需要解析的文件格式。.gltf 是一种为 WebGL 设计的文件格式。它使用 JSON，你可以轻松地加载。对于二进制数据，它使用能直接加载进 GPU 的格式，一般不需要将数字解析成数组。
 
       如果你想使用 .obj 文件，最佳实践是先将它转换成其它文件格式，然后在你的页面中使用。
+
+# WebGL 加载带 Mtl 的 Obj
+
+在上一节我们解析了 .obj 文件，在本节让我们解析它的补充文件：.mtl 材质文件。
+
+## 椅子
+
+> 该 .mtl 解析器不会面面俱到或者完美，也不保证能够处理所有 .mtl 文件。这只是一个练习。如果你使用该程序并遇到问题，下面的链接可能会对你有帮助。
+
+我们加载了我在 [Sketchfab](https://sketchfab.com/) 上找到的，由 haytonm 创建的[椅子](https://sketchfab.com/3d-models/chair-aa2acddb218646a59ece132bf95aa558)。
+
+![](res/2022-06-28-14-35-39.png)
+
+它有一个相应的 .mtl 文件，看起来是这样：
+
+```mtl
+# Blender MTL File: 'None'
+# Material Count: 11
+
+newmtl D1blinn1SG
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl D1lambert2SG
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.020000 0.020000 0.020000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl D1lambert3SG
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+
+# ... 更多类似的 8 个材质
+```
+
+查看对 [.mtl 文件格式](http://paulbourke.net/dataformats/mtl/)的描述，我们可以看到以关键词 newmtl 和给定名字开头的新材质，下面是该材质的所有设置。每行都以关键词开始，这和 .obj 文件类似，所以我们可以用类似的方法来开始解析。
+
+```js
+function parseMTL(text) {
+  const materials = {};
+  let material;
+
+  const keywords = {
+    newmtl(parts, unparsedArgs) {
+      material = {};
+      materials[unparsedArgs] = material;
+    }
+  };
+
+  const keywordRE = /(\w*)(?: )*(.*)/;
+  const lines = text.split('\n');
+  for (let lineNo = 0; lineNo < lines.length; ++lineNo) {
+    const line = lines[lineNo].trim();
+    if (line === '' || line.startsWith('#')) {
+      continue;
+    }
+    const m = keywordRE.exec(line);
+    if (!m) {
+      continue;
+    }
+    const [, keyword, unparsedArgs] = m;
+    const parts = line.split(/\s+/).slice(1);
+    const handler = keywords[keyword];
+    if (!handler) {
+      console.warn('unhandled keyword:', keyword);
+      continue;
+    }
+    handler(parts, unparsedArgs);
+  }
+
+  return materials;
+}
+```
+
+接着，我们只需要为每个关键词添加对应的方法。文档指出：
+
+- Ns 是关于点光源的文章中提到的镜面光泽设置
+- Ka 是材质的环境光
+- Kd 是散射光，这是在关于点光源的文章中的颜色
+- Ks 是镜面光
+- Ke 是放射光
+- Ni 是光学密度。我们这里不使用
+- d 代表“溶解”，代表透明度
+- illum 指定了材质的光照模型。文档中列出了 11 种类型。我们先忽略它
+
+我在犹豫是否要保持这些名字的原样。我想一个数学人喜欢简短的名字。但是大多数代码风格指南都喜欢描述性的名字，所以我决定这么做。
+
+```js{10-33}
+function parseMTL(text) {
+  const materials = {};
+  let material;
+
+  const keywords = {
+    newmtl(parts, unparsedArgs) {
+      material = {};
+      materials[unparsedArgs] = material;
+    },
+    Ns(parts) {
+      material.shininess = parseFloat(parts[0]);
+    },
+    Ka(parts) {
+      material.ambient = parts.map(parseFloat);
+    },
+    Kd(parts) {
+      material.diffuse = parts.map(parseFloat);
+    },
+    Ks(parts) {
+      material.specular = parts.map(parseFloat);
+    },
+    Ke(parts) {
+      material.emissive = parts.map(parseFloat);
+    },
+    Ni(parts) {
+      material.opticalDensity = parseFloat(parts[0]);
+    },
+    d(parts) {
+      material.opacity = parseFloat(parts[0]);
+    },
+    illum(parts) {
+      material.illum = parseInt(parts[0]);
+    }
+  };
+
+  //  ...
+
+  return materials;
+}
+```
+
+我也在犹豫要不要推测每个 .mtl 文件的路径，或者手动指定。我们可以这样做：
+
+```js
+// 伪代码 - 手动指定 .obj 文件和 .mtl 文件的路径
+const obj = downloadAndParseObj(pathToOBJFile);
+const materials = downloadAndParseMtl(pathToMTLFile);
+```
+
+或者这样:
+
+```js
+// 伪代码 - 根据 .obj 文件推测 .mtl 文件的的路径
+const obj = downloadAndParseObj(pathToOBJFile);
+const materials = downloadAndParseMtl(pathToOBJFile, obj);
+```
+
+我选择后者，但是我也不确定是好是坏。根据文档一个 .obj 文件可以包含多个 .mtl 文件的引用。我从没见过这样的例子，但我想文档的作者是这么做的。
+
+并且我也没有见过 .mtl 文件与 .obj 文件命名不同的。换句话说，如果 .obj 文件是 bananas.obj，那么 .mtl 文件几乎总是 bananas.mtl。
+
+也就是说，规范指出 .mtl 文件是在 .obj 文件中指定的，所以我决定试着计算 .mtl 文件的路径。
+
+从上节的代码开始, 我们将 .obj 文件的 URL 提取出来，然后构建 .obj 相关的 .mtl 文件的 URL。最后我们将它们全部加载，连接起来（因为它们都是文本文件），然后传给解析器。
+
+```js{1-3,6-14}
+// const response = await fetch('resources/models/chair/chair.obj');
+const objHref = 'resources/models/chair/chair.obj';
+const response = await fetch(objHref);
+const text = await response.text();
+const obj = parseOBJ(text);
+const baseHref = new URL(objHref, window.location.href);
+const matTexts = await Promise.all(
+  obj.materialLibs.map(async (filename) => {
+    const matHref = new URL(filename, baseHref).href;
+    const response = await fetch(matHref);
+    return await response.text();
+  })
+);
+const materials = parseMTL(matTexts.join('\n'));
+```
+
+现在，我们来使用材质。首先，当我们在设置每个部分的时候，我们需要使用从 .obj 文件中提取出来的材质名称，然后从刚才加载的材质中查找。
+
+```js{1-2,9-12}
+// const parts = obj.geometries.map(({data}) => {
+const parts = obj.geometries.map(({ material, data }) => {
+  // ...
+
+  // create a buffer for each array by calling
+  // gl.createBuffer, gl.bindBuffer, gl.bufferData
+  const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+  return {
+    //  material: {
+    //    u_diffuse: [1, 1, 1, 1],
+    //  },
+    material: materials[material],
+    bufferInfo
+  };
+});
+```
+
+当我们在渲染时，我们需要传不止一组全局变量值。
+
+```js{12-16}
+function render(time) {
+  // ...
+
+  for (const { bufferInfo, material } of parts) {
+    // calls gl.bindBuffer, gl.enableVertexAttribArray, gl.vertexAttribPointer
+    webglUtils.setBuffersAndAttributes(gl, meshProgramInfo, bufferInfo);
+    // calls gl.uniform
+    webglUtils.setUniforms(
+      meshProgramInfo,
+      {
+        u_world
+        // u_diffuse: material.u_diffuse,
+        //  });
+      },
+      material
+    );
+    // calls gl.drawArrays or gl.drawElements
+    webglUtils.drawBufferInfo(gl, bufferInfo);
+  }
+
+  requestAnimationFrame(render);
+}
+```
+
+然后我们需要修改着色器。因为材质有镜面设置，我们添加像关于点光源的文章中一样的镜面计算，除了一点不同，我们计算镜面光是根据方向光源，而不是点光源。
+
+ambient 和 emissive 可能需要解释一下。ambient 是材质在无方向光源下的反射颜色。如果我们想看到它，我们可以乘上 `u_ambientLight` 并设置黑色以外的颜色。这像把东西冲洗干净。
+
+emissive 是材质自身发光的颜色，与所有光照无关，所以我们只要加上它就好。如果你想有块地方发光，你可能会用到 emissive。
+
+这是新的着色器。
+
+```js{9,12,16-19,29,32-38,40,45-46,49,51-53,55-61}
+const vs = `
+   attribute vec4 a_position;
+   attribute vec3 a_normal;
+   attribute vec4 a_color;
+   
+   uniform mat4 u_projection;
+   uniform mat4 u_view;
+   uniform mat4 u_world;
+   uniform vec3 u_viewWorldPosition;
+   
+   varying vec3 v_normal;
+   varying vec3 v_surfaceToView;
+   varying vec4 v_color;
+   
+   void main() {
+      // gl_Position = u_projection * u_view * a_position;
+      vec4 worldPostion = u_world * a_position;
+      gl_Position = u_projection * u_view * worldPosition;
+      v_surfaceToView = u_viewWorldPosition - worldPosition.xyz;
+      v_normal = mat3(u_world) * a_normal;
+      v_color = a_color;
+   }
+`;
+
+const fs = `
+   precision highp float;
+   
+   varying vec3 v_normal;
+   varying vec3 v_surfaceToView;
+   varying vec4 v_color;
+   
+   // uniform vec4 u_diffuse;
+   uniform vec3 diffuse;
+   uniform vec3 ambient;
+   uniform vec3 emissive;
+   uniform vec3 specular;
+   uniform float shininess;
+   uniform float opacity;
+   uniform vec3 u_lightDirection;
+   uniform vec3 u_ambientLight;
+   
+   void main () {
+      vec3 normal = normalize(v_normal);
+      
+      vec3 surfaceToViewDirection = normalize(v_surfaceToView);
+      vec3 halfVector = normalize(u_lightDirection + surfaceToViewDirection);
+      
+      float fakeLight = dot(u_lightDirection, normal) * .5 + .5;
+      float specularLight = clamp(dot(normal, halfVector), 0.0, 1.0);
+      
+      // vec4 diffuse = u_diffuse * v_color;
+      vec3 effectiveDiffuse = diffuse * v_color.rgb;
+      float effectiveOpacity = opacity * v_color.a;
+      
+      // gl_FragColor = vec4(diffuse.rgb * fakeLight, diffuse.a);
+      gl_FragColor = vec4(
+            emissive +
+            ambient * u_ambientLight +
+            effectiveDiffuse * fakeLight +
+            specular * pow(specularLight, shininess),
+            effectiveOpacity);
+   }
+`;
+```
+
+这样，我们得到了和上面图片看起来差不多的效果。
+
+[webgl-load-obj-w-mtl-no-textures](embedded-codesandbox://webgl-fundamental-geometry/webgl-load-obj-w-mtl-no-textures?view=preview)
+
+## 风车
+
+让我们来加载 .mtl 文件中引用纹理的 .obj 文件。
+
+我发现了由 [ahedov](https://www.blendswap.com/user/ahedov) 创建的[风车](https://blendswap.com/blend/9755) 3D 模型。
+
+![](res/2022-06-30-11-25-00.png)
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-load-obj-w-mtl.html
