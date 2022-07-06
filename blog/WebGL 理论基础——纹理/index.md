@@ -48,7 +48,7 @@ void main() {
 
 我们需要设置纹理坐标
 
-```js{3,7,10-16}
+```js{3,7,10,12-13,15-16}
 // 找到顶点坐标中的属性
 var positionLocation = gl.getAttribLocation(program, 'a_position');
 var texcoordLocation = gl.getAttribLocation(program, 'a_texcoord');
