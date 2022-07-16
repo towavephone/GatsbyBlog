@@ -2,7 +2,7 @@
 title: Docker入门学习
 date: 2022-07-14 13:53:03
 categories:
-  - 运维
+   - 运维
 tags: 后端, Docker
 path: /docker-introduce-learning/
 ---
@@ -499,9 +499,9 @@ RUN 指令是用来执行命令行命令的。由于命令行的强大能力，R
 
 - shell 格式：`RUN <命令>`，就像直接在命令行中输入的命令一样。刚才写的 Dockerfile 中的 RUN 指令就是这种格式。
 
-  ```bash
-  RUN echo '<h1>Hello, Docker!</h1>' > /usr/share/nginx/html/index.html
-  ```
+   ```bash
+   RUN echo '<h1>Hello, Docker!</h1>' > /usr/share/nginx/html/index.html
+   ```
 
 - exec 格式：RUN ["可执行文件", "参数 1", "参数 2"]，这更像是函数调用中的格式。
 
@@ -1652,66 +1652,66 @@ $ docker manifest inspect golang:alpine
 
 ```json
 {
-  "schemaVersion": 2,
-  "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
-  "manifests": [
-    {
-      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-      "size": 1365,
-      "digest": "sha256:5e28ac423243b187f464d635bcfe1e909f4a31c6c8bce51d0db0a1062bec9e16",
-      "platform": {
-        "architecture": "amd64",
-        "os": "linux"
+   "schemaVersion": 2,
+   "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+   "manifests": [
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 1365,
+         "digest": "sha256:5e28ac423243b187f464d635bcfe1e909f4a31c6c8bce51d0db0a1062bec9e16",
+         "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 1365,
+         "digest": "sha256:2945c46e26c9787da884b4065d1de64cf93a3b81ead1b949843dda1fcd458bae",
+         "platform": {
+            "architecture": "arm",
+            "os": "linux",
+            "variant": "v7"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 1365,
+         "digest": "sha256:87fff60114fd3402d0c1a7ddf1eea1ded658f171749b57dc782fd33ee2d47b2d",
+         "platform": {
+            "architecture": "arm64",
+            "os": "linux",
+            "variant": "v8"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 1365,
+         "digest": "sha256:607b43f1d91144f82a9433764e85eb3ccf83f73569552a49bc9788c31b4338de",
+         "platform": {
+            "architecture": "386",
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 1365,
+         "digest": "sha256:25ead0e21ed5e246ce31e274b98c09aaf548606788ef28eaf375dc8525064314",
+         "platform": {
+            "architecture": "ppc64le",
+            "os": "linux"
+         }
+      },
+      {
+         "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+         "size": 1365,
+         "digest": "sha256:69f5907fa93ea591175b2c688673775378ed861eeb687776669a48692bb9754d",
+         "platform": {
+            "architecture": "s390x",
+            "os": "linux"
+         }
       }
-    },
-    {
-      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-      "size": 1365,
-      "digest": "sha256:2945c46e26c9787da884b4065d1de64cf93a3b81ead1b949843dda1fcd458bae",
-      "platform": {
-        "architecture": "arm",
-        "os": "linux",
-        "variant": "v7"
-      }
-    },
-    {
-      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-      "size": 1365,
-      "digest": "sha256:87fff60114fd3402d0c1a7ddf1eea1ded658f171749b57dc782fd33ee2d47b2d",
-      "platform": {
-        "architecture": "arm64",
-        "os": "linux",
-        "variant": "v8"
-      }
-    },
-    {
-      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-      "size": 1365,
-      "digest": "sha256:607b43f1d91144f82a9433764e85eb3ccf83f73569552a49bc9788c31b4338de",
-      "platform": {
-        "architecture": "386",
-        "os": "linux"
-      }
-    },
-    {
-      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-      "size": 1365,
-      "digest": "sha256:25ead0e21ed5e246ce31e274b98c09aaf548606788ef28eaf375dc8525064314",
-      "platform": {
-        "architecture": "ppc64le",
-        "os": "linux"
-      }
-    },
-    {
-      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-      "size": 1365,
-      "digest": "sha256:69f5907fa93ea591175b2c688673775378ed861eeb687776669a48692bb9754d",
-      "platform": {
-        "architecture": "s390x",
-        "os": "linux"
-      }
-    }
-  ]
+   ]
 }
 ```
 
@@ -1767,4 +1767,530 @@ $ docker manifest push username/test
 
 我们在 `Linux x86_64` `Linux arm64v8` 中分别执行 `$ docker run -it --rm username/test` 命令，发现可以正确的执行。
 
-// TODO https://vuepress.mirror.docker-practice.com/container/
+# 操作容器
+
+容器是 Docker 又一核心概念。
+
+简单的说，容器是独立运行的一个或一组应用，以及它们的运行态环境。对应的，虚拟机可以理解为模拟运行的一整套操作系统（提供了运行态环境和其他系统环境）和跑在上面的应用。
+
+本章将具体介绍如何来管理一个容器，包括创建、启动和停止等。
+
+## 启动容器
+
+启动容器有两种方式，一种是基于镜像新建一个容器并启动，另外一个是将在终止状态（exited）的容器重新启动。
+
+因为 Docker 的容器实在太轻量级了，很多时候用户都是随时删除和新创建容器。
+
+### 新建并启动
+
+所需要的命令主要为 docker run。
+
+例如，下面的命令输出一个 “Hello World”，之后终止容器。
+
+```bash
+$ docker run ubuntu:18.04 /bin/echo 'Hello world'
+Hello world
+```
+
+这跟在本地直接执行 `/bin/echo 'hello world'` 几乎感觉不出任何区别。
+
+下面的命令则启动一个 bash 终端，允许用户进行交互。
+
+```bash
+$ docker run -t -i ubuntu:18.04 /bin/bash
+root@af8bae53bdd3:/#
+```
+
+其中，`-t` 选项让 Docker 分配一个伪终端（pseudo-tty）并绑定到容器的标准输入上，`-i` 则让容器的标准输入保持打开。
+
+在交互模式下，用户可以通过所创建的终端来输入命令，例如
+
+```bash
+root@af8bae53bdd3:/# pwd
+/
+root@af8bae53bdd3:/# ls
+bin boot dev etc home lib lib64 media mnt opt proc root run sbin srv sys tmp usr var
+```
+
+当利用 docker run 来创建容器时，Docker 在后台运行的标准操作包括：
+
+- 检查本地是否存在指定的镜像，不存在就从 registry 下载
+- 利用镜像创建并启动一个容器
+- 分配一个文件系统，并在只读的镜像层外面挂载一层可读写层
+- 从宿主主机配置的网桥接口中桥接一个虚拟接口到容器中去
+- 从地址池配置一个 ip 地址给容器
+- 执行用户指定的应用程序
+- 执行完毕后容器被终止
+
+### 启动已终止容器
+
+可以利用 `docker container start` 命令，直接将一个已经终止（exited）的容器启动运行。
+
+容器的核心为所执行的应用程序，所需要的资源都是应用程序运行所必需的。除此之外，并没有其它的资源。可以在伪终端中利用 ps 或 top 来查看进程信息。
+
+```bash
+root@ba267838cc1b:/# ps
+  PID TTY          TIME CMD
+    1 ?        00:00:00 bash
+   11 ?        00:00:00 ps
+```
+
+可见，容器中仅运行了指定的 bash 应用。这种特点使得 Docker 对资源的利用率极高，是货真价实的轻量级虚拟化。
+
+## 后台运行
+
+更多的时候，需要让 Docker 在后台运行而不是直接把执行命令的结果输出在当前宿主机下。此时，可以通过添加 `-d` 参数来实现。
+
+下面举两个例子来说明一下。
+
+如果不使用 `-d` 参数运行容器。
+
+```bash
+$ docker run ubuntu:18.04 /bin/sh -c "while true; do echo hello world; sleep 1; done"
+hello world
+hello world
+hello world
+hello world
+```
+
+容器会把输出的结果 (STDOUT) 打印到宿主机上面
+
+如果使用了 `-d` 参数运行容器。
+
+```bash
+$ docker run -d ubuntu:18.04 /bin/sh -c "while true; do echo hello world; sleep 1; done"
+77b2dc01fe0f3f1265df143181e7b9af5e05279a884f4776ee75350ea9d8017a
+```
+
+此时容器会在后台运行并不会把输出的结果 (STDOUT) 打印到宿主机上面(输出结果可以用 `docker logs` 查看)。
+
+> 注：容器是否会长久运行，是和 docker run 指定的命令有关，和 `-d` 参数无关。
+
+使用 `-d` 参数启动后会返回一个唯一的 id，也可以通过 docker container ls 命令来查看容器信息。
+
+```bash
+$ docker container ls
+CONTAINER ID  IMAGE         COMMAND               CREATED        STATUS       PORTS NAMES
+77b2dc01fe0f  ubuntu:18.04  /bin/sh -c 'while tr  2 minutes ago  Up 1 minute        agitated_wright
+```
+
+要获取容器的输出信息，可以通过 `docker container logs` 命令。
+
+```bash
+$ docker container logs [container ID or NAMES]
+hello world
+hello world
+hello world
+. . .
+```
+
+## 终止容器
+
+可以使用 `docker container stop` 来终止一个运行中的容器。
+
+此外，当 Docker 容器中指定的应用终结时，容器也自动终止。
+
+例如对于上一章节中只启动了一个终端的容器，用户通过 `exit` 命令或 `Ctrl+d` 来退出终端时，所创建的容器立刻终止。
+
+终止状态的容器可以用 `docker container ls -a` 命令看到。例如
+
+```bash
+$ docker container ls -a
+CONTAINER ID        IMAGE                    COMMAND                CREATED             STATUS                          PORTS               NAMES
+ba267838cc1b        ubuntu:18.04             "/bin/bash"            30 minutes ago      Exited (0) About a minute ago                       trusting_newton
+```
+
+处于终止状态的容器，可以通过 `docker container start` 命令来重新启动。
+
+此外，`docker container restart` 命令会将一个运行态的容器终止，然后再重新启动它。
+
+## 进入容器
+
+在使用 `-d` 参数时，容器启动后会进入后台。
+
+某些时候需要进入容器进行操作，包括使用 docker attach 命令或 docker exec 命令，推荐大家使用 docker exec 命令，原因会在下面说明。
+
+### attach 命令
+
+下面示例如何使用 docker attach 命令。
+
+```bash
+$ docker run -dit ubuntu
+243c32535da7d142fb0e6df616a3c3ada0b8ab417937c853a9e1c251f499f550
+
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+243c32535da7        ubuntu:latest       "/bin/bash"         18 seconds ago      Up 17 seconds                           nostalgic_hypatia
+
+$ docker attach 243c
+root@243c32535da7:/#
+```
+
+注意：如果从这个 stdin 中 exit，会导致容器的停止。
+
+### exec 命令 -i -t 参数
+
+docker exec 后边可以跟多个参数，这里主要说明 `-i -t` 参数。
+
+只用 `-i` 参数时，由于没有分配伪终端，界面没有我们熟悉的 Linux 命令提示符，但命令执行结果仍然可以返回。
+
+当 `-i -t` 参数一起使用时，则可以看到我们熟悉的 Linux 命令提示符。
+
+```bash
+$ docker run -dit ubuntu
+69d137adef7a8a689cbcb059e94da5489d3cddd240ff675c640c8d96e84fe1f6
+
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+69d137adef7a        ubuntu:latest       "/bin/bash"         18 seconds ago      Up 17 seconds                           zealous_swirles
+
+$ docker exec -i 69d1 bash
+ls
+bin
+boot
+dev
+...
+
+$ docker exec -it 69d1 bash
+root@69d137adef7a:/#
+```
+
+如果从这个 stdin 中 exit，不会导致容器的停止。这就是为什么推荐大家使用 docker exec 的原因。
+
+更多参数说明请使用 `docker exec --help` 查看。
+
+## 导出和导入容器
+
+### 导出容器
+
+如果要导出本地某个容器，可以使用 docker export 命令。
+
+```bash
+$ docker container ls -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                    PORTS               NAMES
+7691a814370e        ubuntu:18.04        "/bin/bash"         36 hours ago        Exited (0) 21 hours ago                       test
+$ docker export 7691a814370e > ubuntu.tar
+```
+
+这样将导出容器快照到本地文件。
+
+### 导入容器快照
+
+可以使用 docker import 从容器快照文件中再导入为镜像，例如
+
+```bash
+$ cat ubuntu.tar | docker import - test/ubuntu:v1.0
+$ docker image ls
+REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
+test/ubuntu         v1.0                9d37a6082e97        About a minute ago   171.3 MB
+```
+
+此外，也可以通过指定 URL 或者某个目录来导入，例如
+
+```bash
+$ docker import http://example.com/exampleimage.tgz example/imagerepo
+```
+
+> 注：用户既可以使用 docker load 来导入镜像存储文件到本地镜像库，也可以使用 docker import 来导入一个容器快照到本地镜像库。这两者的区别在于容器快照文件将丢弃所有的历史记录和元数据信息（即仅保存容器当时的快照状态），而镜像存储文件将保存完整记录，体积也要大。此外，从容器快照文件导入时可以重新指定标签等元数据信息。
+
+## 删除容器
+
+可以使用 `docker container rm` 来删除一个处于终止状态的容器。例如
+
+```bash
+$ docker container rm trusting_newton
+trusting_newton
+```
+
+如果要删除一个运行中的容器，可以添加 -f 参数。Docker 会发送 SIGKILL 信号给容器。
+
+### 清理所有处于终止状态的容器
+
+用 `docker container ls -a` 命令可以查看所有已经创建的包括终止状态的容器，如果数量太多要一个个删除可能会很麻烦，用下面的命令可以清理掉所有处于终止状态的容器。
+
+```bash
+$ docker container prune
+```
+
+# Docker 仓库
+
+仓库（Repository）是集中存放镜像的地方。
+
+一个容易混淆的概念是注册服务器（Registry）。实际上注册服务器是管理仓库的具体服务器，每个服务器上可以有多个仓库，而每个仓库下面有多个镜像。从这方面来说，仓库可以被认为是一个具体的项目或目录。例如对于仓库地址 `docker.io/ubuntu` 来说，docker.io 是注册服务器地址，ubuntu 是仓库名。
+
+大部分时候，并不需要严格区分这两者的概念。
+
+## Docker Hub
+
+目前 Docker 官方维护了一个公共仓库 Docker Hub (opens new window)，大部分需求都可以通过在 Docker Hub 中直接下载镜像来实现。
+
+### 注册
+
+你可以在 https://hub.docker.com 免费注册一个 Docker 账号。
+
+### 登录
+
+可以通过执行 docker login 命令交互式的输入用户名及密码来完成在命令行界面登录 Docker Hub。
+
+你可以通过 docker logout 退出登录。
+
+### 拉取镜像
+
+你可以通过 docker search 命令来查找官方仓库中的镜像，并利用 docker pull 命令来将它下载到本地。
+
+例如以 centos 为关键词进行搜索：
+
+```bash
+$ docker search centos
+NAME                               DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+centos                             The official build of CentOS.                   6449      [OK]
+ansible/centos7-ansible            Ansible on Centos7                              132                  [OK]
+consol/centos-xfce-vnc             Centos container with "headless" VNC session…   126                  [OK]
+jdeathe/centos-ssh                 OpenSSH / Supervisor / EPEL/IUS/SCL Repos - …   117                  [OK]
+centos/systemd                     systemd enabled base container.                 96                   [OK]
+```
+
+可以看到返回了很多包含关键字的镜像，其中包括镜像名字、描述、收藏数（表示该镜像的受关注程度）、是否官方创建（OFFICIAL）、是否自动构建 （AUTOMATED）。
+
+根据是否是官方提供，可将镜像分为两类。
+
+1. 类似 centos 这样的镜像，被称为基础镜像或根镜像。这些基础镜像由 Docker 公司创建、验证、支持、提供。这样的镜像往往使用单个单词作为名字。
+
+2. 比如 `ansible/centos7-ansible` 镜像，它是由 Docker Hub 的注册用户创建并维护的，往往带有用户名称前缀。可以通过前缀 `username/` 来指定使用某个用户提供的镜像，比如 ansible 用户。
+
+另外，在查找的时候通过 `--filter=stars=N` 参数可以指定仅显示收藏数量为 N 以上的镜像。
+
+下载官方 centos 镜像到本地。
+
+```bash
+$ docker pull centos
+Using default tag: latest
+latest: Pulling from library/centos
+7a0437f04f83: Pull complete
+Digest: sha256:5528e8b1b1719d34604c87e11dcd1c0a20bedf46e83b5632cdeac91b8c04efc1
+Status: Downloaded newer image for centos:latest
+docker.io/library/centos:latest
+```
+
+### 推送镜像
+
+用户也可以在登录后通过 docker push 命令来将自己的镜像推送到 Docker Hub。
+
+以下命令中的 username 请替换为你的 Docker 账号用户名。
+
+```bash
+$ docker tag ubuntu:18.04 username/ubuntu:18.04
+
+$ docker image ls
+
+REPOSITORY                                               TAG                    IMAGE ID            CREATED             SIZE
+ubuntu                                                   18.04                  275d79972a86        6 days ago          94.6MB
+username/ubuntu                                          18.04                  275d79972a86        6 days ago          94.6MB
+
+$ docker push username/ubuntu:18.04
+
+$ docker search username
+
+NAME                      DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+username/ubuntu
+```
+
+### 自动构建
+
+2021 年 7 月 26 日之后，该项功能仅限付费用户 (opens new window) 使用。
+
+自动构建（Automated Builds）可以自动触发构建镜像，方便升级镜像。
+
+有时候，用户构建了镜像，安装了某个软件，当软件发布新版本则需要手动更新镜像。
+
+而自动构建允许用户通过 Docker Hub 指定跟踪一个目标网站（支持 GitHub (opens new window) 或 BitBucket (opens new window)）上的项目，一旦项目发生新的提交 （commit）或者创建了新的标签（tag），Docker Hub 会自动构建镜像并推送到 Docker Hub 中。
+
+要配置自动构建，包括如下的步骤：
+
+- 登录 Docker Hub；
+- 在 Docker Hub 点击右上角头像，在账号设置（Account Settings）中关联（Linked Accounts）目标网站；
+- 在 Docker Hub 中新建或选择已有的仓库，在 Builds 选项卡中选择 Configure Automated Builds；
+- 选取一个目标网站中的项目（需要含 Dockerfile）和分支；
+- 指定 Dockerfile 的位置，并保存。
+
+之后，可以在 Docker Hub 的仓库页面的 Timeline 选项卡中查看每次构建的状态。
+
+# 数据管理
+
+![](res/2022-07-17-02-27-55.png)
+
+这一章介绍如何在 Docker 内部以及容器之间管理数据，在容器中管理数据主要有两种方式：
+
+- 数据卷（Volumes）
+- 挂载主机目录 (Bind mounts)
+
+## 数据卷
+
+数据卷是一个可供一个或多个容器使用的特殊目录，它绕过 UFS，可以提供很多有用的特性：
+
+- 数据卷可以在容器之间共享和重用
+- 对数据卷的修改会立马生效
+- 对数据卷的更新，不会影响镜像
+- 数据卷默认会一直存在，即使容器被删除
+
+> 注意：数据卷的使用，类似于 Linux 下对目录或文件进行 mount，镜像中的被指定为挂载点的目录中的文件会复制到数据卷中（仅数据卷为空时会复制）。
+
+### 创建一个数据卷
+
+```bash
+$ docker volume create my-vol
+```
+
+查看所有的数据卷
+
+```bash
+$ docker volume ls
+
+DRIVER              VOLUME NAME
+local               my-vol
+```
+
+在主机里使用以下命令可以查看指定数据卷的信息
+
+```bash
+$ docker volume inspect my-vol
+[
+    {
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/my-vol/_data",
+        "Name": "my-vol",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+### 启动一个挂载数据卷的容器
+
+在用 docker run 命令的时候，使用 `--mount` 标记来将数据卷挂载到容器里。在一次 docker run 中可以挂载多个数据卷。
+
+下面创建一个名为 web 的容器，并加载一个数据卷到容器的 `/usr/share/nginx/html` 目录。
+
+```bash
+$ docker run -d -P \
+    --name web \
+    # -v my-vol:/usr/share/nginx/html \
+    --mount source=my-vol,target=/usr/share/nginx/html \
+    nginx:alpine
+```
+
+### 查看数据卷的具体信息
+
+在主机里使用以下命令可以查看 web 容器的信息
+
+```bash
+$ docker inspect web
+```
+
+数据卷信息在 `"Mounts" Key` 下面
+
+```json
+"Mounts": [
+    {
+        "Type": "volume",
+        "Name": "my-vol",
+        "Source": "/var/lib/docker/volumes/my-vol/_data",
+        "Destination": "/usr/share/nginx/html",
+        "Driver": "local",
+        "Mode": "",
+        "RW": true,
+        "Propagation": ""
+    }
+],
+```
+
+### 删除数据卷
+
+```bash
+$ docker volume rm my-vol
+```
+
+数据卷是被设计用来持久化数据的，它的生命周期独立于容器，Docker 不会在容器被删除后自动删除数据卷，并且也不存在垃圾回收这样的机制来处理没有任何容器引用的数据卷。如果需要在删除容器的同时移除数据卷。可以在删除容器的时候使用 `docker rm -v` 这个命令。
+
+无主的数据卷可能会占据很多空间，要清理请使用以下命令
+
+```bash
+$ docker volume prune
+```
+
+## 挂载主机目录
+
+### 挂载一个主机目录作为数据卷
+
+使用 `--mount` 标记可以指定挂载一个本地主机的目录到容器中去。
+
+```bash
+$ docker run -d -P \
+    --name web \
+    # -v /src/webapp:/usr/share/nginx/html \
+    --mount type=bind,source=/src/webapp,target=/usr/share/nginx/html \
+    nginx:alpine
+```
+
+上面的命令加载主机的 `/src/webapp` 目录到容器的 `/usr/share/nginx/html` 目录。这个功能在进行测试的时候十分方便，比如用户可以放置一些程序到本地目录中，来查看容器是否正常工作。本地目录的路径必须是绝对路径，以前使用 `-v` 参数时如果本地目录不存在 Docker 会自动为你创建一个文件夹，现在使用 `--mount` 参数时如果本地目录不存在，Docker 会报错。
+
+Docker 挂载主机目录的默认权限是读写，用户也可以通过增加 readonly 指定为只读。
+
+```bash
+$ docker run -d -P \
+    --name web \
+    # -v /src/webapp:/usr/share/nginx/html:ro \
+    --mount type=bind,source=/src/webapp,target=/usr/share/nginx/html,readonly \
+    nginx:alpine
+```
+
+加了 readonly 之后，就挂载为只读了。如果你在容器内 `/usr/share/nginx/html` 目录新建文件，会显示如下错误
+
+```bash
+/usr/share/nginx/html # touch new.txt
+touch: new.txt: Read-only file system
+```
+
+### 查看数据卷的具体信息
+
+在主机里使用以下命令可以查看 web 容器的信息
+
+```bash
+$ docker inspect web
+```
+
+挂载主机目录的配置信息在 `"Mounts" Key` 下面
+
+```json
+"Mounts": [
+    {
+        "Type": "bind",
+        "Source": "/src/webapp",
+        "Destination": "/usr/share/nginx/html",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+    }
+],
+```
+
+### 挂载一个本地主机文件作为数据卷
+
+`--mount` 标记也可以从主机挂载单个文件到容器中
+
+```bash
+$ docker run --rm -it \
+   # -v $HOME/.bash_history:/root/.bash_history \
+   --mount type=bind,source=$HOME/.bash_history,target=/root/.bash_history \
+   ubuntu:18.04 \
+   bash
+
+root@2affd44b4667:/# history
+1  ls
+2  diskutil list
+```
+
+这样就可以记录在容器输入过的命令了。
+
+// TODO https://vuepress.mirror.docker-practice.com/network/
