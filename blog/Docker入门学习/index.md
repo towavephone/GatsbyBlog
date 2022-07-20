@@ -786,13 +786,13 @@ Docker 在 OverlayFS 上构建的容器也是利用了类似的原理。
 
 COPY 指令将从构建上下文目录中 `<源路径>` 的文件/目录复制到新的一层的镜像内的 `<目标路径>` 位置。比如：
 
-```docker
+```dockerfile
 COPY package.json /usr/src/app/
 ```
 
 `<源路径>` 可以是多个，甚至可以是通配符，其通配符规则要满足 Go 的 filepath.Match (opens new window) 规则，如：
 
-```docker
+```dockerfile
 COPY hom* /mydir/
 COPY hom?.txt /mydir/
 ```
@@ -803,7 +803,7 @@ COPY hom?.txt /mydir/
 
 在使用该指令的时候还可以加上 `--chown=<user>:<group>` 选项来改变文件的所属用户及所属组。
 
-```docker
+```dockerfile
 COPY --chown=55:mygroup files* /mydir/
 COPY --chown=bin files* /mydir/
 COPY --chown=1 files* /mydir/
@@ -822,7 +822,7 @@ ADD 指令和 COPY 的格式和性质基本一致。但是在 COPY 基础上增�
 
 在某些情况下，这个自动解压缩的功能非常有用，比如官方镜像 ubuntu 中：
 
-```docker
+```dockerfile
 FROM scratch
 ADD ubuntu-xenial-core-cloudimg-amd64-root.tar.gz /
 ...
@@ -838,7 +838,7 @@ ADD ubuntu-xenial-core-cloudimg-amd64-root.tar.gz /
 
 在使用该指令的时候还可以加上 `--chown=<user>:<group>` 选项来改变文件的所属用户及所属组。
 
-```docker
+```dockerfile
 ADD --chown=55:mygroup files* /mydir/
 ADD --chown=bin files* /mydir/
 ADD --chown=1 files* /mydir/k
@@ -861,13 +861,13 @@ CMD 指令的格式和 RUN 相似，也是两种格式：
 
 如果使用 shell 格式的话，实际的命令会被包装为 `sh -c` 的参数的形式进行执行。比如：
 
-```docker
+```dockerfile
 CMD echo $HOME
 ```
 
 在实际执行中，会将其变更为：
 
-```docker
+```dockerfile
 CMD [ "sh", "-c", "echo $HOME" ]
 ```
 
@@ -879,7 +879,7 @@ Docker 不是虚拟机，容器中的应用都应该以前台执行，而不是�
 
 一些初学者将 CMD 写为：
 
-```docker
+```dockerfile
 CMD service nginx start
 ```
 
@@ -891,7 +891,7 @@ CMD service nginx start
 
 正确的做法是直接执行 nginx 可执行文件，并且要求以前台形式运行。比如：
 
-```docker
+```dockerfile
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
@@ -913,7 +913,7 @@ ENTRYPOINT 的目的和 CMD 一样，都是在指定容器启动程序及参数�
 
 假设我们需要一个得知自己当前公网 IP 的镜像，那么可以先用 CMD 来实现：
 
-```docker
+```dockerfile
 FROM ubuntu:18.04
 RUN apt-get update \
     && apt-get install -y curl \
@@ -945,7 +945,7 @@ $ docker run myip curl -s http://myip.ipip.net -i
 
 这显然不是很好的解决方案，而使用 ENTRYPOINT 就可以解决这个问题。现在我们重新用 ENTRYPOINT 来实现这个镜像：
 
-```docker
+```dockerfile
 FROM ubuntu:18.04
 RUN apt-get update \
     && apt-get install -y curl \
@@ -988,7 +988,7 @@ Connection: keep-alive
 
 这些准备工作是和容器 CMD 无关的，无论 CMD 为什么，都需要事先进行一个预处理的工作。这种情况下，可以写一个脚本，然后放入 ENTRYPOINT 中去执行，而这个脚本会将接到的参数（也就是 `<CMD>`）作为命令，在脚本最后执行。比如官方镜像 redis 中就是这么做的：
 
-```docker
+```dockerfile
 FROM alpine:3.4
 ...
 RUN addgroup -S redis && adduser -S -G redis redis
@@ -1029,7 +1029,7 @@ uid=0(root) gid=0(root) groups=0(root)
 
 这个指令很简单，就是设置环境变量而已，无论是后面的其它指令如 RUN，还是运行时的应用，都可以直接使用这里定义的环境变量。
 
-```docker
+```dockerfile
 ENV VERSION=1.0 DEBUG=on \
     NAME="Happy Feet"
 ```
@@ -1038,7 +1038,7 @@ ENV VERSION=1.0 DEBUG=on \
 
 定义了环境变量，那么在后续的指令中，就可以使用这个环境变量。比如在官方 node 镜像 Dockerfile 中，就有类似这样的代码：
 
-```docker
+```dockerfile
 ENV NODE_VERSION 7.2.0
 
 RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
@@ -1068,7 +1068,7 @@ Dockerfile 中的 ARG 指令是定义参数名称，以及定义其默认值。�
 
 ARG 指令有生效范围，如果在 FROM 指令之前指定，那么只能用于 FROM 指令中。
 
-```docker
+```dockerfile
 ARG DOCKER_USERNAME=library
 
 FROM ${DOCKER_USERNAME}/alpine
@@ -1078,7 +1078,7 @@ RUN set -x ; echo ${DOCKER_USERNAME}
 
 使用上述 Dockerfile 会发现无法输出 `${DOCKER_USERNAME}` 变量的值，要想正常输出，你必须在 FROM 之后再次指定 ARG
 
-```docker
+```dockerfile
 # 只在 FROM 中生效
 ARG DOCKER_USERNAME=library
 
@@ -1092,7 +1092,7 @@ RUN set -x ; echo ${DOCKER_USERNAME}
 
 对于多阶段构建，尤其要注意这个问题
 
-```docker
+```dockerfile
 # 这个变量在每个 FROM 中都生效
 ARG DOCKER_USERNAME=library
 
@@ -1107,7 +1107,7 @@ RUN set -x ; echo 2
 
 对于上述 Dockerfile 两个 FROM 指令都可以使用 `${DOCKER_USERNAME}`，对于在各个阶段中使用的变量都必须在每个阶段分别指定：
 
-```docker
+```dockerfile
 ARG DOCKER_USERNAME=library
 
 FROM ${DOCKER_USERNAME}/alpine
@@ -1134,13 +1134,13 @@ RUN set -x ; echo ${DOCKER_USERNAME}
 
 之前我们说过，容器运行时应该尽量保持容器存储层不发生写操作，对于数据库类需要保存动态数据的应用，其数据库文件应该保存于卷(volume)中，后面的章节我们会进一步介绍 Docker 卷的概念。为了防止运行时用户忘记将动态文件所保存目录挂载为卷，在 Dockerfile 中，我们可以事先指定某些目录挂载为匿名卷，这样在运行时如果用户不指定挂载，其应用也可以正常运行，不会向容器存储层写入大量数据。
 
-```docker
+```dockerfile
 VOLUME /data
 ```
 
 这里的 /data 目录就会在容器运行时自动挂载为匿名卷，任何向 /data 中写入的信息都不会记录进容器存储层，从而保证了容器存储层的无状态化。当然，运行容器时可以覆盖这个挂载设置。比如：
 
-```docker
+```dockerfile
 $ docker run -d -v mydata:/data xxxx
 ```
 
@@ -1162,7 +1162,7 @@ EXPOSE 指令是声明容器运行时提供服务的端口，这只是一个声�
 
 之前提到一些初学者常犯的错误是把 Dockerfile 等同于 Shell 脚本来书写，这种错误的理解还可能会导致出现下面这样的错误：
 
-```docker
+```dockerfile
 RUN cd /app
 RUN echo "hello" > world.txt
 ```
@@ -1173,7 +1173,7 @@ RUN echo "hello" > world.txt
 
 因此如果需要改变以后各层的工作目录的位置，那么应该使用 WORKDIR 指令。
 
-```docker
+```dockerfile
 WORKDIR /app
 
 RUN echo "hello" > world.txt
@@ -1181,7 +1181,7 @@ RUN echo "hello" > world.txt
 
 如果你的 WORKDIR 指令使用的相对路径，那么所切换的路径与之前的 WORKDIR 有关：
 
-```docker
+```dockerfile
 WORKDIR /a
 WORKDIR b
 WORKDIR c
@@ -1199,7 +1199,7 @@ USER 指令和 WORKDIR 相似，都是改变环境状态并影响以后的层。
 
 注意，USER 只是帮助你切换到指定用户而已，这个用户必须是事先建立好的，否则无法切换。
 
-```docker
+```dockerfile
 RUN groupadd -r redis && useradd -r -g redis redis
 USER redis
 RUN [ "redis-server" ]
@@ -1207,7 +1207,7 @@ RUN [ "redis-server" ]
 
 如果以 root 执行的脚本，在执行期间希望改变身份，比如希望以某个已经建立好的用户来运行某个服务进程，不要使用 su 或者 sudo，这些都需要比较麻烦的配置，而且在 TTY 缺失的环境下经常出错。建议使用 gosu (opens new window)。
 
-```docker
+```dockerfile
 # 建立 redis 用户，并使用 gosu 换另一个用户执行命令
 RUN groupadd -r redis && useradd -r -g redis redis
 # 下载 gosu
@@ -1245,7 +1245,7 @@ HEALTHCHECK 支持下列选项：
 
 假设我们有个镜像是个最简单的 Web 服务，我们希望增加健康检查来判断其 Web 服务是否在正常工作，我们可以用 curl 来帮助判断，其 Dockerfile 的 HEALTHCHECK 可以这么写：
 
-```docker
+```dockerfile
 FROM nginx
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 HEALTHCHECK --interval=5s --timeout=3s \
@@ -1306,13 +1306,13 @@ $ docker inspect --format '{{json .State.Health}}' web | python -m json.tool
 
 LABEL 指令用来给镜像以键值对的形式添加一些元数据（metadata）。
 
-```docker
+```dockerfile
 LABEL <key>=<value> <key>=<value> <key>=<value> ...
 ```
 
 我们还可以用一些标签来申明镜像的作者、文档地址等：
 
-```docker
+```dockerfile
 LABEL org.opencontainers.image.authors="yeasy"
 
 LABEL org.opencontainers.image.documentation="https://yeasy.gitbooks.io"
@@ -1326,7 +1326,7 @@ LABEL org.opencontainers.image.documentation="https://yeasy.gitbooks.io"
 
 SHELL 指令可以指定 `RUN ENTRYPOINT CMD` 指令的 shell，Linux 中默认为 `["/bin/sh", "-c"]`
 
-```docker
+```dockerfile
 SHELL ["/bin/sh", "-c"]
 
 RUN lll ; ls
@@ -1340,13 +1340,13 @@ RUN lll ; ls
 
 当 `ENTRYPOINT CMD` 以 shell 格式指定时，SHELL 指令所指定的 shell 也会成为这两个指令的 shell
 
-````docker
+````dockerfile
 SHELL ["/bin/sh", "-cex"]
 
 # /bin/sh -cex "nginx"
 ENTRYPOINT nginx
 
-```docker
+```dockerfile
 SHELL ["/bin/sh", "-cex"]
 
 # /bin/sh -cex "nginx"
@@ -1363,7 +1363,7 @@ Dockerfile 中的其它指令都是为了定制当前镜像而准备的，唯有
 
 假设我们要制作 Node.js 所写的应用的镜像。我们都知道 Node.js 使用 npm 进行包管理，所有依赖、配置、启动信息等会放到 package.json 文件里。在拿到程序代码后，需要先进行 npm install 才可以获得所有需要的依赖。然后就可以通过 npm start 来启动应用。因此，一般来说会这样写 Dockerfile：
 
-```docker
+```dockerfile
 FROM node:slim
 RUN mkdir /app
 WORKDIR /app
@@ -1379,7 +1379,7 @@ CMD [ "npm", "start" ]
 
 那么我们可不可以做一个基础镜像，然后各个项目使用这个基础镜像呢？这样基础镜像更新，各个项目不用同步 Dockerfile 的变化，重新构建后就继承了基础镜像的更新？好吧，可以，让我们看看这样的结果。那么上面的这个 Dockerfile 就会变为：
 
-```docker
+```dockerfile
 FROM node:slim
 RUN mkdir /app
 WORKDIR /app
@@ -1388,7 +1388,7 @@ CMD [ "npm", "start" ]
 
 这里我们把项目相关的构建指令拿出来，放到子项目里去。假设这个基础镜像的名字为 my-node 的话，各个项目内的自己的 Dockerfile 就变为：
 
-```docker
+```dockerfile
 FROM my-node
 COPY ./package.json /app
 RUN [ "npm", "install" ]
@@ -1401,7 +1401,7 @@ COPY . /app/
 
 ONBUILD 可以解决这个问题。让我们用 ONBUILD 重新写一下基础镜像的 Dockerfile:
 
-```docker
+```dockerfile
 FROM node:slim
 RUN mkdir /app
 WORKDIR /app
@@ -1413,7 +1413,7 @@ CMD [ "npm", "start" ]
 
 这次我们回到原始的 Dockerfile，但是这次将项目相关的指令加上 ONBUILD，这样在构建基础镜像的时候，这三行并不会被执行。然后各个项目的 Dockerfile 就变成了简单地：
 
-```docker
+```dockerfile
 FROM my-node
 ```
 
@@ -1446,7 +1446,7 @@ func main(){
 
 编写 Dockerfile.one 文件
 
-```docker
+```dockerfile
 FROM golang:alpine
 
 RUN apk --no-cache add git ca-certificates
@@ -1476,7 +1476,7 @@ $ docker build -t go/helloworld:1 -f Dockerfile.one .
 
 例如，编写 Dockerfile.build 文件
 
-```docker
+```dockerfile
 FROM golang:alpine
 
 RUN apk --no-cache add git
@@ -1491,7 +1491,7 @@ RUN go get -d -v github.com/go-sql-driver/mysql \
 
 编写 Dockerfile.copy 文件
 
-```docker
+```dockerfile
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
@@ -1545,7 +1545,7 @@ go/helloworld   1      f55d3e16affc    2 minutes ago   295MB
 
 例如，编写 Dockerfile 文件
 
-```docker
+```dockerfile
 FROM golang:alpine as builder
 
 RUN apk --no-cache add git
@@ -1592,13 +1592,13 @@ go/helloworld     1     f55d3e16affc     2 minutes ago      295MB
 
 我们可以使用 as 来为某一阶段命名，例如
 
-```docker
+```dockerfile
 FROM golang:alpine as builder
 ```
 
 例如当我们只想构建 builder 阶段的镜像时，增加 --target=builder 参数即可
 
-```docker
+```dockerfile
 $ docker build --target builder -t username/imagename:tag .
 ```
 
@@ -1606,7 +1606,7 @@ $ docker build --target builder -t username/imagename:tag .
 
 上面例子中我们使用 `COPY --from=0 /go/src/github.com/go/helloworld/app .` 从上一阶段的镜像中复制文件，我们也可以复制任意镜像中的文件。
 
-```docker
+```dockerfile
 $ COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf
 ```
 
@@ -1618,7 +1618,7 @@ Windows、macOS 除外，其使用了 `binfmt_misc (opens new window)` 提供了
 
 例如我们在 `Linux x86_64` 中构建一个 `username/test` 镜像。
 
-```docker
+```dockerfile
 FROM alpine
 
 CMD echo 1
@@ -3238,7 +3238,7 @@ BuildKit 是下一代的镜像构建组件，在 https://github.com/moby/buildki
 
 例如一个前端工程需要用到 npm：
 
-```docker
+```dockerfile
 FROM node:alpine as builder
 
 WORKDIR /app
@@ -3263,7 +3263,7 @@ COPY --from=builder /app/dist /app/dist
 
 BuildKit 提供了 `RUN --mount=type=cache` 指令，可以实现上边的设想。
 
-```docker
+```dockerfile
 # syntax = docker/dockerfile:experimental
 FROM node:alpine as builder
 
@@ -3293,7 +3293,7 @@ RUN --mount=type=cache,target=/tmp/dist,from=builder,source=/app/dist \
 
 由于 BuildKit 为实验特性，每个 Dockerfile 文件开头都必须加上如下指令
 
-```docker
+```dockerfile
 # syntax = docker/dockerfile:experimental
 ```
 
@@ -3318,7 +3318,7 @@ RUN --mount=type=cache,target=/tmp/dist,from=builder,source=/app/dist \
 
 该指令可以将一个镜像（或上一构建阶段）的文件挂载到指定位置。
 
-```docker
+```dockerfile
 # syntax = docker/dockerfile:experimental
 
 RUN --mount=type=bind,from=php:alpine,source=/usr/local/bin/docker-php-entrypoint,target=/docker-php-entrypoint \
@@ -3329,7 +3329,7 @@ RUN --mount=type=bind,from=php:alpine,source=/usr/local/bin/docker-php-entrypoin
 
 该指令可以将一个 tmpfs 文件系统挂载到指定位置。
 
-```docker
+```dockerfile
 # syntax = docker/dockerfile:experimental
 
 RUN --mount=type=tmpfs,target=/temp \
@@ -3340,7 +3340,7 @@ RUN --mount=type=tmpfs,target=/temp \
 
 该指令可以将一个文件（例如密钥）挂载到指定位置。
 
-```docker
+```dockerfile
 # syntax = docker/dockerfile:experimental
 
 RUN --mount=type=secret,id=aws,target=/root/.aws/credentials \
@@ -3353,7 +3353,7 @@ $ docker build -t test --secret id=aws,src=$HOME/.aws/credentials .
 
 该指令可以挂载 ssh 密钥。
 
-```docker
+```dockerfile
 # syntax = docker/dockerfile:experimental
 
 FROM alpine
@@ -3421,7 +3421,7 @@ $ docker buildx use mybuilder
 
 新建 Dockerfile 文件。
 
-```docker
+```dockerfile
 FROM --platform=$TARGETPLATFORM alpine
 
 RUN uname -a > /os.txt
@@ -3722,4 +3722,522 @@ $ sudo ip netns exec 1234 ifconfig eth0 172.17.0.100/16
 
 最简单的一种方式是通过查看接口的索引号，在容器中执行 `ip a` 命令，查看到本地接口最前面的接口索引号，如 205，将此值加上 1，即 206，然后在本地主机执行 `ip a` 命令，查找接口索引号为 206 的接口，两者即为连接的 veth 接口对。
 
-// TODO https://vuepress.mirror.docker-practice.com/appendix/command/
+# Docker 命令
+
+Docker 命令有两大类，客户端命令和服务端命令。前者是主要的操作接口，后者用来启动 Docker Daemon。
+
+- 客户端命令：基本命令格式为 `docker [OPTIONS] COMMAND [arg...]`；
+- 服务端命令：基本命令格式为 `dockerd [OPTIONS]`。
+
+可以通过 `man docker` 或 `docker help` 来查看这些命令。
+
+## 客户端命令(docker)
+
+### 客户端命令选项
+
+- `--config=""`：指定客户端配置文件，默认为 `~/.docker`；
+- `-D=true|false`：是否使用 debug 模式。默认不开启；
+- `-H, --host=[]`：指定命令对应 Docker 守护进程的监听接口，可以为 unix 套接字 `unix:///path/to/socket`，文件句柄 `fd://socketfd` 或 tcp 套接字 `tcp://[host[:port]]`，默认为 `unix:///var/run/docker.sock`；
+- `-l, --log-level="debug|info|warn|error|fatal"`：指定日志输出级别；
+- `--tls=true|false`：是否对 Docker 守护进程启用 TLS 安全机制，默认为否；
+- `--tlscacert=/.docker/ca.pem`：TLS CA 签名的可信证书文件路径；
+- `--tlscert=/.docker/cert.pem`：TLS 可信证书文件路径；
+- `--tlscert=/.docker/key.pem`：TLS 密钥文件路径；
+- `--tlsverify=true|false`：启用 TLS 校验，默认为否。
+
+### 客户端命令
+
+可以通过 `docker COMMAND --help` 来查看这些命令的具体用法。
+
+- attach：依附到一个正在运行的容器中；
+- build：从一个 Dockerfile 创建一个镜像；
+- commit：从一个容器的修改中创建一个新的镜像；
+- cp：在容器和本地宿主系统之间复制文件中；
+- create：创建一个新容器，但并不运行它；
+- diff：检查一个容器内文件系统的修改，包括修改和增加；
+- events：从服务端获取实时的事件；
+- exec：在运行的容器内执行命令；
+- export：导出容器内容为一个 tar 包；
+- history：显示一个镜像的历史信息；
+- images：列出存在的镜像；
+- import：导入一个文件（典型为 tar 包）路径或目录来创建一个本地镜像；
+- info：显示一些相关的系统信息；
+- inspect：显示一个容器的具体配置信息；
+- kill：关闭一个运行中的容器 (包括进程和所有相关资源)；
+- load：从一个 tar 包中加载一个镜像；
+- login：注册或登录到一个 Docker 的仓库服务器；
+- logout：从 Docker 的仓库服务器登出；
+- logs：获取容器的 log 信息；
+- network：管理 Docker 的网络，包括查看、创建、删除、挂载、卸载等；
+- node：管理 swarm 集群中的节点，包括查看、更新、删除、提升/取消管理节点等；
+- pause：暂停一个容器中的所有进程；
+- port：查找一个 nat 到一个私有网口的公共口；
+- ps：列出主机上的容器；
+- pull：从一个Docker的仓库服务器下拉一个镜像或仓库；
+- push：将一个镜像或者仓库推送到一个 Docker 的注册服务器；
+- rename：重命名一个容器；
+- restart：重启一个运行中的容器；
+- rm：删除给定的若干个容器；
+- rmi：删除给定的若干个镜像；
+- run：创建一个新容器，并在其中运行给定命令；
+- save：保存一个镜像为 tar 包文件；
+- search：在 Docker index 中搜索一个镜像；
+- service：管理 Docker 所启动的应用服务，包括创建、更新、删除等；
+- start：启动一个容器；
+- stats：输出（一个或多个）容器的资源使用统计信息；
+- stop：终止一个运行中的容器；
+- swarm：管理 Docker swarm 集群，包括创建、加入、退出、更新等；
+- tag：为一个镜像打标签；
+- top：查看一个容器中的正在运行的进程信息；
+- unpause：将一个容器内所有的进程从暂停状态中恢复；
+- update：更新指定的若干容器的配置信息；
+- version：输出 Docker 的版本信息；
+- volume：管理 Docker volume，包括查看、创建、删除等；
+- wait：阻塞直到一个容器终止，然后输出它的退出符。
+
+### 一张图总结 Docker 的命令
+
+![](res/2022-07-20-14-15-18.png)
+
+## 服务端命令(dockerd)
+
+### dockerd 命令选项
+
+- `--api-cors-header=""`：CORS 头部域，默认不允许 CORS，要允许任意的跨域访问，可以指定为 "*"；
+- `--authorization-plugin=""`：载入认证的插件；
+- `-b=""`：将容器挂载到一个已存在的网桥上。指定为 none 时则禁用容器的网络，与 `--bip` 选项互斥；
+- `--bip=""`：让动态创建的 docker0 网桥采用给定的 CIDR 地址; 与 `-b` 选项互斥；
+- `--cgroup-parent=""`：指定 cgroup 的父组，默认 fs cgroup 驱动为 `/docker`，systemd cgroup 驱动为 `system.slice`；
+- `--cluster-store=""`：构成集群（如 Swarm）时，集群键值数据库服务地址；
+- `--cluster-advertise=""`：构成集群时，自身的被访问地址，可以为 `host:port` 或 `interface:port`；
+- `--cluster-store-opt=""`：构成集群时，键值数据库的配置选项；
+- `--config-file="/etc/docker/daemon.json"`：daemon 配置文件路径；
+- `--containerd=""`：containerd 文件的路径；
+- `-D, --debug=true|false`：是否使用 Debug 模式。缺省为 false；
+- `--default-gateway=""`：容器的 IPv4 网关地址，必须在网桥的子网段内；
+- `--default-gateway-v6=""`：容器的 IPv6 网关地址；
+- `--default-ulimit=[]`：默认的 ulimit 值；
+- `--disable-legacy-registry=true|false`：是否允许访问旧版本的镜像仓库服务器；
+- `--dns=""`：指定容器使用的 DNS 服务器地址；
+- `--dns-opt=""`：DNS 选项；
+- `--dns-search=[]`：DNS 搜索域；
+- `--exec-opt=[]`：运行时的执行选项；
+- `--exec-root=""`：容器执行状态文件的根路径，默认为 `/var/run/docker`；
+- `--fixed-cidr=""`：限定分配 IPv4 地址范围；
+- `--fixed-cidr-v6=""`：限定分配 IPv6 地址范围；
+- `-G, --group=""`：分配给 unix 套接字的组，默认为 docker；
+- `-g, --graph=""`：Docker 运行时的根路径，默认为 `/var/lib/docker`；
+- `-H, --host=[]`：指定命令对应 Docker daemon 的监听接口，可以为 unix 套接字 `unix:///path/to/socket`，文件句柄 `fd://socketfd` 或 tcp 套接字 `tcp://[host[:port]]`，默认为 `unix:///var/run/docker.sock`；
+- `--icc=true|false`：是否启用容器间以及跟 daemon 所在主机的通信。默认为 true。
+- `--insecure-registry=[]`：允许访问给定的非安全仓库服务；
+- `--ip=""`：绑定容器端口时候的默认 IP 地址。缺省为 0.0.0.0；
+- `--ip-forward=true|false`：是否检查启动在 Docker 主机上的启用 IP 转发服务，默认开启。注意关闭该选项将不对系统转发能力进行任何检查修改；
+- `--ip-masq=true|false`：是否进行地址伪装，用于容器访问外部网络，默认开启；
+- `--iptables=true|false`：是否允许 Docker 添加 iptables 规则。缺省为 true；
+- `--ipv6=true|false`：是否启用 IPv6 支持，默认关闭；
+- `-l, --log-level="debug|info|warn|error|fatal"`：指定日志输出级别；
+- `--label="[]"`：添加指定的键值对标注；
+- `--log-driver="json-file|syslog|journald|gelf|fluentd|awslogs|splunk|etwlogs|gcplogs|none"`：指定日志后端驱动，默认为 `json-file`；
+- `--log-opt=[]`：日志后端的选项；
+- `--mtu=VALUE`：指定容器网络的 mtu；
+- `-p=""`：指定 daemon 的 PID 文件路径。缺省为 `/var/run/docker.pid`；
+- `--raw-logs`：输出原始，未加色彩的日志信息；
+- `--registry-mirror=<scheme>://<host>`：指定 docker pull 时使用的注册服务器镜像地址；
+- `-s, --storage-driver=""`：指定使用给定的存储后端；
+- `--selinux-enabled=true|false`：是否启用 SELinux 支持。缺省值为 false。SELinux 目前尚不支持 overlay 存储驱动；
+- `--storage-opt=[]`：驱动后端选项；
+- `--tls=true|false`：是否对 Docker daemon 启用 TLS 安全机制，默认为否；
+- `--tlscacert=/.docker/ca.pem`：TLS CA 签名的可信证书文件路径；
+- `--tlscert=/.docker/cert.pem`：TLS 可信证书文件路径；
+- `--tlscert=/.docker/key.pem`：TLS 密钥文件路径；
+- `--tlsverify=true|false`：启用 TLS 校验，默认为否；
+- `--userland-proxy=true|false`：是否使用用户态代理来实现容器间和出容器的回环通信，默认为 true；
+- `--userns-remap=default|uid:gid|user:group|user|uid`：指定容器的用户命名空间，默认是创建新的 UID 和 GID 映射到容器内进程。
+
+# Dockerfile 最佳实践
+
+## 一般性的指南和建议
+
+### 容器应该是短暂的
+
+通过 Dockerfile 构建的镜像所启动的容器应该尽可能短暂（生命周期短）。「短暂」意味着可以停止和销毁容器，并且创建一个新容器并部署好所需的设置和配置工作量应该是极小的。
+
+### 使用 .dockerignore 文件
+
+使用 Dockerfile 构建镜像时最好是将 Dockerfile 放置在一个新建的空目录下。然后将构建镜像所需要的文件添加到该目录中。为了提高构建镜像的效率，你可以在目录下新建一个 .dockerignore 文件来指定要忽略的文件和目录。.dockerignore 文件的排除模式语法和 Git 的 .gitignore 文件相似。
+
+### 使用多阶段构建
+
+在 Docker 17.05 以上版本中，你可以使用多阶段构建来减少所构建镜像的大小。
+
+### 避免安装不必要的包
+
+为了降低复杂性、减少依赖、减小文件大小、节约构建时间，你应该避免安装任何不必要的包。例如，不要在数据库镜像中包含一个文本编辑器。
+
+### 一个容器只运行一个进程
+
+应该保证在一个容器中只运行一个进程。将多个应用解耦到不同容器中，保证了容器的横向扩展和复用。例如 web 应用应该包含三个容器：web应用、数据库、缓存。
+
+如果容器互相依赖，你可以使用 Docker 自定义网络来把这些容器连接起来。
+
+### 镜像层数尽可能少
+
+你需要在 Dockerfile 可读性（也包括长期的可维护性）和减少层数之间做一个平衡。
+
+### 将多行参数排序
+
+将多行参数按字母顺序排序（比如要安装多个包时）。这可以帮助你避免重复包含同一个包，更新包列表时也更容易。也便于 PRs 阅读和审查。建议在反斜杠符号 `\` 之前添加一个空格，以增加可读性。
+
+下面是来自 `buildpack-deps` 镜像的例子：
+
+```dockerfile
+RUN apt-get update && apt-get install -y \
+  bzr \
+  cvs \
+  git \
+  mercurial \
+  subversion
+```
+
+### 构建缓存
+
+在镜像的构建过程中，Docker 会遍历 Dockerfile 文件中的指令，然后按顺序执行。在执行每条指令之前，Docker 都会在缓存中查找是否已经存在可重用的镜像，如果有就使用现存的镜像，不再重复创建。如果你不想在构建过程中使用缓存，你可以在 docker build 命令中使用 `--no-cache=true` 选项。
+
+但是，如果你想在构建的过程中使用缓存，你得明白什么时候会，什么时候不会找到匹配的镜像，遵循的基本规则如下：
+
+- 从一个基础镜像开始（FROM 指令指定），下一条指令将和该基础镜像的所有子镜像进行匹配，检查这些子镜像被创建时使用的指令是否和被检查的指令完全一样。如果不是，则缓存失效。
+- 在大多数情况下，只需要简单地对比 Dockerfile 中的指令和子镜像。然而，有些指令需要更多的检查和解释。
+- 对于 ADD 和 COPY 指令，镜像中对应文件的内容也会被检查，每个文件都会计算出一个校验和。文件的最后修改时间和最后访问时间不会纳入校验。在缓存的查找过程中，会将这些校验和和已存在镜像中的文件校验和进行对比。如果文件有任何改变，比如内容和元数据，则缓存失效。
+- 除了 ADD 和 COPY 指令，缓存匹配过程不会查看临时容器中的文件来决定缓存是否匹配。例如，当执行完 `RUN apt-get -y update` 指令后，容器中一些文件被更新，但 Docker 不会检查这些文件。这种情况下，只有指令字符串本身被用来匹配缓存。
+
+一旦缓存失效，所有后续的 Dockerfile 指令都将产生新的镜像，缓存不会被使用。
+
+## Dockerfile 指令
+
+下面针对 Dockerfile 中各种指令的最佳编写方式给出建议。
+
+### FROM
+
+尽可能使用当前官方仓库作为你构建镜像的基础。推荐使用 Alpine 镜像，因为它被严格控制并保持最小尺寸（目前小于 5 MB），但它仍然是一个完整的发行版。
+
+### LABEL
+
+你可以给镜像添加标签来帮助组织镜像、记录许可信息、辅助自动化构建等。每个标签一行，由 LABEL 开头加上一个或多个标签对。下面的示例展示了各种不同的可能格式。`#` 开头的行是注释内容。
+
+注意：如果你的字符串中包含空格，必须将字符串放入引号中或者对空格使用转义。如果字符串内容本身就包含引号，必须对引号使用转义。
+
+```dockerfile
+# Set one or more individual labels
+LABEL com.example.version="0.0.1-beta"
+
+LABEL vendor="ACME Incorporated"
+
+LABEL com.example.release-date="2015-02-12"
+
+LABEL com.example.version.is-production=""
+```
+
+一个镜像可以包含多个标签，但建议将多个标签放入到一个 LABEL 指令中。
+
+```dockerfile
+# Set multiple labels at once, using line-continuation characters to break long lines
+LABEL vendor=ACME\ Incorporated \
+      com.example.is-beta= \
+      com.example.is-production="" \
+      com.example.version="0.0.1-beta" \
+      com.example.release-date="2015-02-12"
+```
+
+关于标签可以接受的键值对，参考 [Understanding object labels](https://docs.docker.com/config/labels-custom-metadata/)。关于查询标签信息，参考 [Managing labels on objects](https://docs.docker.com/config/labels-custom-metadata/)。
+
+### RUN
+
+为了保持 Dockerfile 文件的可读性，可理解性，以及可维护性，建议将长的或复杂的 RUN 指令用反斜杠 `\` 分割成多行。
+
+#### apt-get
+
+RUN 指令最常见的用法是安装包用的 apt-get。因为 `RUN apt-get` 指令会安装包，所以有几个问题需要注意。
+
+不要使用 `RUN apt-get upgrade` 或 `dist-upgrade`，因为许多基础镜像中的「必须」包不会在一个非特权容器中升级。如果基础镜像中的某个包过时了，你应该联系它的维护者。如果你确定某个特定的包，比如 foo，需要升级，使用 `apt-get install -y foo` 就行，该指令会自动升级 foo 包。
+
+永远将 `RUN apt-get update` 和 `apt-get install` 组合成一条 RUN 声明，例如：
+
+```dockerfile
+RUN apt-get update && apt-get install -y \
+        package-bar \
+        package-baz \
+        package-foo
+```
+
+将 `apt-get update` 放在一条单独的 RUN 声明中会导致缓存问题以及后续的 `apt-get install` 失败。比如，假设你有一个 Dockerfile 文件：
+
+```dockerfile
+FROM ubuntu:18.04
+
+RUN apt-get update
+
+RUN apt-get install -y curl
+```
+
+构建镜像后，所有的层都在 Docker 的缓存中。假设你后来又修改了其中的 `apt-get install` 添加了一个包：
+
+```dockerfile
+FROM ubuntu:18.04
+
+RUN apt-get update
+
+RUN apt-get install -y curl nginx
+```
+
+Docker 发现修改后的 `RUN apt-get update` 指令和之前的完全一样。所以，`apt-get update` 不会执行，而是使用之前的缓存镜像。因为 `apt-get update` 没有运行，后面的 `apt-get install` 可能安装的是过时的 curl 和 nginx 版本。
+
+使用 `RUN apt-get update && apt-get install -y` 可以确保你的 Dockerfiles 每次安装的都是包的最新的版本，而且这个过程不需要进一步的编码或额外干预。这项技术叫作 `cache busting`。你也可以显示指定一个包的版本号来达到 `cache-busting`，这就是所谓的固定版本，例如：
+
+```dockerfile
+RUN apt-get update && apt-get install -y \
+    package-bar \
+    package-baz \
+    package-foo=1.3.*
+```
+
+固定版本会迫使构建过程检索特定的版本，而不管缓存中有什么。这项技术也可以减少因所需包中未预料到的变化而导致的失败。
+
+下面是一个 RUN 指令的示例模板，展示了所有关于 apt-get 的建议。
+
+```dockerfile
+RUN apt-get update && apt-get install -y \
+    aufs-tools \
+    automake \
+    build-essential \
+    curl \
+    dpkg-sig \
+    libcap-dev \
+    libsqlite3-dev \
+    mercurial \
+    reprepro \
+    ruby1.9.1 \
+    ruby1.9.1-dev \
+    s3cmd=1.1.* \
+ && rm -rf /var/lib/apt/lists/*
+```
+
+其中 s3cmd 指令指定了一个版本号 `1.1.*`。如果之前的镜像使用的是更旧的版本，指定新的版本会导致 `apt-get udpate` 缓存失效并确保安装的是新版本。
+
+另外，清理掉 apt 缓存 `var/lib/apt/lists` 可以减小镜像大小。因为 RUN 指令的开头为 `apt-get udpate`，包缓存总是会在 `apt-get install` 之前刷新。
+
+> 注意：官方的 Debian 和 Ubuntu 镜像会自动运行 `apt-get clean`，所以不需要显式的调用 `apt-get clean`。
+
+### CMD
+
+CMD 指令用于执行目标镜像中包含的软件，可以包含参数。CMD 大多数情况下都应该以 `CMD ["executable", "param1", "param2"...]` 的形式使用。因此，如果创建镜像的目的是为了部署某个服务(比如 Apache)，你可能会执行类似于 `CMD ["apache2", "-DFOREGROUND"]` 形式的命令。我们建议任何服务镜像都使用这种形式的命令。
+
+多数情况下，CMD 都需要一个交互式的 shell (bash, Python, perl 等)，例如 `CMD ["perl", "-de0"]`，或者 `CMD ["PHP", "-a"]`。使用这种形式意味着，当你执行类似 `docker run -it python` 时，你会进入一个准备好的 shell 中。CMD 应该在极少的情况下才能以 `CMD ["param", "param"]` 的形式与 ENTRYPOINT 协同使用，除非你和你的镜像使用者都对 ENTRYPOINT 的工作方式十分熟悉。
+
+### EXPOSE
+
+EXPOSE 指令用于指定容器将要监听的端口。因此，你应该为你的应用程序使用常见的端口。例如，提供 `Apache web` 服务的镜像应该使用 `EXPOSE 80`，而提供 MongoDB 服务的镜像使用 `EXPOSE 27017`。
+
+对于外部访问，用户可以在执行 `docker run` 时使用一个标志来指示如何将指定的端口映射到所选择的端口。
+
+### ENV
+
+为了方便新程序运行，你可以使用 ENV 来为容器中安装的程序更新 PATH 环境变量。例如使用 `ENV PATH /usr/local/nginx/bin:$PATH` 来确保 `CMD ["nginx"]` 能正确运行。
+
+ENV 指令也可用于为你想要容器化的服务提供必要的环境变量，比如 Postgres 需要的 PGDATA。
+
+最后，ENV 也能用于设置常见的版本号，比如下面的示例：
+
+```dockerfile
+ENV PG_MAJOR 9.3
+
+ENV PG_VERSION 9.3.4
+
+RUN curl -SL http://example.com/postgres-$PG_VERSION.tar.xz | tar -xJC /usr/src/postgress && …
+
+ENV PATH /usr/local/postgres-$PG_MAJOR/bin:$PATH
+```
+
+类似于程序中的常量，这种方法可以让你只需改变 ENV 指令来自动的改变容器中的软件版本。
+
+### ADD 和 COPY
+
+虽然 ADD 和 COPY 功能类似，但一般优先使用 COPY。因为它比 ADD 更透明。COPY 只支持简单将本地文件拷贝到容器中，而 ADD 有一些并不明显的功能（比如本地 tar 提取和远程 URL 支持）。因此，ADD 的最佳用例是将本地 tar 文件自动提取到镜像中，例如 `ADD rootfs.tar.xz`。
+
+如果你的 Dockerfile 有多个步骤需要使用上下文中不同的文件。单独 COPY 每个文件，而不是一次性的 COPY 所有文件，这将保证每个步骤的构建缓存只在特定的文件变化时失效。例如：
+
+```dockerfile
+COPY requirements.txt /tmp/
+
+RUN pip install --requirement /tmp/requirements.txt
+
+COPY . /tmp/
+```
+
+如果将 `COPY . /tmp/` 放置在 RUN 指令之前，只要 `.` 目录中任何一个文件变化，都会导致后续指令的缓存失效。
+
+为了让镜像尽量小，最好不要使用 ADD 指令从远程 URL 获取包，而是使用 curl 和 wget。这样你可以在文件提取完之后删掉不再需要的文件来避免在镜像中额外添加一层。比如尽量避免下面的用法：
+
+```dockerfile
+ADD http://example.com/big.tar.xz /usr/src/things/
+
+RUN tar -xJf /usr/src/things/big.tar.xz -C /usr/src/things
+
+RUN make -C /usr/src/things all
+```
+
+而是应该使用下面这种方法：
+
+```dockerfile
+RUN mkdir -p /usr/src/things \
+    && curl -SL http://example.com/big.tar.xz \
+    | tar -xJC /usr/src/things \
+    && make -C /usr/src/things all
+```
+
+上面使用的管道操作，所以没有中间文件需要删除。
+
+对于其他不需要 ADD 的自动提取功能的文件或目录，你应该使用 COPY。
+
+### ENTRYPOINT
+
+ENTRYPOINT 的最佳用处是设置镜像的主命令，允许将镜像当成命令本身来运行（用 CMD 提供默认选项）。
+
+例如，下面的示例镜像提供了命令行工具 s3cmd:
+
+```dockerfile
+ENTRYPOINT ["s3cmd"]
+
+CMD ["--help"]
+```
+
+现在直接运行该镜像创建的容器会显示命令帮助：
+
+```bash
+$ docker run s3cmd
+```
+
+或者提供正确的参数来执行某个命令：
+
+```bash
+$ docker run s3cmd ls s3://mybucket
+```
+
+这样镜像名可以当成命令行的参考。
+
+ENTRYPOINT 指令也可以结合一个辅助脚本使用，和前面命令行风格类似，即使启动工具需要不止一个步骤。
+
+例如，Postgres 官方镜像使用下面的脚本作为 ENTRYPOINT：
+
+```bash
+#!/bin/bash
+set -e
+
+if [ "$1" = 'postgres' ]; then
+    chown -R postgres "$PGDATA"
+
+    if [ -z "$(ls -A "$PGDATA")" ]; then
+        gosu postgres initdb
+    fi
+
+    exec gosu postgres "$@"
+fi
+
+exec "$@"
+```
+
+> 注意：该脚本使用了 Bash 的内置命令 exec，所以最后运行的进程就是容器的 PID 为 1 的进程。这样，进程就可以接收到任何发送给容器的 Unix 信号了。
+
+该辅助脚本被拷贝到容器，并在容器启动时通过 ENTRYPOINT 执行：
+
+```dockerfile
+COPY ./docker-entrypoint.sh /
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+```
+
+该脚本可以让用户用几种不同的方式和 Postgres 交互。
+
+你可以很简单地启动 Postgres：
+
+```bash
+$ docker run postgres
+```
+
+也可以执行 Postgres 并传递参数：
+
+```bash
+$ docker run postgres postgres --help
+```
+
+最后，你还可以启动另外一个完全不同的工具，比如 Bash：
+
+```bash
+$ docker run --rm -it postgres bash
+```
+
+### VOLUME
+
+VOLUME 指令用于暴露任何数据库存储文件，配置文件，或容器创建的文件和目录。强烈建议使用 VOLUME 来管理镜像中的可变部分和用户可以改变的部分。
+
+### USER
+
+如果某个服务不需要特权执行，建议使用 USER 指令切换到非 root 用户。先在 Dockerfile 中使用类似 `RUN groupadd -r postgres && useradd -r -g postgres postgres` 的指令创建用户和用户组。
+
+> 注意：在镜像中，用户和用户组每次被分配的 `UID/GID` 都是不确定的，下次重新构建镜像时被分配到的 `UID/GID` 可能会不一样。如果要依赖确定的 `UID/GID`，你应该显式的指定一个 `UID/GID`。
+
+你应该避免使用 sudo，因为它不可预期的 TTY 和信号转发行为可能造成的问题比它能解决的问题还多。如果你真的需要和 sudo 类似的功能（例如，以 root 权限初始化某个守护进程，以非 root 权限执行它），你可以使用 [gosu](https://github.com/tianon/gosu)。
+
+最后，为了减少层数和复杂度，避免频繁地使用 USER 来回切换用户。
+
+### WORKDIR
+
+为了清晰性和可靠性，你应该总是在 WORKDIR 中使用绝对路径。另外，你应该使用 WORKDIR 来替代类似于 `RUN cd ... && do-something` 的指令，后者难以阅读、排错和维护。
+
+## 官方镜像示例
+
+这些官方镜像的 Dockerfile 都是参考典范：https://github.com/docker-library/docs
+
+# 如何调试 Docker
+
+## 开启 Debug 模式
+
+在 dockerd 配置文件 `daemon.json`（默认位于 `/etc/docker/`）中添加
+
+```json
+{
+  "debug": true
+}
+```
+
+重启守护进程。
+
+```bash
+$ sudo kill -SIGHUP $(pidof dockerd)
+```
+
+此时 dockerd 会在日志中输入更多信息供分析。
+
+## 检查内核日志
+
+```bash
+$ sudo dmesg | grep dockerd
+$ sudo dmesg | grep runc
+```
+
+## Docker 不响应时处理
+
+可以杀死 dockerd 进程查看其堆栈调用情况。
+
+```bash
+$ sudo kill -SIGUSR1 $(pidof dockerd)
+```
+
+## 重置 Docker 本地数据
+
+注意，本操作会移除所有的 Docker 本地数据，包括镜像和容器等。
+
+```bash
+$ sudo rm -rf /var/lib/docker
+```
+
+// TODO https://vuepress.mirror.docker-practice.com/compose/usage/
