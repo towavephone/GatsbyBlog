@@ -3773,7 +3773,7 @@ Docker 命令有两大类，客户端命令和服务端命令。前者是主要�
 - pause：暂停一个容器中的所有进程；
 - port：查找一个 nat 到一个私有网口的公共口；
 - ps：列出主机上的容器；
-- pull：从一个Docker的仓库服务器下拉一个镜像或仓库；
+- pull：从一个 Docker 的仓库服务器下拉一个镜像或仓库；
 - push：将一个镜像或者仓库推送到一个 Docker 的注册服务器；
 - rename：重命名一个容器；
 - restart：重启一个运行中的容器；
@@ -3803,7 +3803,7 @@ Docker 命令有两大类，客户端命令和服务端命令。前者是主要�
 
 ### dockerd 命令选项
 
-- `--api-cors-header=""`：CORS 头部域，默认不允许 CORS，要允许任意的跨域访问，可以指定为 "*"；
+- `--api-cors-header=""`：CORS 头部域，默认不允许 CORS，要允许任意的跨域访问，可以指定为 "\*"；
 - `--authorization-plugin=""`：载入认证的插件；
 - `-b=""`：将容器挂载到一个已存在的网桥上。指定为 none 时则禁用容器的网络，与 `--bip` 选项互斥；
 - `--bip=""`：让动态创建的 docker0 网桥采用给定的 CIDR 地址; 与 `-b` 选项互斥；
@@ -3876,7 +3876,7 @@ Docker 命令有两大类，客户端命令和服务端命令。前者是主要�
 
 ### 一个容器只运行一个进程
 
-应该保证在一个容器中只运行一个进程。将多个应用解耦到不同容器中，保证了容器的横向扩展和复用。例如 web 应用应该包含三个容器：web应用、数据库、缓存。
+应该保证在一个容器中只运行一个进程。将多个应用解耦到不同容器中，保证了容器的横向扩展和复用。例如 web 应用应该包含三个容器：web 应用、数据库、缓存。
 
 如果容器互相依赖，你可以使用 Docker 自定义网络来把这些容器连接起来。
 
@@ -4240,4 +4240,1894 @@ $ sudo kill -SIGUSR1 $(pidof dockerd)
 $ sudo rm -rf /var/lib/docker
 ```
 
-// TODO https://vuepress.mirror.docker-practice.com/compose/usage/
+# Compose
+
+Compose 项目是 Docker 官方的开源项目，负责实现对 Docker 容器集群的快速编排。从功能上看，跟 OpenStack 中的 Heat 十分类似。
+
+其代码目前在 https://github.com/docker/compose 上开源。
+
+Compose 定位是「定义和运行多个 Docker 容器的应用（Defining and running multi-container Docker applications）」，其前身是开源项目 Fig。
+
+通过第一部分中的介绍，我们知道使用一个 Dockerfile 模板文件，可以让用户很方便的定义一个单独的应用容器。然而，在日常工作中，经常会碰到需要多个容器相互配合来完成某项任务的情况。例如要实现一个 Web 项目，除了 Web 服务容器本身，往往还需要再加上后端的数据库服务容器，甚至还包括负载均衡容器等。
+
+Compose 恰好满足了这样的需求。它允许用户通过一个单独的 `docker-compose.yml` 模板文件（YAML 格式）来定义一组相关联的应用容器为一个项目（project）。
+
+Compose 中有两个重要的概念：
+
+- 服务 (service)：一个应用的容器，实际上可以包括若干运行相同镜像的容器实例。
+- 项目 (project)：由一组关联的应用容器组成的一个完整业务单元，在 `docker-compose.yml` 文件中定义。
+
+Compose 的默认管理对象是项目，通过子命令对项目中的一组容器进行便捷地生命周期管理。
+
+Compose 项目由 Python 编写，实现上调用了 Docker 服务提供的 API 来对容器进行管理。因此，只要所操作的平台支持 Docker API，就可以在其上利用 Compose 来进行编排管理。
+
+## 使用
+
+### 术语
+
+首先介绍几个术语。
+
+- 服务(service)：一个应用容器，实际上可以运行多个相同镜像的实例。
+- 项目(project)：由一组关联的应用容器组成的一个完整业务单元。
+
+可见，一个项目可以由多个服务（容器）关联而成，Compose 面向项目进行管理。
+
+### 场景
+
+最常见的项目是 web 网站，该项目应该包含 web 应用和缓存。
+
+下面我们用 Python 来建立一个能够记录页面访问次数的 web 网站。
+
+#### web 应用
+
+新建文件夹，在该目录中编写 app.py 文件
+
+```py
+from flask import Flask
+from redis import Redis
+
+app = Flask(__name__)
+redis = Redis(host='redis', port=6379)
+
+@app.route('/')
+def hello():
+    count = redis.incr('hits')
+    return 'Hello World! 该页面已被访问 {} 次。\n'.format(count)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)
+```
+
+#### Dockerfile
+
+编写 Dockerfile 文件，内容为
+
+```dockerfile
+FROM python:3.6-alpine
+ADD . /code
+WORKDIR /code
+RUN pip install redis flask
+CMD ["python", "app.py"]
+```
+
+#### docker-compose.yml
+
+编写 `docker-compose.yml` 文件，这个是 Compose 使用的主模板文件。
+
+```yml
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - '5000:5000'
+
+  redis:
+    image: 'redis:alpine'
+```
+
+#### 运行 compose 项目
+
+```bash
+$ docker compose up
+```
+
+此时访问本地 5000 端口，每次刷新页面，计数就会加 1。
+
+## Compose 命令说明
+
+### 命令对象与格式
+
+对于 Compose 来说，大部分命令的对象既可以是项目本身，也可以指定为项目中的服务或者容器。如果没有特别的说明，命令对象将是项目，这意味着项目中所有的服务都会受到命令影响。
+
+执行 `docker compose [COMMAND] --help` 可以查看具体某个命令的使用格式。
+
+docker compose 命令的基本的使用格式是
+
+```bash
+docker compose [-f=<arg>...] [options] [COMMAND] [ARGS...]
+```
+
+### 命令选项
+
+- `-f, --file FILE` 指定使用的 Compose 模板文件，默认为 `docker-compose.yml`，可以多次指定。
+- `-p, --project-name NAME` 指定项目名称，默认将使用所在目录名称作为项目名。
+- `--verbose` 输出更多调试信息。
+- `-v, --version` 打印版本并退出。
+
+### 命令使用说明
+
+#### build
+
+格式为 `docker compose build [options] [SERVICE...]`。
+
+构建（重新构建）项目中的服务容器。
+
+服务容器一旦构建后，将会带上一个标记名，例如对于 web 项目中的一个 db 容器，可能是 `web_db`。
+
+可以随时在项目目录下运行 `docker compose build` 来重新构建服务。
+
+选项包括：
+
+- `--force-rm` 删除构建过程中的临时容器。
+- `--no-cache` 构建镜像过程中不使用 cache（这将加长构建过程）。
+- `--pull` 始终尝试通过 pull 来获取更新版本的镜像。
+
+#### config
+
+验证 Compose 文件格式是否正确，若正确则显示配置，若格式错误显示错误原因。
+
+#### down
+
+此命令将会停止 up 命令所启动的容器，并移除网络
+
+#### exec
+
+进入指定的容器。
+
+#### help
+
+获得一个命令的帮助。
+
+#### images
+
+列出 Compose 文件中包含的镜像。
+
+#### kill
+
+格式为 `docker compose kill [options] [SERVICE...]`。
+
+通过发送 SIGKILL 信号来强制停止服务容器。
+
+支持通过 `-s` 参数来指定发送的信号，例如通过如下指令发送 SIGINT 信号。
+
+```bash
+$ docker compose kill -s SIGINT
+```
+
+#### logs
+
+格式为 `docker compose logs [options] [SERVICE...]`。
+
+查看服务容器的输出。默认情况下，`docker compose` 将对不同的服务输出使用不同的颜色来区分。可以通过 `--no-color` 来关闭颜色。
+
+该命令在调试问题的时候十分有用。
+
+#### pause
+
+格式为 `docker compose pause [SERVICE...]`。
+
+暂停一个服务容器。
+
+#### port
+
+格式为 `docker compose port [options] SERVICE PRIVATE_PORT`。
+
+打印某个容器端口所映射的公共端口。
+
+选项：
+
+- `--protocol=proto` 指定端口协议，tcp（默认值）或者 udp。
+- `--index=index` 如果同一服务存在多个容器，指定命令对象容器的序号（默认为 1）。
+
+#### ps
+
+格式为 `docker compose ps [options] [SERVICE...]`。
+
+列出项目中目前的所有容器。
+
+选项：
+
+- `-q` 只打印容器的 ID 信息。
+
+#### pull
+
+格式为 `docker compose pull [options] [SERVICE...]`。
+
+拉取服务依赖的镜像。
+
+选项：
+
+- `--ignore-pull-failures` 忽略拉取镜像过程中的错误。
+
+#### push
+
+推送服务依赖的镜像到 Docker 镜像仓库。
+
+#### restart
+
+格式为 `docker compose restart [options] [SERVICE...]`。
+
+重启项目中的服务。
+
+选项：
+
+- `-t, --timeout TIMEOUT` 指定重启前停止容器的超时（默认为 10 秒）。
+
+#### rm
+
+格式为 `docker compose rm [options] [SERVICE...]`。
+
+删除所有（停止状态的）服务容器。推荐先执行 `docker compose stop` 命令来停止容器。
+
+选项：
+
+- `-f, --force` 强制直接删除，包括非停止状态的容器。一般尽量不要使用该选项。
+- `-v` 删除容器所挂载的数据卷。
+
+#### run
+
+格式为 `docker compose run [options] [-p PORT...] [-e KEY=VAL...] SERVICE [COMMAND] [ARGS...]`。
+
+在指定服务上执行一个命令。
+
+例如：
+
+```bash
+$ docker compose run ubuntu ping docker.com
+```
+
+将会启动一个 ubuntu 服务容器，并执行 `ping docker.com` 命令。
+
+默认情况下，如果存在关联，则所有关联的服务将会自动被启动，除非这些服务已经在运行中。
+
+该命令类似启动容器后运行指定的命令，相关卷、链接等等都将会按照配置自动创建。
+
+两个不同点：
+
+1. 给定命令将会覆盖原有的自动运行命令；
+2. 不会自动创建端口，以避免冲突。
+
+如果不希望自动启动关联的容器，可以使用 `--no-deps` 选项，例如
+
+```bash
+$ docker compose run --no-deps web python manage.py shell
+```
+
+将不会启动 web 容器所关联的其它容器。
+
+选项：
+
+- `-d` 后台运行容器。
+- `--name NAME` 为容器指定一个名字。
+- `--entrypoint CMD` 覆盖默认的容器启动指令。
+- `-e KEY=VAL` 设置环境变量值，可多次使用选项来设置多个环境变量。
+- `-u, --user=""` 指定运行容器的用户名或者 uid。
+- `--no-deps` 不自动启动关联的服务容器。
+- `--rm` 运行命令后自动删除容器，`d` 模式下将忽略。
+- `-p, --publish=[]` 映射容器端口到本地主机。
+- `--service-ports` 配置服务端口并映射到本地主机。
+- `-T` 不分配伪 tty，意味着依赖 tty 的指令将无法运行。
+
+#### start
+
+格式为 `docker compose start [SERVICE...]`。
+
+启动已经存在的服务容器。
+
+#### stop
+
+格式为 `docker compose stop [options] [SERVICE...]`。
+
+停止已经处于运行状态的容器，但不删除它。通过 `docker compose start` 可以再次启动这些容器。
+
+选项：
+
+- `-t, --timeout TIMEOUT` 停止容器时候的超时（默认为 10 秒）。
+
+#### top
+
+查看各个服务容器内运行的进程。
+
+#### unpause
+
+格式为 `docker compose unpause [SERVICE...]`。
+
+恢复处于暂停状态中的服务。
+
+#### up
+
+格式为 `docker compose up [options] [SERVICE...]`。
+
+该命令十分强大，它将尝试自动完成包括构建镜像，（重新）创建服务，启动服务，并关联服务相关容器的一系列操作。
+
+链接的服务都将会被自动启动，除非已经处于运行状态。
+
+可以说，大部分时候都可以直接通过该命令来启动一个项目。
+
+默认情况，`docker compose up` 启动的容器都在前台，控制台将会同时打印所有容器的输出信息，可以很方便进行调试。
+
+当通过 `Ctrl-C` 停止命令时，所有容器将会停止。
+
+如果使用 `docker compose up -d`，将会在后台启动并运行所有的容器。一般推荐生产环境下使用该选项。
+
+默认情况，如果服务容器已经存在，`docker compose up` 将会尝试停止容器，然后重新创建（保持使用 `volumes-from` 挂载的卷），以保证新启动的服务匹配 `docker-compose.yml` 文件的最新内容。如果用户不希望容器被停止并重新创建，可以使用 `docker compose up --no-recreate`。这样将只会启动处于停止状态的容器，而忽略已经运行的服务。如果用户只想重新部署某个服务，可以使用 `docker compose up --no-deps -d <SERVICE_NAME>` 来重新创建服务并后台停止旧服务，启动新服务，并不会影响到其所依赖的服务。
+
+选项：
+
+- `-d` 在后台运行服务容器。
+- `--no-color` 不使用颜色来区分不同的服务的控制台输出。
+- `--no-deps` 不启动服务所链接的容器。
+- `--force-recreate` 强制重新创建容器，不能与 `--no-recreate` 同时使用。
+- `--no-recreate` 如果容器已经存在了，则不重新创建，不能与 `--force-recreate` 同时使用。
+- `--no-build` 不自动构建缺失的服务镜像。
+- `-t, --timeout TIMEOUT` 停止容器时候的超时（默认为 10 秒）。
+
+#### version
+
+格式为 `docker compose version`。
+
+打印版本信息。
+
+## Compose 模板文件
+
+模板文件是使用 Compose 的核心，涉及到的指令关键字也比较多。但大家不用担心，这里面大部分指令跟 docker run 相关参数的含义都是类似的。
+
+默认的模板文件名称为 `docker-compose.yml`，格式为 YAML 格式。
+
+```yml
+version: '3'
+
+services:
+  webapp:
+    image: examples/web
+    ports:
+      - '80:80'
+    volumes:
+      - '/data'
+```
+
+注意每个服务都必须通过 image 指令指定镜像或 build 指令（需要 Dockerfile）等来自动构建生成镜像。
+
+如果使用 build 指令，在 Dockerfile 中设置的选项(例如：CMD, EXPOSE, VOLUME, ENV 等) 将会自动被获取，无需在 `docker-compose.yml` 中重复设置。
+
+下面分别介绍各个指令的用法。
+
+### build
+
+指定 Dockerfile 所在文件夹的路径（可以是绝对路径，或者相对 `docker-compose.yml` 文件的路径）。Compose 将会利用它自动构建这个镜像，然后使用这个镜像。
+
+```yml
+version: '3'
+services:
+  webapp:
+    build: ./dir
+```
+
+你也可以使用 context 指令指定 Dockerfile 所在文件夹的路径。
+
+使用 dockerfile 指令指定 Dockerfile 文件名。
+
+使用 arg 指令指定构建镜像时的变量。
+
+```yml
+version: '3'
+services:
+  webapp:
+    build:
+      context: ./dir
+      dockerfile: Dockerfile-alternate
+      args:
+        buildno: 1
+```
+
+使用 `cache_from` 指定构建镜像的缓存
+
+```yml
+build:
+  context: .
+  cache_from:
+    - alpine:latest
+    - corp/web_app:3.14
+```
+
+### `cap_add`, `cap_drop`
+
+指定容器的内核能力（capacity）分配。
+
+例如，让容器拥有所有能力可以指定为：
+
+```yml
+cap_add:
+  - ALL
+```
+
+去掉 `NET_ADMIN` 能力可以指定为：
+
+```yml
+cap_drop:
+  - NET_ADMIN
+```
+
+### command
+
+覆盖容器启动后默认执行的命令。
+
+```yml
+command: echo "hello world"
+```
+
+### configs
+
+仅用于 Swarm mode，详细内容请查看 Swarm mode 一节。
+
+### cgroup_parent
+
+指定父 cgroup 组，意味着将继承该组的资源限制。
+
+例如，创建了一个 cgroup 组名称为 `cgroups_1`。
+
+```yml
+cgroup_parent: cgroups_1
+```
+
+### container_name
+
+指定容器名称。默认将会使用 `项目名称-服务名称-序号` 这样的格式。
+
+```yml
+container_name: docker-web-container
+```
+
+> 注意: 指定容器名称后，该服务将无法进行扩展（scale），因为 Docker 不允许多个容器具有相同的名称。
+
+### deploy
+
+仅用于 Swarm mode，详细内容请查看 Swarm mode 一节
+
+### devices
+
+指定设备映射关系。
+
+```yml
+devices:
+  - '/dev/ttyUSB1:/dev/ttyUSB0'
+```
+
+### depends_on
+
+解决容器的依赖、启动先后的问题。以下例子中会先启动 `redis db` 再启动 web
+
+```yml
+version: '3'
+
+services:
+  web:
+    build: .
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis
+
+  db:
+    image: postgres
+```
+
+> 注意：web 服务不会等待 `redis db`「完全启动」之后才启动。
+
+### dns
+
+自定义 DNS 服务器。可以是一个值，也可以是一个列表。
+
+```yml
+dns: 8.8.8.8
+
+dns:
+  - 8.8.8.8
+  - 114.114.114.114
+```
+
+### dns_search
+
+配置 DNS 搜索域。可以是一个值，也可以是一个列表。
+
+```yml
+dns_search: example.com
+
+dns_search:
+  - domain1.example.com
+  - domain2.example.com
+```
+
+### tmpfs
+
+挂载一个 tmpfs 文件系统到容器。
+
+```yml
+tmpfs: /run
+tmpfs:
+  - /run
+  - /tmp
+```
+
+### env_file
+
+从文件中获取环境变量，可以为单独的文件路径或列表。
+
+如果通过 `docker compose -f FILE` 方式来指定 Compose 模板文件，则 `env_file` 中变量的路径会基于模板文件路径。
+
+如果有变量名称与 environment 指令冲突，则按照惯例，以后者为准。
+
+```yml
+env_file: .env
+
+env_file:
+  - ./common.env
+  - ./apps/web.env
+  - /opt/secrets.env
+```
+
+环境变量文件中每一行必须符合格式，支持 # 开头的注释行。
+
+```bash
+# common.env: Set development environment
+PROG_ENV=development
+```
+
+### environment
+
+设置环境变量。你可以使用数组或字典两种格式。
+
+只给定名称的变量会自动获取运行 Compose 主机上对应变量的值，可以用来防止泄露不必要的数据。
+
+```yml
+environment:
+  RACK_ENV: development
+  SESSION_SECRET:
+
+environment:
+  - RACK_ENV=development
+  - SESSION_SECRET
+```
+
+如果变量名称或者值中用到 `true|false`，`yes|no` 等表达布尔含义的词汇，最好放到引号里，避免 YAML 自动解析某些内容为对应的布尔语义。这些特定词汇，包括
+
+```bash
+y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF
+```
+
+### expose
+
+暴露端口，但不映射到宿主机，只被连接的服务访问。
+
+仅可以指定内部端口为参数
+
+```yml
+expose:
+  - '3000'
+  - '8000'
+```
+
+### external_links
+
+注意：不建议使用该指令。
+
+链接到 `docker-compose.yml` 外部的容器，甚至并非 Compose 管理的外部容器。
+
+```yml
+external_links:
+  - redis_1
+  - project_db_1:mysql
+  - project_db_1:postgresql
+```
+
+### extra_hosts
+
+类似 Docker 中的 `--add-host` 参数，指定额外的 host 名称映射信息。
+
+```yml
+extra_hosts:
+  - 'googledns:8.8.8.8'
+  - 'dockerhub:52.1.157.61'
+```
+
+会在启动后的服务容器中 `/etc/hosts` 文件中添加如下两条条目。
+
+```bash
+8.8.8.8 googledns
+52.1.157.61 dockerhub
+```
+
+### healthcheck
+
+通过命令检查容器是否健康运行。
+
+```yml
+healthcheck:
+  test: ['CMD', 'curl', '-f', 'http://localhost']
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+```
+
+### image
+
+指定为镜像名称或镜像 ID。如果镜像在本地不存在，Compose 将会尝试拉取这个镜像。
+
+```yml
+image: ubuntu
+image: orchardup/postgresql
+image: a4bc65fd
+```
+
+### labels
+
+为容器添加 Docker 元数据（metadata）信息。例如可以为容器添加辅助说明信息。
+
+```yml
+labels:
+  com.startupteam.description: 'webapp for a startup team'
+  com.startupteam.department: 'devops department'
+  com.startupteam.release: 'rc3 for v1.0'
+```
+
+### links
+
+注意：不推荐使用该指令。
+
+### logging
+
+配置日志选项。
+
+```yml
+logging:
+  driver: syslog
+  options:
+    syslog-address: 'tcp://192.168.0.42:123'
+```
+
+目前支持三种日志驱动类型。
+
+```yml
+driver: "json-file"
+driver: "syslog"
+driver: "none"
+```
+
+options 配置日志驱动的相关参数。
+
+```yml
+options:
+  max-size: '200k'
+  max-file: '10'
+```
+
+### network_mode
+
+设置网络模式。使用和 docker run 的 `--network` 参数一样的值。
+
+```yml
+network_mode: "bridge"
+network_mode: "host"
+network_mode: "none"
+network_mode: "service:[service name]"
+network_mode: "container:[container name/id]"
+```
+
+### networks
+
+配置容器连接的网络。
+
+```yml
+version: '3'
+services:
+  some-service:
+    networks:
+      - some-network
+      - other-network
+
+networks:
+  some-network:
+  other-network:
+```
+
+### pid
+
+跟主机系统共享进程命名空间。打开该选项的容器之间，以及容器和宿主机系统之间可以通过进程 ID 来相互访问和操作。
+
+```yml
+pid: 'host'
+```
+
+### ports
+
+暴露端口信息。
+
+使用宿主端口：容器端口（HOST:CONTAINER）格式，或者仅仅指定容器的端口（宿主将会随机选择端口）都可以。
+
+```yml
+ports:
+  - '3000'
+  - '8000:8000'
+  - '49100:22'
+  - '127.0.0.1:8001:8001'
+```
+
+> 注意：当使用 `HOST:CONTAINER` 格式来映射端口时，如果你使用的容器端口小于 60 并且没放到引号里，可能会得到错误结果，因为 YAML 会自动解析 `xx:yy` 这种数字格式为 60 进制。为避免出现这种问题，建议数字串都采用引号包括起来的字符串格式。
+
+### secrets
+
+存储敏感数据，例如 mysql 服务密码。
+
+```yml
+version: '3.1'
+services:
+
+mysql:
+  image: mysql
+  environment:
+    MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+  secrets:
+    - db_root_password
+    - my_other_secret
+
+secrets:
+  my_secret:
+    file: ./my_secret.txt
+  my_other_secret:
+    external: true
+```
+
+### security_opt
+
+指定容器模板标签（label）机制的默认属性（用户、角色、类型、级别等）。例如配置标签的用户名和角色名。
+
+```yml
+security_opt:
+  - label:user:USER
+  - label:role:ROLE
+```
+
+### stop_signal
+
+设置另一个信号来停止容器。在默认情况下使用的是 SIGTERM 停止容器。
+
+```yml
+stop_signal: SIGUSR1
+```
+
+### sysctls
+
+配置容器内核参数。
+
+```yml
+sysctls:
+  net.core.somaxconn: 1024
+  net.ipv4.tcp_syncookies: 0
+
+sysctls:
+  - net.core.somaxconn=1024
+  - net.ipv4.tcp_syncookies=0
+```
+
+### ulimits
+
+指定容器的 ulimits 限制值。
+
+例如，指定最大进程数为 65535，指定文件句柄数为 20000（软限制，应用可以随时修改，不能超过硬限制）和 40000（系统硬限制，只能 root 用户提高）。
+
+```yml
+ulimits:
+  nproc: 65535
+  nofile:
+    soft: 20000
+    hard: 40000
+```
+
+### volumes
+
+数据卷所挂载路径设置。可以设置为宿主机路径（HOST:CONTAINER）或者数据卷名称（VOLUME:CONTAINER），并且可以设置访问模式（HOST:CONTAINER:ro）。
+
+该指令中路径支持相对路径。
+
+```yml
+volumes:
+  - /var/lib/mysql
+  - cache/:/tmp/cache
+  - ~/configs:/etc/configs/:ro
+```
+
+如果路径为数据卷名称，必须在文件中配置数据卷。
+
+```yml
+version: '3'
+
+services:
+  my_src:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+```
+
+### 其它指令
+
+此外，还有包括 domainname, entrypoint, hostname, ipc, `mac_address`, privileged, `read_only`, `shm_size`, restart, `stdin_open`, tty, user, `working_dir` 等指令，基本跟 docker run 中对应参数的功能一致。
+
+指定服务容器启动后执行的入口文件。
+
+```yml
+entrypoint: /code/entrypoint.sh
+```
+
+指定容器中运行应用的用户名。
+
+```yml
+user: nginx
+```
+
+指定容器中工作目录。
+
+```yml
+working_dir: /code
+```
+
+指定容器中搜索域名、主机名、mac 地址等。
+
+```yml
+domainname: your_website.com
+hostname: test
+mac_address: 08-00-27-00-0C-0A
+```
+
+允许容器中运行一些特权命令。
+
+```yml
+privileged: true
+```
+
+指定容器退出后的重启策略为始终重启。该命令对保持服务始终运行十分有效，在生产环境中推荐配置为 always 或者 `unless-stopped`。
+
+```yml
+restart: always
+```
+
+以只读模式挂载容器的 root 文件系统，意味着不能对容器内容进行修改。
+
+```yml
+read_only: true
+```
+
+打开标准输入，可以接受外部输入。
+
+```yml
+stdin_open: true
+```
+
+模拟一个伪终端。
+
+```yml
+tty: true
+```
+
+### 读取变量
+
+Compose 模板文件支持动态读取主机的系统环境变量和当前目录下的 `.env` 文件中的变量。
+
+例如，下面的 Compose 文件将从运行它的环境中读取变量 `${MONGO_VERSION}` 的值，并写入执行的指令中。
+
+```yml
+version: '3'
+services:
+
+db:
+  image: 'mongo:${MONGO_VERSION}'
+```
+
+如果执行 `MONGO_VERSION=3.2 docker compose up` 则会启动一个 `mongo:3.2` 镜像的容器；如果执行 `MONGO_VERSION=2.8 docker compose up` 则会启动一个 `mongo:2.8` 镜像的容器。
+
+若当前目录存在 `.env` 文件，执行 `docker compose` 命令时将从该文件中读取变量。
+
+在当前目录新建 `.env` 文件并写入以下内容。
+
+```bash
+# 支持 # 号注释
+MONGO_VERSION=3.6
+```
+
+执行 `docker compose up` 则会启动一个 `mongo:3.6` 镜像的容器。
+
+## 使用 Django
+
+我们现在将使用 Docker Compose 配置并运行一个 `Django/PostgreSQL` 应用。
+
+在一切工作开始前，需要先编辑好三个必要的文件。
+
+第一步，因为应用将要运行在一个满足所有环境依赖的 Docker 容器里面，那么我们可以通过编辑 Dockerfile 文件来指定 Docker 容器要安装内容。内容如下：
+
+```dockerfile
+FROM python:3
+ENV PYTHONUNBUFFERED 1
+RUN mkdir /code
+WORKDIR /code
+COPY requirements.txt /code/
+RUN pip install -r requirements.txt
+COPY . /code/
+```
+
+以上内容指定应用将使用安装了 Python 以及必要依赖包的镜像。更多关于如何编写 Dockerfile 文件的信息可以查看 Dockerfile 使用。
+
+第二步，在 `requirements.txt` 文件里面写明需要安装的具体依赖包名。
+
+```
+Django>=2.0,<3.0
+psycopg2>=2.7,<3.0
+```
+
+第三步，`docker-compose.yml` 文件将把所有的东西关联起来。它描述了应用的构成（一个 web 服务和一个数据库）、使用的 Docker 镜像、镜像之间的连接、挂载到容器的卷，以及服务开放的端口。
+
+```yml
+version: '3'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 'postgres'
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - '8000:8000'
+```
+
+查看 `docker-compose.yml` 章节 了解更多详细的工作机制。
+
+现在我们就可以使用 `docker compose run` 命令启动一个 Django 应用了。
+
+```bash
+$ docker compose run web django-admin startproject django_example .
+```
+
+由于 web 服务所使用的镜像并不存在，所以 Compose 会首先使用 Dockerfile 为 web 服务构建一个镜像，接着使用这个镜像在容器里运行 `django-admin startproject django_example` 指令。
+
+这将在当前目录生成一个 Django 应用。
+
+```bash
+$ ls
+Dockerfile       docker-compose.yml          django_example       manage.py       requirements.txt
+```
+
+如果你的系统是 Linux，记得更改文件权限。
+
+```bash
+$ sudo chown -R $USER:$USER .
+```
+
+首先，我们要为应用设置好数据库的连接信息。用以下内容替换 `django_example/settings.py` 文件中 `DATABASES = ...` 定义的节点内容。
+
+```py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
+        'PASSWORD': 'postgres',
+    }
+}
+```
+
+这些信息是在 postgres 镜像固定设置好的。然后，运行 `docker compose up`：
+
+```bash
+$ docker compose up
+
+django_db_1 is up-to-date
+Creating django_web_1 ...
+Creating django_web_1 ... done
+Attaching to django_db_1, django_web_1
+db_1   | The files belonging to this database system will be owned by user "postgres".
+db_1   | This user must also own the server process.
+db_1   |
+db_1   | The database cluster will be initialized with locale "en_US.utf8".
+db_1   | The default database encoding has accordingly been set to "UTF8".
+db_1   | The default text search configuration will be set to "english".
+
+web_1  | Performing system checks...
+web_1  |
+web_1  | System check identified no issues (0 silenced).
+web_1  |
+web_1  | November 23, 2017 - 06:21:19
+web_1  | Django version 1.11.7, using settings 'django_example.settings'
+web_1  | Starting development server at http://0.0.0.0:8000/
+web_1  | Quit the server with CONTROL-C.
+```
+
+这个 Django 应用已经开始在你的 Docker 守护进程里监听着 8000 端口了。打开 `127.0.0.1:8000` 即可看到 Django 欢迎页面。
+
+你还可以在 Docker 上运行其它的管理命令，例如对于同步数据库结构这种事，在运行完 `docker compose up` 后，在另外一个终端进入文件夹运行以下命令即可：
+
+```bash
+$ docker compose run web python manage.py syncdb
+```
+
+## 使用 WordPress
+
+Compose 可以很便捷的让 Wordpress 运行在一个独立的环境中。
+
+### 创建空文件夹
+
+假设新建一个名为 wordpress 的文件夹，然后进入这个文件夹。
+
+### 创建 docker-compose.yml 文件
+
+`docker-compose.yml` 文件将开启一个 wordpress 服务和一个独立的 MySQL 实例：
+
+```yml
+version: '3'
+services:
+  db:
+    image: mysql:8.0
+    command:
+      - --default_authentication_plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    ports:
+      - '8000:80'
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+volumes:
+  db_data:
+```
+
+### 构建并运行项目
+
+运行 `docker compose up -d Compose` 就会拉取镜像再创建我们所需要的镜像，然后启动 wordpress 和数据库容器。接着浏览器访问 `127.0.0.1:8000` 端口就能看到 WordPress 安装界面了。
+
+# Kubernetes
+
+Kubernetes 是 Google 团队发起并维护的基于 Docker 的开源容器集群管理系统，它不仅支持常见的云平台，而且支持内部数据中心。
+
+建于 Docker 之上的 Kubernetes 可以构建一个容器的调度服务，其目的是让用户透过 Kubernetes 集群来进行云端容器集群的管理，而无需用户进行复杂的设置工作。系统会自动选取合适的工作节点来执行具体的容器集群调度处理工作。其核心概念是 Container Pod。一个 Pod 由一组工作于同一物理工作节点的容器构成。这些组容器拥有相同的网络命名空间、IP 以及存储配额，也可以根据实际情况对每一个 Pod 进行端口映射。此外，Kubernetes 工作节点会由主系统进行管理，节点包含了能够运行 Docker 容器所用到的服务。
+
+## 项目简介
+
+Kubernetes 是 Google 团队发起的开源项目，它的目标是管理跨多个主机的容器，提供基本的部署，维护以及应用伸缩，主要实现语言为 Go 语言。Kubernetes 是：
+
+- 易学：轻量级，简单，容易理解
+- 便携：支持公有云，私有云，混合云，以及多种云平台
+- 可拓展：模块化，可插拔，支持钩子，可任意组合
+- 自修复：自动重调度，自动重启，自动复制
+
+Kubernetes 构建于 Google 数十年经验，一大半来源于 Google 生产环境规模的经验。结合了社区最佳的想法和实践。
+
+在分布式系统中，部署，调度，伸缩一直是最为重要的也最为基础的功能。Kubernetes 就是希望解决这一序列问题的。
+
+Kubernetes 目前在 GitHub 进行维护。
+
+Kubernetes 能够运行在任何地方，虽然 Kubernetes 最初是为 GCE 定制的，但是在后续版本中陆续增加了其他云平台的支持，以及本地数据中心的支持。
+
+## 基本概念
+
+![](res/2022-07-21-13-57-53.png)
+
+- 节点（Node）：一个节点是一个运行 Kubernetes 中的主机。
+- 容器组（Pod）：一个 Pod 对应于由若干容器组成的一个容器组，同个组内的容器共享一个存储卷(volume)。
+- 容器组生命周期（pos-states）：包含所有容器状态集合，包括容器组状态类型，容器组生命周期，事件，重启策略，以及 `replication controllers`。
+- Replication Controllers：主要负责指定数量的 pod 在同一时间一起运行。
+- 服务（services）：一个 Kubernetes 服务是容器组逻辑的高级抽象，同时也对外提供访问容器组的策略。
+- 卷（volumes）：一个卷就是一个目录，容器对其有访问权限。
+- 标签（labels）：标签是用来连接一组对象的，比如容器组。标签可以被用来组织和选择子对象。
+- 接口权限（`accessing_the_api`）：端口，IP 地址和代理的防火墙规则。
+- web 界面（ux）：用户可以通过 web 界面操作 Kubernetes。
+- 命令行操作（cli）：kubectl 命令。
+
+### 节点
+
+在 Kubernetes 中，节点是实际工作的点，节点可以是虚拟机或者物理机器，依赖于一个集群环境。每个节点都有一些必要的服务以运行容器组，并且它们都可以通过主节点来管理。必要服务包括 Docker，kubelet 和代理服务。
+
+#### 容器状态
+
+容器状态用来描述节点的当前状态。现在，其中包含三个信息：
+
+##### 主机 IP
+
+主机 IP 需要云平台来查询，Kubernetes 把它作为状态的一部分来保存。如果 Kubernetes 没有运行在云平台上，节点 ID 就是必需的。IP 地址可以变化，并且可以包含多种类型的 IP 地址，如公共 IP，私有 IP，动态 IP，ipv6 等等。
+
+##### 节点周期
+
+通常来说节点有 Pending，Running，Terminated 三个周期，如果 Kubernetes 发现了一个节点并且其可用，那么 Kubernetes 就把它标记为 Pending。然后在某个时刻，Kubernetes 将会标记其为 Running。节点的结束周期称为 Terminated。一个已经 Terminated 的节点不会接受和调度任何请求，并且已经在其上运行的容器组也会删除。
+
+##### 节点状态
+
+节点的状态主要是用来描述处于 Running 的节点。当前可用的有 NodeReachable 和 NodeReady。以后可能会增加其他状态。NodeReachable 表示集群可达。NodeReady 表示 kubelet 返回 Status Ok 并且 HTTP 状态检查健康。
+
+#### 节点管理
+
+节点并非 Kubernetes 创建，而是由云平台创建，或者就是物理机器、虚拟机。在 Kubernetes 中，节点仅仅是一条记录，节点创建之后，Kubernetes 会检查其是否可用。在 Kubernetes 中，节点用如下结构保存：
+
+```json
+{
+  "id": "10.1.2.3",
+  "kind": "Minion",
+  "apiVersion": "v1beta1",
+  "resources": {
+    "capacity": {
+      "cpu": 1000,
+      "memory": 1073741824
+    }
+  },
+  "labels": {
+    "name": "my-first-k8s-node"
+  }
+}
+```
+
+Kubernetes 校验节点可用依赖于 ID。在当前的版本中，有两个接口可以用来管理节点：节点控制和 Kube 管理。
+
+#### 节点控制
+
+在 Kubernetes 主节点中，节点控制器是用来管理节点的组件。主要包含：
+
+- 集群范围内节点同步
+- 单节点生命周期管理
+
+节点控制有一个同步轮询，主要监听所有云平台的虚拟实例，会根据节点状态创建和删除。可以通过 `--node_sync_period` 标志来控制该轮询。如果一个实例已经创建，节点控制将会为其创建一个结构。同样的，如果一个节点被删除，节点控制也会删除该结构。在 Kubernetes 启动时可用通过 `--machines` 标记来显示指定节点。同样可以使用 kubectl 来一条一条的添加节点，两者是相同的。通过设置 `--sync_nodes=false` 标记来禁止集群之间的节点同步，你也可以使用 `api/kubectl` 命令行来增删节点。
+
+### 容器组
+
+在 Kubernetes 中，使用的最小单位是容器组，容器组是创建，调度，管理的最小单位。一个容器组使用相同的 Docker 容器并共享卷（挂载点）。一个容器组是一个特定应用的打包集合，包含一个或多个容器。
+
+和运行的容器类似，一个容器组被认为只有很短的运行周期。容器组被调度到一组节点运行，直到容器的生命周期结束或者其被删除。如果节点死掉，运行在其上的容器组将会被删除而不是重新调度。（也许在将来的版本中会添加容器组的移动）。
+
+#### 容器组设计的初衷
+
+#### 资源共享和通信
+
+容器组主要是为了数据共享和它们之间的通信。
+
+在一个容器组中，容器都使用相同的网络地址和端口，可以通过本地网络来相互通信。每个容器组都有独立的 IP，可用通过网络来和其他物理主机或者容器通信。
+
+容器组有一组存储卷（挂载点），主要是为了让容器在重启之后可以不丢失数据。
+
+#### 容器组管理
+
+容器组是一个应用管理和部署的高层次抽象，同时也是一组容器的接口。容器组是部署、水平放缩的最小单位。
+
+#### 容器组的使用
+
+容器组可以通过组合来构建复杂的应用，其本来的意义包含：
+
+- 内容管理，文件和数据加载以及本地缓存管理等。
+- 日志和检查点备份，压缩，快照等。
+- 监听数据变化，跟踪日志，日志和监控代理，消息发布等。
+- 代理，网桥
+- 控制器，管理，配置以及更新
+
+#### 替代方案
+
+为什么不在一个单一的容器里运行多个程序？
+
+- 透明化。为了使容器组中的容器保持一致的基础设施和服务，比如进程管理和资源监控。这样设计是为了用户的便利性。
+- 解偶软件之间的依赖。每个容器都可能重新构建和发布，Kubernetes 必须支持热发布和热更新（将来）。
+- 方便使用。用户不必运行独立的程序管理，也不用担心每个应用程序的退出状态。
+- 高效。考虑到基础设施有更多的职责，容器必须要轻量化。
+
+#### 容器组的生命状态
+
+包括若干状态值：pending、running、succeeded、failed。
+
+##### pending
+
+容器组已经被节点接受，但有一个或多个容器还没有运行起来。这将包含某些节点正在下载镜像的时间，这种情形会依赖于网络情况。
+
+##### running
+
+容器组已经被调度到节点，并且所有的容器都已经启动。至少有一个容器处于运行状态（或者处于重启状态）。
+
+##### succeeded
+
+所有的容器都正常退出。
+
+##### failed
+
+容器组中所有容器都意外中断了。
+
+#### 容器组生命周期
+
+通常来说，如果容器组被创建了就不会自动销毁，除非被某种行为触发，而触发此种情况可能是人为，或者复制控制器所为。唯一例外的是容器组由 succeeded 状态成功退出，或者在一定时间内重试多次依然失败。
+
+如果某个节点死掉或者不能连接，那么节点控制器将会标记其上的容器组的状态为 failed。
+
+举例如下：
+
+- 容器组状态 running，有 1 容器，容器正常退出
+   - 记录完成事件
+   - 如果重启策略为：
+      - 始终：重启容器，容器组保持 running
+      - 失败时：容器组变为 succeeded
+      - 从不：容器组变为 succeeded
+- 容器组状态 running，有 1 容器，容器异常退出
+   - 记录失败事件
+   - 如果重启策略为：
+      - 始终：重启容器，容器组保持 running
+      - 失败时：重启容器，容器组保持 running
+      - 从不：容器组变为 failed
+- 容器组状态 running，有 2 容器，有 1 容器异常退出
+   - 记录失败事件
+   - 如果重启策略为：
+      - 始终：重启容器，容器组保持 running
+      - 失败时：重启容器，容器组保持 running
+      - 从不：容器组保持 running
+   - 当有 2 容器退出
+      - 记录失败事件
+      - 如果重启策略为：
+         - 始终：重启容器，容器组保持 running
+         - 失败时：重启容器，容器组保持 running
+         - 从不：容器组变为 failed
+- 容器组状态 running，容器内存不足
+   - 标记容器错误中断
+   - 记录内存不足事件
+   - 如果重启策略为：
+      - 始终：重启容器，容器组保持 running
+      - 失败时：重启容器，容器组保持 running
+      - 从不：记录错误事件，容器组变为 failed
+- 容器组状态 running，一块磁盘死掉
+   - 杀死所有容器
+   - 记录事件
+   - 容器组变为 failed
+   - 如果容器组运行在一个控制器下，容器组将会在其他地方重新创建
+- 容器组状态 running，对应的节点段溢出
+   - 节点控制器等到超时
+   - 节点控制器标记容器组 failed
+   - 如果容器组运行在一个控制器下，容器组将会在其他地方重新创建
+
+### Replication Controllers
+
+### 服务
+
+### 卷
+
+### 标签
+
+### 接口权限
+
+### web 界面
+
+### 命令行操作
+
+## 基本架构
+
+任何优秀的项目都离不开优秀的架构设计。本小节将介绍 Kubernetes 在架构方面的设计考虑。
+
+### 基本考虑
+
+如果让我们自己从头设计一套容器管理平台，有如下几个方面是很容易想到的：
+
+- 分布式架构，保证扩展性；
+- 逻辑集中式的控制平面 + 物理分布式的运行平面；
+- 一套资源调度系统，管理哪个容器该分配到哪个节点上；
+- 一套对容器内服务进行抽象和 HA 的系统。
+
+### 运行原理
+
+下面这张图完整展示了 Kubernetes 的运行原理。
+
+![](res/2022-07-21-14-00-05.png)
+
+可见，Kubernetes 首先是一套分布式系统，由多个节点组成，节点分为两类：一类是属于管理平面的主节点/控制节点（Master Node）；一类是属于运行平面的工作节点（Worker Node）。
+
+显然，复杂的工作肯定都交给控制节点去做了，工作节点负责提供稳定的操作接口和能力抽象即可。
+
+从这张图上，我们没有能发现 Kubernetes 中对于控制平面的分布式实现，但是由于数据后端自身就是一套分布式的数据库 Etcd，因此可以很容易扩展到分布式实现。
+
+### 控制平面
+
+#### 主节点服务
+
+主节点上需要提供如下的管理服务：
+
+- apiserver 是整个系统的对外接口，提供一套 RESTful 的 Kubernetes API，供客户端和其它组件调用；
+- scheduler 负责对资源进行调度，分配某个 pod 到某个节点上。是 pluggable 的，意味着很容易选择其它实现方式；
+- controller-manager 负责管理控制器，包括 endpoint-controller（刷新服务和 pod 的关联信息）和 replication-controller（维护某个 pod 的复制为配置的数值）。
+
+#### Etcd
+
+这里 Etcd 即作为数据后端，又作为消息中间件。
+
+通过 Etcd 来存储所有的主节点上的状态信息，很容易实现主节点的分布式扩展。
+
+组件可以自动的去侦测 Etcd 中的数值变化来获得通知，并且获得更新后的数据来执行相应的操作。
+
+### 工作节点
+
+- kubelet 是工作节点执行操作的 agent，负责具体的容器生命周期管理，根据从数据库中获取的信息来管理容器，并上报 pod 运行状态等；
+- kube-proxy 是一个简单的网络访问代理，同时也是一个 Load Balancer。它负责将访问到某个服务的请求具体分配给工作节点上的 Pod（同一类标签）。
+
+![](res/2022-07-21-14-00-36.png)
+
+## 部署 Kubernetes
+
+目前，Kubernetes 支持在多种环境下使用，包括本地主机（Ubuntu、Debian、CentOS、Fedora 等）、云服务（腾讯云、阿里云、百度云等）。
+
+你可以使用以下几种方式部署 Kubernetes：
+
+- kubeadm
+- docker-desktop
+- k3s
+
+接下来的小节会对以上几种方式进行详细介绍。
+
+### 使用 kubeadm 部署 kubernetes(CRI 使用 containerd)
+
+kubeadm 提供了 kubeadm init 以及 kubeadm join 这两个命令作为快速创建 kubernetes 集群的最佳实践。
+
+#### 安装 containerd
+
+参考 安装 Docker 一节添加 `apt/yum` 源，之后执行如下命令。
+
+```bash
+# debian 系
+$ sudo apt install containerd.io
+
+# rhel 系
+$ sudo yum install containerd.io
+```
+
+#### 配置 containerd
+
+新建 `/etc/systemd/system/cri-containerd.service` 文件
+
+```
+[Unit]
+Description=containerd container runtime for kubernetes
+Documentation=https://containerd.io
+After=network.target local-fs.target
+
+[Service]
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=/usr/bin/containerd --config //etc/cri-containerd/config.toml
+
+Type=notify
+Delegate=yes
+KillMode=process
+Restart=always
+RestartSec=5
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNPROC=infinity
+LimitCORE=infinity
+LimitNOFILE=infinity
+# Comment TasksMax if your systemd version does not supports it.
+# Only systemd 226 and above support this version.
+TasksMax=infinity
+OOMScoreAdjust=-999
+
+[Install]
+WantedBy=multi-user.target
+```
+
+新建 `/etc/cri-containerd/config.toml` containerd 配置文件
+
+```toml
+version = 2
+# persistent data location
+root = "/var/lib/cri-containerd"
+# runtime state information
+state = "/run/cri-containerd"
+plugin_dir = ""
+disabled_plugins = []
+required_plugins = []
+# set containerd's OOM score
+oom_score = 0
+
+[grpc]
+  address = "/run/cri-containerd/cri-containerd.sock"
+  tcp_address = ""
+  tcp_tls_cert = ""
+  tcp_tls_key = ""
+  # socket uid
+  uid = 0
+  # socket gid
+  gid = 0
+  max_recv_message_size = 16777216
+  max_send_message_size = 16777216
+
+[debug]
+  address = ""
+  format = "json"
+  uid = 0
+  gid = 0
+  level = ""
+
+[metrics]
+  address = "127.0.0.1:1338"
+  grpc_histogram = false
+
+[cgroup]
+  path = ""
+
+[timeouts]
+  "io.containerd.timeout.shim.cleanup" = "5s"
+  "io.containerd.timeout.shim.load" = "5s"
+  "io.containerd.timeout.shim.shutdown" = "3s"
+  "io.containerd.timeout.task.state" = "2s"
+
+[plugins]
+  [plugins."io.containerd.gc.v1.scheduler"]
+    pause_threshold = 0.02
+    deletion_threshold = 0
+    mutation_threshold = 100
+    schedule_delay = "0s"
+    startup_delay = "100ms"
+  [plugins."io.containerd.grpc.v1.cri"]
+    disable_tcp_service = true
+    stream_server_address = "127.0.0.1"
+    stream_server_port = "0"
+    stream_idle_timeout = "4h0m0s"
+    enable_selinux = false
+    selinux_category_range = 1024
+    sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.5"
+    stats_collect_period = 10
+    # systemd_cgroup = false
+    enable_tls_streaming = false
+    max_container_log_line_size = 16384
+    disable_cgroup = false
+    disable_apparmor = false
+    restrict_oom_score_adj = false
+    max_concurrent_downloads = 3
+    disable_proc_mount = false
+    unset_seccomp_profile = ""
+    tolerate_missing_hugetlb_controller = true
+    disable_hugetlb_controller = true
+    ignore_image_defined_volumes = false
+    [plugins."io.containerd.grpc.v1.cri".containerd]
+      snapshotter = "overlayfs"
+      default_runtime_name = "runc"
+      no_pivot = false
+      disable_snapshot_annotations = false
+      discard_unpacked_layers = false
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+          runtime_type = "io.containerd.runc.v2"
+          pod_annotations = []
+          container_annotations = []
+          privileged_without_host_devices = false
+          base_runtime_spec = ""
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+            # SystemdCgroup enables systemd cgroups.
+            SystemdCgroup = true
+            # BinaryName is the binary name of the runc binary.
+            # BinaryName = "runc"
+            # BinaryName = "crun"
+            # NoPivotRoot disables pivot root when creating a container.
+            # NoPivotRoot = false
+
+            # NoNewKeyring disables new keyring for the container.
+            # NoNewKeyring = false
+
+            # ShimCgroup places the shim in a cgroup.
+            # ShimCgroup = ""
+
+            # IoUid sets the I/O's pipes uid.
+            # IoUid = 0
+
+            # IoGid sets the I/O's pipes gid.
+            # IoGid = 0
+
+            # Root is the runc root directory.
+            Root = ""
+
+            # CriuPath is the criu binary path.
+            # CriuPath = ""
+
+            # CriuImagePath is the criu image path
+            # CriuImagePath = ""
+
+            # CriuWorkPath is the criu work path.
+            # CriuWorkPath = ""
+    [plugins."io.containerd.grpc.v1.cri".cni]
+      bin_dir = "/opt/cni/bin"
+      conf_dir = "/etc/cni/net.d"
+      max_conf_num = 1
+      conf_template = ""
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/cri-containerd/certs.d"
+      [plugins."io.containerd.grpc.v1.cri".registry.headers]
+        # Foo = ["bar"]
+    [plugins."io.containerd.grpc.v1.cri".image_decryption]
+      key_model = ""
+    [plugins."io.containerd.grpc.v1.cri".x509_key_pair_streaming]
+      tls_cert_file = ""
+      tls_key_file = ""
+  [plugins."io.containerd.internal.v1.opt"]
+    path = "/opt/cri-containerd"
+  [plugins."io.containerd.internal.v1.restart"]
+    interval = "10s"
+  [plugins."io.containerd.metadata.v1.bolt"]
+    content_sharing_policy = "shared"
+  [plugins."io.containerd.monitor.v1.cgroups"]
+    no_prometheus = false
+  [plugins."io.containerd.runtime.v2.task"]
+    platforms = ["linux/amd64"]
+  [plugins."io.containerd.service.v1.diff-service"]
+    default = ["walking"]
+  [plugins."io.containerd.snapshotter.v1.devmapper"]
+    root_path = ""
+    pool_name = ""
+    base_image_size = ""
+    async_remove = false
+```
+
+#### 安装 kubelet kubeadm kubectl cri-tools kubernetes-cni
+
+##### Ubuntu/Debian
+
+```bash
+$ apt-get update && apt-get install -y apt-transport-https
+$ curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -
+
+$ cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
+EOF
+
+$ apt-get update
+$ apt-get install -y kubelet kubeadm kubectl
+```
+
+##### CentOS/Fedora
+
+```bash
+$ cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+
+$ sudo yum install -y kubelet kubeadm kubectl
+```
+
+#### 修改内核的运行参数
+
+```bash
+$ cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.ipv4.ip_forward                 = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+EOF
+
+# 应用配置
+$ sysctl --system
+```
+
+#### 配置 kubelet
+
+##### 修改 kubelet.service
+
+`/etc/systemd/system/kubelet.service.d/10-proxy-ipvs.conf` 写入以下内容
+
+```bash
+# 启用 ipvs 相关内核模块
+[Service]
+ExecStartPre=-/sbin/modprobe ip_vs
+ExecStartPre=-/sbin/modprobe ip_vs_rr
+ExecStartPre=-/sbin/modprobe ip_vs_wrr
+ExecStartPre=-/sbin/modprobe ip_vs_sh
+```
+
+执行以下命令应用配置。
+
+```bash
+$ sudo systemctl daemon-reload
+```
+
+#### 部署
+
+##### master
+
+```bash
+$ systemctl enable cri-containerd
+
+$ systemctl start cri-containerd
+
+$ sudo kubeadm init \
+      --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers \
+      --pod-network-cidr 10.244.0.0/16 \
+      --cri-socket /run/cri-containerd/cri-containerd.sock \
+      --v 5 \
+      --ignore-preflight-errors=all
+```
+
+`--pod-network-cidr 10.244.0.0/16` 参数与后续 CNI 插件有关，这里以 flannel 为例，若后续部署其他类型的网络插件请更改此参数。执行可能出现错误，例如缺少依赖包，根据提示安装即可。
+
+执行成功会输出
+
+```bash
+...
+[addons] Applied essential addon: CoreDNS
+I1116 12:35:13.270407   86677 request.go:538] Throttling request took 181.409184ms, request: POST:https://192.168.199.100:6443/api/v1/namespaces/kube-system/serviceaccounts
+I1116 12:35:13.470292   86677 request.go:538] Throttling request took 186.088112ms, request: POST:https://192.168.199.100:6443/api/v1/namespaces/kube-system/configmaps
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.199.100:6443 --token cz81zt.orsy9gm9v649e5lf \
+    --discovery-token-ca-cert-hash sha256:5edb316fd0d8ea2792cba15cdf1c899a366f147aa03cba52d4e5c5884ad836fe
+```
+
+##### node 工作节点
+
+在另一主机重复部署小节以前的步骤，安装配置好 kubelet。根据提示，加入到集群。
+
+```bash
+$ systemctl enable cri-containerd
+
+$ systemctl start cri-containerd
+
+$ kubeadm join 192.168.199.100:6443 \
+    --token cz81zt.orsy9gm9v649e5lf \
+    --discovery-token-ca-cert-hash sha256:5edb316fd0d8ea2792cba15cdf1c899a366f147aa03cba52d4e5c5884ad836fe \
+    --cri-socket /run/cri-containerd/cri-containerd.sock
+```
+
+#### 查看服务
+
+所有服务启动后，通过 crictl 查看本地实际运行的容器。这些服务大概分为三类：主节点服务、工作节点服务和其它服务。
+
+```bash
+CONTAINER_RUNTIME_ENDPOINT=/run/cri-containerd/cri-containerd.sock crictl ps -a
+```
+
+##### 主节点服务
+
+- apiserver 是整个系统的对外接口，提供 RESTful 方式供客户端和其它组件调用；
+- scheduler 负责对资源进行调度，分配某个 pod 到某个节点上；
+- controller-manager 负责管理控制器，包括 endpoint-controller（刷新服务和 pod 的关联信息）和 replication-controller（维护某个 pod 的复制为配置的数值）。
+
+##### 工作节点服务
+
+proxy 为 pod 上的服务提供访问的代理。
+
+##### 其它服务
+
+Etcd 是所有状态的存储数据库；
+
+#### 使用
+
+将 `/etc/kubernetes/admin.conf` 复制到 `~/.kube/config`
+
+执行 `$ kubectl get all -A` 查看启动的服务。
+
+由于未部署 CNI 插件，CoreDNS 未正常启动。如何使用 Kubernetes，请参考后续章节。
+
+#### 部署 CNI
+
+这里以 flannel 为例进行介绍。
+
+##### flannel
+
+检查 podCIDR 设置
+
+```bash
+$ kubectl get node -o yaml | grep CIDR
+
+# 输出
+    podCIDR: 10.244.0.0/16
+    podCIDRs:
+```
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.11.0/Documentation/kube-flannel.yml
+```
+
+#### master 节点默认不能运行 pod
+
+如果用 kubeadm 部署一个单节点集群，默认情况下无法使用，请执行以下命令解除限制
+
+```bash
+$ kubectl taint nodes --all node-role.kubernetes.io/master-
+
+# 恢复默认值
+# $ kubectl taint nodes NODE_NAME node-role.kubernetes.io/master=true:NoSchedule
+```
+
+### Docker Desktop 启用 Kubernetes
+
+使用 Docker Desktop 可以很方便的启用 Kubernetes，由于国内获取不到 k8s.gcr.io 镜像，我们必须首先解决这一问题。
+
+#### 获取 k8s.gcr.io 镜像
+
+由于国内拉取不到 k8s.gcr.io 镜像，我们可以使用开源项目 [AliyunContainerService/k8s-for-docker-desktop](https://github.com/AliyunContainerService/k8s-for-docker-desktop) 来获取所需的镜像。
+
+#### 启用 Kubernetes
+
+在 Docker Desktop 设置页面，点击 Kubernetes，选择 Enable Kubernetes，稍等片刻，看到左下方 Kubernetes 变为 running，Kubernetes 启动成功。
+
+#### 测试
+
+```bash
+$ kubectl version
+```
+
+如果正常输出信息，则证明 Kubernetes 成功启动。
+
+### 一步步部署 kubernetes 集群
+
+可以参考 [opsnull/follow-me-install-kubernetes-cluster](https://github.com/opsnull/follow-me-install-kubernetes-cluster) 项目一步步部署 kubernetes 集群。
+
+### Kubernetes Dashboard
+
+[Kubernetes Dashboard](https://github.com/kubernetes/dashboard) 是基于网页的 Kubernetes 用户界面。
+
+#### 部署
+
+执行以下命令即可部署 Dashboard：
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+```
+
+#### 访问
+
+通过命令行代理访问，执行以下命令：
+
+```bash
+$ kubectl proxy
+```
+
+到 `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/` 即可访问。
+
+#### 登录
+
+目前，Dashboard 仅支持使用 Bearer 令牌登录。下面教大家如何创建该令牌：
+
+```bash
+$ kubectl create sa dashboard-admin -n kube-system
+
+$ kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
+
+$ ADMIN_SECRET=$(kubectl get secrets -n kube-system | grep dashboard-admin | awk '{print $1}')
+
+$ DASHBOARD_LOGIN_TOKEN=$(kubectl describe secret -n kube-system ${ADMIN_SECRET} | grep -E '^token' | awk '{print $2}')
+
+echo ${DASHBOARD_LOGIN_TOKEN}
+```
+
+将结果粘贴到登录页面，即可登录。
+
+## Kubernetes 命令行 kubectl
+
+### kubectl 使用
+
+[kubectl](https://github.com/kubernetes/kubernetes) 是 Kubernetes 自带的客户端，可以用它来直接操作 Kubernetes。
+
+使用格式有两种：
+
+```bash
+kubectl [flags]
+kubectl [command]
+```
+
+#### get
+
+显示一个或多个资源
+
+#### describe
+
+显示资源详情
+
+#### create
+
+从文件或标准输入创建资源
+
+#### update
+
+从文件或标准输入更新资源
+
+#### delete
+
+通过文件名、标准输入、资源名或者 label selector 删除资源
+
+#### log
+
+输出 pod 中一个容器的日志
+
+#### rolling-update
+
+对指定的 replication controller 执行滚动升级
+
+#### exec
+
+在容器内部执行命令
+
+#### port-forward
+
+将本地端口转发到 Pod
+
+#### proxy
+
+为 Kubernetes API server 启动代理服务器
+
+#### run
+
+在集群中使用指定镜像启动容器
+
+#### expose
+
+将 `replication controller service` 或 pod 暴露为新的 `kubernetes service`
+
+#### label
+
+更新资源的 label
+
+#### config
+
+修改 kubernetes 配置文件
+
+#### cluster-info
+
+显示集群信息
+
+#### api-versions
+
+以 "组/版本" 的格式输出服务端支持的 API 版本
+
+#### version
+
+输出服务端和客户端的版本信息
+
+#### help
+
+显示各个命令的帮助信息
+
+// TODO https://vuepress.mirror.docker-practice.com/security/
