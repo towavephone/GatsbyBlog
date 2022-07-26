@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>column-rule 属性基本效果示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo code {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      .container {
+        margin: 1em auto;
+        text-align: left;
+        /* word-break: break-all; */
+      }
+
+      .container {
+        width: 320px;
+        border: solid deepskyblue;
+        padding: 10px;
+        column-count: 2;
+        column-rule: dashed deepskyblue;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <div class="container">
+        <code>column-rule</code
+        >属性是<code>column-rule-width</code>，<code>column-rule-style</code>和<code>column-rule-color</code>这3个CSS属性的缩写。
+      </div>
+    </div>
+  </body>
+</html>

@@ -15,7 +15,7 @@ Docker 镜像是一个特殊的文件系统，除了提供容器运行时所需�
 
 ### 分层存储
 
-因为镜像包含操作系统完整的 root 文件系统，其体积往往是庞大的，因此在 Docker 设计时，就充分利用 Union FS (opens new window) 的技术，将其设计为分层存储的架构。所以严格来说，镜像并非是像一个 ISO 那样的打包文件，镜像只是一个虚拟的概念，其实际体现并非由一个文件组成，而是由一组文件系统组成，或者说，由多层文件系统联合组成。
+因为镜像包含操作系统完整的 root 文件系统，其体积往往是庞大的，因此在 Docker 设计时，就充分利用 Union FS 的技术，将其设计为分层存储的架构。所以严格来说，镜像并非是像一个 ISO 那样的打包文件，镜像只是一个虚拟的概念，其实际体现并非由一个文件组成，而是由一组文件系统组成，或者说，由多层文件系统联合组成。
 
 镜像构建时，会一层层构建，前一层是后一层的基础。每一层构建完就不会再发生改变，后一层上的任何改变只发生在自己这一层。比如，删除前一层文件的操作，实际不是真的删除前一层的文件，而是仅在当前层标记为该文件已删除。在最终容器运行的时候，虽然不会看到这个文件，但是实际上该文件会一直跟随镜像。因此，在构建镜像的时候，需要额外小心，每一层尽量只包含该层需要添加的东西，任何额外的东西应该在该层构建结束前清理掉。
 
@@ -43,7 +43,7 @@ Docker 镜像是一个特殊的文件系统，除了提供容器运行时所需�
 
 通常，一个仓库会包含同一个软件不同版本的镜像，而标签就常用于对应该软件的各个版本。我们可以通过 `<仓库名>:<标签>` 的格式来指定具体是这个软件哪个版本的镜像。如果不给出标签，将以 latest 作为默认标签。
 
-以 Ubuntu 镜像 (opens new window) 为例，ubuntu 是仓库的名字，其内包含有不同的版本标签，如，16.04, 18.04。我们可以通过 ubuntu:16.04 或者 ubuntu:18.04 来具体指定所需哪个版本的镜像。如果忽略了标签，比如 ubuntu，那将视为 ubuntu:latest。
+以 Ubuntu 镜像为例，ubuntu 是仓库的名字，其内包含有不同的版本标签，如 16.04, 18.04。我们可以通过 ubuntu:16.04 或者 ubuntu:18.04 来具体指定所需哪个版本的镜像。如果忽略了标签，比如 ubuntu，那将视为 ubuntu:latest。
 
 仓库名经常以两段式路径形式出现，比如 jwilder/nginx-proxy，前者往往意味着 Docker Registry 多用户环境下的用户名，后者则往往是对应的软件名。但这并非绝对，取决于所使用的具体 Docker Registry 的软件或服务。
 
@@ -51,19 +51,19 @@ Docker 镜像是一个特殊的文件系统，除了提供容器运行时所需�
 
 Docker Registry 公开服务是开放给用户使用、允许用户管理镜像的 Registry 服务。一般这类公开服务允许用户免费上传、下载公开的镜像，并可能提供收费服务供用户管理私有镜像。
 
-最常使用的 Registry 公开服务是官方的 Docker Hub (opens new window)，这也是默认的 Registry，并拥有大量的高质量的官方镜像 (opens new window)。除此以外，还有 Red Hat 的 Quay.io (opens new window)；Google 的 Google Container Registry (opens new window)，Kubernetes (opens new window) 的镜像使用的就是这个服务；代码托管平台 GitHub (opens new window) 推出的 ghcr.io (opens new window)。
+最常使用的 Registry 公开服务是官方的 Docker Hub，这也是默认的 Registry，并拥有大量的高质量的官方镜像。除此以外，还有 Red Hat 的 Quay.io ；Google 的 Google Container Registry，Kubernetes 的镜像使用的就是这个服务；代码托管平台 GitHub 推出的 ghcr.io。
 
-由于某些原因，在国内访问这些服务可能会比较慢。国内的一些云服务商提供了针对 Docker Hub 的镜像服务（Registry Mirror），这些镜像服务被称为加速器。常见的有阿里云加速器 (opens new window)、DaoCloud 加速器 (opens new window) 等。使用加速器会直接从国内的地址下载 Docker Hub 的镜像，比直接从 Docker Hub 下载速度会提高很多。
+由于某些原因，在国内访问这些服务可能会比较慢。国内的一些云服务商提供了针对 Docker Hub 的镜像服务（Registry Mirror），这些镜像服务被称为加速器。常见的有阿里云加速器、DaoCloud 加速器等。使用加速器会直接从国内的地址下载 Docker Hub 的镜像，比直接从 Docker Hub 下载速度会提高很多。
 
-国内也有一些云服务商提供类似于 Docker Hub 的公开服务。比如网易云镜像服务 (opens new window)、DaoCloud 镜像市场 (opens new window)、阿里云镜像库 (opens new window)等。
+国内也有一些云服务商提供类似于 Docker Hub 的公开服务。比如网易云镜像服务、DaoCloud 镜像市场、阿里云镜像库等。
 
 ### 私有 Docker Registry
 
-除了使用公开服务外，用户还可以在本地搭建私有 Docker Registry。Docker 官方提供了 Docker Registry (opens new window) 镜像，可以直接使用做为私有 Registry 服务。在私有仓库一节中，会有进一步的搭建私有 Registry 服务的讲解。
+除了使用公开服务外，用户还可以在本地搭建私有 Docker Registry。Docker 官方提供了 Docker Registry 镜像，可以直接使用做为私有 Registry 服务。在私有仓库一节中，会有进一步的搭建私有 Registry 服务的讲解。
 
-开源的 Docker Registry 镜像只提供了 Docker Registry API (opens new window) 的服务端实现，足以支持 docker 命令，不影响使用。但不包含图形界面，以及镜像维护、用户管理、访问控制等高级功能。
+开源的 Docker Registry 镜像只提供了 Docker Registry API 的服务端实现，足以支持 docker 命令，不影响使用。但不包含图形界面，以及镜像维护、用户管理、访问控制等高级功能。
 
-除了官方的 Docker Registry 外，还有第三方软件实现了 Docker Registry API，甚至提供了用户界面以及一些高级功能，比如 Harbor (opens new window) 和 Sonatype Nexus
+除了官方的 Docker Registry 外，还有第三方软件实现了 Docker Registry API，甚至提供了用户界面以及一些高级功能，比如 Harbor 和 Sonatype Nexus
 
 # 使用镜像
 
@@ -235,7 +235,7 @@ fe9198c04d62
 
 --filter 配合 -q 产生出指定范围的 ID 列表，然后送给另一个 docker 命令作为参数，从而针对这组实体成批的进行某种操作的做法在 Docker 命令行使用过程中非常常见，不仅仅是镜像，将来我们会在各个命令中看到这类搭配以完成很强大的功能。因此每次在文档看到过滤器后，可以多注意一下它们的用法。
 
-另外一些时候，我们可能只是对表格的结构不满意，希望自己组织列；或者不希望有标题，这样方便其它程序解析结果等，这就用到了 Go 的模板语法 (opens new window)。
+另外一些时候，我们可能只是对表格的结构不满意，希望自己组织列；或者不希望有标题，这样方便其它程序解析结果等，这就用到了 Go 的模板语法。
 
 比如，下面的命令会直接列出镜像结果，并且只包含镜像 ID 和仓库名：
 
@@ -478,9 +478,9 @@ RUN echo '<h1>Hello, Docker!</h1>' > /usr/share/nginx/html/index.html
 
 所谓定制镜像，那一定是以一个镜像为基础，在其上进行定制。就像我们之前运行了一个 nginx 镜像的容器，再进行修改一样，基础镜像是必须指定的。而 FROM 就是指定基础镜像，因此一个 Dockerfile 中 FROM 是必备的指令，并且必须是第一条指令。
 
-在 Docker Hub (opens new window) 上有非常多的高质量的官方镜像，有可以直接拿来使用的服务类的镜像，如 nginx (opens new window)、redis (opens new window)、mongo (opens new window)、mysql (opens new window)、httpd (opens new window)、php (opens new window)、tomcat (opens new window) 等；也有一些方便开发、构建、运行各种语言应用的镜像，如 node (opens new window)、openjdk (opens new window)、python (opens new window)、ruby (opens new window)、golang (opens new window) 等。可以在其中寻找一个最符合我们最终目标的镜像为基础镜像进行定制。
+在 Docker Hub 上有非常多的高质量的官方镜像，有可以直接拿来使用的服务类的镜像，如 nginx、redis、mongo、mysql、httpd、php、tomcat 等；也有一些方便开发、构建、运行各种语言应用的镜像，如 node、openjdk、python、ruby、golang 等。可以在其中寻找一个最符合我们最终目标的镜像为基础镜像进行定制。
 
-如果没有找到对应服务的镜像，官方镜像中还提供了一些更为基础的操作系统镜像，如 ubuntu (opens new window)、debian (opens new window)、centos (opens new window)、fedora (opens new window)、alpine (opens new window) 等，这些操作系统的软件库为我们提供了更广阔的扩展空间。
+如果没有找到对应服务的镜像，官方镜像中还提供了一些更为基础的操作系统镜像，如 ubuntu、debian、centos、fedora、alpine 等，这些操作系统的软件库为我们提供了更广阔的扩展空间。
 
 除了选择现有镜像为基础镜像外，Docker 还存在一个特殊的镜像，名为 scratch。这个镜像是虚拟的概念，并不实际存在，它表示一个空白的镜像。
 
@@ -491,7 +491,7 @@ FROM scratch
 
 如果你以 scratch 为基础镜像的话，意味着你不以任何镜像为基础，接下来所写的指令将作为镜像第一层开始存在。
 
-不以任何系统为基础，直接将可执行文件复制进镜像的做法并不罕见，对于 Linux 下静态编译的程序来说，并不需要有操作系统提供运行时支持，所需的一切库都已经在可执行文件里了，因此直接 FROM scratch 会让镜像体积更加小巧。使用 Go 语言 (opens new window) 开发的应用很多会使用这种方式来制作镜像，这也是为什么有人认为 Go 是特别适合容器微服务架构的语言的原因之一。
+不以任何系统为基础，直接将可执行文件复制进镜像的做法并不罕见，对于 Linux 下静态编译的程序来说，并不需要有操作系统提供运行时支持，所需的一切库都已经在可执行文件里了，因此直接 FROM scratch 会让镜像体积更加小巧。使用 Go 语言开发的应用很多会使用这种方式来制作镜像，这也是为什么有人认为 Go 是特别适合容器微服务架构的语言的原因之一。
 
 ### RUN 执行命令
 
@@ -584,7 +584,7 @@ docker build [选项] <上下文路径/URL/->
 
 如果注意，会看到 docker build 命令最后有一个 `.`。`.` 表示当前目录，而 Dockerfile 就在当前目录，因此不少初学者以为这个路径是在指定 Dockerfile 所在路径，这么理解其实是不准确的。如果对应上面的命令格式，你可能会发现，这是在指定上下文路径。那么什么是上下文呢？
 
-首先我们要理解 docker build 的工作原理。Docker 在运行时分为 Docker 引擎（也就是服务端守护进程）和客户端工具。Docker 的引擎提供了一组 REST API，被称为 Docker Remote API (opens new window)，而如 docker 命令这样的客户端工具，则是通过这组 API 与 Docker 引擎交互，从而完成各种功能。因此，虽然表面上我们好像是在本机执行各种 docker 功能，但实际上，一切都是使用的远程调用形式在服务端（Docker 引擎）完成。也因为这种 C/S 设计，让我们操作远程服务器的 Docker 引擎变得轻而易举。
+首先我们要理解 docker build 的工作原理。Docker 在运行时分为 Docker 引擎（也就是服务端守护进程）和客户端工具。Docker 的引擎提供了一组 REST API，被称为 Docker Remote API，而如 docker 命令这样的客户端工具，则是通过这组 API 与 Docker 引擎交互，从而完成各种功能。因此，虽然表面上我们好像是在本机执行各种 docker 功能，但实际上，一切都是使用的远程调用形式在服务端（Docker 引擎）完成。也因为这种 C/S 设计，让我们操作远程服务器的 Docker 引擎变得轻而易举。
 
 当我们进行镜像构建的时候，并非所有定制都会通过 RUN 指令完成，经常会需要将一些本地文件复制进镜像，比如通过 COPY 指令、ADD 指令等。而 docker build 命令构建镜像，其实并非在本地构建，而是在服务端，也就是 Docker 引擎中构建的。那么在这种客户端/服务端的架构中，如何才能让服务端获得本地文件呢？
 
@@ -687,7 +687,7 @@ docker import [选项] <文件>|<URL>|- [<仓库名>[:<标签>]]
 
 压缩包可以是本地文件、远程 Web 文件，甚至是从标准输入中得到。压缩包将会在镜像 / 目录展开，并直接作为镜像第一层提交。
 
-比如我们想要创建一个 OpenVZ (opens new window)的 Ubuntu 16.04 模板 (opens new window)的镜像：
+比如我们想要创建一个 OpenVZ 的 Ubuntu 16.04 模板的镜像：
 
 ```bash
 $ docker import \
@@ -767,7 +767,7 @@ docker save <镜像名> | bzip2 | pv | ssh <用户名>@<主机名> 'cat | docker
 
 Docker 镜像是怎么实现增量的修改和维护的？
 
-每个镜像都由很多层次构成，Docker 使用 Union FS (opens new window) 将这些不同的层结合到一个镜像中去。
+每个镜像都由很多层次构成，Docker 使用 Union FS 将这些不同的层结合到一个镜像中去。
 
 通常 Union FS 有两个用途, 一方面可以实现不借助 LVM、RAID 将多个 disk 挂到同一个目录下,另一个更常用的就是将一个只读的分支和一个可写的分支联合在一起，Live CD 正是基于此方法可以允许在镜像不变的基础上允许用户在其上进行一些写操作。
 
@@ -790,7 +790,7 @@ COPY 指令将从构建上下文目录中 `<源路径>` 的文件/目录复制�
 COPY package.json /usr/src/app/
 ```
 
-`<源路径>` 可以是多个，甚至可以是通配符，其通配符规则要满足 Go 的 filepath.Match (opens new window) 规则，如：
+`<源路径>` 可以是多个，甚至可以是通配符，其通配符规则要满足 Go 的 filepath.Match 规则，如：
 
 ```dockerfile
 COPY hom* /mydir/
@@ -1205,7 +1205,7 @@ USER redis
 RUN [ "redis-server" ]
 ```
 
-如果以 root 执行的脚本，在执行期间希望改变身份，比如希望以某个已经建立好的用户来运行某个服务进程，不要使用 su 或者 sudo，这些都需要比较麻烦的配置，而且在 TTY 缺失的环境下经常出错。建议使用 gosu (opens new window)。
+如果以 root 执行的脚本，在执行期间希望改变身份，比如希望以某个已经建立好的用户来运行某个服务进程，不要使用 su 或者 sudo，这些都需要比较麻烦的配置，而且在 TTY 缺失的环境下经常出错。建议使用 gosu。
 
 ```dockerfile
 # 建立 redis 用户，并使用 gosu 换另一个用户执行命令
@@ -1614,7 +1614,7 @@ $ COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf
 
 我们知道使用镜像创建一个容器，该镜像必须与 Docker 宿主机系统架构一致，例如 `Linux x86_64` 架构的系统中只能使用 `Linux x86_64` 的镜像创建容器。
 
-Windows、macOS 除外，其使用了 `binfmt_misc (opens new window)` 提供了多种架构支持，在 Windows、macOS 系统上 (x86_64) 可以运行 arm 等其他架构的镜像。
+Windows、macOS 除外，其使用了 `binfmt_misc` 提供了多种架构支持，在 Windows、macOS 系统上 (x86_64) 可以运行 arm 等其他架构的镜像。
 
 例如我们在 `Linux x86_64` 中构建一个 `username/test` 镜像。
 
@@ -1640,7 +1640,7 @@ $ docker run -it --rm username/test
 
 这是什么原因呢？
 
-原因就是 `golang:alpine` 官方镜像有一个 manifest 列表 (manifest list) (opens new window)。
+原因就是 `golang:alpine` 官方镜像有一个 manifest 列表 (manifest list) 。
 
 当用户获取一个镜像时，Docker 引擎会首先查找该镜像是否有 manifest 列表，如果有的话 Docker 引擎会按照 Docker 运行环境（系统及架构）查找出对应镜像（例如 golang:alpine）。如果没有的话会直接获取镜像（例如上例中我们构建的 username/test）。
 
@@ -2022,7 +2022,7 @@ $ docker container prune
 
 ## Docker Hub
 
-目前 Docker 官方维护了一个公共仓库 Docker Hub (opens new window)，大部分需求都可以通过在 Docker Hub 中直接下载镜像来实现。
+目前 Docker 官方维护了一个公共仓库 Docker Hub，大部分需求都可以通过在 Docker Hub 中直接下载镜像来实现。
 
 ### 注册
 
@@ -2097,13 +2097,13 @@ username/ubuntu
 
 ### 自动构建
 
-2021 年 7 月 26 日之后，该项功能仅限付费用户 (opens new window) 使用。
+2021 年 7 月 26 日之后，该项功能仅限付费用户使用。
 
 自动构建（Automated Builds）可以自动触发构建镜像，方便升级镜像。
 
 有时候，用户构建了镜像，安装了某个软件，当软件发布新版本则需要手动更新镜像。
 
-而自动构建允许用户通过 Docker Hub 指定跟踪一个目标网站（支持 GitHub (opens new window) 或 BitBucket (opens new window)）上的项目，一旦项目发生新的提交 （commit）或者创建了新的标签（tag），Docker Hub 会自动构建镜像并推送到 Docker Hub 中。
+而自动构建允许用户通过 Docker Hub 指定跟踪一个目标网站（支持 GitHub 或 BitBucket）上的项目，一旦项目发生新的提交（commit）或者创建了新的标签（tag），Docker Hub 会自动构建镜像并推送到 Docker Hub 中。
 
 要配置自动构建，包括如下的步骤：
 

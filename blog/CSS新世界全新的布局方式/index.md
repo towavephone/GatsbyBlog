@@ -1,6 +1,6 @@
 ---
 title: CSS新世界全新的布局方式
-date: 2022-3-31 19:07:24
+date: 2022-07-26 13:43:31
 path: /css-new-world-new-layout/
 tags: 前端, CSS, CSS新世界, 读书笔记
 ---
@@ -62,5 +62,244 @@ ul {
 - column-gap
 
 虽然这 10 个 CSS 属性都有各自的作用，但是在实用程度上却有明显的差异。根据我的开发经验，超过 80% 的分栏布局只需要使用 columns 属性就足够，因此，大家的学习重心可以放在 columns 属性上，column-gap 属性有时候也会用到，所以也可以关注下，至于剩下的属性，大家了解一下基本作用即可。
+
+## 重点关注 columns 属性
+
+columns 属性是 column-width 和 column-count 属性的缩写，举几个使用 columns 属性的例子：
+
+```css
+/*栏目宽度*/
+columns: 18em;
+
+/*栏目数目*/
+columns: auto;
+columns: 2;
+
+/*同时定义宽度和数目，顺序任意*/
+columns: 2 auto;
+columns: auto 2;
+columns: auto 12em;
+columns: auto auto;
+```
+
+### 关于 column-width
+
+column-width 表示每一栏/列的最佳宽度，注意，是“最佳宽度”，实际渲染宽度多半和指定的宽度是有出入的，例如：
+
+```css
+.container {
+  width: 300px;
+  column-width: 200px;
+}
+```
+
+这里容器宽度为 300px，设定每一栏的宽度是 200px，不足以分栏，此时容器里面的内容会无视 column-width: 200px 声明，并按照容器的 300px 宽度排版。又如：
+
+```css
+.container {
+  width: 200px;
+  column-width: 300px;
+}
+```
+
+这里容器宽度为 200px，设定的每一栏宽度是 300px，比容器宽度还要宽，此时容器里面的内容会无视 column-width: 300px 声明，并按照容器的 200px 宽度排版。
+
+那么，什么情况下 column-width 设置的宽度值和实际渲染的宽度值一致呢？这个问题的答案可能会出乎大家的意料：几乎不存在分栏布局的栏目宽度就是 column-width 设置的宽度这样的场景。
+
+因为 column-width 和传统的 width 属性不同，column-width 更像是一个期望尺寸，浏览器会根据这个期望尺寸确定分栏数目，一旦分栏数目确定了，column-width 属性的使命也就完成了，接下来根据分栏数目对容器进行的分栏布局就和 column-width 属性没有任何关系了。
+
+没错，column-width 属性在分栏布局中就是一个工具属性。而且 column-width 相比 width 属性在语法上还有很多限制，例如 column-width 不支持百分比值，即下面的语句是不合法的：
+
+```css
+/* 不合法 */
+column-width: 30%;
+```
+
+### 关于 column-count
+
+column-count 表示理想的分栏数目，又出现了很微妙的词——“理想的”，也就是意味着最终的分栏数目可能不受 column-count 属性值的控制。
+
+没错，在分栏布局中，最终分栏的数量是由 column-count 与 column-width 属性共同决定的，不对，不能称为“共同决定”，应该叫作“互相制约”。也就是说，在分栏布局中，最终分栏的数量要么由 column-count 属性决定，要么由 column-width 属性决定，这两个 CSS 属性都可能有更高的决定权，至于哪个 CSS 属性的决定权更高，是要看具体场景的。
+
+决定权优先级的计算诀窍可以用一句话概括：统一转换 column-count 值，哪个值小就使用哪一个。例如，下面的 CSS 代码：
+
+```css
+.container-1 {
+  width: 360px;
+  column-count: 2;
+  column-width: 100px;
+}
+
+.container-2 {
+  width: 360px;
+  column-count: 4;
+  column-width: 100px;
+}
+```
+
+其中 .container-1 是 2 栏显示，而 .container-2 是 3 栏显示。效果如图 6-2 所示。
+
+![](res/2022-07-26-11-12-13.png)
+
+具体解析过程如下。
+
+1. .container-1 元素宽度为 360px，因此 column-width: 100px 换算成 column-count 的值是 3.6，而.container-1 元素已经设定了 column-count: 2，遵循“哪个值小哪个优先级高”的规则，最终 .container-1 元素的内容分成了 2 栏。
+2. .container-2 元素设置的是 column-count: 4，比 column-width: 100px 换算成的 column-count 值大，因此，最终 .container-2 元素的内容分成了 3 栏（3.6 栏向下取整）。
+
+[column-count-width-priority](embedded-codesandbox://css-new-world-new-layout/column-count-width-priority)
+
+另外，从图 6-2 所示的 .container-2 的效果可以看出，分栏布局的每一栏的高度并不总是相等的，内容的分割也不总是均匀的，浏览器有一套自己的算法。
+
+## column-gap 和 gap 属性的关系
+
+column-gap 属性表示每一栏之间的空白间隙的大小，可以是长度值，也可以是百分比值，语法示意如下：
+
+```css
+/* 关键字属性值 */
+column-gap: normal;
+
+/* 长度值 */
+column-gap: 3px;
+column-gap: 3em;
+
+/* 百分比值 */
+column-gap: 3%;
+```
+
+column-gap 属性本身没什么好说的，但是 column-gap 属性和 gap 属性之间的关系值得一提。实际上，在分栏布局中，如果不考虑 IE 浏览器，我们可以直接使用 gap 属性设置分栏间隙大小，例如：
+
+```css
+.container {
+  columns: 2;
+  gap: 1rem;
+}
+```
+
+至于原因，用一句话解释就是：column-gap 是 gap 属性的子属性。
+
+在网格布局规范制定之后的一段时间，CSS 世界中的行与列之间的间隙使用了 gap 属性进行了统一，也就是分栏布局、弹性布局和网格布局的间隙都全部统一使用 gap 属性表示，而 gap 属性实际上是 column-gap 属性和 row-gap 属性的缩写。
+
+## 了解 column-rule、column-span 和 column-fill 属性
+
+本节介绍的 3 个分栏布局属性都有各自独特的作用，平常不太用得到，多出现在对分栏布局效果要求更高的场景中。
+
+### 了解 column-rule 属性
+
+column-rule 属性是 column-rule-width、column-rule-style 和 column-rule-color 这 3 个 CSS 属性的缩写，正如 border 是 border-style、border-width 和 border-color 的缩写一样。
+
+column-rule 属性和 border 属性的语法和规则是一模一样的，只是 column-rule 是设置各个分栏的分隔线样式，border 是设置元素的边框样式。例如：
+
+```css
+.container {
+  width: 320px;
+  border: solid deepskyblue;
+  padding: 10px;
+  column-count: 2;
+  column-rule: dashed deepskyblue;
+}
+```
+
+效果如图 6-3 所示，2 栏文字内容的中间出现了 3px 宽的虚线分隔线。
+
+![](res/2022-07-26-11-25-30.png)
+
+[column-rule-attr](embedded-codesandbox://css-new-world-new-layout/column-rule-attr)
+
+### 了解 column-span 属性
+
+column-span 属性有点类似表格布局中的 HTML 属性 colspan，表示某一个内容是否跨多栏显示。这个 CSS 属性是作用在分栏布局的子元素上的。语法如下：
+
+```css
+column-span: none;
+column-span: all;
+```
+
+先讲一下这一语法中的几个关键点。
+
+- none 表示不横跨多栏，默认值。
+- all 表示横跨所有垂直列。
+
+我们一起来看一个例子，就知道这个属性是做什么的了，HTML 和 CSS 代码如下：
+
+```html{21}
+<div class="container">
+  <p>第1段</p>
+  <p>第2段</p>
+  <p>第3段</p>
+  <p class="span-all">第4段</p>
+  <p>第5段</p>
+</div>
+<style>
+  .container {
+    width: 320px;
+    border: solid deepskyblue;
+    padding: 10px;
+    column-count: 3;
+  }
+
+  .container p {
+    background: deepskyblue;
+  }
+
+  .span-all {
+    column-span: all;
+    color: white;
+  }
+</style>
+```
+
+结果如图 6-4 所示，对比图中左侧的默认效果，可以看到，设置了 column-span: all 的“第 4 段”文字所在的 `<p>` 元素几乎贯穿了整个容器元素。
+
+![](res/2022-07-26-11-31-15.png)
+
+[column-span-all](embedded-codesandbox://css-new-world-new-layout/column-span-all)
+
+图 6-4 所示的“第 1 段”内容之所以偏下，是因为第一个 `<p>` 元素默认的 margin-top 无法参与分栏计算。
+
+想要在分栏布局中插入广告，可以使用 column-span: all 声明。
+
+### 了解 column-fill 属性
+
+column-fill 的作用是当内容分栏的时候平衡每一栏填充的内容。语法如下：
+
+```css
+column-fill: auto;
+column-fill: balance;
+column-fill: balance-all;
+```
+
+先讲一下这一语法中的几个关键点。
+
+- auto 的作用是按顺序填充每一列，内容只占用它需要的空间。
+- balance 是默认值，作用是尽可能在列之间平衡内容。在分隔断开的上下文中，只有最后一个片段是平衡的。例如，有多个 `<p>` 元素，正好最后一个 `<p>` 换行了，那这个 `<p>` 元素的内容前后等分，保持平衡。这会造成最后一栏内容较少的问题。
+- balance-all 的作用是尽可能在列之间平衡内容。在分隔断开的上下文中，所有片段都是平衡的。该属性值目前没有任何浏览器支持，可以忽略。
+
+我们测试一下各个属性值的渲染表现，假设代码如下（这里给容器设置了 80px 的高度）
+
+```html
+<style>
+  .container {
+    width: 300px;
+    height: 80px;
+    border: solid deepskyblue;
+    padding: 10px;
+    column-count: 2;
+  }
+</style>
+<div class="container" style="column-fil: auto">内容略</div>
+<div class="container" style="column-fill: balance">内容略</div>
+<div class="container" style="column-fill: balance-all">内容略</div>
+```
+
+最后的渲染效果如图 6-5 所示，可以看到容器元素应用 column-fill: auto 声明的时候，里面的文字内容会优先填充第一列，而不是尽可能让两列内容平衡。
+
+![](res/2022-07-26-11-39-05.png)
+
+[column-fill-attr](embedded-codesandbox://css-new-world-new-layout/column-fill-attr)
+
+经过仔细地对比测试可以发现以下几点。
+
+1. 所有浏览器都能识别 column-fill: auto，但是，需要容器有固定的高度才能准确渲染。如果容器没有设置具体的高度值，则仅在 Firefox 浏览器中有比较符合预期的渲染。因此，在实际开发的时候，column-fill: auto 声明的使用一定要配合容器元素的 height 属性。
+2. 所有浏览器都不能识别 column-fill: balance-all，我在 W3C 官方的规范文档 CSS Multi-column layout Module level1 中也没有找到任何的示例，因此，column-fill: balance- all 声明大家可以忽略。
 
 // TODO CSS 新世界全新的布局方式待完成
