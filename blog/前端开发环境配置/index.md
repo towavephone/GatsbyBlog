@@ -2,7 +2,7 @@
 title: 前端开发环境配置
 date: 2021-9-30 13:51:29
 categories:
-   - 前端
+  - 前端
 tags: 前端, 开发环境
 path: /frontend-devlopment-environment-setting/
 ---
@@ -124,6 +124,18 @@ $ nrm ls # 列出当前支持切换的源
 $ nrm use taobao # 使用 taobao 的源作为默认的 npm 源
 ```
 
+# Python 环境
+
+1. pyenv 安装
+   - https://github.com/pyenv/pyenv#prerequisites
+   - https://github.com/pyenv/pyenv-installer
+2. python 版本调整到 3.7 版本以上，vscode 的 python 拓展才可正常使用
+3. Python PIP 升级后执行命令报错：`sys.stderr.write(f"ERROR: {exc}")` 解决方法
+
+   ```bash
+   wget https://bootstrap.pypa.io/pip/3.5/get-pip.py && chmod a+x ./get-pip.py && ./get-pip.py
+   ```
+
 # sass 编译
 
 如果项目中有 sass 存在则需要 python 编译，需要以下处理
@@ -131,10 +143,10 @@ $ nrm use taobao # 使用 taobao 的源作为默认的 npm 源
 - 安装 `python2 sudo apt-get install python2.7`
 - 在 /home/用户名/.zshrc 下添加以下脚本
 
-   ```bash
-   alias python="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装
-   python2 alias python2="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
-   ```
+  ```bash
+  alias python="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装
+  python2 alias python2="/usr/bin/python2.7" # 解决 sass 编译问题，需提前安装 python2
+  ```
 
 # ssh 免密登录
 
