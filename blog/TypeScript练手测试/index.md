@@ -11,19 +11,19 @@ tags: 前端, TypeScript, ts, 练手测试
 
 ```ts
 type User = {
-   id: number;
-   kind: string;
+  id: number;
+  kind: string;
 };
 
 function makeCustomer<T extends User>(u: T): T {
-   // Error（TS 编译器版本：v4.4.2）
-   // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
-   // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
-   // but 'T' could be instantiated with a different subtype of constraint 'User'.
-   return {
-      id: u.id,
-      kind: 'customer'
-   };
+  // Error（TS 编译器版本：v4.4.2）
+  // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
+  // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
+  // but 'T' could be instantiated with a different subtype of constraint 'User'.
+  return {
+    id: u.id,
+    kind: 'customer'
+  };
 }
 ```
 
@@ -33,19 +33,19 @@ function makeCustomer<T extends User>(u: T): T {
 
 ```ts
 type User = {
-   id: number;
-   kind: string;
+  id: number;
+  kind: string;
 };
 
 function makeCustomer<T extends User>(u: T) {
-   // Error（TS 编译器版本：v4.4.2）
-   // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
-   // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
-   // but 'T' could be instantiated with a different subtype of constraint 'User'.
-   return {
-      id: u.id,
-      kind: 'customer'
-   };
+  // Error（TS 编译器版本：v4.4.2）
+  // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
+  // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
+  // but 'T' could be instantiated with a different subtype of constraint 'User'.
+  return {
+    id: u.id,
+    kind: 'customer'
+  };
 }
 ```
 
@@ -55,20 +55,20 @@ T 类型兼容 User 类型
 
 ```ts
 type User = {
-   id: number;
-   kind: string;
+  id: number;
+  kind: string;
 };
 
 function makeCustomer<T extends User>(u: T): T {
-   // Error（TS 编译器版本：v4.4.2）
-   // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
-   // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
-   // but 'T' could be instantiated with a different subtype of constraint 'User'.
-   return {
-      ...u, // 返回的类型是 User，而非 T，T 是 User 的子类型，约束条件更多，子类可以赋值给父类，反过来不行
-      id: u.id,
-      kind: 'customer'
-   };
+  // Error（TS 编译器版本：v4.4.2）
+  // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
+  // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
+  // but 'T' could be instantiated with a different subtype of constraint 'User'.
+  return {
+    ...u, // 返回的类型是 User，而非 T，T 是 User 的子类型，约束条件更多，子类可以赋值给父类，反过来不行
+    id: u.id,
+    kind: 'customer'
+  };
 }
 ```
 
@@ -104,19 +104,19 @@ type ReturnMake<T extends User, U> = {
 
 ```ts
 type User = {
-   id: number;
-   kind: string;
+  id: number;
+  kind: string;
 };
 
 function makeCustomer<T extends User>(u: T): T {
-   // Error（TS 编译器版本：v4.4.2）
-   // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
-   // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
-   // but 'T' could be instantiated with a different subtype of constraint 'User'.
-   return {
-      id: u.id,
-      kind: 'customer'
-   } as T;
+  // Error（TS 编译器版本：v4.4.2）
+  // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
+  // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
+  // but 'T' could be instantiated with a different subtype of constraint 'User'.
+  return {
+    id: u.id,
+    kind: 'customer'
+  } as T;
 }
 ```
 
@@ -126,19 +126,19 @@ function makeCustomer<T extends User>(u: T): T {
 
 ```ts
 type User = {
-   id: number;
-   kind: string;
+  id: number;
+  kind: string;
 };
 
 function makeCustomer<T extends User>(u: T): User {
-   // Error（TS 编译器版本：v4.4.2）
-   // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
-   // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
-   // but 'T' could be instantiated with a different subtype of constraint 'User'.
-   return {
-      id: u.id,
-      kind: 'customer'
-   };
+  // Error（TS 编译器版本：v4.4.2）
+  // Type '{ id: number; kind: string; }' is not assignable to type 'T'.
+  // '{ id: number; kind: string; }' is assignable to the constraint of type 'T',
+  // but 'T' could be instantiated with a different subtype of constraint 'User'.
+  return {
+    id: u.id,
+    kind: 'customer'
+  };
 }
 ```
 
@@ -152,11 +152,11 @@ T 只是约束于 User 类型，而不局限于 User 类型，所以返回为 T 
 
 ```ts
 function f(a: string | number, b: string | number) {
-   if (typeof a === 'string') {
-      return a + ':' + b; // no error but b can be number!
-   } else {
-      return a + b; // error as b can be number | string
-   }
+  if (typeof a === 'string') {
+    return a + ':' + b; // no error but b can be number!
+  } else {
+    return a + b; // error as b can be number | string
+  }
 }
 
 f(2, 3); // Ok
@@ -174,11 +174,11 @@ function f(a: string, b: string): string;
 function f(a: number, b: number): number;
 
 function f(a, b) {
-   if (typeof a === 'string') {
-      return a + ':' + b; // no error but b can be number!
-   } else {
-      return a + b; // error as b can be number | string
-   }
+  if (typeof a === 'string') {
+    return a + ':' + b; // no error but b can be number!
+  } else {
+    return a + b; // error as b can be number | string
+  }
 }
 
 f(2, 3); // Ok
@@ -193,11 +193,11 @@ f('a', 'b'); // Ok
 
 ```ts
 function f<T extends string | number>(a: T, b: T) {
-   if (typeof a === 'string') {
-      return a + ':' + b; // no error but b can be number!
-   } else {
-      return +a + +b; // error as b can be number | string
-   }
+  if (typeof a === 'string') {
+    return a + ':' + b; // no error but b can be number!
+  } else {
+    return +a + +b; // error as b can be number | string
+  }
 }
 
 f(2, 3); // Ok
@@ -214,11 +214,11 @@ f('a', 'b'); // Ok
 type F = <T extends string | number>(...args: [T, T]) => string | number;
 
 const f: F = (a, b) => {
-   if (typeof a === 'string') {
-      return a + ':' + b; // no error but b can be number!
-   } else {
-      return +a + +b; // error as b can be number | string
-   }
+  if (typeof a === 'string') {
+    return a + ':' + b; // no error but b can be number!
+  } else {
+    return +a + +b; // error as b can be number | string
+  }
 };
 
 f(2, 3); // Ok
@@ -233,11 +233,11 @@ f('a', 'b'); // Ok
 type F = (...args: [string, string] | [number, number]) => string | number;
 
 const f: F = (a, b) => {
-   if (typeof a === 'string') {
-      return a + ':' + b; // no error but b can be number!
-   } else {
-      return +a + +b; // error as b can be number | string
-   }
+  if (typeof a === 'string') {
+    return a + ':' + b; // no error but b can be number!
+  } else {
+    return +a + +b; // error as b can be number | string
+  }
 };
 
 f(2, 3); // Ok
@@ -252,9 +252,9 @@ f('a', 'b'); // Ok
 
 ```ts
 type Foo = {
-   a: number;
-   b?: string;
-   c: boolean;
+  a: number;
+  b?: string;
+  c: boolean;
 };
 
 // 测试用例
@@ -271,9 +271,9 @@ type SomeOptional = SetOptional<Foo, 'a' | 'b'>;
 
 ```ts
 type Foo = {
-   a?: number;
-   b: string;
-   c?: boolean;
+  a?: number;
+  b: string;
+  c?: boolean;
 };
 
 // 测试用例
@@ -289,7 +289,7 @@ type SomeRequired = SetRequired<Foo, 'b' | 'c'>;
 
 ```ts
 type Simplify<T> = {
-   [P in keyof T]: T[P];
+  [P in keyof T]: T[P];
 };
 
 type SetOptional<T extends object, K extends keyof T = keyof T> = Simplify<Omit<T, K> & Partial<Pick<T, K>>>;
@@ -303,16 +303,16 @@ type SetRequired<T extends object, K extends keyof T = keyof T> = Simplify<Omit<
 
 ```ts
 interface Todo {
-   title: string;
-   description: string;
-   completed: boolean;
+  title: string;
+  description: string;
+  completed: boolean;
 }
 
 type TodoPreview = Pick<Todo, 'title' | 'completed'>;
 
 const todo: TodoPreview = {
-   title: 'Clean room',
-   completed: false
+  title: 'Clean room',
+  completed: false
 };
 ```
 
@@ -320,10 +320,10 @@ const todo: TodoPreview = {
 
 ```ts
 interface Example {
-   a: string;
-   b: string | number;
-   c: () => void;
-   d: {};
+  a: string;
+  b: string | number;
+  c: () => void;
+  d: {};
 }
 
 // 测试用例：
@@ -335,14 +335,14 @@ type StringKeysOnly = ConditionalPick<Example, string>;
 
 ```ts
 interface Example {
-   a: string;
-   b: string | number;
-   c: () => void;
-   d: {};
+  a: string;
+  b: string | number;
+  c: () => void;
+  d: {};
 }
 
 type ConditionalPick<T, U> = {
-   [K in keyof T]: T[K] extends U ? Pick<T, K> : never;
+  [K in keyof T]: T[K] extends U ? Pick<T, K> : never;
 }[keyof T];
 
 // 测试用例：
@@ -400,8 +400,8 @@ infer 推断
 ```ts
 type Fn = (a: number, b: string) => number;
 type AppendArgument<F extends (...args: any) => any, A> = F extends (...args: infer T) => infer U
-   ? (x: A, ...args: T) => U
-   : never;
+  ? (x: A, ...args: T) => U
+  : never;
 
 type FinalFn = AppendArgument<Fn, boolean>;
 // (x: boolean, a: number, b: string) => number
@@ -459,7 +459,7 @@ type DeepTestResult = DeepFlat<Deep>;
 ```ts{3,13}
 // T[P][number] 对数组里每个 index 进行循环，将 index 转换成key
 type NaiveFlat<T extends any[]> = {
-   [P in keyof T]: T[P] extends any[] ? T[P][number] : T[P];
+  [P in keyof T]: T[P] extends any[] ? T[P][number] : T[P];
 }[number];
 
 // 测试用例：
@@ -469,7 +469,7 @@ type NaiveResult = NaiveFlat<[['a'], ['b', 'c'], ['d']]>;
 type Deep = [['a'], ['b', 'c'], [['d']], [[[['e']]]]];
 
 type DeepFlat<T extends any[]> = {
-   [K in keyof T]: T[K] extends any[] ? DeepFlat<T[K]> : T[K];
+  [K in keyof T]: T[K] extends any[] ? DeepFlat<T[K]> : T[K];
 }[number];
 
 type DeepTestResult = DeepFlat<Deep>;
@@ -482,20 +482,20 @@ infer 推断，这里的 `T[number] extends infer U` 可等价替换为 `T exten
 
 ```ts
 type NaiveFlat<T extends any[]> = T[number] extends infer U // 你的实现代码
-   ? U extends any[]
-      ? U[number]
-      : U
-   : never;
+  ? U extends any[]
+    ? U[number]
+    : U
+  : never;
 
 // 测试用例：
 type NaiveResult = NaiveFlat<[['a'], ['b', 'c'], ['d']]>;
 // NaiveResult 的结果： "a" | "b" | "c" | "d"
 
 type DeepFlat<T extends any[]> = T[number] extends infer U // 你的实现代码
-   ? U extends any[]
-      ? DeepFlat<U>
-      : U
-   : never;
+  ? U extends any[]
+    ? DeepFlat<U>
+    : U
+  : never;
 
 // 测试用例
 type Deep = [['a'], ['b', 'c'], [['d']], [[[['e']]]]];
@@ -513,8 +513,8 @@ type EmptyObject = {};
 // 测试用例
 const shouldPass: EmptyObject = {}; // 可以正常赋值
 const shouldFail: EmptyObject = {
-   // 将出现编译错误
-   prop: 'TS'
+  // 将出现编译错误
+  prop: 'TS'
 };
 ```
 
@@ -522,12 +522,12 @@ const shouldFail: EmptyObject = {
 
 ```ts
 type SomeType = {
-   prop: string;
+  prop: string;
 };
 
 // 更改以下函数的类型定义，让它的参数只允许严格SomeType类型的值
 function takeSomeTypeOnly(x: SomeType) {
-   return x;
+  return x;
 }
 
 // 测试用例：
@@ -542,28 +542,28 @@ takeSomeTypeOnly(y); // 将出现编译错误
 
 ```ts
 type EmptyObject = {
-   [P in PropertyKey]: never;
+  [P in PropertyKey]: never;
 };
 
 // 测试用例
 const shouldPass: EmptyObject = {}; // 可以正常赋值
 const shouldFail: EmptyObject = {
-   // 将出现编译错误
-   prop: 'TS'
+  // 将出现编译错误
+  prop: 'TS'
 };
 
 type SomeType = {
-   prop: string;
+  prop: string;
 };
 
 // T2 的 key 必须存在于 T1 里面，且 T2 是 T1 的一部分
 type StrictType<T1 extends T2, T2> = {
-   [P in keyof T1]: P extends keyof T2 ? T1[P] : never;
+  [P in keyof T1]: P extends keyof T2 ? T1[P] : never;
 };
 
 // 更改以下函数的类型定义，让它的参数只允许严格 SomeType 类型的值
 function takeSomeTypeOnly<T extends SomeType>(x: StrictType<T, SomeType>) {
-   return x;
+  return x;
 }
 
 // 测试用例：
@@ -636,8 +636,8 @@ type NamesStars = JoinStrArray<Names, "⭐️">; // "Sem⭐️Lolo⭐️Kaquko"
 
 ```ts
 type Trim<V extends string> = // 你的实现代码
-   // 测试用例
-   Trim<' semlinker '>;
+  // 测试用例
+  Trim<' semlinker '>;
 //=> 'semlinker'
 ```
 
@@ -709,7 +709,7 @@ type A7 = IsEqual<1 | 2, 1>; // boolean
 // TODO IsEqual 具体原理
 
 ```ts
-type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends (<G>() => G extends U ? 1 : 2) ? true : false;
+type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
 
 // 测试用例
 type E0 = IsEqual<1, 2>; // false
@@ -784,7 +784,7 @@ type T2 = Tail<[1, 2, 3, 4, 5]> // [2, 3, 4, 5]
 ## 最佳解答
 
 ```ts
-type Tail<T extends Array<any>> = T extends [] ? [] : (T extends [any, ...infer K] ? K : never);
+type Tail<T extends Array<any>> = T extends [] ? [] : T extends [any, ...(infer K)] ? K : never;
 
 // 测试用例
 type T0 = Tail<[]>; // []
@@ -897,9 +897,11 @@ type I2 = Includes<[2, 3, 3, 1], 1>; // true
 // 实现一个 Includes 工具类型，用于判断指定的类型 E 是否包含在 T 数组类型中。具体的使用示例如下所示：
 type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
 
-type Includes<T extends Array<any>, E> = T extends [infer A, ...infer B]
-   ? (IsEqual<A, E> extends true ? true : Includes<B, E>)
-   : false;
+type Includes<T extends Array<any>, E> = T extends [infer A, ...(infer B)]
+  ? IsEqual<A, E> extends true
+    ? true
+    : Includes<B, E>
+  : false;
 
 type I0 = Includes<[], 1>; // false
 type I1 = Includes<[2, 2, 3, 1], 2>; // true
@@ -956,15 +958,15 @@ type PersonOptionalKeys = OptionalKeys<Person> // "from" | "speak"
 
 ```ts
 type Person = {
-   id: string;
-   name: string;
-   age: number;
-   from?: string;
-   speak?: string;
+  id: string;
+  name: string;
+  age: number;
+  from?: string;
+  speak?: string;
 };
 
 type OptionalKeys<T> = {
-   [K in keyof T]: {} extends Pick<T, K> ? K : never;
+  [K in keyof T]: {} extends Pick<T, K> ? K : never;
 }[keyof T];
 
 type PersonOptionalKeys = OptionalKeys<Person>; // "from" | "speak"
@@ -989,25 +991,25 @@ type F2 = Curry<(a: number, b: string) => Date>; //  (arg_0: number) => (b: stri
 ## 最佳解答
 
 ```ts
-type FirstAsArray<T extends any[]> = T extends [...infer A, infer B, infer C]
-   ? A extends []
-      ? T extends [...infer A, infer B]
-         ? A
-         : never
-      : T extends [...infer A, infer B]
-      ? FirstAsArray<A>
+type FirstAsArray<T extends any[]> = T extends [...(infer A), infer B, infer C]
+  ? A extends []
+    ? T extends [...(infer A), infer B]
+      ? A
       : never
-   : T;
+    : T extends [...(infer A), infer B]
+    ? FirstAsArray<A>
+    : never
+  : T;
 
 type Curry<F extends (...args: any[]) => any, P extends any[] = Parameters<F>, R = ReturnType<F>> = P extends [
-   infer A,
-   infer B,
-   ...infer C
+  infer A,
+  infer B,
+  ...(infer C)
 ]
-   ? P extends [infer A, ...infer B]
-      ? Curry<F, FirstAsArray<P>, Curry<F, B, R>>
-      : never
-   : (...args: P) => R;
+  ? P extends [infer A, ...(infer B)]
+    ? Curry<F, FirstAsArray<P>, Curry<F, B, R>>
+    : never
+  : (...args: P) => R;
 
 type F0 = Curry<() => Date>; // () => Date
 type F1 = Curry<(a: number) => Date>; // (a: number) => Date
@@ -1038,13 +1040,13 @@ const ab: Merge<Foo, Bar> = { a: 1, b: 2 };
 
 ```ts
 type ExtractKeys<T> = {
-   [K in keyof T]: K;
+  [K in keyof T]: K;
 }[keyof T];
 
 type Merge<FirstType, SecondType> = {
-   [K in keyof FirstType]: K extends ExtractKeys<SecondType> ? SecondType[K] : FirstType[K];
+  [K in keyof FirstType]: K extends ExtractKeys<SecondType> ? SecondType[K] : FirstType[K];
 } &
-   SecondType;
+  SecondType;
 ```
 
 ## 最佳解答一
@@ -1057,11 +1059,11 @@ type Merge<FirstType, SecondType> = Omit<FirstType, keyof SecondType> & SecondTy
 
 ```ts
 type Merge<FirstType, SecondType> = {
-   [K in keyof (FirstType & SecondType)]: K extends keyof SecondType
-      ? SecondType[K]
-      : K extends keyof FirstType
-      ? FirstType[K]
-      : never;
+  [K in keyof (FirstType & SecondType)]: K extends keyof SecondType
+    ? SecondType[K]
+    : K extends keyof FirstType
+    ? FirstType[K]
+    : never;
 };
 ```
 
@@ -1093,8 +1095,8 @@ const responder: RequireAtLeastOne<Responder, 'text' | 'json'> = {
 ```ts
 // 这里利用了联合类型作为泛型是 extends 会分发处理的特性，之后将去掉某个属性的类型与只有某个属性，且必填的类型做交叉合并
 type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof ObjectType> = KeysType extends string
-   ? Omit<ObjectType, KeysType> & Required<Pick<ObjectType, KeysType>>
-   : never;
+  ? Omit<ObjectType, KeysType> & Required<Pick<ObjectType, KeysType>>
+  : never;
 ```
 
 ## 最佳解答二
@@ -1103,9 +1105,9 @@ type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof Obj
 
 ```ts
 type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof ObjectType> = Omit<ObjectType, KeysType> &
-   {
-      [K in KeysType]: Required<Pick<ObjectType, K>>;
-   }[KeysType];
+  {
+    [K in KeysType]: Required<Pick<ObjectType, K>>;
+  }[KeysType];
 ```
 
 # 测试二十三
@@ -1176,15 +1178,15 @@ mutableFoo.b = '6'; // Cannot assign to 'b' because it is a read-only property.
 
 ```ts
 type Foo = {
-   readonly a: number;
-   readonly b: string;
-   readonly c: boolean;
+  readonly a: number;
+  readonly b: string;
+  readonly c: boolean;
 };
 
 type Mutable<T, Keys extends keyof T = keyof T> = {
-   -readonly [K in Keys]: T[K];
+  -readonly [K in Keys]: T[K];
 } &
-   Omit<T, Keys>;
+  Omit<T, Keys>;
 
 const mutableFoo: Mutable<Foo, 'a'> = { a: 1, b: '2', c: true };
 
@@ -1245,7 +1247,7 @@ type I2 = IsNever<null>; // false
 利用 isEqual
 
 ```ts
-type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends (<G>() => G extends U ? 1 : 2) ? true : false;
+type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
 type IsNever<T> = IsEqual<T, never>;
 type I0 = IsNever<never>; // true
 type I1 = IsNever<never | string>; // false
@@ -1269,9 +1271,9 @@ type R1 = Reverse<[1, 2, 3]> // [3, 2, 1]
 ## 最佳解答一
 
 ```ts
-type Reverse<T extends Array<any>, R extends Array<any> = []> = T extends [infer First, ...infer Rest]
-   ? Reverse<Rest, [First, ...R]>
-   : R;
+type Reverse<T extends Array<any>, R extends Array<any> = []> = T extends [infer First, ...(infer Rest)]
+  ? Reverse<Rest, [First, ...R]>
+  : R;
 
 type R0 = Reverse<[]>; // []
 type R1 = Reverse<[1, 2, 3]>; // [3, 2, 1]
@@ -1280,9 +1282,9 @@ type R1 = Reverse<[1, 2, 3]>; // [3, 2, 1]
 ## 最佳解答二
 
 ```ts
-type Reverse<T extends Array<any>, R extends Array<any> = []> = T extends [infer First, ...infer Rest]
-   ? [...Reverse<Rest>, First]
-   : [];
+type Reverse<T extends Array<any>, R extends Array<any> = []> = T extends [infer First, ...(infer Rest)]
+  ? [...Reverse<Rest>, First]
+  : [];
 
 type R0 = Reverse<[]>; // []
 type R1 = Reverse<[1, 2, 3]>; // [3, 2, 1]
@@ -1348,15 +1350,11 @@ type b = ToPath<"foo[0].bar.baz">; //=> ['foo', '0', 'bar', 'baz']
 declare const config: Chainable;
 
 type Chainable = {
-   option(key: string, value: any): any;
-   get(): any;
+  option(key: string, value: any): any;
+  get(): any;
 };
 
-const result = config
-   .option('age', 7)
-   .option('name', 'lolo')
-   .option('address', { value: 'XiaMen' })
-   .get();
+const result = config.option('age', 7).option('name', 'lolo').option('address', { value: 'XiaMen' }).get();
 
 type ResultType = typeof result;
 // 期望 ResultType 的类型是：
@@ -1375,15 +1373,11 @@ type ResultType = typeof result;
 declare const config: Chainable;
 
 type Chainable<T0 = {}> = {
-   option<T, U>(key: keyof T, value: U): Chainable<T0 & { [P in keyof T]: U }>;
-   get(): T0;
+  option<T, U>(key: keyof T, value: U): Chainable<T0 & { [P in keyof T]: U }>;
+  get(): T0;
 };
 
-const result = config
-   .option('age', 7)
-   .option('name', 'lolo')
-   .option('address', { value: 'XiaMen' })
-   .get();
+const result = config.option('age', 7).option('name', 'lolo').option('address', { value: 'XiaMen' }).get();
 
 type ResultType = typeof result;
 // 期望 ResultType 的类型是：
@@ -1502,10 +1496,10 @@ type S2 = SmallerThan<8, 10>; // true
 
 ```ts
 type SmallerThan<N extends number, M extends number, A extends any[] = []> = A['length'] extends M
-   ? false
-   : A['length'] extends N
-   ? true
-   : SmallerThan<N, M, [...A, any]>;
+  ? false
+  : A['length'] extends N
+  ? true
+  : SmallerThan<N, M, [...A, any]>;
 
 type S0 = SmallerThan<0, 1>; // true
 type S1 = SmallerThan<2, 0>; // false
@@ -1552,11 +1546,11 @@ type F2 = Filter<[0, true, any, "abao"], string>; // [any, "abao"]
 ## 最佳解答
 
 ```ts
-type Filter<T extends any[], F> = T extends [infer A, ...infer B]
-   ? [A] extends [F]
-      ? [A, ...Filter<B, F>]
-      : Filter<B, F>
-   : [];
+type Filter<T extends any[], F> = T extends [infer A, ...(infer B)]
+  ? [A] extends [F]
+    ? [A, ...Filter<B, F>]
+    : Filter<B, F>
+  : [];
 
 type F0 = Filter<[6, 'lolo', 7, 'semlinker', false], number>; // [6, 7]
 type F1 = Filter<['kakuqo', 2, ['ts'], 'lolo'], string>; // ["kakuqo", "lolo"]
@@ -1579,11 +1573,11 @@ type F2 = Flat<['a', ['b', 'c'], ['d', ['e', ['f']]]]> // ["a", "b", "c", "d", "
 ## 最佳解答
 
 ```ts
-type Flat<T extends any[]> = T extends [infer U, ...infer V]
-   ? U extends any[]
-      ? [...Flat<U>, ...Flat<V>]
-      : [U, ...Flat<V>]
-   : [];
+type Flat<T extends any[]> = T extends [infer U, ...(infer V)]
+  ? U extends any[]
+    ? [...Flat<U>, ...Flat<V>]
+    : [U, ...Flat<V>]
+  : [];
 
 type F0 = Flat<[]>; // []
 type F1 = Flat<['a', 'b', 'c']>; // ["a", "b", "c"]
@@ -1685,11 +1679,11 @@ type A2 = AnyOf<[1, "", false, [], {}]> // true
 ```ts
 type NotEmptyObject<T> = T extends {} ? ({} extends T ? false : true) : true;
 type Flasy = 0 | '' | false | [];
-type AnyOf<T extends any[]> = T extends [infer First, ...infer Rest]
-   ? [First] extends [Flasy]
-      ? AnyOf<Rest>
-      : NotEmptyObject<First>
-   : false;
+type AnyOf<T extends any[]> = T extends [infer First, ...(infer Rest)]
+  ? [First] extends [Flasy]
+    ? AnyOf<Rest>
+    : NotEmptyObject<First>
+  : false;
 
 type A0 = AnyOf<[]>; // false
 type A1 = AnyOf<[0, '', false, [], {}]>; // false
@@ -1773,11 +1767,11 @@ type I2 = IndexOf<Arr, 3> // 2
 ```ts
 type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
 
-type IndexOf<A extends any[], Item, U extends any[] = []> = A extends [infer First, ...infer Rest]
-   ? IsEqual<First, Item> extends true
-      ? U['length']
-      : IndexOf<Rest, Item, [...U, First]>
-   : -1;
+type IndexOf<A extends any[], Item, U extends any[] = []> = A extends [infer First, ...(infer Rest)]
+  ? IsEqual<First, Item> extends true
+    ? U['length']
+    : IndexOf<Rest, Item, [...U, First]>
+  : -1;
 
 type Arr = [1, 2, 3, 4, 5];
 type I0 = IndexOf<Arr, 0>; // -1
@@ -1799,7 +1793,7 @@ type P0 = Permutation<'a' | 'b'>  // ['a', 'b'] | ['b' | 'a']
 type P1 = Permutation<'a' | 'b' | 'c'>
 ```
 
-## 最佳答案
+## 最佳解答
 
 ```ts
 type Permutation<T, K = T> = [T] extends [never] ? [] : K extends K ? [K, ...Permutation<Exclude<T, K>>] : never;
@@ -1809,6 +1803,222 @@ type P0 = Permutation<'a' | 'b'>; // ['a', 'b'] | ['b' | 'a']
 // type P1 = ["a", "b", "c"] | ["a", "c", "b"] | ["b", "a", "c"]
 // | ["b", "c", "a"] | ["c", "a", "b"] | ["c", "b", "a"]
 type P1 = Permutation<'a' | 'b' | 'c'>;
+```
+
+# 测试四十四
+
+精简如下组合起来的 ts
+
+```ts
+// 上报选项
+type ExposeOptions =
+  | {
+      selector: string; // 选择器
+      targetList?: HTMLElement[]; // 元素列表
+      viewSuccess: ViewSuccessOptions; // 有效曝光
+      view?: ViewOptions; // 立即曝光
+    }
+  | {
+      selector?: string; // 选择器
+      targetList: HTMLElement[]; // 元素列表
+      viewSuccess?: ViewSuccessOptions; // 有效曝光
+      view: ViewOptions; // 立即曝光
+    }
+  | {
+      selector: string; // 选择器
+      targetList?: HTMLElement[]; // 元素列表
+      viewSuccess?: ViewSuccessOptions; // 有效曝光
+      view: ViewOptions; // 立即曝光
+    }
+  | {
+      selector?: string; // 选择器
+      targetList: HTMLElement[]; // 元素列表
+      viewSuccess: ViewSuccessOptions; // 有效曝光
+      view?: ViewOptions; // 立即曝光
+    };
+```
+
+## 我的解答
+
+```ts
+type ExposeOption = {
+  selector: string; // 选择器
+  targetList: HTMLElement[]; // 元素列表
+  viewSuccess: string; // 有效曝光
+  view: string; // 立即曝光
+};
+
+type tmp2 = ['targetList', 'view'] | ['selector', 'viewSuccess'];
+
+type UnionType<T> = T extends (infer P)[] ? P : never;
+
+type RequireAtLeastOne<ObjectType, KeysType extends keyof ObjectType = keyof ObjectType> = KeysType extends string[]
+  ? Omit<ObjectType, UnionType<KeysType>> & Partial<Pick<ObjectType, UnionType<KeysType>>>
+  : never;
+
+type tmp = RequireAtLeastOne<ExposeOption, tmp2>;
+```
+
+## 最佳解答
+
+```ts
+type PersonInfo = {
+  name: string;
+  age: number;
+  sex: string;
+  id: number;
+};
+
+// 在这里写需要的组合
+type ArrType = [['name', 'age'], ['id', 'age']];
+// type ArrType = [['name', 'age'], ['id', 'age'], ['id'], ['id', 'age', 'name']]
+
+type PartialWithKeys<T, Keys extends Array<keyof T>, K extends keyof T = Keys[number]> = Partial<Pick<T, K>> &
+  Omit<T, Extract<keyof T, K>>;
+
+type IterArr<
+  T,
+  C extends Array<Array<keyof T>>,
+  Res = never,
+  L extends Array<any> = []
+> = C['length'] extends L['length'] ? Res : IterArr<T, C, Res | PartialWithKeys<T, C[L['length']]>, [...L, 1]>;
+
+type R5 = IterArr<PersonInfo, ArrType>;
+
+// 测试用例
+const dd: R5 = {
+  // name: '1',
+  // age: 2,
+  // sex: 'k',
+  // id: 2
+};
+```
+
+# 测试四十五
+
+实现 Flat 工具类
+
+```ts
+type permission = {
+  a: string;
+  c: number;
+  d: {
+    e: string;
+    f: string;
+  };
+};
+
+// type R1 = {
+//   a: string;
+//   c: number;
+//   e: string;
+//   f: string;
+// };
+type R1 = Flat<permission>;
+```
+
+## 我的解答
+
+这里不考虑 key 的冲突情况，且没有处理对象嵌套的情况
+
+```ts
+type permission = {
+    a: string;
+    c: number;
+    d: {
+        e: string;
+        f: string
+    };
+}
+
+type ValueOf<T> = T[keyof T];
+
+type Flat<T> = ValueOf<{
+    [K in keyof T as (T[K] extends { [key: string]: any } ? K : never)] : T[K]
+}> & {
+    [K in keyof T as (T[K] extends { [key: string]: any } ? never : K)] : T[K]
+}
+
+type R1 = Flat<permission>
+
+const c: R1 = {
+    a: '12',
+    c: 1,
+    e: '12',
+    f: 'ssf'
+}
+```
+
+## 最佳解答
+
+```ts
+type PermissionReqBaseSharp = {
+  resourceCode: string;
+  privilegeName: string;
+  ext: {
+    multiLanguageKey: string;
+    hasFeatureKey: boolean;
+    isCascade: {
+      person: boolean;
+      score: {
+        math: 100;
+      };
+    };
+  };
+  params: {
+    name: string;
+  };
+};
+
+type GetDetail<T> = {
+  [K in keyof T]: T[K];
+};
+
+// 选出对象中非对象类型的 keys
+type PickNonObjectKeys<T> = {
+  [K in keyof T]: T[K] extends object ? never : K;
+}[keyof T];
+
+type PickNonObjectPartial<T> = Pick<T, PickNonObjectKeys<T>>;
+
+// 选出对象中对象类型的 keys
+type PickObjectKeys<T> = Exclude<keyof T, PickNonObjectKeys<T>>;
+
+// 联合转交叉
+type UnionToIntersection<T> = (T extends any ? (k: T) => void : never) extends (k: infer I) => void ? I : never;
+
+// 处理联合对象，继续向下递归
+type FlatUnion<T> = T extends object ? FlatDeep<T> : never;
+
+/**
+ * 递归打平对象类型, 可参考：PermissionReqBaseSharp
+ */
+type FlatDeep<T> = PickNonObjectPartial<T> &
+  (PickObjectKeys<T> extends never ? {} : UnionToIntersection<FlatUnion<T[PickObjectKeys<T>]>>);
+
+type APermissionReqBaseSharp = {
+  resourceCode: string;
+  privilegeUrl: string;
+  privilegeType: any;
+  belongDomain: any;
+  privilegeName: string;
+  belongType: 1; // admin 归属
+  ext: {
+    multiLanguageKey: string;
+    hasFeatureKey: boolean;
+    featureKey: string;
+    hasHover: boolean;
+    hasHoverLangKey: string;
+    isCascade: boolean;
+  };
+  brushData: boolean;
+  publishEnv: 2;
+  parentId?: string;
+};
+
+type R1 = GetDetail<FlatDeep<APermissionReqBaseSharp>>;
+
+type R2 = GetDetail<FlatDeep<PermissionReqBaseSharp>>;
 ```
 
 // TODO https://github.com/semlinker/awesome-typescript/issues?page=2&q=is%3Aissue+is%3Aopen+sort%3Acreated-asc

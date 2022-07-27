@@ -324,7 +324,7 @@ function drawScene() {
 
 为什么会这样？来看看数学公式。
 
-```cpp
+```js
 rotatedX = a_position.x * u_rotation.y + a_position.y * u_rotation.x;
 rotatedY = a_position.y * u_rotation.y - a_position.x * u_rotation.x;
 ```
@@ -721,7 +721,7 @@ matrix = m3.multiply(matrix, moveOriginMatrix);
 
 还可以做更有趣的事情，如果你回想第一篇文章 WebGL 基础概念，可能会记得在着色器中我们将像素坐标转换到裁剪空间，这是当时的代码
 
-```cpp
+```glsl
 // ...
 // 从像素坐标转换到 0.0 到 1.0
 vec2 zeroToOne = position / u_resolution;

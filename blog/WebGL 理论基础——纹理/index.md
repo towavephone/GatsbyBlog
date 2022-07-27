@@ -1,6 +1,6 @@
 ---
 title: WebGL 理论基础——纹理
-date: 2022-07-05 15:15:57
+date: 2022-07-27 14:35:19
 categories:
   - 前端
 tags: 前端, 可视化, WebGL, 读书笔记
@@ -66,6 +66,8 @@ gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0);
 // 设置纹理坐标
 setTexcoords(gl);
 ```
+
+## F
 
 如你所见，我们将图像映射到 F 中的每个矩形面上。
 
@@ -140,5 +142,235 @@ image.addEventListener('load', function () {
 ```
 
 [webgl-3d-textures](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures?view=preview)
+
+如果我只想使用一部分图像覆盖 'F' 的正面怎么办，纹理是通过“纹理坐标”来引用的，纹理坐标 0.0 到 1.0 对应纹理从左到右，0.0 到 1.0 对应第一个像素所在行到最后一行。注意我没有使用上或者下，上下在纹理坐标空间中是没有意义的，因为绘制一些东西后再重定向后，是没有上下的概念的，主要是依据传递给 WebGL 的纹理数据，纹理数据的开头对应纹理坐标 0, 0，结尾对应纹理坐标 1, 1
+
+![](res/2022-07-26-17-11-32.png)
+
+我将纹理载入到 Photoshop 中得到一些点的坐标。
+
+![](res/2022-07-26-17-11-52.png)
+
+可以像这样将像素坐标转换到纹理坐标
+
+```js
+texcoordX = pixelCoordX / (width - 1);
+texcoordY = pixelCoordY / (height - 1);
+```
+
+这是正面的纹理坐标
+
+```
+// 正面左竖
+ 38 / 255,  44 / 255,
+ 38 / 255, 223 / 255,
+113 / 255,  44 / 255,
+ 38 / 255, 223 / 255,
+113 / 255, 223 / 255,
+113 / 255,  44 / 255,
+
+// 正面上横
+113 / 255, 44 / 255,
+113 / 255, 85 / 255,
+218 / 255, 44 / 255,
+113 / 255, 85 / 255,
+218 / 255, 85 / 255,
+218 / 255, 44 / 255,
+
+// 正面中横
+113 / 255, 112 / 255,
+113 / 255, 151 / 255,
+203 / 255, 112 / 255,
+113 / 255, 151 / 255,
+203 / 255, 151 / 255,
+203 / 255, 112 / 255,
+```
+
+对背面也使用相同的纹理坐标，得到这样的结果。
+
+[webgl-3d-textures-texture-coords-mapped](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-texture-coords-mapped?view=preview)
+
+并不是非常好看，但是希望这样能展示出纹理坐标的用法。如果你使用代码生成几何体（立方体，球体，等等），通常情况下计算期望的纹理坐标也是比较容易的。另一方面如果通过软件例如 Blender, Maya, 3D Studio Max 制作几何体，那么你的美术（或者你自己）就会用软件调整纹理坐标。
+
+如果纹理坐标再 0.0 到 1.0 之外会怎样？WebGL 默认会重复纹理，0.0 到 1.0 是一份纹理的“拷贝”，1.0 到 2.0 是另外一份拷贝，-4.0 到 -3.0 也是另外一份拷贝。让我们在一个平面上使用这些纹理坐标。
+
+```
+-3, -1,
+ 2, -1,
+-3,  4,
+-3,  4,
+ 2, -1,
+ 2,  4,
+```
+
+这是结果
+
+[webgl-3d-textures-repeat-clamp](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-repeat-clamp?view=preview)
+
+你可以使用 `CLAMP_TO_EDGE` 告诉 WebGL 再某个方向不需要重复，例如
+
+```js
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+```
+
+点击上方示例中的按钮，观察结果。
+
+你可能注意到在加载纹理时调用了 `gl.generateMipmap`，那是干什么的？
+
+假设我们有这样一个 16×16 像素的纹理。
+
+![](res/2022-07-26-18-15-32.png)
+
+假设我们要将它绘制在屏幕的 2×2 个像素上，那么这 4 个像素应该使用什么颜色？这里有 256 个像素可以选择，如果在 Photoshop 中将 16×16 的图像缩放到 2×2，它会将每个角 8×8 的像素的平均值赋给这四个像素。不幸的是绘制 64 个像素再求平均在 GPU 中是非常慢的。假设你有一个 2048x2048 像素的纹理想要绘制成 2x2 个像素，就需要对 1024x1024 或 100 万个像素求平均 4 次，这需要很多运算同时速度要快。
+
+事实上 GPU 使用的是一个纹理贴图（mipmap），纹理贴图是一个逐渐缩小的图像集合，每一个是前一个的四分之一大小，16×16 纹理的纹理贴图看起来像这样。
+
+![](res/2022-07-26-18-24-47.png)
+
+通常每个子图都是前一级的双线性插值，这就是 `gl.generateMipmap` 做的事情，它根据原始图像创建所有的缩小级别，你也可以自己提供缩小级别的图像。
+
+现在如果你想将 16x16 像素的纹理绘制到屏幕的 2×2 个像素上，WebGL 会从创建的贴图中找到从之前级别贴图插值出的 2×2 贴图来使用。
+
+你可以为纹理选择不同的贴图筛选条件来控制 WebGL 的插值，一共有这 6 种模式
+
+1. `NEAREST` 从最大的贴图中选择 1 个像素
+2. `LINEAR` 从最大的贴图中选择 4 个像素然后混合
+3. `NEAREST_MIPMAP_NEAREST` 选择最合适的贴图，然后从上面找到一个像素
+4. `LINEAR_MIPMAP_NEAREST` 选择最合适的贴图，然后取出 4 个像素进行混合
+5. `NEAREST_MIPMAP_LINEAR` 选择最合适的两个贴图，从每个上面选择 1 个像素然后混合
+6. `LINEAR_MIPMAP_LINEAR` 选择最合适的两个贴图，从每个上选择 4 个像素然后混合
+
+你可以通过这两个例子看到贴图的重要性，第一个显示的是使用 NEAREST 或 LINEAR，只从最大的贴图上选择像素，当物体运动时就会出现抖动。由于每个像素都从最大的图上选择，随着位置和大小的改变，可能会在不同的时间选择不同的像素，从而出现抖动。
+
+[webgl-3d-textures-mips](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-mips?view=preview)
+
+观察发现左边和中间的抖动会多于右边。由于右边的使用多级贴图并且混合颜色，绘制的越小 WebGL 挑选的像素离原图关系越远。相反的中间的小图虽然使用了 LINEAR 混合 4 个像素的颜色，但这 4 个像素是从大图中选出来，不同的选择会有较大的差别，所以还是抖动明显。右下角的图保持颜色一致是从右中图中挑选的像素。
+
+第二个例子显示了一些深入屏幕中的多边形。
+
+[webgl-3d-textures-mips-tri-linear](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-mips-tri-linear?view=preview)
+
+6 个深入屏幕的横梁使用的是之前 6 种不同的筛选模式。左上使用的是 NEAREST，你会感受到明显的块状感；中上使用的是 LINEAR 也没有好到哪里去；右上使用的是 `NEAREST_MIPMAP_NEAREST`，点击图像切换纹理，每个贴图都是不同的颜色，就可以清除的看出它使用的是哪个贴图；左下使用的是 `LINEAR_MIPMAP_NEAREST`，意思是挑选最合适贴图种的 4 个像素进行混合，你会发现贴图切换的部分非常突兀；中下使用的是 `NEAREST_MIPMAP_LINEAR`，也就是找到最合适的两个贴图各取一点进行混合，如果仔细看会发现仍然有块状感，尤其是水平方向；右下使用的是 `LINEAR_MIPMAP_LINEAR`，也就是选出最合适的两个贴图各取 4 个点进行混合。
+
+![](res/2022-07-26-18-34-03.png)
+
+你可能会想既然理论上 `LINEAR_MIPMAP_LINEAR` 是最好的选择为什么还要有其他选择，一个原因是 `LINEAR_MIPMAP_LINEAR` 是最慢的，读 8 个像素比读 1 个像素慢一些，在现代的 GPU 上如果一次使用一个贴图可能没什么问题，但是现在的游戏可能一次就需要 2 到 4 个贴图，4 贴图 \* 8 像素每贴图 = 绘制每个像素需要读取 32 个像素，那就会慢很多了。另一个原因是如果想实现特定的效果，比如做一些复古的东西可能就需要使用 NEAREST。贴图也占用内存，事实上它占用额外 33% 的内存，那是非常多的内存，尤其是使用很大的纹理例如想要在游戏的标题屏幕上绘制的东西。如果你不会绘制比最大的贴图要小的东西，为什么要把内存浪费在贴图上，直接使用 NEAREST 或 LINEAR 就只使用第一个贴图。
+
+设置筛选器可以调用 `gl.texParameter`
+
+```js
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+```
+
+- `TEXTURE_MIN_FILTER` 是当绘制的比最大贴图小的时候。
+- `TEXTURE_MAG_FILTER` 是绘制的比最大的贴图大的时候。
+- 对于 `TEXTURE_MAG_FILTER` 只有 NEAREST 和 LINEAR 两个可选设置。
+
+假设我们想使用这个纹理。
+
+![](res/2022-07-27-11-18-57.png)
+
+这是结果。
+
+[webgl-3d-textures-bad-npot](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-bad-npot?view=preview)
+
+为什么键盘的纹理没有出现？那是因为 WebGL 限制了纹理的维度必须是 2 的整数次幂，2 的幂有 `1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048` 等等。`F` 纹理是 256 × 256，256 是 2 的幂。键盘纹理是 320x240，都不是 2 的幂，所以显示纹理失败，在着色器中当 texture2D 被调用的时候由于纹理没有正确设置，就会使用颜色 `(0, 0, 0, 1)` 也就是黑色。如果打开 JavaScript 控制台或者浏览器控制台，根据浏览器不同可能会显示不同的错误信息，像这样
+
+```
+WebGL: INVALID_OPERATION: generateMipmap: level 0 not power of 2
+   or not all the same size
+WebGL: drawArrays: texture bound to texture unit 0 is not renderable.
+   It maybe non-power-of-2 and have incompatible texture filtering or
+   is not 'texture complete'.
+```
+
+解决这个问题只需要将包裹模式设置为 `CLAMP_TO_EDGE` 并且通过设置过滤器为 `LINEAR or NEAREST` 来关闭贴图映射。
+
+让我们来更新图像加载的代码解决这个问题，首先需要一个方法判断一个数是不是 2 的幂。
+
+```js
+function isPowerOf2(value) {
+  return (value & (value - 1)) == 0;
+}
+```
+
+我不准备深入讲解二进制运算，以及它的的原理。有了它后，就可以这样使用。
+
+[webgl-3d-textures-good-npot](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-good-npot?view=preview)
+
+## 6 个面
+
+一个常见的问题是 `如何为立方体的每个面设置不同的图像？`，假设我们有 6 个这样的图片。
+
+![](res/2022-07-27-11-25-05.png)
+
+脑中出现了 3 个答案
+
+1. 制作一个复杂的着色器，引用 6 个纹理，传入一些额外的顶点信息表明使用的纹理是什么。不要这样做！稍微一想就知道你要写一大堆不同的着色器应用于不同面数量的图形之类。
+
+2. 绘制 6 个面代替立方体，这是常用的解决办法，不错但是只能用在简单的图形例如立方体。如果有一个包含 1000 个方形的图形就要绘制 1000 个面，会非常慢。
+
+3. 我敢说，最好的方法就是将图像放在一个纹理中，然后利用纹理坐标映射不同的图像到每个面，这是很多高性能应用（读作游戏）使用的技术。例如我们将所有的图像放入这样一个纹理中
+
+![](res/2022-07-27-11-25-42.png)
+
+然后为立方体的每个面设置不同的纹理坐标。
+
+```
+// 选择左下图
+0   , 0  ,
+0   , 0.5,
+0.25, 0  ,
+0   , 0.5,
+0.25, 0.5,
+0.25, 0  ,
+// 选择中下图
+0.25, 0  ,
+0.5 , 0  ,
+0.25, 0.5,
+0.25, 0.5,
+0.5 , 0  ,
+0.5 , 0.5,
+// 选择中右图
+0.5 , 0  ,
+0.5 , 0.5,
+0.75, 0  ,
+0.5 , 0.5,
+0.75, 0.5,
+0.75, 0  ,
+// 选择左上图
+0   , 0.5,
+0.25, 0.5,
+0   , 1  ,
+0   , 1  ,
+0.25, 0.5,
+0.25, 1  ,
+// 选择中上图
+0.25, 0.5,
+0.25, 1  ,
+0.5 , 0.5,
+0.25, 1  ,
+0.5 , 1  ,
+0.5 , 0.5,
+// 选择右上图
+0.5 , 0.5,
+0.75, 0.5,
+0.5 , 1  ,
+0.5 , 1  ,
+0.75, 0.5,
+0.75, 1  ,
+```
+
+[webgl-3d-textures-texture-atlas](embedded-codesandbox://webgl-fundamental-textures/webgl-3d-textures-texture-atlas?view=preview)
+
+这种将多个图像通过一个纹理提供的方法通常被叫做纹理图集，它是最好的方式，因为只需要加载一个贴图，着色器也会因为只用一个贴图而保持简单，不同于多个平面需要多次调用绘制，这样只需要调用一次绘制。
+
+## UVs vs. 纹理坐标
+
+纹理坐标经常被简写为 `texture coords`，`texcoords` 或 UVs(发音为 Ew-Vees)，我不知道术语 UVs 是从哪来的，除了一点那就是顶点位置使用 `x, y, z, w`，所以对于纹理坐标他们决定使用 `s, t, u, v`，好让你清楚使用的两个类型的区别。有了这些你可能会想它应该读作 Es-Tees，因为纹理包裹的设置被叫做 `TEXTURE_WRAP_S` 和 `TEXTURE_WRAP_T`，但是出于某些原因我的图形相关的同事都叫它 Ew-Vees。
+
+所以现在你就知道了如果有人说 UVs 其实就是再说纹理坐标。
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-textures.html

@@ -15,7 +15,7 @@ path: /webgl-fundamental-image-processing/
 
 接着用顶点着色器，我们需要添加一个属性，用它接收纹理坐标然后传给片断着色器。
 
-```cpp
+```glsl
 attribute vec2 a_texCoord;
 // ...
 varying vec2 v_texCoord;
@@ -98,7 +98,7 @@ function render(image) {
 
 这个图片没什么特别的，让我们来对它进行一些操作。把红和蓝调换位置如何？
 
-```cpp
+```glsl
 // ...
 gl_FragColor = texture2D(u_image, v_texCoord).bgra;
 // ...
