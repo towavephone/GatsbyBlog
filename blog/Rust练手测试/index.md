@@ -1,6 +1,6 @@
 ---
 title: Rust练手测试
-date: 2022-07-11 10:39:35
+date: 2022-08-02 17:24:05
 categories:
   - 后端
 tags: 后端, Rust, 练手测试
@@ -61,6 +61,8 @@ fn main() {
 
 ### 作用域是一个变量在程序中能够保持合法的范围
 
+#### 问题一
+
 ```rust
 // 修复下面代码的错误并使用尽可能少的改变
 fn main() {
@@ -73,18 +75,7 @@ fn main() {
 }
 ```
 
-```rust
-// 修复错误
-fn main() {
-    println!("{}, world", x);
-}
-
-fn define_x() {
-    let x = "hello";
-}
-```
-
-#### 我的解答
+##### 我的解答
 
 ```rust
 // 修复下面代码的错误并使用尽可能少的改变
@@ -97,6 +88,34 @@ fn main() {
     println!("x 的值是 {}, y 的值是 {}", x, y);
 }
 ```
+
+##### 最佳解答
+
+```rust
+fn main() {
+    let x: i32 = 10;
+    {
+        let y: i32 = 5;
+        println!("The value of x is {} and value of y is {}", x, y);
+    }
+    println!("The value of x is {}", x);
+}
+```
+
+#### 问题二
+
+```rust
+// 修复错误
+fn main() {
+    println!("{}, world", x);
+}
+
+fn define_x() {
+    let x = "hello";
+}
+```
+
+##### 我的解答
 
 ```rust
 // 修复错误
@@ -111,18 +130,7 @@ fn define_x() -> &'static str {
 }
 ```
 
-#### 最佳解答
-
-```rust
-fn main() {
-    let x: i32 = 10;
-    {
-        let y: i32 = 5;
-        println!("The value of x is {} and value of y is {}", x, y);
-    }
-    println!("The value of x is {}", x);
-}
-```
+##### 最佳解答
 
 ```rust
 fn main() {
@@ -315,6 +323,8 @@ fn main() {
 
 #### 如果我们没有显式的给予变量一个类型，那编译器会自动帮我们推导一个类型
 
+##### 问题一
+
 ```rust
 // 移除某个部分让代码工作
 fn main() {
@@ -327,7 +337,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+###### 我的解答
 
 ```rust
 // 移除某个部分让代码工作
@@ -341,7 +351,7 @@ fn main() {
 }
 ```
 
-##### 最佳解答
+###### 最佳解答
 
 ```rust
 fn main() {
@@ -354,7 +364,7 @@ fn main() {
 }
 ```
 
----
+##### 问题二
 
 ```rust
 // 填空
@@ -363,7 +373,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+###### 我的解答
 
 ```rust
 // 填空
@@ -372,7 +382,7 @@ fn main() {
 }
 ```
 
----
+##### 问题三
 
 ```rust
 //  修改 `assert_eq!` 让代码工作
@@ -387,7 +397,7 @@ fn type_of<T>(_: &T) -> String {
 }
 ```
 
-##### 我的解答
+###### 我的解答
 
 ```rust
 //  修改 `assert_eq!` 让代码工作
@@ -402,7 +412,7 @@ fn type_of<T>(_: &T) -> String {
 }
 ```
 
----
+##### 问题四
 
 ```rust
 // 填空，让代码工作
@@ -412,7 +422,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+###### 我的解答
 
 ```rust
 // 填空，让代码工作
@@ -422,7 +432,7 @@ fn main() {
 }
 ```
 
----
+##### 问题五
 
 ```rust
 // 解决代码中的错误和 `panic`
@@ -433,7 +443,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+###### 我的解答
 
 ```rust
 // 解决代码中的错误和 `panic`
@@ -444,7 +454,7 @@ fn main() {
 }
 ```
 
-##### 最佳解答
+###### 最佳解答
 
 ```rust
 fn main() {
@@ -454,7 +464,7 @@ fn main() {
 }
 ```
 
----
+##### 问题六
 
 ```rust
 // 修改 `assert!` 让代码工作
@@ -464,7 +474,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+###### 我的解答
 
 ```rust
 // 修改 `assert!` 让代码工作
@@ -476,6 +486,8 @@ fn main() {
 
 ### 浮点数
 
+#### 问题一
+
 ```rust
 // 将 ? 替换成你的答案
 fn main() {
@@ -485,7 +497,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+##### 我的解答
 
 ```rust
 // 将 ? 替换成你的答案
@@ -496,7 +508,7 @@ fn main() {
 }
 ```
 
----
+#### 问题二
 
 使用两种方法来让下面代码工作
 
@@ -506,7 +518,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+##### 我的解答
 
 ```rust
 fn main() {
@@ -521,6 +533,8 @@ fn main() {
 ```
 
 ### 序列 Range
+
+#### 问题一
 
 两个目标:
 
@@ -542,7 +556,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+##### 我的解答
 
 ```rust
 fn main() {
@@ -559,7 +573,7 @@ fn main() {
 }
 ```
 
-#### 最佳解答
+##### 最佳解答
 
 ```rust
 fn main() {
@@ -576,7 +590,7 @@ fn main() {
 }
 ```
 
----
+#### 问题二
 
 ```rust
 // 填空
@@ -587,7 +601,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+##### 我的解答
 
 ```rust
 // 填空
@@ -662,4 +676,200 @@ fn main() {
 }
 ```
 
-// TODO https://zh.practice.rs/basic-types/char-bool-unit.html
+## 字符、布尔、单元类型
+
+### 字符
+
+#### 问题一
+
+```rust
+//  修改 2 处 `assert_eq!` 让代码工作
+
+use std::mem::size_of_val;
+fn main() {
+    let c1 = 'a';
+    assert_eq!(size_of_val(&c1), 1);
+
+    let c2 = '中';
+    assert_eq!(size_of_val(&c2), 3);
+
+    println!("Success!")
+}
+```
+
+##### 我的解答
+
+```rust
+// 修改 2 处 `assert_eq!` 让代码工作
+
+use std::mem::size_of_val;
+fn main() {
+    let c1 = 'a';
+    assert_eq!(size_of_val(&c1), 4);
+
+    let c2 = '中';
+    assert_eq!(size_of_val(&c2), 4);
+
+    println!("Success!")
+}
+```
+
+#### 问题二
+
+```rust
+// 修改一行让代码正常打印
+fn main() {
+    let c1 = "中";
+    print_char(c1);
+}
+
+fn print_char(c : char) {
+    println!("{}", c);
+}
+```
+
+##### 我的解答
+
+```rust
+// 修改一行让代码正常打印
+fn main() {
+    let c1 = '中';
+    print_char(c1);
+}
+
+fn print_char(c: char) {
+    println!("{}", c);
+}
+```
+
+### 布尔
+
+#### 问题一
+
+```rust
+// 使成功打印
+fn main() {
+    let _f: bool = false;
+
+    let t = true;
+    if !t {
+        println!("Success!")
+    }
+}
+```
+
+##### 我的解答
+
+```rust
+// 使成功打印
+fn main() {
+    let _f: bool = false;
+
+    let t = true;
+    if t {
+        println!("Success!")
+    }
+}
+```
+
+#### 问题二
+
+```rust
+fn main() {
+    let f = true;
+    let t = true && false;
+    assert_eq!(t, f);
+
+    println!("Success!")
+}
+```
+
+##### 我的解答
+
+```rust
+fn main() {
+    let f = true;
+    let t = true && false;
+    assert_eq!(t, !f);
+
+    println!("Success!")
+}
+```
+
+### 单元类型
+
+#### 问题一
+
+```rust
+// 让代码工作，但不要修改 `implicitly_ret_unit` !
+fn main() {
+    let _v: () = ();
+
+    let v = (2, 3);
+    assert_eq!(v, implicitly_ret_unit());
+
+    println!("Success!")
+}
+
+fn implicitly_ret_unit() {
+    println!("I will return a ()")
+}
+
+// 不要使用下面的函数，它只用于演示！
+fn explicitly_ret_unit() -> () {
+    println!("I will return a ()")
+}
+```
+
+##### 我的解答
+
+```rust
+// 让代码工作，但不要修改 `implicitly_ret_unit` !
+fn main() {
+    let _v: () = ();
+
+    let v = ();
+    assert_eq!(v, implicitly_ret_unit());
+
+    println!("Success!")
+}
+
+fn implicitly_ret_unit() {
+    println!("I will return a ()")
+}
+
+// 不要使用下面的函数，它只用于演示！
+fn explicitly_ret_unit() -> () {
+    println!("I will return a ()")
+}
+```
+
+#### 问题二
+
+单元类型占用的内存大小是多少？
+
+```rust
+// 让代码工作：修改 `assert!` 中的 `4`
+use std::mem::size_of_val;
+fn main() {
+    let unit: () = ();
+    assert!(size_of_val(&unit) == 4);
+
+    println!("Success!")
+}
+```
+
+##### 我的解答
+
+```rust
+// 让代码工作：修改 `assert!` 中的 `4`
+use std::mem::size_of_val;
+fn main() {
+    let unit: () = ();
+    assert!(size_of_val(&unit) == 0);
+
+    println!("Success!")
+}
+```
+
+// TODO https://zh.practice.rs/basic-types/statements-expressions.html
