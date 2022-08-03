@@ -124,6 +124,25 @@ $ nrm ls # 列出当前支持切换的源
 $ nrm use taobao # 使用 taobao 的源作为默认的 npm 源
 ```
 
+# volta
+
+[volta](https://github.com/volta-cli/volta) 管理前端开发环境，切换目录即切换开发环境
+
+```bash
+# install Volta
+curl https://get.volta.sh | bash
+
+# 安装 node 默认版本，和 nvm alias default 有一定的冲突
+volta install node
+
+# start using Node
+node
+
+# 安装 node 最新版本到 example 项目下，并更新依赖到 package.json
+cd example
+volta pin node
+```
+
 # Python 环境
 
 1. pyenv 安装

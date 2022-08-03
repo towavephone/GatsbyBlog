@@ -96,5 +96,9 @@
     "react-helmet": "^5.2.0",
     "react-instantsearch": "^5.0.3",
     "react-share": "^2.1.1"
+  },
+  "volta": {
+    "node": "10.24.1",
+    "yarn": "1.22.19"
   }
 }
