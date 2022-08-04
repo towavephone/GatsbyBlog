@@ -2048,4 +2048,541 @@ gl_FragColor = inRange ? projectedTexColor : texColor;
 
 至于我为什么使用 mix 而不使用基于 inRange 的三元运算符，则只是一个个人喜好。mix 更加灵活，所以我通常这样写。
 
-// TODO https://webglfundamentals.org/webgl/lessons/webgl-ramp-textures.html
+# WebGL 渐变纹理
+
+WebGL 中的一个重要认识是纹理不仅仅是直接应用于三角形的东西，正如我们在纹理文章中所介绍的那样。纹理是随机访问数据的数组，通常是二维数据数组。因此，使用随机访问数据数组的任何解决方案都是我们可以使用纹理的地方。
+
+在关于定向光的文章中，我们介绍了如何使用点积来计算 2 个向量之间的角度。在那里 ​ 我们计算了光的方向与模型表面法线的点积，这提供了 2 个向量之间角度的余弦值。余弦是从 -1 到 +1 的值，我们将其用作颜色的直接乘数。
+
+```glsl
+float light = dot(normal, u_reverseLightDirection);
+
+gl_FragColor = u_color;
+gl_FragColor.rgb *= light;
+```
+
+这会使颜色变暗，使其远离光线。
+
+如果我们不直接使用该点积，而是使用它从一维纹理中查找值，该怎么办？
+
+```glsl{8,16-26,29-30}
+precision mediump float;
+
+// 从顶点着色器传入
+varying vec3 v_normal;
+
+uniform vec3 u_reverseLightDirection;
+uniform vec4 u_color;
+uniform sampler2D u_ramp;
+
+void main() {
+  // 因为 v_normal 是一个变量，所以它是插值的
+  // 所以它不会是单位向量。规范化它
+  // 将再次使其成为单位向量
+  vec3 normal = normalize(v_normal);
+
+  // float light = dot(normal, u_reverseLightDirection);
+  float cosAngle = dot(normal, u_reverseLightDirection);
+
+  // 从 -1 <-> 1 转换为 0 <-> 1
+  float u = cosAngle * 0.5 + 0.5;
+
+  // 创建一个纹理坐标
+  vec2 uv = vec2(u, 0.5);
+
+  // 从一维纹理中查找一个值
+  vec4 rampColor = texture2D(u_ramp, uv);
+
+  gl_FragColor = u_color;
+  // gl_FragColor.rgb *= light;
+  gl_FragColor *= rampColor;
+}
+```
+
+我们需要制作纹理，让我们从 2x1 纹理开始，我们将使用 LUMINANCE 为我们提供单色纹理的格式，每个纹理像素仅使用 1 个字节。
+
+```js
+var tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texImage2D(
+  gl.TEXTURE_2D, // 目标
+  0, // mip 级别
+  gl.LUMINANCE, // 内部格式
+  2, // 宽度
+  1, // 高度
+  0, // 边界
+  gl.LUMINANCE, // 格式
+  gl.UNSIGNED_BYTE, // 类型
+  new Uint8Array([90, 255])
+);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+```
+
+上面 2 个像素的颜色是深灰色（90）和白色（255）。我们还设置了纹理参数，因此不会有过滤。
+
+修改新纹理的样本，我们需要查找 `u_ramp` 变量
+
+```js{4}
+var worldViewProjectionLocation = gl.getUniformLocation(program, 'u_worldViewProjection');
+var worldInverseTransposeLocation = gl.getUniformLocation(program, 'u_worldInverseTranspose');
+var colorLocation = gl.getUniformLocation(program, 'u_color');
+var rampLocation = gl.getUniformLocation(program, 'u_ramp');
+var reverseLightDirectionLocation = gl.getUniformLocation(program, 'u_reverseLightDirection');
+```
+
+我们需要在渲染时设置纹理
+
+```js
+// 将纹理绑定到活动纹理单元 0
+gl.activeTexture(gl.TEXTURE0 + 0);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+// 告诉着色器 u_ramp 应该使用纹理单元 0 上的纹理
+gl.uniform1i(rampLocation, 0);
+```
+
+我将 3D 的 F 数据换成了低多边形头部的数据。
+
+[webgl-ramp-texture](embedded-codesandbox://webgl-fundamental-textures/webgl-ramp-texture?view=preview)
+
+如果您旋转模型，您会看到它看起来类似于卡通着色
+
+在上面的示例中，我们设置了纹理过滤，NEAREST 这意味着我们只需从纹理中选择最近的纹理元作为我们的颜色。只有 2 个纹理元，所以如果表面背对光，我们得到第一种颜色（深灰色），如果表面朝向光，我们得到第二种颜色（白色），那种颜色乘以以前的 `gl_FragColor` 颜色 light。
+
+考虑一下，如果我们切换到 LINEAR 过滤，我们应该得到与使用纹理之前相同的结果。
+
+```js
+// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+```
+
+[webgl-ramp-texture-linear](embedded-codesandbox://webgl-fundamental-textures/webgl-ramp-texture-linear?view=preview)
+
+这看起来很相似，但如果我们真的将它们并排比较......
+
+![](res/2022-08-04-11-29-57.png)
+
+我们可以看到它们并不相同。这是怎么回事？
+
+LINEAR 过滤像素之间的混合。如果我们使用线性过滤放大 2 像素纹理，我们会看到问题
+
+![](res/2022-08-04-11-30-56.png)
+
+每边有半个像素，没有插值。想象一下，如果纹理设置 `TEXTURE_WRAP_S` 为 REPEAT，然后我们期望红色像素的最左半部分线性地向绿色混合，就好像绿色向左重复一样。但是左边的颜色更红，因为我们使用的是 `CLAMP_TO_EDGE`
+
+要真正获得渐变，我们只想从该中心范围中选择值。我们可以通过着色器中的一些数学运算来做到这一点
+
+```glsl{9,25-29,31-32}
+precision mediump float;
+
+// 从顶点着色器传入
+varying vec3 v_normal;
+
+uniform vec3 u_reverseLightDirection;
+uniform vec4 u_color;
+uniform sampler2D u_ramp;
+uniform vec2 u_rampSize;
+
+void main() {
+  // 因为 v_normal 是一个变量，所以它是插值的
+  // 所以它不会是单位向量。规范化它
+  // 将再次使其成为单位向量
+  vec3 normal = normalize(v_normal);
+
+  float cosAngle = dot(normal, u_reverseLightDirection);
+
+  // 从 -1 <-> 1 转换为 0 <-> 1
+  float u = cosAngle * 0.5 + 0.5;
+
+  // 制作纹理坐标
+  vec2 uv = vec2(u, 0.5);
+
+  // 缩放到渐变的大小
+  vec2 texelRange = uv * (u_rampSize - 1.0);
+
+  // 偏移半个纹理元并转换为纹理坐标
+  vec2 rampUV = (texelRange + 0.5) / u_rampSize;
+
+  // vec4 rampColor = texture2D(u_ramp, uv);
+  vec4 rampColor = texture2D(u_ramp, rampUV);
+
+  gl_FragColor = u_color;
+  gl_FragColor *= rampColor;
+}
+```
+
+上面我们基本上是在缩放我们的 uv 坐标，所以它从 0 到 1 比纹理的宽度小 1。然后添加半个像素并转换回标准化纹理坐标。
+
+我们需要查找位置 `u_rampSize`
+
+```js
+var colorLocation = gl.getUniformLocation(program, 'u_color');
+var rampLocation = gl.getUniformLocation(program, 'u_ramp');
+var rampSizeLocation = gl.getUniformLocation(program, 'u_rampSize');
+```
+
+我们需要在渲染时设置它
+
+```js
+// 将纹理绑定到活动纹理单元 0
+gl.activeTexture(gl.TEXTURE0 + 0);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+// 告诉着色器 u_ramp 应该使用纹理单元 0 上的纹理
+gl.uniform1i(rampLocation, 0);
+gl.uniform2fv(rampSizeLocation, [2, 1]);
+```
+
+在我们运行它之前，让我们添加一个标志，以便我们可以比较有无渐变纹理
+
+```glsl{10,34-36}
+precision mediump float;
+
+// 从顶点着色器传入
+varying vec3 v_normal;
+
+uniform vec3 u_reverseLightDirection;
+uniform vec4 u_color;
+uniform sampler2D u_ramp;
+uniform vec2 u_rampSize;
+uniform bool u_useRampTexture;
+
+void main() {
+  // 因为 v_normal 是一个变量，所以它是插值的
+  // 所以它不会是单位向量。规范化它
+  // 将再次使其成为单位向量
+  vec3 normal = normalize(v_normal);
+
+  float cosAngle = dot(normal, u_reverseLightDirection);
+
+  // 从 -1 <-> 1 转换为 0 <-> 1
+  float u = cosAngle * 0.5 + 0.5;
+
+  // 制作纹理坐标
+  vec2 uv = vec2(u, 0.5);
+
+  // 缩放到渐变的大小
+  vec2 texelRange = uv * (u_rampSize - 1.0);
+
+  // 偏移半个纹理元并转换为纹理坐标
+  vec2 rampUV = (texelRange + 0.5) / u_rampSize;
+
+  vec4 rampColor = texture2D(u_ramp, rampUV);
+
+  if (!u_useRampTexture) {
+    rampColor = vec4(u, u, u, 1);
+  }
+
+  gl_FragColor = u_color;
+  gl_FragColor *= rampColor;
+}
+```
+
+我们也会查找 uniform 的位置。
+
+```js{3}
+var rampLocation = gl.getUniformLocation(program, 'u_ramp');
+var rampSizeLocation = gl.getUniformLocation(program, 'u_rampSize');
+var useRampTextureLocation = gl.getUniformLocation(program, 'u_useRampTexture');
+```
+
+并设置它
+
+```js{14}
+var data = {
+  useRampTexture: true
+};
+
+// ...
+
+// 将纹理绑定到活动纹理单元 0
+gl.activeTexture(gl.TEXTURE0 + 0);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+// 告诉着色器 u_ramp 应该使用纹理单元 0 上的纹理
+gl.uniform1i(rampLocation, 0);
+gl.uniform2fv(rampSizeLocation, [2, 1]);
+
+gl.uniform1i(useRampTextureLocation, data.useRampTexture);
+```
+
+并且我们可以看到旧的光照方式和新的渐变纹理方式匹配
+
+[webgl-ramp-texture-issue-confirm](embedded-codesandbox://webgl-fundamental-textures/webgl-ramp-texture-issue-confirm?view=preview)
+
+单击 useRampTexture 复选框，我们看不到任何变化，因为这两种技术现在匹配。
+
+> 注意：我通常不建议 `u_useRampTexture` 在着色器中使用条件。相反，我建议制作 2 个着色器程序，一个使用普通光照，一个使用渐变纹理。不幸的是，由于代码没有使用类似于 out helper 库的东西，因此支持 2 个着色器程序将进行相当大的更改。每个程序都需要自己的一组位置。做出如此大的改变会分散本文的重点，因此在这种情况下，我决定使用条件。一般来说，虽然我尽量避免使用条件来选择着色器中的特征，而是为不同的特征创建不同的着色器。
+
+> 注意：这个数学只有在我们使用 LINEAR 过滤时才重要。如果我们使用 NEAREST 过滤，我们需要原始数学。
+
+现在我们知道渐变数学是正确的，让我们制作一堆不同的渐变纹理。
+
+```js
+// 创建一个 256 数组，其中元素 0 到 127
+// 从 64 到 191 和元素 128 到 255
+// 都是 255
+const smoothSolid = new Array(256).fill(255);
+for (let i = 0; i < 128; ++i) {
+  smoothSolid[i] = 64 + i;
+}
+
+const ramps = [
+  { name: 'dark-white', color: [0.2, 1, 0.2, 1], format: gl.LUMINANCE, filter: false, data: [80, 255] },
+  {
+    name: 'dark-white-skewed',
+    color: [0.2, 1, 0.2, 1],
+    format: gl.LUMINANCE,
+    filter: false,
+    data: [80, 80, 80, 255, 255]
+  },
+  { name: 'normal', color: [0.2, 1, 0.2, 1], format: gl.LUMINANCE, filter: true, data: [0, 255] },
+  { name: '3-step', color: [0.2, 1, 0.2, 1], format: gl.LUMINANCE, filter: false, data: [80, 160, 255] },
+  { name: '4-step', color: [0.2, 1, 0.2, 1], format: gl.LUMINANCE, filter: false, data: [80, 140, 200, 255] },
+  {
+    name: '4-step skewed',
+    color: [0.2, 1, 0.2, 1],
+    format: gl.LUMINANCE,
+    filter: false,
+    data: [80, 80, 80, 80, 140, 200, 255]
+  },
+  { name: 'black-white-black', color: [0.2, 1, 0.2, 1], format: gl.LUMINANCE, filter: false, data: [80, 255, 80] },
+  {
+    name: 'stripes',
+    color: [0.2, 1, 0.2, 1],
+    format: gl.LUMINANCE,
+    filter: false,
+    data: [
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255,
+      80,
+      255
+    ]
+  },
+  {
+    name: 'stripe',
+    color: [0.2, 1, 0.2, 1],
+    format: gl.LUMINANCE,
+    filter: false,
+    data: [
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      80,
+      0,
+      0,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255,
+      255
+    ]
+  },
+  { name: 'smooth-solid', color: [0.2, 1, 0.2, 1], format: gl.LUMINANCE, filter: false, data: smoothSolid },
+  { name: 'rgb', color: [1, 1, 1, 1], format: gl.RGB, filter: true, data: [255, 0, 0, 0, 255, 0, 0, 0, 255] }
+];
+
+var elementsForFormat = {};
+elementsForFormat[gl.LUMINANCE] = 1;
+elementsForFormat[gl.RGB] = 3;
+
+ramps.forEach((ramp) => {
+  const { name, format, filter, data } = ramp;
+  var tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  const width = data.length / elementsForFormat[format];
+  gl.texImage2D(
+    gl.TEXTURE_2D, // 目标
+    0, // mip 级别
+    format, // 内部格式
+    width,
+    1, // 高度
+    0, // 边界
+    format, // 格式
+    gl.UNSIGNED_BYTE, // 类型
+    new Uint8Array(data)
+  );
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter ? gl.LINEAR : gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter ? gl.LINEAR : gl.NEAREST);
+  ramp.texture = tex;
+  ramp.size = [width, 1];
+});
+```
+
+让我们制作着色器，这样我们就可以同时处理 NEAREST 和 LINEAR。就像我上面提到的，我通常不在着色器中使用布尔 if 语句，但如果区别很简单并且我可以在没有条件的情况下做到这一点，那么我会考虑使用一个着色器。为此，我们可以添加一个 `u_linearAdjust`，我们将其设置为 0.0 或 1.0
+
+```glsl{10-11,28-29,31-34,38-40}
+precision mediump float;
+
+// 从顶点着色器传入
+varying vec3 v_normal;
+
+uniform vec3 u_reverseLightDirection;
+uniform vec4 u_color;
+uniform sampler2D u_ramp;
+uniform vec2 u_rampSize;
+// uniform bool u_useRampTexture;
+// uniform float u_linearAdjust; // 如果是线性的，则为 1.0，如果是最近的，则为 0.0
+
+void main() {
+  // 因为 v_normal 是一个变量，所以它是插值的
+  // 所以它不会是单位向量，规范化它
+  // 将再次使其成为单位向量
+  vec3 normal = normalize(v_normal);
+
+  float cosAngle = dot(normal, u_reverseLightDirection);
+
+  // 从 -1 <-> 1 转换为 0 <-> 1
+  float u = cosAngle * 0.5 + 0.5;
+
+  // 制作纹理坐标
+  vec2 uv = vec2(u, 0.5);
+
+  // 缩放到渐变的大小
+  // vec2 texelRange = uv * (u_rampSize - 1.0);
+  vec2 texelRange = uv * (u_rampSize - u_linearAdjust);
+
+  // // 偏移半个纹理元并转换为纹理坐标
+  // vec2 rampUV = (texelRange + 0.5) / u_rampSize;
+  // 如果是线性的，则偏移半个纹理元并转换为纹理坐标
+  vec2 rampUV = (texelRange + 0.5 * u_linearAdjust) / u_rampSize;
+
+  vec4 rampColor = texture2D(u_ramp, rampUV);
+
+  // if (!u_useRampTexture) {
+  //   rampColor = vec4(u, u, u, 1);
+  // }
+
+  gl_FragColor = u_color;
+  gl_FragColor *= rampColor;
+}
+```
+
+在初始化时查找位置
+
+```js{4}
+var colorLocation = gl.getUniformLocation(program, 'u_color');
+var rampLocation = gl.getUniformLocation(program, 'u_ramp');
+var rampSizeLocation = gl.getUniformLocation(program, 'u_rampSize');
+var linearAdjustLocation = gl.getUniformLocation(program, 'u_linearAdjust');
+```
+
+并在渲染时选择其中一个纹理
+
+```js{7,10-11,18-19,23-24,26-27}
+var data = {
+  ramp: 0
+};
+
+// ...
+
+const { texture, color, size, filter } = ramps[data.ramp];
+
+// 设置要使用的颜色
+// gl.uniform4fv(colorLocation, [0.2, 1, 0.2, 1]);
+gl.uniform4fv(colorLocation, color);
+
+// 设置光照方向
+gl.uniform3fv(reverseLightDirectionLocation, m4.normalize([-1.75, 0.7, 1]));
+
+// 将纹理绑定到活动纹理单元 0
+gl.activeTexture(gl.TEXTURE0 + 0);
+// gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.bindTexture(gl.TEXTURE_2D, texture);
+
+// 告诉着色器 u_ramp 应该使用纹理单元 0 上的纹理
+gl.uniform1i(rampLocation, 0);
+// gl.uniform2fv(rampSizeLocation, [2, 1]);
+gl.uniform2fv(rampSizeLocation, size);
+
+// 如果是线性调整
+gl.uniform1f(linearAdjustLocation, filter ? 1 : 0);
+```
+
+[webgl-ramp-textures](embedded-codesandbox://webgl-fundamental-textures/webgl-ramp-textures?view=preview)
+
+尝试不同的渐变纹理，你会看到很多奇怪的效果。这是制作通用调整着色器的一种方法。您可以通过设置 2 种颜色和像这样的阈值来制作进行 2 种颜色卡通着色的着色器。
+
+```glsl
+uniform vec4 color1;
+uniform vec4 color2;
+uniform float threshold;
+
+// ...
+
+float cosAngle = dot(normal, u_reverseLightDirection);
+
+// 从 -1 <-> 1 转换为 0 <-> 1
+float u = cosAngle * 0.5 + 0.5;
+
+gl_FragColor = mix(color1, color2, step(cosAngle, threshold));
+```
+
+它会起作用。但是，如果您想要 3 步或 4 步版本，则需要编写另一个着色器。使用渐变纹理，您可以提供不同的纹理。此外，请注意上面，即使您想要一个 2 步色调着色器，您仍然可以通过在纹理中放置更多或更少的数据来调整步进发生的位置。例如纹理
+
+```
+[dark, light]
+```
+
+为您提供 2 步纹理，其中它在面向或远离光线的中间分裂。但质地像
+
+```
+[dark, dark, dark, light, light]
+```
+
+无需更改着色器即可将拆分移动到背对光和朝向光之间的 60% 标记。
+
+这个使用渐变纹理进行卡通着色或奇怪效果的具体示例可能对您有用也可能不那么有用，但更重要的结论只是使用一些值在纹理中查找数据的基本概念。使用这样的纹理不仅仅是为了转换光照计算。您可以使用渐变纹理进行后期处理，以实现与 Photoshop 中的渐变贴图相同的效果
+
+您还可以将渐变纹理用于基于 GPU 的动画。您将关键值存储在纹理中，并使用时间作为在纹理上移动的值。这种技术有很多用途。
