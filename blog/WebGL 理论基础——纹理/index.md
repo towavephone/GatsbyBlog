@@ -1577,7 +1577,7 @@ const imageTexture = loadImageTexture('resources/f-texture.png');
 
 让我们来试试吧。首先，在我们的片段着色器中，我们会在 0.0 到 1.0 之间的纹理坐标上绘制投影的纹理。而在这个范围外的纹理坐标，我们将会使用棋盘纹理。
 
-```glsl{5,9}
+```glsl{5,9,12-26}
 precision mediump float;
 
 // 从顶点着色器传来的
