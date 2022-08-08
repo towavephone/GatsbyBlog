@@ -1171,9 +1171,7 @@ function drawImage(tex, texWidth, texHeight, dstX, dstY, dstWidth, dstHeight) {
 
 我将代码修改为使用不同的大小
 
-<!-- // TODO ex
-
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-02](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-02?view=preview)
 
 ## drawImage 版本三
 
@@ -1277,18 +1275,14 @@ function drawImage(tex, texWidth, texHeight, srcX, srcY, srcWidth, srcHeight, ds
 ```
 
 我也上传了这个版本的例子，这是结果
-<!-- 
-// TODO ex
 
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-03](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-03?view=preview)
 
 不同于画布的二维接口，WebGL 对 drawImage 的情况做了更多的处理。
 
 一个是我们可以给源或者目标宽高传递负值，负的 srcWidth 会选择 srcX 左边的像素，负的 dstWidth 会将图像绘制在 dstX 的左边，在画布的二维接口中报错是好一点的情况，坏一点时会出现 udefined。
 
-<!-- // TODO ex
-
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-04](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-04?view=preview)
 
 另一个是我们使用矩阵就可以实现任何矩阵运算可以实现的效果。
 
@@ -1314,9 +1308,7 @@ var texMatrix = m4.scale(texMatrix, srcWidth, srcHeight, 1);
 gl.uniformMatrix4fv(textureMatrixLocation, false, texMatrix);
 ```
 
-<!-- // TODO ex
-
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-05](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-05?view=preview)
 
 可以看出一个问题，在旋转的过程中会看到超出边缘的纹理，由于设置的是 `CLAMP_TO_EDGE` 所以得到重复的边缘。
 
@@ -1343,9 +1335,7 @@ void main() {
 
 现在边缘消失了
 
-<!-- // TODO ex
-
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-06](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-06?view=preview)
 
 或者你想的话也可以对超出的部分使用纯色
 
@@ -1369,9 +1359,7 @@ void main() {
 }
 ```
 
-<!-- // TODO ex
-
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-07](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-07?view=preview)
 
 接下来讲实现画布二维接口中的矩阵栈。
 
@@ -1398,8 +1386,6 @@ void main() {
 
 现在移除关于纹理坐标设置的代码，得到的结果和之前是相同的。
 
-<!-- // TODO ex
-
-[webgl-2d-geometry-matrix-transform-center-f](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-geometry-matrix-transform-center-f?view=preview) -->
+[webgl-2d-drawimage-08](embedded-codesandbox://webgl-fundamental-2d/webgl-2d-drawimage-08?view=preview)
 
 // TODO https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-2d-matrix-stack.html
