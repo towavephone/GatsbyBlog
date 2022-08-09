@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebGL 坐标系—投影</title>
+  </head>
+  <body>
+    <canvas id="webgl" width="500" height="500" style="background-color: #0d72da;"></canvas>
+    <!-- 顶点着色器源码 -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+      // attribute 声明 vec4 类型变量 apos
+      attribute vec4 apos;
+      void main() {
+        // 顶点坐标 apos 赋值给内置变量 gl_Position
+        // 逐顶点处理数据
+        gl_Position = apos;
+      }
+    </script>
+    <!-- 片元着色器源码 -->
+    <script id="fragmentShader" type="x-shader/x-fragment">
+
+      void main() {
+        // 逐片元处理数据，所有片元(像素)设置为红色
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    </script>
+
+    <script>
+      // 通过 getElementById() 方法获取 canvas 画布
+      var canvas = document.getElementById('webgl');
+      // 通过方法 getContext() 获取 WebGL 上下文
+      var gl = canvas.getContext('webgl');
+
+      // 顶点着色器源码
+      var vertexShaderSource = document.getElementById('vertexShader').innerText;
+
+      // 片元着色器源码
+      var fragShaderSource = document.getElementById('fragmentShader').innerText;
+      // 初始化着色器
+      var program = initShader(gl, vertexShaderSource, fragShaderSource);
+      // 获取顶点着色器的位置变量 apos
+      var aposLocation = gl.getAttribLocation(program, 'apos');
+
+      // 9 个元素构建三个顶点的 xyz 坐标值
+      var data = new Float32Array([0, 0, 1, 0, 1, 0, 1, 0, 0]);
+
+      // 创建缓冲区对象
+      var buffer = gl.createBuffer();
+      // 绑定缓冲区对象
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      // 顶点数组 data 数据传入缓冲区
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+      // 缓冲区中的数据按照一定的规律传递给位置变量 apos，第二个代码案例 vertexAttribPointer 方法的第二个参数是 2，这里是 3
+      gl.vertexAttribPointer(aposLocation, 3, gl.FLOAT, false, 0, 0);
+      // 允许数据传递
+      gl.enableVertexAttribArray(aposLocation);
+      // 开始绘制图形，使用 TRIANGLES 模式，三点构成一个平面
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      // 声明初始化着色器函数
+      function initShader(gl, vertexShaderSource, fragmentShaderSource) {
+        var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(vertexShader, vertexShaderSource);
+        gl.shaderSource(fragmentShader, fragmentShaderSource);
+        gl.compileShader(vertexShader);
+        gl.compileShader(fragmentShader);
+        var program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+        return program;
+      }
+    </script>
+  </body>
+</html>
