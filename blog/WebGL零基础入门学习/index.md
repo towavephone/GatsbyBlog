@@ -521,6 +521,8 @@ void main() {
 }
 ```
 
+[varying-color-interpolation](embedded-codesandbox://webgl-zero-based-practice-learn/varying-color-interpolation)
+
 ### 获取顶点变量
 
 ```js
@@ -576,6 +578,8 @@ var colorData = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
 gl.drawArrays(gl.TRIANGLES, 0, 3);
 ```
 
+[varying-many-color-triangle](embedded-codesandbox://webgl-zero-based-practice-learn/varying-many-color-triangle)
+
 ### 两个单色三角面（不同颜色）
 
 ```js
@@ -626,6 +630,8 @@ var colorData = new Float32Array([
 ]);
 ```
 
+[varying-2-color-triangle](embedded-codesandbox://webgl-zero-based-practice-learn/varying-2-color-triangle)
+
 ### 颜色插值（顶点位置、颜色使用一个缓冲区存储）
 
 ```js
@@ -650,6 +656,8 @@ gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, 4 * 5, 4 * 2);
 gl.enableVertexAttribArray(aposLocation);
 gl.enableVertexAttribArray(a_color);
 ```
+
+[varying-common-buffer](embedded-codesandbox://webgl-zero-based-practice-learn/varying-common-buffer)
 
 ## 立方体-每个面一种颜色
 
@@ -907,6 +915,8 @@ var colorData = new Float32Array([
 /** 执行绘制之前，一定要开启深度测试，以免颜色混乱 **/
 gl.enable(gl.DEPTH_TEST);
 ```
+
+[draw-cube-diff-color-plane](embedded-codesandbox://webgl-zero-based-practice-learn/draw-cube-diff-color-plane)
 
 ### 测试
 
