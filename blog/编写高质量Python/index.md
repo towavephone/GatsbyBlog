@@ -1,6 +1,6 @@
 ---
 title: 编写高质量Python
-date: 2022-05-05 10:09:56
+date: 2022-08-24 12:19:06
 path: /writing-high-quality-python/
 tags: 后端, python, 读书笔记
 ---
@@ -2650,5 +2650,143 @@ Average: 67.5, Median: 68.5, Count: 10
 1. 函数可以把多个值合起来通过一个元组返回给调用者，以便利用 Python 的 unpacking 机制去拆分。
 2. 对于函数返回的多个值，可以把普通变量没有捕获到的那些值全都捕获到一个带星号的变量里。
 3. 把返回的值拆分到四个或四个以上的变量是很容易出错的，所以最好不要那么写，而是应该通过小类或 namedtuple 实例完成。
+
+## 第 20 条：遇到意外状况时应该抛出异常，不要返回 None
+
+编写工具函数（utility function）时，许多 Python 程序员都爱用 None 这个返回值来表示特殊情况。对于某些函数来说，这或许有几分道理。
+
+例如，我们要编写一个辅助函数计算两数相除的结果。在除数是 0 的情况下，返回 None 似乎相当合理，因为这种除法的结果是没有意义的。
+
+```py
+def careful_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return None
+```
+
+调用这个函数时，可以按自己的方式处理这样的返回值。
+
+```py
+def careful_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return None
+
+
+x, y = 1, 0
+result = careful_divide(x, y)
+if result is None:
+    print('Invalid inputs')
+
+>>>
+Invalid inputs
+```
+
+如果传给 `careful_divide` 函数的被除数为 0，会怎么样呢？在这种情况下，只要除数不为 0，函数返回的结果就应该是 0。
+
+问题是，这个函数的返回值有时可能会用在 if 条件语句里面，那时可能会根据值本身是否相当于 False 来做判断，而不像刚才那样明确判断这个值是否为 None（第 5 条也列举了类似的例子）。
+
+```py
+def careful_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return None
+
+
+x, y = 0, 5
+result = careful_divide(x, y)
+if not result:
+    print('Invalid inputs')  # This runs! But shouldn't
+
+>>>
+Invalid inputs
+```
+
+上面这种 if 语句，会把函数返回 0 时的情况，也当成函数返回 None 时那样来处理。这种写法经常出现在 Python 代码里，因此像 `careful_divide` 这样，用 None 来表示特殊状况的函数是很容易出错的。有两种办法可以减少这样的错误。
+
+1. 利用二元组把计算结果分成两部分返回（与这种写法有关的基础知识，参见第 19 条）。元组的首个元素表示操作是否成功，第二个元素表示计算的实际值。
+
+   ```py
+   def careful_divide(a, b):
+    try:
+        return True, a / b
+    except ZeroDivisionError:
+        return False, None
+   ```
+
+   这样写，会促使调用函数者去拆分返回值，他可以先看看这次运算是否成功，然后再决定怎么处理运算结果。
+
+   ```py
+   success, result = careful_divide(x, y)
+   if not success:
+      print('Invalid inputs')
+   ```
+
+   但问题是，有些调用方总喜欢忽略返回元组的第一个部分（在 Python 代码里，习惯用下划线表示用不到的变量）。这样写成的代码，乍一看似乎没问题，但实际上还是无法区分返回 0 与返回 None 这两种情况。
+
+   ```py
+   _, result = careful_divide(x, y)
+   if not result:
+      print('Invalid inputs')
+   ```
+
+2. 不采用 None 表示特例，而是向调用方抛出异常（Exception），让他自己去处理。下面我们把执行除法时发生的 ZeroDivisionError 转化成 ValueError，告诉调用方输入的值不对（什么时候应该使用 Exception 类的子类，可参见第 87 条）。
+
+   ```py
+   def careful_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        raise ValueError('Invalid inputs')
+   ```
+
+   现在，调用方拿到函数的返回值之后，不用先判断操作是否成功了。因为这次可以假设，只要能拿到返回值，就说明函数肯定顺利执行完了，所以只需要用 try 把函数包起来并在 else 块里处理运算结果就好（这种结构的详细用法，参见第 65 条）。
+
+   ```py
+   def careful_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        raise ValueError('Invalid inputs')
+
+   x, y = 5, 2
+   try:
+      result = careful_divide(x, y)
+   except ValueError:
+      print('Invalid inputs')
+   else:
+      print('Result is %.1f' % result)
+
+   >>>
+   Result is 2.5
+   ```
+
+这个办法也可以扩展到那些使用类型注解的代码中（参见第 90 条），我们可以把函数的返回值指定为 float 类型，这样它就不可能返回 None 了。然而，Python 采用的是动态类型与静态类型相搭配的 gradual 类型系统，我们不能在函数的接口上指定函数可能抛出哪些异常（有的编程语言支持这样的受检异常（checked exception），调用方必须应对这些异常）。所以，我们只好把有可能抛出的异常写在文档里面，并希望调用方能够根据这份文档适当地捕获相关的异常（参见第 84 条）。
+
+下面我们给刚才那个函数加类型注解，并为它编写 docstring。
+
+```py
+def careful_divide(a: float, b: float) -> float:
+    """Divides a by b.
+
+    Raises:
+      ValueError: When the inputs cannot be divided.
+    """
+    try:
+        return a / b
+    except ZeroDivisionError as e:
+        raise ValueError('Invalid inputs')
+```
+
+这样写，输入、输出与异常都显得很清晰，所以调用方出错的概率就变得很小了。
+
+### 总结
+
+1. 用返回值 None 表示特殊情况是很容易出错的，因为这样的值在条件表达式里面，没办法与 0 和空白字符串之类的值区分，这些值都相当于 False。
+2. 用异常表示特殊的情况，而不要返回 None。让调用这个函数的程序根据文档里写的异常情况做出处理。
+3. 通过类型注解可以明确禁止函数返回 None，即便在特殊情况下，它也不能返回这个值。
 
 // TODO 编写高质量 Python 待完成
