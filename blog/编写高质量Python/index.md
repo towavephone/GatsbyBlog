@@ -2789,4 +2789,267 @@ def careful_divide(a: float, b: float) -> float:
 2. 用异常表示特殊的情况，而不要返回 None。让调用这个函数的程序根据文档里写的异常情况做出处理。
 3. 通过类型注解可以明确禁止函数返回 None，即便在特殊情况下，它也不能返回这个值。
 
+## 第 21 条：了解如何在闭包里面使用外围作用域中的变量
+
+有时，我们要给列表中的元素排序，而且要优先把某个群组之中的元素放在其他元素的前面。例如，渲染用户界面时，可能就需要这样做，因为关键的消息和特殊的事件应该优先显示在其他信息之前。
+
+实现这种做法的一种常见方案，是把辅助函数通过 key 参数传给列表的 sort 方法（参见第 14 条），让这个方法根据辅助函数所返回的值来决定元素在列表中的先后顺序。辅助函数先判断当前元素是否处在重要群组里，如果在，就把返回值的第一项写成 0，让它能够排在不属于这个组的那些元素之前。
+
+```py
+def sort_priority(values, group):
+    def helper(x):
+        if x in group:
+            return (0, x)
+        return (1, x)
+    values.sort(key=helper)
+```
+
+这个函数可以处理比较简单的输入数据。
+
+```py
+def sort_priority(values, group):
+    def helper(x):
+        if x in group:
+            return (0, x)
+        return (1, x)
+    values.sort(key=helper)
+
+
+numbers = [8, 3, 1, 2, 5, 4, 7, 6]
+group = {2, 3, 5, 7}
+sort_priority(numbers, group)
+print(numbers)
+
+>>>
+[2, 3, 5, 7, 1, 4, 6, 8]
+```
+
+它为什么能够实现这个功能呢？这要分三个原因来讲：
+
+1. Python 支持闭包（closure），这让定义在大函数里面的小函数也能引用大函数之中的变量。具体到这个例子，`sort_priority` 函数里面的那个 helper 函数也能够引用前者的 group 参数。
+2. 函数在 Python 里是头等对象（first-class object），所以你可以像操作其他对象那样，直接引用它们、把它们赋给变量、将它们当成参数传给其他函数，或是在 in 表达式与 if 语句里面对它做比较，等等。闭包函数也是函数，所以，同样可以传给 sort 方法的 key 参数。
+3. Python 在判断两个序列（包括元组）的大小时，有自己的一套规则。它首先比较 0 号位置的那两个元素，如果相等，那就比较 1 号位置的那两个元素；如果还相等，那就比较 2 号位置的那两个元素；依此类推，直到得出结论为止。所以，我们可以利用这套规则让 helper 这个闭包函数返回一个元组，并把关键指标写为元组的首个元素以表示当前排序的值是否属于重要群组（0 表示属于，1 表示不属于）。
+
+如果这个 `sort_priority` 函数还能告诉我们，列表里面有没有位于重要群组之中的元素，那就更好了，因为这样可以让用户界面开发者更方便地做出相应处理。添加这样一个功能似乎相当简单，因为闭包函数本身就需要判断当前值是否处在重要群组之中，既然这样，那么不妨让它在发现这种值时，顺便把标志变量翻转过来。最后，让闭包外的大函数（即 `sort_priority` 函数）返回这个标志变量，如果闭包函数当时遇到过这样的值，那么这个标志肯定是 True。
+
+下面，试着用最直接的写法来实现。
+
+```py
+def sort_priority2(numbers, group):
+    found = False
+
+    def helper(x):
+        if x in group:
+            found = True  # Seems simple
+            return (0, x)
+        return (1, x)
+    numbers.sort(key=helper)
+    return found
+
+
+numbers = [8, 3, 1, 2, 5, 4, 7, 6]
+group = {2, 3, 5, 7}
+found = sort_priority2(numbers, group)
+print('Found:', found)
+print(numbers)
+
+>>>
+Found: False
+[2, 3, 5, 7, 1, 4, 6, 8]
+```
+
+排序结果没有问题，可以看到：在排过序的 numbers 里面，重要群组 group 里的那些元素（2、3、5、7），确实出现在了其他元素前面。既然这样，那表示函数返回值的 found 变量就应该是 True，但我们看到的却是 False，这是为什么？
+
+在表达式中引用某个变量时，Python 解释器会按照下面的顺序，在各个作用域（scope）里面查找这个变量，以解析（resolve）这次引用
+
+1. 当前函数的作用域。
+2. 外围作用域（例如包含当前函数的其他函数所对应的作用域）。
+3. 包含当前代码的那个模块所对应的作用域（也叫全局作用域，global scope）。
+4. 内置作用域（built-in scope，也就是包含 len 与 str 等函数的那个作用域）。
+
+如果这些作用域中都没有定义名称相符的变量，那么程序就抛出 NameError 异常。
+
+```py
+foo = does_not_exist * 5
+
+>>>
+Traceback...
+NameError: name 'does_not_exist' is not defined
+```
+
+刚才讲的是怎么引用变量，现在我们来讲怎么给变量赋值，这要分两种情况处理。
+
+1. 如果变量已经定义在当前作用域中，那么直接把新值交给它就行了。
+2. 如果当前作用域中不存在这个变量，那么即便外围作用域里有同名的变量，Python 也还是会把这次的赋值操作当成变量的定义来处理
+
+这会产生一个重要的效果，也就是说，Python 会把包含赋值操作的这个函数当成新定义的这个变量的作用域。
+
+这可以解释刚才那种写法错在何处。`sort_priority2` 函数里面的 helper 闭包函数是把 True 赋给了 found 变量。当前作用域里没有这样一个叫作 found 的变量，所以就算外围的 `sort_priority2` 函数里面有 found 变量，系统也还是会把这次赋值当成定义，也就是会在 helper 里面定义一个新的 found 变量，而不是把它当成给 `sort_priority2` 已有的那个 found 变量赋值。
+
+这种问题有时也称作作用域 bug（scoping bug），Python 新手可能认为这样的赋值规则很奇怪，但实际上 Python 是故意这么设计的。因为这样可以防止函数中的局部变量污染外围模块。假如不这样做，那么函数里的每条赋值语句都有可能影响全局作用域的变量，这样不仅混乱，而且会让全局变量之间彼此交互影响，从而导致很多难以探查的 bug。
+
+Python 有一种特殊的写法，可以把闭包里面的数据赋给闭包外面的变量。用 nonlocal 语句描述变量，就可以让系统在处理针对这个变量的赋值操作时，去外围作用域查找。然而，nonlocal 有个限制，就是不能侵入模块级别的作用域（以防污染全局作用域）。
+
+下面，用 nonlocal 改写刚才那个函数。
+
+```py{5}
+def sort_priority2(numbers, group):
+    found = False
+
+    def helper(x):
+        nonlocal found
+        if x in group:
+            found = True  # Seems simple
+            return (0, x)
+        return (1, x)
+    numbers.sort(key=helper)
+    return found
+
+
+numbers = [8, 3, 1, 2, 5, 4, 7, 6]
+group = {2, 3, 5, 7}
+found = sort_priority2(numbers, group)
+print('Found:', found)
+print(numbers)
+
+>>>
+Found: True
+[2, 3, 5, 7, 1, 4, 6, 8]
+```
+
+nonlocal 语句清楚地表明，我们要把数据赋给闭包之外的变量。有一种跟它互补的语句，叫作 global，用这种语句描述某个变量后，在给这个变量赋值时，系统会直接把它放到模块作用域（或者说全局作用域）中。
+
+我们都知道全局变量不应该滥用，其实 nonlocal 也这样。除比较简单的函数外，大家尽量不要用这个语句，因为它造成的副作用有时很难发现。尤其是在那种比较长的函数里，nonlocal 语句与其关联变量的赋值操作之间可能隔得很远。
+
+如果 nonlocal 的用法比较复杂，那最好是改用辅助类来封装状态。下面就定义了这样一个类，用来实现与刚才那种写法相同的效果。这样虽然稍微长一点，但看起来更清晰易读（`__call__` 这个特殊方法，请参见第 38 条）。
+
+```py
+class Sorter:
+    def __init__(self, group):
+        self.group = group
+        self.found = False
+
+    def __call__(self, x):
+        if x in self.group:
+            self.found = True
+            return (0, x)
+        return (1, x)
+
+
+numbers = [8, 3, 1, 2, 5, 4, 7, 6]
+group = {2, 3, 5, 7}
+sorter = Sorter(group)
+numbers.sort(key=sorter)
+assert sorter.found is True
+```
+
+### 总结
+
+1. 闭包函数可以引用定义它们的那个外围作用域之中的变量。
+2. 按照默认的写法，在闭包里面给变量赋值并不会改变外围作用域中的同名变量。
+3. 先用 nonlocal 语句说明，然后赋值，可以修改外围作用域中的变量。
+4. 除特别简单的函数外，尽量少用 nonlocal 语句。
+
+## 第 22 条：用数量可变的位置参数给函数设计清晰的参数列表
+
+让函数接受数量可变的位置参数（positional argument），可以把函数设计得更加清晰（这些位置参数通常简称 var args，或者叫作 star args，因为我们习惯用 `*args` 指代）。例如，假设我们要记录调试信息。如果采用参数数量固定的方案来设计，那么函数应该接受一个表示信息的 message 参数和一个 values 列表（这个列表用于存放需要填充到信息里的那些值）。
+
+```py
+def log(message, values):
+    if not values:
+        print(message)
+    else:
+        values_str = ', '.join(str(x) for x in values)
+        print(f'{message}: {values_str}')
+
+
+log('My numbers are', [1, 2])
+log('Hi there', [])
+
+>>>
+My numbers are: 1, 2
+Hi there
+```
+
+即便没有值需要填充到信息里面，也必须专门传一个空白的列表进去，这样显得多余，而且让代码看起来比较乱。最好是能允许调用者把第二个参数留空。在 Python 里，可以给最后一个位置参数加前缀 \*，这样调用者就只需要提供不带星号的那些参数，然后可以不再指其他参数，也可以继续指定任意数量的位置参数。函数的主体代码不用改，只修改调用代码即可。
+
+```py
+def log(message, *values):  # The only difference
+    if not values:
+        print(message)
+    else:
+        values_str = ', '.join(str(x) for x in values)
+        print(f'{message}: {values_str}')
+
+
+log('My numbers are', 1, 2)
+log('Hi there')  # Much better
+
+>>>
+My numbers are: 1, 2
+Hi there
+```
+
+这种写法与拆解数据时用在赋值语句左边带星号的 unpacking 操作非常类似（参见第 13 条）。
+
+如果想把已有序列（例如某列表）里面的元素当成参数传给像 log 这样的参数个数可变的函数（variadic function），那么可以在传递序列的时采用 \* 操作符。这会让 Python 把序列中的元素都当成位置参数传给这个函数。
+
+```py
+favorites = [7, 33, 99]
+log('Favorite colors', *favorites)
+
+>>>
+Favorite colors: 7, 33, 99
+```
+
+令函数接受数量可变的位置参数，可能导致两个问题。
+
+1. 程序总是必须先把这些参数转化成一个元组，然后才能把它们当成可选的位置参数传给函数。这意味着，如果调用函数时，把带 \* 操作符的生成器传了过去，那么程序必须先把这个生成器里的所有元素迭代完（以便形成元组），然后才能继续往下执行（相关知识，参见第 30 条）。这个元组包含生成器所给出的每个值，这可能耗费大量内存，甚至会让程序崩溃。
+
+   ```py
+   def my_generator():
+    for i in range(10):
+        yield i
+
+   def my_func(*args):
+      print(args)
+
+   it = my_generator()
+   my_func(*it)
+
+   >>>
+   (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+   ```
+
+   接受 `*args` 参数的函数，适合处理输入值不太多，而且数量可以提前预估的情况。在调用这种函数时，传给 `*args` 这一部分的应该是许多个字面值或变量名才对。这种机制，主要是为了让代码写起来更方便、读起来更清晰。
+
+2. 如果用了 `*args` 之后，又要给函数添加新的位置参数，那么原有的调用操作就需要全都更新。例如给参数列表开头添加新的位置参数 sequence，那么没有据此更新的那些调用代码就会出错。
+
+   ```py
+   def log(sequence, message, *values):
+    if not values:
+        print(f'{sequence} - {message}')
+    else:
+        values_str = ', '.join(str(x) for x in values)
+        print(f'{sequence} - {message}: {values_str}')
+
+   log(1, 'Favorites', 7, 33)  # New with *args OK
+   log(1, 'Hi there')  # New message only OK
+   log('Favorite numbers', 7, 33)  # old usage breaks
+
+   >>>
+   1 - Favorites: 7, 33
+   1 - Hi there
+   Favorite numbers - 7: 33
+   ```
+
+   问题在于：第三次调用 log 函数的那个地方并没有根据新的参数列表传入 sequence 参数，所以 Favorite numbers 就成了 sequence 参数，7 就成了 message 参数。这样的 bug 很难排查，因为程序不会抛出异常，只会采用错误的数据继续运行下去。为了彻底避免这种漏洞，在给这种 `*arg` 函数添加参数时，应该使用只能通过关键字来指定的参数（keyword-only argument，参见第 25 条）。要是想做得更稳妥一些，可以考虑添加类型注解（参见第 90 条）。
+
+### 总结
+
+1. 用 def 定义函数时，可以通过 `*args` 的写法让函数接受数量可变的位置参数。
+2. 调用函数时，可以在序列左边加上 `*` 操作符，把其中的元素当成位置参数传给 `*args` 所表示的这一部分。
+3. 如果 `*` 操作符加在生成器前，那么传递参数时，程序有可能因为耗尽内存而崩溃。
+4. 给接受 `*args` 的函数添加新位置参数，可能导致难以排查的 bug。
+
 // TODO 编写高质量 Python 待完成
