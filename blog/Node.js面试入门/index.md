@@ -2,7 +2,7 @@
 title: Node.js面试入门
 path: /nodejs-interview-introduce-learn/
 date: 2021-2-26 18:27:10
-tags: 后端, nodejs
+tags: 后端, nodejs, 读书笔记
 ---
 
 # JS 基础问题
@@ -17,7 +17,7 @@ tags: 后端, nodejs
 
 ## 作用域
 
-看 《你不知道的 js》
+看《你不知道的 js》
 
 ## 引用传递
 

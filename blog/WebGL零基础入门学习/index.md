@@ -3,7 +3,7 @@ title: WebGL 零基础入门学习
 date: 2022-08-09 11:09:34
 categories:
   - 前端
-tags: 前端, 可视化, WebGL
+tags: 前端, 可视化, WebGL, 读书笔记
 path: /webgl-zero-based-practice-learn/
 ---
 
