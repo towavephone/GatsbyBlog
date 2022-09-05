@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>column-gap 实现两端对齐效果</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo code {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      h4 {
+        max-width: 320px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .container {
+        margin: -0.5em auto auto;
+      }
+
+      .container {
+        width: 300px;
+        border: solid deepskyblue;
+        column-count: 3;
+        column-gap: 5%;
+      }
+
+      .list {
+        height: 100px;
+        background-color: deeppink;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <h4>分栏布局实现两端对齐</h4>
+      <div class="container">
+        <div class="list"></div>
+        <div class="list"></div>
+        <div class="list"></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 ---
 title: CSS新世界全新的布局方式
-date: 2022-07-26 13:43:31
+date: 2022-09-05 14:17:23
 path: /css-new-world-new-layout/
 tags: 前端, CSS, CSS新世界, 读书笔记
 ---
@@ -17,18 +17,18 @@ IE10+ 浏览器都可以使用分栏布局，API 稳定，在移动端的兼容�
 
 ```html
 <ul>
-  <li>重庆市</li>
-  <li>哈尔滨市</li>
-  <li>长春市</li>
-  <li>兰州市</li>
-  <li>北京市</li>
-  <li>杭州市</li>
-  <li>长沙市</li>
-  <li>沈阳市</li>
-  <li>成都市</li>
-  <li>合肥市</li>
-  <li>天津市</li>
-  <li>西安市</li>
+   <li>重庆市</li>
+   <li>哈尔滨市</li>
+   <li>长春市</li>
+   <li>兰州市</li>
+   <li>北京市</li>
+   <li>杭州市</li>
+   <li>长沙市</li>
+   <li>沈阳市</li>
+   <li>成都市</li>
+   <li>合肥市</li>
+   <li>天津市</li>
+   <li>西安市</li>
 </ul>
 ```
 
@@ -36,7 +36,7 @@ IE10+ 浏览器都可以使用分栏布局，API 稳定，在移动端的兼容�
 
 ```css
 ul {
-  columns: 2;
+   columns: 2;
 }
 ```
 
@@ -88,8 +88,8 @@ column-width 表示每一栏/列的最佳宽度，注意，是“最佳宽度”
 
 ```css
 .container {
-  width: 300px;
-  column-width: 200px;
+   width: 300px;
+   column-width: 200px;
 }
 ```
 
@@ -97,8 +97,8 @@ column-width 表示每一栏/列的最佳宽度，注意，是“最佳宽度”
 
 ```css
 .container {
-  width: 200px;
-  column-width: 300px;
+   width: 200px;
+   column-width: 300px;
 }
 ```
 
@@ -125,15 +125,15 @@ column-count 表示理想的分栏数目，又出现了很微妙的词——“�
 
 ```css
 .container-1 {
-  width: 360px;
-  column-count: 2;
-  column-width: 100px;
+   width: 360px;
+   column-count: 2;
+   column-width: 100px;
 }
 
 .container-2 {
-  width: 360px;
-  column-count: 4;
-  column-width: 100px;
+   width: 360px;
+   column-count: 4;
+   column-width: 100px;
 }
 ```
 
@@ -170,8 +170,8 @@ column-gap 属性本身没什么好说的，但是 column-gap 属性和 gap 属�
 
 ```css
 .container {
-  columns: 2;
-  gap: 1rem;
+   columns: 2;
+   gap: 1rem;
 }
 ```
 
@@ -191,11 +191,11 @@ column-rule 属性和 border 属性的语法和规则是一模一样的，只是
 
 ```css
 .container {
-  width: 320px;
-  border: solid deepskyblue;
-  padding: 10px;
-  column-count: 2;
-  column-rule: dashed deepskyblue;
+   width: 320px;
+   border: solid deepskyblue;
+   padding: 10px;
+   column-count: 2;
+   column-rule: dashed deepskyblue;
 }
 ```
 
@@ -223,28 +223,28 @@ column-span: all;
 
 ```html{21}
 <div class="container">
-  <p>第1段</p>
-  <p>第2段</p>
-  <p>第3段</p>
-  <p class="span-all">第4段</p>
-  <p>第5段</p>
+   <p>第1段</p>
+   <p>第2段</p>
+   <p>第3段</p>
+   <p class="span-all">第4段</p>
+   <p>第5段</p>
 </div>
 <style>
-  .container {
-    width: 320px;
-    border: solid deepskyblue;
-    padding: 10px;
-    column-count: 3;
-  }
+   .container {
+      width: 320px;
+      border: solid deepskyblue;
+      padding: 10px;
+      column-count: 3;
+   }
 
-  .container p {
-    background: deepskyblue;
-  }
+   .container p {
+      background: deepskyblue;
+   }
 
-  .span-all {
-    column-span: all;
-    color: white;
-  }
+   .span-all {
+      column-span: all;
+      color: white;
+   }
 </style>
 ```
 
@@ -278,13 +278,13 @@ column-fill: balance-all;
 
 ```html
 <style>
-  .container {
-    width: 300px;
-    height: 80px;
-    border: solid deepskyblue;
-    padding: 10px;
-    column-count: 2;
-  }
+   .container {
+      width: 300px;
+      height: 80px;
+      border: solid deepskyblue;
+      padding: 10px;
+      column-count: 2;
+   }
 </style>
 <div class="container" style="column-fil: auto">内容略</div>
 <div class="container" style="column-fill: balance">内容略</div>
@@ -300,6 +300,37 @@ column-fill: balance-all;
 经过仔细地对比测试可以发现以下几点。
 
 1. 所有浏览器都能识别 column-fill: auto，但是，需要容器有固定的高度才能准确渲染。如果容器没有设置具体的高度值，则仅在 Firefox 浏览器中有比较符合预期的渲染。因此，在实际开发的时候，column-fill: auto 声明的使用一定要配合容器元素的 height 属性。
-2. 所有浏览器都不能识别 column-fill: balance-all，我在 W3C 官方的规范文档 CSS Multi-column layout Module level1 中也没有找到任何的示例，因此，column-fill: balance- all 声明大家可以忽略。
+2. 所有浏览器都不能识别 column-fill: balance-all，我在 W3C 官方的规范文档 CSS Multi-column layout Module level1 中也没有找到任何的示例，因此，column-fill: balance-all 声明大家可以忽略。
+
+## 分栏布局实现两端对齐布局
+
+分栏布局非常适合实现单行的两端对齐布局效果，例如：
+
+```html
+<div class="container">
+   <div class="list"></div>
+   <div class="list"></div>
+   <div class="list"></div>
+</div>
+<style>
+   .container {
+      width: 300px;
+      border: solid deepskyblue;
+      column-count: 3;
+      column-gap: 5%;
+   }
+
+   .list {
+      height: 100px;
+      background-color: deeppink;
+   }
+</style>
+```
+
+不需要改变元素的 display 属性，也不需要定位，只需要设置好 column-count 属性的值，然后使用 column-gap 属性设置想要的间隙就好了，这个时候，列表元素就会自动两端对齐，效果如图 6-6 所示。
+
+![](res/2022-09-05-14-05-01.png)
+
+[column-justify-align](embedded-codesandbox://css-new-world-new-layout/column-justify-align)
 
 // TODO CSS 新世界全新的布局方式待完成
