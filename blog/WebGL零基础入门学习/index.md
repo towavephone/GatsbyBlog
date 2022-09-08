@@ -1410,6 +1410,8 @@ float dot = max(dot(lightDirection, normal), 0.0);
 
 ## 立方体旋转动画
 
+[draw-cube-rotate-animation](embedded-codesandbox://webgl-zero-based-practice-learn/draw-cube-rotate-animation)
+
 要通过 WebGL 渲染出立方体旋转的动画效果，你首要了解“帧”这个概念，比如你观看的视频其实就是一帧一帧的图片连续播放的效果，只要图片刷新的频率的不是太低，人的眼睛都不会察觉，一般 30~60FPS 就可以。WebGL 如何产生一帧一帧的图片，这个很简单，执行一次绘制函数 gl.drawArrays()，WebGL 图形系统就会通知 GPU 渲染管线处理顶点数据生成一帧 RGB 像素数据显示在屏幕 canvas 画布上。只要周期性保持一定的频率调用 gl.drawArrays() 就可以生成一帧一帧的图片，在这个过程中同时要利用 JS 程序更新顶点的旋转矩阵，如果顶点的位置不变化，渲染出来的都是一样的图片，自然也没有动画的效果。
 
 浏览器提供了一个方法 requestAnimationFrame() 可以实现周期性调用某个函数，主要用于动画。
@@ -1499,6 +1501,8 @@ draw();
 为了绘制两个相同的立方体效果，下面给出了两种方式。
 
 ### 方式一
+
+[draw-many-cube-points](embedded-codesandbox://webgl-zero-based-practice-learn/draw-many-cube-points)
 
 最简单思路，增加一个几何体就把几何体的顶点添加到顶点数据中，在光照立方体代码的基础上更改即可，把立方体原来数据复制一份，为了把两个立方体的位置错开，可以使用 for 循环批量修改顶点数据，把某个坐标值加或减。
 
@@ -2226,7 +2230,9 @@ gl.drawArrays(gl.TRIANGLES, 0, 36);
 gl.drawArrays(gl.TRIANGLES, 0, 72);
 ```
 
-### 方式二(重用数据)
+### 方式二（重用数据）
+
+[draw-many-cube-reuse-points](embedded-codesandbox://webgl-zero-based-practice-learn/draw-many-cube-reuse-points)
 
 两个几何体颜色、形状完全相同，没有必要在创建一组顶点数据，可以使用 WebGL API 绘制函数 gl.drawArrays() 多次调用同一组顶点数据，执行平移变换即可，第一次调用 WebGL API 绘制函数 gl.drawArrays() 把立方体整体向右平移（x 轴正方向），第二次调用立方体整体向左平移（x 轴负方向）。
 
