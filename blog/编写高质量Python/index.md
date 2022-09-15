@@ -1,6 +1,6 @@
 ---
 title: 编写高质量Python
-date: 2022-08-24 12:19:06
+date: 2022-9-15 11:45:45
 path: /writing-high-quality-python/
 tags: 后端, python, 读书笔记
 ---
@@ -3051,5 +3051,169 @@ Favorite colors: 7, 33, 99
 2. 调用函数时，可以在序列左边加上 `*` 操作符，把其中的元素当成位置参数传给 `*args` 所表示的这一部分。
 3. 如果 `*` 操作符加在生成器前，那么传递参数时，程序有可能因为耗尽内存而崩溃。
 4. 给接受 `*args` 的函数添加新位置参数，可能导致难以排查的 bug。
+
+## 第 23 条：用关键字参数来表示可选的行为
+
+与大多数其他编程语言一样，Python 允许在调用函数时，按照位置传递参数
+
+```py
+def remainder(number, divisor):
+    return number % divisor
+
+
+assert remainder(20, 7) == 6
+```
+
+Python 函数里面的所有普通参数，除了按位置传递外，还可以按关键字传递。调用函数时，在调用括号内可以把关键字的名称写在 = 左边，把参数值写在右边。这种写法不在乎参数的顺序，只要把必须指定的所有位置参数全都传过去即可。另外，关键字形式与位置形式也可以混用。下面这四种写法的效果相同：
+
+```py
+remainder(20, 7)
+remainder(20, divisor=7)
+remainder(number=20, divisor=7)
+remainder(divisor=7, number=20)
+```
+
+如果混用，那么位置参数必须出现在关键字参数之前，否则就会出错。
+
+```py
+remainder(number=20, 7)
+
+>>>
+Traceback ...
+SyntaxError: positional argument follows keyword argument
+```
+
+每个参数只能指定一次，不能既通过位置形式指定，又通过关键字形式指定。
+
+```py
+remainder(20, number=7)
+
+>>>
+Traceback ...
+TypeError: remainder() got multiple values for argument number
+```
+
+如果有一份字典，而且字典里面的内容能够用来调用 remainder 这样的函数，那么可以把 `**` 运算符加在字典前面，这会让 Python 把字典里面的键值以关键字参数的形式传给函数。
+
+```py
+my_kwargs = {
+    'number': 20,
+    'divisor': 7,
+}
+assert remainder(**my_kwargs) == 6
+```
+
+调用函数时，带 `**` 操作符的参数可以和位置参数或关键字参数混用，只要不重复指定就行。
+
+```py
+my_kwargs = {
+    'divisor': 7,
+}
+assert remainder(number=20, **my_kwargs) == 6
+```
+
+也可以对多个字典分别施加 `**` 操作，只要这些字典所提供的参数不重叠就好。
+
+```py
+my_kwargs = {
+    'number': 20,
+}
+other_kwargs = {
+    'divisor': 7,
+}
+assert remainder(**my_kwargs, **other_kwargs) == 6
+```
+
+定义函数时，如果想让这个函数接受任意数量的关键字参数，那么可以在参数列表里写上万能形参 `**kwargs`，它会把调用者传进来的参数收集合到一个字典里面稍后处理（第 26 条讲了一种特别适合这么做的情况）。
+
+```py
+def print_parameters(**kwargs):
+    for key, value in kwargs.items():
+        print(f'{key} = {value}')
+
+
+print_parameters(alpha=1.5, beta=9, gamma=4)
+
+>>>
+alpha = 1.5
+beta = 9
+gamma = 4
+```
+
+关键字参数的灵活用法可以带来三个好处。
+
+1. 用关键字参数调用函数可以让初次阅读代码的人更容易看懂。例如，读到 remainder(20, 7) 这样的调用代码，就不太容易看出谁是被除数 number，谁是除数 divisor，只有去查看 remainder 的具体实现方法才能明白。但如果改用关键字形式来调用，例如 remainder(number=20, divisor=7)，那么每个参数的含义就相当明了。
+
+2. 它可以带有默认值，该值是在定义函数时指定的。在大多数情况下，调用者只需要沿用这个值就好，但有时也可以明确指定自己想要传的值。这样能够减少重复代码，让程序看上去干净一些。
+
+   例如，我们要计算液体流入容器的速率。如果这个容器带刻度，那么可以取前后两个时间点的刻度差（`weight_diff`），并把它跟这两个时间点的时间差（`time_diff`）相除，就可以算出流速了。
+
+   ```py
+   def flow_rate(weight_diff, time_diff):
+    return weight_diff / time_diff
+
+   weight_diff = 0.5
+   time_diff = 3
+   flow = flow_rate(weight_diff, time_diff)
+   print(f'{flow:.3} kg per second')
+   ```
+
+   一般来说，我们会用每秒的千克数表示流速。但有的时候，我们还想估算更长的时间段（例如几小时或几天）内的流速结果。只需给同一个函数加一个 period 参数来表示那个时间段相当于多少秒即可。
+
+   ```py
+   def flow_rate(weight_diff, time_diff, period):
+       return (weight_diff / time_diff) * period
+   ```
+
+   这样写有个问题，就是每次调用函数时，都得明确指定 period 参数。即便我们想计算每秒钟的流速，也还是得明确指定 period 为 1。
+
+   ```py
+   flow_per_second = flow_rate(weight_diff, time_diff, 1)
+   ```
+
+   为了简化这种用法，我们可以给 period 参数设定默认值。
+
+   ```py
+   def flow_rate(weight_diff, time_diff, period=1):
+       return (weight_diff / time_diff) * period
+
+   flow_per_second = flow_rate(weight_diff, time_diff)
+   flow_per_hour = flow_rate(weight_diff, time_diff, 3600)
+   ```
+
+   这个办法适用于默认值比较简单的情况。如果默认值本身要根据比较复杂的逻辑来确定（可参考第 24 条），那就得仔细考虑一下了。
+
+3. 我们可以很灵活地扩充函数的参数，而不用担心会影响原有的函数调用代码。这样的话，我们就可以通过这些新参数在函数里面实现许多新的功能，同时又无须修改早前写好的调用代码，这也让程序不容易因此出现 bug。
+
+   例如，我们想继续扩充上述 `flow_rate` 函数的功能，让它可以用千克之外的其他重量单位来计算流速。那只需要再添加一个可选参数，用来表示 1 千克相当于多少个那样的单位即可。
+
+   ```py
+   def flow_rate(weight_diff, time_diff, period=1, units_per_kg=1):
+      return ((weight_diff * units_per_kg) / time_diff) * period
+   ```
+
+   新参数 `units_per_kg` 的默认值为 1，这表示默认情况下，依然以千克为重量单位来计算。于是，以前写好的那些调用代码就不用修改了。以后调用 `flow_rate` 时，可以通过关键字形式给这个参数指定值，以表示他们想用的那种单位（例如磅，1 千克约等于 2.2 磅）。
+
+   ```py
+   pounds_per_hour = flow_rate(weight_diff, time_diff,
+                            period=3600, units_per_kg=2.2)
+   ```
+
+   可选的关键字参数有助于维护向后兼容（backward compatibility）。这是个相当重要的问题，对于接受带 `*args` 参数的函数，也要注意向后兼容（参见第 22 条）。
+
+   像 period 和 `units_per_kg` 这样可选的关键字参数，只有一个缺点，就是调用者仍然能够按照位置来指定。
+
+   ```py
+   pounds_per_hour = flow_rate(weight_diff, time_diff, 3600, 2.2)
+   ```
+
+   通过位置来指定可选参数，可能会让读代码的人有点儿糊涂，因为他不太清楚 3600 和 2.2 这两个值分别指哪个量的缩放系数。所以，最好是能以关键字的形式给这些参数传值，而不要按位置去传。从设计函数的角度来说，还可以考虑用更加明确的方案以降低出错概率（参见第 25 条）。
+
+### 总结
+
+1. 函数的参数可以按位置指定，也可以用关键字的形式指定。
+2. 关键字可以让每个参数的作用更加明了，因为在调用函数时只按位置指定参数，可能导致这些参数的含义不够明确。
+3. 应该通过带默认值的关键字参数来扩展函数的行为，因为这不会影响原有的函数调用代码。
+4. 可选的关键字参数总是应该通过参数名来传递，而不应按位置传递。
 
 // TODO 编写高质量 Python 待完成
