@@ -3216,4 +3216,368 @@ gamma = 4
 3. 应该通过带默认值的关键字参数来扩展函数的行为，因为这不会影响原有的函数调用代码。
 4. 可选的关键字参数总是应该通过参数名来传递，而不应按位置传递。
 
+## 第 24 条：用 None 和 docstring 来描述默认值会变的参数
+
+有时，我们想把那种不能够提前固定的值，当作关键字参数的默认值。例如，记录日志消息时，默认的时间应该是触发事件的那一刻。所以，如果调用者没有明确指定时间，那么就默认把调用函数的那一刻当成这条日志的记录时间。现在试试下面这种写法，假定它能让 when 参数的默认值随着这个函数每次的执行时间而发生变化。
+
+```py
+from time import sleep
+from datetime import datetime
+
+
+def log(message, when=datetime.now()):
+    print(f'{when}: {message}')
+
+
+log('Hi there!')
+sleep(0.1)
+log('Hello again!')
+
+>>>
+2022-09-16 11:39:58.577119: Hi there!
+2022-09-16 11:39:58.577119: Hello again!
+```
+
+这样写不行。因为 datetime.now 只执行了一次，所以每条日志的时间戳（timestamp）相同。参数的默认值只会在系统加载这个模块的时候，计算一遍，而不会在每次执行时都重新计算，这通常意味着这些默认值在程序启动后，就已经定下来了。只要包含这段代码的那个模块已经加载进来，那么 when 参数的默认值就是加载时计算的那个 datetime.now()，系统不会重新计算。
+
+要想在 Python 里实现这种效果，惯用的办法是把参数的默认值设为 None，同时在 docstring 文档里面写清楚，这个参数为 None 时，函数会怎么运作（参见第 84 条）。给函数写实现代码时，要判断该参数是不是 None，如果是，就把它改成相应的默认值。
+
+```py
+from time import sleep
+from datetime import datetime
+
+
+def log(message, when=None):
+    """Log a message with a timestamp.
+
+    Args:
+        message: Message to print.
+        when: datetime of when the message occurred.
+            Defaults to the present time.
+    """
+    if when is None:
+        when = datetime.now()
+    print(f'{when}: {message}')
+
+
+log('Hi there!')
+sleep(0.1)
+log('Hello again!')
+
+>>>
+2022-09-16 11:52:02.810552: Hi there!
+2022-09-16 11:52:02.910765: Hello again!
+```
+
+把参数的默认值写成 None 还有个重要的意义，就是用来表示那种以后可能由调用者修改内容的默认值（例如某个可变的容器）。例如，我们要写一个函数对采用 JSON 格式编码的数据做解码。如果无法解码，那么就返回调用时所指定的默认结果，假如调用者当时没有明确指定，那就返回空白的字典。
+
+```py
+import json
+
+
+def decode(data, default={}):
+    try:
+        return json.loads(data)
+    except ValueError:
+        return default
+```
+
+这样的写法与前面 datetime.now 的例子有着同样的问题。系统只会计算一次 default 参数（在加载这个模块的时候），所以每次调用这个函数时，给调用者返回的都是一开始分配的那个字典，这就相当于凡是以默认值调用这个函数的代码都共用同一份字典。这会使程序出现很奇怪的效果。
+
+```py
+import json
+
+
+def decode(data, default={}):
+    try:
+        return json.loads(data)
+    except ValueError:
+        return default
+
+
+foo = decode('bad data')
+foo['stuff'] = 5
+bar = decode('also bad')
+bar['meep'] = 1
+print('Foo:', foo)
+print('Bar:', bar)
+
+>>>
+Foo: {'stuff': 5, 'meep': 1}
+Bar: {'stuff': 5, 'meep': 1}
+```
+
+我们本意是想让这两次调用操作得到两个不同的空白字典，每个字典都可以分别用来存放不同的键值。但实际上，只要修改其中一个字典，另一个字典的内容就会受到影响。这种错误的根源在于，foo 和 bar 实际上是同一个字典，都等于系统一开始给 default 参数确定默认值时所分配的那个字典。它们表示的是同一个字典对象。
+
+要解决这个问题，可以把默认值设成 None，并且在 docstring 文档里面说明，函数在这个值为 None 时会怎么做。
+
+```py
+import json
+
+
+def decode(data, default=None):
+    """Load JSON data from a string.
+
+    Args:
+        data: JSON data to decode.
+        default: Value to return if decoding fails.
+            Defaults to an empty dictionary.
+    """
+    try:
+        return json.loads(data)
+    except ValueError:
+        if default is None:
+            default = {}
+        return default
+
+
+foo = decode('bad data')
+foo['stuff'] = 5
+bar = decode('also bad')
+bar['meep'] = 1
+print('Foo:', foo)
+print('Bar:', bar)
+assert foo is not bar
+
+>>>
+Foo: {'stuff': 5}
+Bar: {'meep': 1}
+```
+
+这个思路可以跟类型注解搭配起来（参见第 90 条）。下面这种写法把 when 参数标注成可选（Optional）值，并限定其类型为 datetime。于是，它的取值就只有两种可能，要么是 None，要么是 datetime 对象。
+
+```py
+from typing import Optional
+
+
+def log_typed(message: str, when: Optional[datetime] = None) -> None:
+    """Log a message with a timestamp.
+
+        Args:
+            message: Message to print.
+            when: datetime of when the message occurred.
+                Defaults to the present time.
+    """
+    if when is None:
+        when = datetime.now()
+    print(f'{when}: {message}')
+```
+
+### 总结
+
+1. 参数的默认值只会计算一次，也就是在系统把定义函数的那个模块加载进来的时候。所以，如果默认值将来可能由调用方修改（例如{}、[]）或者要随着调用时的情况变化（例如 datetime.now()），那么程序就会出现奇怪的效果。
+2. 如果关键字参数的默认值属于这种会发生变化的值，那就应该写成 None，并且要在 docstring 里面描述函数此时的默认行为。
+3. 默认值为 None 的关键字参数，也可以添加类型注解。
+
+## 第 25 条：用只能以关键字指定和只能按位置传入的参数来设计清晰的参数列表
+
+按关键字传递参数是 Python 函数的一项强大特性（参见第 23 条）。这种关键字参数特别灵活，在很多情况下，都能让我们写出一看就懂的函数代码。例如，计算两数相除的结果时，可能需要仔细考虑各种特殊情况。
+
+例如，在除数为 0 的情况下，是抛出 ZeroDivisionError 异常，还是返回无穷（infinity）；在结果溢出的情况下，是抛出 OverflowError 异常，还是返回 0。
+
+```py
+def safe_division(number, divisor,
+                  ignore_overflow,
+                  ignore_zero_division):
+    try:
+        return number / divisor
+    except OverflowError:
+        if ignore_overflow:
+            return 0
+        else:
+            raise
+    except ZeroDivisionError:
+        if ignore_zero_division:
+            return float('inf')
+        else:
+            raise
+```
+
+这个函数用起来很直观。如果想在结果溢出的情况下，让它返回 0，那么可以像下面这样调用函数。
+
+```py
+result = safe_division(1.0, 10**500, True, False)
+print(result)
+
+>>>
+0
+```
+
+如果想在除数是 0 的情况下，让函数返回无穷，那么就按下面这样来写。
+
+```py
+result = safe_division(1.0, 0, False, True)
+print(result)
+
+>>>
+inf
+```
+
+表示要不要忽略异常的那两个参数都是 Boolean 值，所以容易弄错位置，这会让程序出现难以查找的 bug。要想让代码看起来更清晰，一种办法是给这两个参数都指定默认值。按照默认值，该函数只要遇到特殊情况，就会抛出异常。
+
+调用者可以用关键字参数指定覆盖其中某个参数的默认值，以调整函数在遇到那种特殊情况时的处理方式，同时让另一个参数依然取那个参数自己的默认值。
+
+```py{2-3}
+def safe_division_b(number, divisor,
+                    ignore_overflow=False,
+                    ignore_zero_division=False):
+    try:
+        return number / divisor
+    except OverflowError:
+        if ignore_overflow:
+            return 0
+        else:
+            raise
+    except ZeroDivisionError:
+        if ignore_zero_division:
+            return float('inf')
+        else:
+            raise
+
+
+result = safe_division_b(1.0, 10**500, ignore_overflow=True)
+print(result)
+result = safe_division_b(1.0, 0, ignore_zero_division=True)
+print(result)
+
+>>>
+0
+inf
+```
+
+然而，由于这些关键参数是可选的，我们没办法要求调用者必须按照关键字形式来指定这两个参数。他们还是可以用传统的写法，按位置给这个新定义的 `safe_division_b` 函数传递参数。
+
+```py
+assert safe_division_b(1.0, 10**500, True, False) == 0
+```
+
+对于这种参数比较复杂的函数，我们可以声明只能通过关键字指定的参数（keyword-only argument），这样的话，写出来的代码就能清楚地反映调用者的想法了。这种参数只能用关键字来指定，不能按位置传递。
+
+下面就重新定义 `safe_division` 函数，让它接受这样的参数。参数列表里的 `*` 符号把参数分成两组，左边是位置参数，右边是只能用关键字指定的参数。
+
+```py{1}
+def safe_division_c(number, divisor, *,
+                    ignore_overflow=False,
+                    ignore_zero_division=False):
+    try:
+        return number / divisor
+    except OverflowError:
+        if ignore_overflow:
+            return 0
+        else:
+            raise
+    except ZeroDivisionError:
+        if ignore_zero_division:
+            return float('inf')
+        else:
+            raise
+
+
+assert safe_division_c(1.0, 10**500, True, False) == 0
+
+>>>
+Traceback ...
+TypeError: safe_division_c() takes 2 positional arguments but 4 were given
+```
+
+当然我们还是可以像前面那样，用关键字参数指定覆盖其中一个参数的默认值（即忽略其中一种特殊情况，并让函数在遇到另一种特殊情况时抛出异常）。
+
+```py
+result = safe_division_c(1.0, 0, ignore_zero_division=True)
+assert result == float('inf')
+try:
+    result = safe_division_c(1.0, 0)
+except ZeroDivisionError:
+    pass  # Expected
+```
+
+这样改依然有问题，因为在 `safe_division_c` 版本的函数里面，有两个参数（也就是 number 和 divisor）必须由调用者提供。然而，调用者在提供这两个参数时，既可以按位置提供，也可以按关键字提供，还可以把这两种方式混起来用。
+
+```py
+assert safe_division_c(number=2, divisor=5) == 0.4
+assert safe_division_c(divisor=5, number=2) == 0.4
+assert safe_division_c(2, divisor=5) == 0.4
+```
+
+在未来也许因为扩展函数的需要，甚至是因为代码风格的变化，或许要修改这两个参数的名字。
+
+```py{1}
+def safe_division_c(numerator, denominator, *,
+                    ignore_overflow=False,
+                    ignore_zero_division=False):
+```
+
+这看起来只是文字上面的微调，但之前所有通过关键字形式来指定这两个参数的调用代码，都会出错。
+
+其实最重要的问题在于，我们根本就没打算把 number 和 divisor 这两个名称纳入函数的接口；我们只是在编写函数的实现代码时，随意挑了这两个比较顺口的名称而已。也并不期望调用者也非得采用这种称呼来指定这两个参数。
+
+Python 3.8 引入了一项新特性，可以解决这个问题，这就是只能按位置传递的参数（positional-only argument）。这种参数与刚才的只能通过关键字指定的参数（keyword-only argument）相反，它们必须按位置指定，绝不能通过关键字形式指定。下面来重新定义 `safe_division` 函数，使其前两个必须由调用者提供的参数只能按位置来提供。参数列表中的 `/` 符号，表示它左边的那些参数只能按位置指定。
+
+```py{1}
+def safe_division_d(numerator, denominator, /, *,
+                    ignore_overflow=False,
+                    ignore_zero_division=False):
+    try:
+        return numerator / denominator
+    except OverflowError:
+        if ignore_overflow:
+            return 0
+        else:
+            raise
+    except ZeroDivisionError:
+        if ignore_zero_division:
+            return float('inf')
+        else:
+            raise
+
+
+assert safe_division_d(2, 5) == 0.4 # 正常运行
+assert safe_division_d(numerator=2, denominator=5) == 0.4 # 报错
+```
+
+现在我们可以确信：给 `safe_division_d` 函数的前两个参数（也就是那两个必备的参数）所挑选的名称，已经与调用者的代码解耦了。即便以后再次修改这两个参数的名称，也不会影响已经写好的调用代码。
+
+在函数的参数列表之中，`/` 符号左侧的参数是只能按位置指定的参数，`*` 符号右侧的参数则是只能按关键字形式指定的参数。那么，这两个符号如果同时出现在参数列表中，会有什么效果呢？这是个值得注意的问题。这意味着，这两个符号之间的参数，既可以按位置提供，又可以用关键字形式指定（其实，如果不特别说明 Python 函数的参数全都属于这种参数）。在设计 API 时，为了体现某编程风格或者实现某些需求，可能会允许某些参数既可以按位置传递，也可以用关键字形式指定，这样可以让代码简单易读。例如，给下面这个 `safe_division` 函数的参数列表添加一个可选的 ndigits 参数，允许调用者指定这次除法应该精确到小数点后第几位。
+
+下面我们用三种方式来调用这个 `safe_division_e` 函数。ndigits 是个带默认值的普通参数，因此，它既可以按位置传递，也可以用关键字来指定，还可以直接省略。
+
+```py
+def safe_division_e(numerator, denominator, /,
+                    ndigits=10, *,
+                    ignore_overflow=False,
+                    ignore_zero_division=False):
+    try:
+        fraction = numerator / denominator
+        return round(fraction, ndigits)
+    except OverflowError:
+        if ignore_overflow:
+            return 0
+        else:
+            raise
+    except ZeroDivisionError:
+        if ignore_zero_division:
+            return float('inf')
+        else:
+            raise
+
+
+result = safe_division_e(22, 7)
+print(result)
+result = safe_division_e(22, 7, 5)
+print(result)
+result = safe_division_e(22, 7, ndigits=2)
+print(result)
+
+>>>
+3.1428571429
+3.14286
+3.14
+```
+
+### 总结
+
+1. Keyword-only argument 是一种只能通过关键字指定而不能通过位置指定的参数。这迫使调用者必须指明，这个值是传给哪一个参数的。在函数的参数列表中，这种参数位于 `*` 符号的右侧。
+2. Positional-only argument 是这样一种参数，它不允许调用者通过关键字来指定，而是要求必须按位置传递。这可以降低调用代码与参数名称之间的耦合程度。在函数的参数列表中，这些参数位于 `/` 符号的左侧。
+3. 在参数列表中，位于 `/` 与 `*` 之间的参数，可以按位置指定，也可以用关键字来指定。这也是 Python 普通参数的默认指定方式。
+
 // TODO 编写高质量 Python 待完成
