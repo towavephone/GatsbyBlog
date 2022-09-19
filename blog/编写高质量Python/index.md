@@ -3580,4 +3580,114 @@ print(result)
 2. Positional-only argument 是这样一种参数，它不允许调用者通过关键字来指定，而是要求必须按位置传递。这可以降低调用代码与参数名称之间的耦合程度。在函数的参数列表中，这些参数位于 `/` 符号的左侧。
 3. 在参数列表中，位于 `/` 与 `*` 之间的参数，可以按位置指定，也可以用关键字来指定。这也是 Python 普通参数的默认指定方式。
 
+## 第 26 条：用 functools.wraps 定义函数修饰器
+
+Python 中有一种特殊的写法，可以用修饰器（decorator）来封装某个函数，从而让程序在执行这个函数之前与执行完这个函数之后，分别运行某些代码。这意味着，调用者传给函数的参数值、函数返回给调用者的值，以及函数抛出的异常，都可以由修饰器访问并修改。这是个很有用的机制，能够确保用户以正确的方式使用函数，也能够用来调试程序或实现函数注册功能，此外还有许多用途。
+
+例如，假设我们要把函数执行时收到的参数与返回的值记录下来。这在调试递归函数时是很有用的，因为我们需要知道，这个函数执行每一层递归时，输入的是什么参数，返回的是什么值。下面我们就定义这样一个修饰器，在实现这个修饰器时，用 `*args` 与 `**kwargs` 表示受修饰的原函数 func 所收到的参数（参见第 22 条与第 23 条）。
+
+```py
+def trace(func):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        print(f'{func.__name__}({args!r}，{kwargs!r})'
+              f'-> {result!r}')
+        return result
+    return wrapper
+
+
+@trace # 相当于 fibonacci = trace(fibonacci)
+def fibonacci(n):
+    """Return the n-th Fibonacci number"""
+    if n in (0, 1):
+        return n
+    return fibonacci(n - 2) + fibonacci(n - 1)
+
+fibonacci(4)
+
+>>>
+fibonacci((0,)，{})-> 0
+fibonacci((1,)，{})-> 1
+fibonacci((2,)，{})-> 1
+fibonacci((1,)，{})-> 1
+fibonacci((0,)，{})-> 0
+fibonacci((1,)，{})-> 1
+fibonacci((2,)，{})-> 1
+fibonacci((3,)，{})-> 2
+fibonacci((4,)，{})-> 3
+```
+
+这样写确实能满足需求，但是会带来一个我们不愿意看到的副作用。修饰器返回的那个值，也就是刚才调用的 fibonacci，它的名字并不叫 `fibonacci`。
+
+```py
+print(fibonacci)
+
+>>>
+<function trace.<locals>.wrapper at 0x108955dcO>
+```
+
+这种现象解释起来并不困难。trace 函数返回的，是它里面定义的 wrapper 函数，所以，当我们把这个返回值赋给 fibonacci 之后，fibonacci 这个名称所表示的自然就是 wrapper 了。问题在于，这样可能会干扰那些需要利用 introspection 机制来运作的工具，例如调试器（debugger）（参见第 80 条）。
+
+例如，如果用内置的 help 函数来查看修饰后的 fibonacci，那么打印出来的并不是我们想看的帮助文档，它本来应该打印前面定义时写的那行 `Return the n-th Fibonacci number` 文本才对。
+
+```py
+help(fibonacci)
+
+>>>
+Help on function wrapper in module __main__:
+
+wrapper(*args, **kwargs)
+```
+
+对象序列化器（object serializer，参见第 68 条）也无法正常运作，因为它不能确定受修饰的那个原始函数的位置。
+
+```py
+import pickle
+
+pickle.dumps(fibonacci)
+
+>>>
+Traceback ...
+AttributeError: Can't pickle local object 'trace.<locals>.wrapper'
+```
+
+要想解决这些问题，可以改用 functools 内置模块之中的 wraps 辅助函数来实现。wraps 本身也是个修饰器，它可以帮助你编写自己的修饰器。把它运用到 wrapper 函数上面，它就会将重要的元数据（metadata）全都从内部函数复制到外部函数。
+
+```py{2,6}
+import pickle
+from functools import wraps
+
+
+def trace(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        print(f'{func.__name__}({args!r}，{kwargs!r})'
+              f'-> {result!r}')
+        return result
+    return wrapper
+
+
+@trace
+def fibonacci(n):
+    """Return the n-th Fibonacci number"""
+    if n in (0, 1):
+        return n
+    return fibonacci(n - 2) + fibonacci(n - 1)
+
+
+pickle.dumps(fibonacci)
+help(fibonacci)
+```
+
+现在我们就可以通过 help 函数看到正确的文档了。虽然原来的 fibonacci 函数现在封装在修饰器里面，但我们还是可以看到它的文档。
+
+除了这里讲到的几个方面之外，Python 函数还有很多标准属性（例如 `__name__`、`__module__`、`__annotations__`）也应该在受到封装时得以保留，这样才能让相关的接口正常运作。wraps 可以帮助保留这些属性，使程序表现出正确的行为。
+
+### 总结
+
+1. 修饰器是 Python 中的一种写法，能够把一个函数封装在另一个函数里面，这样程序在执行原函数之前与执行完毕之后，就有机会执行其他一些逻辑了。
+2. 修饰器可能会让那些利用 introspection 机制运作的工具（例如调试器）产生奇怪的行为。
+3. Python 内置的 functools 模块里有个叫作 wraps 的修饰器，可以帮助我们正确定义自己的修饰器，从而避开相关的问题。
+
 // TODO 编写高质量 Python 待完成
