@@ -3859,4 +3859,211 @@ print(filtered)
 1. 推导的时候可以使用多层循环，每层循环可以带有多个条件。
 2. 控制推导逻辑的子表达式不要超过两个，否则代码很难读懂。
 
+## 第 29 条：用赋值表达式消除推导中的重复代码
+
+推导 list、dict 与 set 等变体结构时，经常要在多个地方用到同一个计算结果。例如，我们要给制作紧固件的公司编写程序以管理订单。顾客下单后，我们要判断当前的库存能否满足这份订单，也就是说，要核查每种产品的数量有没有达到可以发货的最低限制（8 个为一批，至少要有一批，才能发货）。
+
+```py
+stock = {
+    'nails': 125,
+    'screws': 35,
+    'wingnuts': 8,
+    'washers': 24,
+}
+order = ['screws', 'wingnuts', 'clips']
+
+
+def get_batches(count, size):
+    return count // size
+
+
+result = {}
+for name in order:
+    count = stock.get(name, 0)
+    batches = get_batches(count, 8)
+    if batches:
+        result[name] = batches
+
+print(result)
+
+>>>
+{'screws': 4, 'wingnuts': 1}
+```
+
+这段循环逻辑，如果改用字典推导来写，会简单一些（参见第 27 条）。
+
+```py
+found = {name: get_batches(stock.get(name, 0), 8)
+         for name in order
+         if get_batches(stock.get(name, 0), 8)}
+print(found)
+```
+
+这样写虽然比刚才简短，但问题是，它把 `get_batches(stock.get(name, 0), 8)` 写了两遍。这样会让代码看起来比较乱，而且实际上，程序也没有必要把这个结果计算两遍。另外，如果这两个地方忘了同步更新，那么程序就会出现 bug。例如，我们决定每一批不是 8 个，而是 4 个，那么需要把 `get_batches` 的第二个参数从 8 改成 4，但是，万一我们忘了同步修改另一个地方，那么代码就可能会出问题（它会把大于等于 4 但是小于 8 的情况给漏掉）。
+
+有个简单的办法可以解决这个问题，那就是在推导的过程中使用 Python 3.8 新引入的 `:=` 操作符进行赋值表达（参见第 10 条）。
+
+```py
+found = {name: batches for name in order
+         if (batches := get_batches(stock.get(name, 0), 8))}
+```
+
+这条 `batches := get_batches(...)` 赋值表达式，能够从 stock 字典里查到对应产品一共有几批，并把这个批数放在 batches 变量里。这样的话，我们推导这个产品所对应批数时，就不用再通过 `get_batches` 计算了，因为结果已经保存到 batches 里面了。这种写法只需要把 get 与 `get_batches` 调用一次即可，这样能够提升效率，因为我们不需要针对 order 列表中的每件产品都多做一次 get 与 `get_batches`。
+
+在推导过程中，描述新值的那一部分也可以出现赋值表达式。但如果在其他部分引用了定义在那一部分的变量，那么程序可能就会在运行时出错。例如，如果写成了下面这样，那么程序就必须先考虑 `for name, count in stock.items() if tenth > 0`，而这个时候，其中的 tenth 还没有得到定义。
+
+```py
+result = {name: (tenth := count // 10)
+          for name, count in stock.items() if tenth > 0}
+print(result)
+
+>>>
+Traceback ...
+NameError: name 'tenth' is not defined
+```
+
+为了解决这个问题，可以把赋值表达式移动到 if 条件里面，然后在描述新值的这一部分引用已经定义过的 tenth 变量。
+
+```py
+result = {name: tenth for name, count in stock.items()
+          if (tenth := count // 10) > 0}
+print(result)
+
+>>>
+{'nails': 12, 'screws': 3, 'washers': 2}
+```
+
+如果推导逻辑不带条件，而表示新值的那一部分又使用了 `:=` 操作符，那么操作符左边的变量就会泄漏到包含这条推导语句的那个作用域里（参见第 21 条）。
+
+```py
+half = [(last := count // 2) for count in stock.values()]
+print(f'Last item of {half} is {last}')
+
+>>>
+Last item of [62, 17, 4, 12] is 12
+```
+
+这与普通的 for 循环所用的那个循环变量类似
+
+```py
+for count in stock.values():  # Leaks loop variable
+    pass
+print(f'Last item of {list(stock.values())} is {count}')
+
+>>>
+Last item of [125, 35, 8, 24] is 24
+```
+
+然而，推导语句中的 for 循环所使用的循环变量，是不会像刚才那样泄漏到外面的。
+
+```py
+half = [count // 2 for count in stock.values()]
+print(half)
+# Works
+print(count)  # Exception because loop variable didn't leak
+
+>>>
+[62, 17, 4, 12]
+Traceback ...
+NameError: name 'count' is not defined
+```
+
+最好不要泄漏循环变量，所以，建议赋值表达式只出现在推导逻辑的条件之中。
+
+赋值表达式不仅可以用在推导过程中，而且可以用来编写生成器表达式（generator expression，参见第 32 条）。下面这种写法创建的是迭代器，而不是字典实例，该迭代器每次会给出一对数值，其中第一个元素为产品的名字，第二个元素为这种产品的库存。
+
+```py
+found = ((name, batches) for name in order
+         if (batches := get_batches(stock.get(name, 0), 8)))
+print(next(found))
+print(next(found))
+
+>>>
+('screws', 4)
+('wingnuts', 1)
+```
+
+### 总结
+
+1. 编写推导式与生成器表达式时，可以在描述条件的那一部分通过赋值表达式定义变量，并在其他部分复用该变量，可使程序简单易读。
+2. 对于推导式与生成器表达式来说，虽然赋值表达式也可以出现在描述条件的那一部分之外，但最好别这么写。
+
+## 第 30 条：不要让函数直接返回列表，应该让它逐个生成列表里的值
+
+如果函数要返回的是个包含许多结果的序列，那么最简单的办法就是把这些结果放到列表中。例如，我们要返回字符串里每个单词的首字母所对应的下标。下面这种写法，会把每次遇到的新单词所在的位置追加（append）到存放结果的 result 列表中，在函数末尾返回这份列表。
+
+```py
+def index_words(text):
+    result = []
+    if text:
+        result.append(0)
+    for index, letter in enumerate(text):
+        if letter == ' ':
+            result.append(index + 1)
+    return result
+```
+
+我们把一段范例文本传给这个函数，它可以返回正确的结果。
+
+```py
+address = 'Four score and seven years ago...'
+result = index_words(address)
+print(result)
+
+>>>
+[0, 5, 11, 15, 21, 27]
+```
+
+index_words 函数有两个缺点。
+
+1. 它的代码看起来有点杂乱。每找到一个新单词，它都要调用 append 方法，而调用这个方法时，必须写上 result.append 这样一串字符，这就把我们想要强调的重点，也就是这个新单词在字符串中的位置（index + 1）淡化了。另外，函数还必须专门用一行代码创建这个保存结果的 result 列表，并且要用一条 return 语句把它返回给调用者。这样算下来，虽然函数的主体部分大约有 130 个字符（非空白的），但真正重要的只有 75 个左右。
+
+   这种函数改用生成器（generator）来实现会比较好。生成器由包含 yield 表达式的函数创建。下面就定义一个生成器函数，实现与刚才那个函数相同的效果。
+
+   ```py
+   def index_words_iter(text):
+      if text:
+         yield 0
+      for index, letter in enumerate(text):
+         if letter == ' ':
+               yield index + 1
+
+   address = 'Four score and seven years ago...'
+   result = index_words_iter(address)
+   print(list(result))
+   ```
+
+2. 它必须把所有的结果都保存到列表中，然后才能返回列表。如果输入的数据特别多，那么程序可能会因为耗尽内存而崩溃。
+
+   相反，用生成器函数来实现，就不会有这个问题了。它可以接受长度任意的输入信息，并把内存消耗量压得比较低。例如下面这个生成器，只需要把当前这行文字从文件中读进来就行，每次推进的时候，它都只处理一个单词，直到把当前这行文字处理完毕，才读入下一行文字。
+
+   ```py
+   import itertools
+
+   def index_file(handle):
+      offset = 0
+      for line in handle:
+         if line:
+               yield offset
+         for letter in line:
+               offset += 1
+               if letter == ' ':
+                  yield offset
+
+   with open('address.txt', 'r') as f:
+      it = index_file(f)
+      results = itertools.islice(it, 0, 10)
+      print(list(results))
+   ```
+
+   该函数运行时所耗的内存，取决于文件中最长的那一行所包含的字符数。把刚才那份输入数据存放到 address.txt 文件，让这个函数去读取并用它所返回的生成器构建一份列表，可以看到跟原来相同的结果（islice 函数的详细用法，参见第 36 条）。
+
+   定义这种生成器函数的时候，只有一个地方需要注意，就是调用者无法重复使用函数所返回的迭代器，因为这些迭代器是有状态的（参见第 31 条）。
+
+### 总结
+
+1. 用生成器来实现比让函数把结果收集合到列表里再返回，要更加清晰一些。
+2. 生成器函数所返回的迭代器可以产生一系列值，每次产生的那个值都是由函数体的下一条 yield 表达式所决定的。
+3. 不管输入的数据量有多大，生成器函数每次都只需要根据其中的一小部分来计算当前这次的输出值。它不用把整个输入值全都读取进来，也不用一次就把所有的输出值全都算好。
+
 // TODO 编写高质量 Python 待完成
