@@ -899,6 +899,16 @@ for rank, (name, calories) in enumerate(snacks, 1):
 
 这才是符合 Python 风格的写法（Pythonic 式的写法），我们不需要再通过下标逐层访问了。这种写法可以节省篇幅，而且比较容易理解。
 
+Python 的 unpacking 机制可以用在许多方面，例如构建列表（参见第 13 条）、给函数设计参数列表（参见第 22 条）、传递关键字参数（参见第 23 条）、接收多个返回值（参见第 19 条）等。
+
+明智地使用 unpacking 机制，可以实现很多原来必须通过下标才能写出的功能，这让代码变得更加清晰，而且能充分发挥 Python 的优势。
+
+### 总结
+
+1. unpacking 是一种特殊的 Python 语法，只需要一行代码，就能把数据结构里面的多个值分别赋给相应的变量。
+2. unpacking 在 Python 中应用广泛，凡是可迭代的对象都能拆分，无论它里面还有多少层迭代结构。
+3. 尽量通过 unpacking 来拆解序列之中的数据，而不要通过下标访问，这样可以让代码更简洁、更清晰。
+
 ## 第 7 条：尽量用 enumerate 取代 range
 
 Python 内置的 range 函数适合用来迭代一系列整数。
@@ -4065,5 +4075,229 @@ index_words 函数有两个缺点。
 1. 用生成器来实现比让函数把结果收集合到列表里再返回，要更加清晰一些。
 2. 生成器函数所返回的迭代器可以产生一系列值，每次产生的那个值都是由函数体的下一条 yield 表达式所决定的。
 3. 不管输入的数据量有多大，生成器函数每次都只需要根据其中的一小部分来计算当前这次的输出值。它不用把整个输入值全都读取进来，也不用一次就把所有的输出值全都算好。
+
+## 第 31 条：谨慎地迭代函数所收到的参数
+
+如果函数接受的参数是个包含许多对象的列表，那么这份列表有可能要迭代多次。例如，我们要分析美国得克萨斯州的游客数量。原始数据保存在一份列表中，其中的每个元素表示每年有多少游客到这个城市旅游（单位是百万）。我们现在要统计每个城市的游客数占游客总数的百分比。
+
+为了求出这份数据，先把列表里的所有元素加起来求出游客总数，然后，分别用每个城市的游客数除以游客总数计算出该城市在总数据中所占的百分比。
+
+```py
+def normalize(numbers):
+    total = sum(numbers)
+    result = []
+    for value in numbers:
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+```
+
+把一份范例数据放到列表中传给这个函数，可以得到正确的结果。
+
+```py
+def normalize(numbers):
+    total = sum(numbers)
+    result = []
+    for value in numbers:
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+
+
+visits = [15, 35, 80]
+percentages = normalize(visits)
+print(percentages)
+assert sum(percentages) == 100.0
+
+>>>
+[11.538461538461538, 26.923076923076923, 61.53846153846154]
+```
+
+为了应对规模更大的数据，我们现在需要让程序能够从文件中读取信息，并假设得克萨斯州所有城市的游客数都放在这份文件中。笔者决定用生成器实现，因为这样做可以让我们把同样的功能套用在其他数据上面，例如分析全世界（而不仅仅是得克萨斯一州）各城市的游客数。那些场合的数据量与内存用量可能会比现在大得多（参见第 30 条）。
+
+```py
+def read_visits(data_path):
+    with open(data_path)as f:
+        for line in f:
+            yield int(line)
+```
+
+奇怪的是，对 `read_visits` 所返回的迭代器调用 normalize 函数后，并没有得到结果。
+
+```py
+it = read_visits('my_numbers.txt')
+percentages = normalize(it)
+print(percentages)
+
+>>>
+[]
+```
+
+出现这种状况的原因在于，迭代器只能产生一次结果。假如迭代器或生成器已经抛出过 StopIteration 异常，继续用它来构造列表或是像 normalize 那样对它做 for 循环，那它不会给出任何结果。
+
+```py
+it = read_visits('my_numbers.txt')
+print(list(it))
+print(list(it))  # Already exhausted
+
+>>>
+[15, 35, 80]
+[]
+```
+
+还有个因素也很令人迷惑，那就是：在已经把数据耗完的迭代器上面继续迭代，程序居然不报错。for 循环、list 构造器以及 Python 标准库的其他许多函数，都认为迭代器在正常的操作过程中抛出 StopIteration 异常是很自然的。它们没办法区分，这个迭代器是本身就没有数据可以提供，还是虽然有数据，但现在已经耗尽了。
+
+为了解决这个问题，我们可以把外界传入的迭代器特意遍历一整轮，从而将其中的内容复制到一份列表里。这样的话，以后就可以用这份列表来处理数据了，那时想迭代多少遍都可以。下面的函数与原来的 normalize 函数功能相同，但是它会把收到的那个 numbers 迭代器所能提供的数据明确地复制到 `numbers_copy` 列表里。
+
+```py
+def normalize_copy(numbers):
+    numbers_copy = list(numbers)  # Copy the iterator
+    total = sum(numbers_copy)
+    result = []
+    for value in numbers_copy:
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+```
+
+现在的这个函数就可以正确处理 `read_visits` 生成器函数所返回的 it 值了。
+
+```py
+it = read_visits('my_numbers.txt')
+percentages = normalize_copy(it)
+print(percentages)
+assert sum(percentages) == 100.0
+```
+
+这个办法虽然能解决问题，但如果输入给它的迭代器所要提供的数据量相当庞大，那么有可能导致程序在复制迭代器时，因耗尽内存而崩溃。所以，把这个方案用在大规模的数据集合上面，会抵消掉 `read_visits` 的好处。编写那样一个函数，就是不想让程序把整套数据全都读取进来，而是可以一条一条地处理。为了应对大规模的数据，其中一个变通方案是让 normalize 函数接受另外一个函数（也就是下面的 `get_iter`），使它每次要使用迭代器时，都去向那个函数索要。
+
+```py
+def normalize_func(get_iter):
+    total = sum(get_iter())  # New iterator
+    result = []
+    for value in get_iter():  # New iterator
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+```
+
+使用 `normalize_func` 函数时，需要传入一条 `lambda` 表达式，让这个表达式去调用 `read_visits` 生成器函数。这样 `normalize_func` 每次向 `get_iter` 索要迭代器时，程序都会给出一个新的迭代器。
+
+```py
+path = 'my_numbers.txt'
+percentages = normalize_func(lambda: read_visits(path))
+print(percentages)
+assert sum(percentages) == 100.0
+```
+
+这样做虽然可行，但传入这么一个 lambda 表达式显得有点儿生硬。要想用更好的办法解决这个问题，可以新建一种容器类，让它实现迭代器协议（iterator protocol）。
+
+Python 的 for 循环及相关的表达式，正是按照迭代器协议来遍历容器内容的。Python 执行 `for x in foo` 这样的语句时，实际上会调用 iter(foo)，也就是把 foo 传给内置的 iter 函数。这个函数会触发名为 `foo.__iter__` 的特殊方法，该方法必须返回迭代器对象（这个迭代器对象本身要实现 `__next__` 特殊方法）。最后，Python 会用迭代器对象反复调用内置的 next 函数，直到数据耗尽为止（如果抛出 StopIteration 异常，就表示数据已经迭代完了）。
+
+这个过程听上去比较复杂，但总结起来，其实只需要让你的类在实现 `__iter__` 方法时，按照生成器的方式来写就好。下面定义这样一种可迭代的容器类，用来读取文件中的游客数据。
+
+```py
+class ReadVisits:
+    def __init__(self, data_path):
+        self.data_path = data_path
+
+    def __iter__(self):
+        with open(self.data_path) as f:
+            for line in f:
+                yield int(line)
+```
+
+我们只需要把新的容器传给最早的那个 normalize 函数运行即可，函数本身的代码不需要修改。
+
+```py
+def normalize(numbers):
+    total = sum(numbers)
+    result = []
+    for value in numbers:
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+
+
+class ReadVisits:
+    def __init__(self, data_path):
+        self.data_path = data_path
+
+    def __iter__(self):
+        with open(self.data_path) as f:
+            for line in f:
+                yield int(line)
+
+
+path = 'my_numbers.txt'
+visits = ReadVisits(path)
+percentages = normalize(visits)
+print(percentages)
+assert sum(percentages) == 100.0
+```
+
+这样做为什么可行呢？因为 normalize 函数里面的 sum 会触发 `ReadVisits.__iter__`，让系统分配一个新的迭代器对象给它。接下来，normalize 通过 for 循环计算每项数据占总值的百分比时，又会触发 `__iter__`，于是系统会分配另一个迭代器对象。这些迭代器各自推进，其中一个迭代器把数据耗尽，并不会影响其他迭代器。所以，在每一个迭代器上面遍历，都可以分别看到一套完整的数据。这种方案的唯一缺点，就是多次读取输入数据。
+
+明白了 ReadVisits 这种容器的工作原理后，我们就可以在编写函数和方法时先确认一下，收到的应该是像 ReadVisits 这样的容器，而不是普通的迭代器。按照协议，如果将普通的迭代器传给内置的 iter 函数，那么函数会把迭代器本身返回给调用者。反之，如果传来的是容器类型，那么 iter 函数就会返回一个新的迭代器对象。我们可以借助这条规律，判断输入值是不是这种容器。如果不是，就抛出 TypeError 异常，因为我们没办法在那样的值上面重复遍历。
+
+```py
+def normalize_defensive(numbers):
+    if iter(numbers) is numbers:  # An iterator -- bad!
+        raise TypeError('Must supply a container')
+    total = sum(numbers)
+    result = []
+    for value in numbers:
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+```
+
+还有一种写法也可以检测出这样的问题。collections.abc 内置模块里定义了名为 Iterator 的类，它用在 isinstance 函数中，可以判断自己收到的参数是不是这种实例。如果是，就抛出异常（参见第 43 条）。
+
+```py
+def normalize_defensive(numbers):
+    if isinstance(numbers, Iterator):  # Another way to check
+        raise TypeError('Must supply a container')
+    total = sum(numbers)
+    result = []
+    for value in numbers:
+        percent = 100 * value / total
+        result.append(percent)
+    return result
+```
+
+这种自定义容器的方案，最适合于既不想像 `normalize_copy` 函数一样，把迭代器提供的这套数据全部复制一份，同时又要多次遍历这套数据的情况。该方案不仅支持自定义容器，还支持系统自带的列表类型，因为这些全都属于遵循迭代器协议的可迭代容器。
+
+```py
+visits = [15, 35, 80]
+percentages = normalize_defensive(visits)
+assert sum(percentages) == 100.0
+
+path = 'my_numbers.txt'
+visits = ReadVisits(path)
+percentages = normalize_defensive(visits)
+assert sum(percentages) == 100.0
+```
+
+如果输入的是普通迭代器而不是容器，那么 `normalize_defensive` 就会抛出异常。
+
+```py
+visits = [15, 35, 80]
+it = iter(visits)
+normalize_defensive(it)
+
+>>>
+Traceback ...
+TypeError: Must supply a container
+```
+
+这种思路也适用于异步的迭代器（示例参见第 61 条）。
+
+### 总结
+
+1. 函数和方法如果要把收到的参数遍历很多遍，那就必须特别小心。因为如果这些参数为迭代器，那么程序可能得不到预期的值，从而出现奇怪的效果。
+2. Python 的迭代器协议确定了容器与迭代器应该怎样跟内置的 iter 及 next 函数、for 循环及相关的表达式交互。
+3. 要想让自定义的容器类型可以迭代，只需要把 `__iter__` 方法实现为生成器即可。
+4. 可以把值传给 iter 函数，检测它返回的是不是那个值本身。如果是，就说明这是个普通的迭代器，而不是一个可以迭代的容器。另外，也可以用内置的 isinstance 函数判断该值是不是 collections.abc.Iterator 类的实例。
 
 // TODO 编写高质量 Python 待完成
