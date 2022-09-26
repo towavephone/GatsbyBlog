@@ -4300,4 +4300,447 @@ TypeError: Must supply a container
 3. 要想让自定义的容器类型可以迭代，只需要把 `__iter__` 方法实现为生成器即可。
 4. 可以把值传给 iter 函数，检测它返回的是不是那个值本身。如果是，就说明这是个普通的迭代器，而不是一个可以迭代的容器。另外，也可以用内置的 isinstance 函数判断该值是不是 collections.abc.Iterator 类的实例。
 
+## 第 32 条：考虑用生成器表达式改写数据量较大的列表推导
+
+列表推导可以根据输入序列中的每个元素创建一个包含派生元素的新列表（参见第 27 条）。如果输入的数据量比较小，那么这样做没问题，但如果数据量很大，那么程序就有可能因为内存耗尽而崩溃。
+
+例如，我们要读取一份文件并返回每行的字符数。假如采用列表推导来实现，那需要把文件中的每行文本都载入内存，并统计长度。对于庞大的文件，或者像 network socket 这样无休止的输入来说，这么写恐怕有问题。下面就是采用列表推导写的代码，它只能处理输入数据量比较少的情况。
+
+```py
+value = [len(x) for x in open('my_file.txt')]
+print(value)
+```
+
+要想处理大规模的数据，可以使用生成器表达式（generator expression）来做，它扩展了列表推导式与生成器机制。程序在对生成器表达式求值时，并不会让它把包含输出结果的那个序列立刻构建出来，而是会把它当成一个迭代器，该迭代器每次可以根据表达式中的逻辑给出一项结果。
+
+生成器表达式的写法，与列表推导式语法类似，但它是写在一对圆括号内，而不是方括号里面。下面这种写法的效果与刚才一样，但是程序并不会立刻给出全部结果，而是先将生成器表达式表示成一个迭代器返回。
+
+```py
+it = (len(x) for x in open('my_file.txt'))
+print(it)
+
+>>>
+<generator object <genexpr> at 0x7f13063e03c0>
+```
+
+返回的迭代器每次可以推进一步，这时它会根据生成表达式的逻辑计算出下一项输出结果（这项结果可以通过内置的 next 函数取得）。需要多少项结果，就把迭代器推进多少次，这种采用生成器表达式来实现的写法不会消耗太多内存。
+
+```py
+print(next(it))
+print(next(it))
+```
+
+生成器表达式还有个强大的特性，就是可以组合起来。例如，可以用刚才那条生成器表达式所形成的 it 迭代器作为输入，编写一条新的生成器表达式。
+
+```py
+it = (len(x) for x in open('my_file.txt'))
+roots = ((x, x ** 0.5) for x in it)
+print(roots)
+```
+
+这条表达式所形成的 roots 迭代器每次推进时，会引发连锁反应：它也推进内部迭代器 it 以判断当前是否还能在 it 上面继续迭代，如果可以，就把 it 所返回的值代入 `(x, x ** 0.5)` 里面求出结果。这种写法使用的内存同样不会太多。
+
+多个生成器嵌套而成的代码，执行起来还是相当快的。所以，如果要对数据量很大的输入流做一系列处理，那么生成器表达式应该是个很好的选择。唯一需要注意的是，生成器表达式返回的迭代器是有状态的，跑完一整轮之后，就不能继续使用了（参见第 31 条）。
+
+### 总结
+
+1. 通过列表推导来处理大量的输入数据，可能会占用许多内存。
+2. 改用生成器表达式来做，可以避免内存使用量过大的问题，因为这种表达式所形成的迭代器每次只会计算一项结果。
+3. 生成器表达式所形成的迭代器可以当成 for 语句的子表达式出现在另一个生成器表达式里。
+4. 把生成器表达式组合起来使用，能够写出执行速度快且占用内存少的代码。
+
+## 第 33 条：通过 yield from 把多个生成器连起来用
+
+生成器有很多好处（参见第 30 条），而且能够解决许多常见的问题（参见第 31 条）。生成器的用途特别广，所以许多程序都会频繁使用它们，而且是一个连着一个地用。
+
+例如，我们要编写一个图形程序，让它在屏幕上面移动图像，从而形成动画效果。假设要实现这样一段动画：图片先快速移动一段时间，然后暂停，接下来慢速移动一段时间。为了把移动与暂停表示出来，笔者定义了下面两个生成器函数，让它们分别给出图片在当前时间段内应该保持的速度。
+
+```py
+def move(period, speed):
+    for _ in range(period):
+        yield speed
+
+
+def pause(delay):
+    for _ in range(delay):
+        yield 0
+```
+
+为了把完整的动画制作出来，需要将 move 与 pause 连起来使用，从而算出这张图片当前的位置与上一个位置之差。下面的函数用三个 for 循环来表示动画的三个环节，在每一个环节里，它都通过 yield 把图片当前的位置与上一次的位置之差 delta 返回给调用者。根据 animate 函数返回的 delta 值，即可把整段动画做好。
+
+```py
+def animate():
+    for delta in move(4, 5.0):
+        yield delta
+    for delta in pause(3):
+        yield delta
+    for delta in move(2, 3.0):
+        yield delta
+```
+
+接下来，我们就根据 animate 生成器所给出的 delta 值，把整个动画效果渲染出来。
+
+```py
+def render(delta):
+    print(f'Delta: {delta:.1f}')
+    # Move the images onscreen
+
+
+def run(func):
+    for delta in func():
+        render(delta)
+
+
+run(animate)
+
+>>>
+Delta: 5.0
+Delta: 5.0
+Delta: 5.0
+Delta: 5.0
+Delta: 0.0
+Delta: 0.0
+Delta: 0.0
+Delta: 3.0
+Delta: 3.0
+```
+
+这种写法的问题在于，animate 函数里有很多重复的地方。比如它反复使用 for 结构来操纵生成器，而且每个 for 结构都使用相同的 yield 表达式，这样看上去很啰唆。这个例子仅仅连用了三个生成器，就让代码变得如此烦琐，若是动画里面有十几或几十个环节，那么代码读起来会更加困难。
+
+为了解决这个问题，我们可以改用 yield from 形式的表达式来实现。这种形式，会先从嵌套进去的小生成器里面取值，如果该生成器已经用完，那么程序的控制流程就会回到 yield from 所在的这个函数之中，然后它有可能进入下一套 yield from 逻辑。下面这段代码，用 yield from 语句重新实现了 animate 函数。
+
+```py
+def animate_composed():
+    yield from move(4, 5.0)
+    yield from pause(3)
+    yield from move(2, 3.0)
+
+run(animate_composed)
+
+>>>
+Delta: 5.0
+Delta: 5.0
+Delta: 5.0
+Delta: 5.0
+Delta: 0.0
+Delta: 0.0
+Delta: 0.0
+Delta: 3.0
+Delta: 3.0
+```
+
+它的运行结果与刚才一样，但是代码看上去更清晰、更直观了。Python 解释器看到 yield from 形式的表达式后，会自己想办法实现与带有普通 yield 语句的 for 循环相同的效果，而且这种实现方式要更快。下面采用内置的 timeit 模块编写并运行一个 micro-benchmark 试试。
+
+```py
+import timeit
+
+
+def child():
+    for i in range(1_000_000):
+        yield i
+
+
+def slow():
+    for i in child():
+        yield i
+
+
+def fast():
+    yield from child()
+
+
+baseline = timeit.timeit(
+    stmt='for _ in slow(): pass',
+    globals=globals(),
+    number=50)
+print(f'Manual nesting {baseline:.2f}s')
+comparison = timeit.timeit(
+    stmt='for _ in fast(): pass',
+    globals=globals(),
+    number=50)
+print(f'Composed nesting {comparison:2f}s')
+reduction = -(comparison - baseline)/baseline
+print(f'{reduction:.1%} less time')
+
+>>>
+Manual nesting 3.70s
+Composed nesting 3.319963s
+10.2% less time
+```
+
+所以，如果要把多个生成器连起来用，那么笔者强烈建议优先考虑 yield from 表达式。
+
+### 总结
+
+1. 如果要连续使用多个生成器，那么可以通过 yield from 表达式来分别使用这些生成器，这样做能够免去重复的 for 结构。
+2. yield from 的性能要胜过那种在 for 循环里手工编写 yield 表达式的方案。
+
+## 第 34 条：不要用 send 给生成器注入数据
+
+yield 表达式让我们能够轻松地写出生成器函数，使得调用者可以每次只获取输出序列中的一项结果（参见第 30 条）。但问题是，这种通道是单向的，也就是说，无法让生成器在其一端接收数据流，同时在另一端给出计算结果。假如能实现双向通信，那么生成器的适用面会更广。
+
+例如，我们想用软件实现无线电广播，用它来发送信号。为了编写这个程序，我们必须用一个函数来模拟正弦波，让它能够给出一系列按照正弦方式分布的点。
+
+```py
+import math
+
+
+def wave(amplitude, steps):
+    step_size = 2 * math.pi / steps
+    for step in range(steps):
+        radians = step * step_size
+        fraction = math.sin(radians)
+        output = amplitude * fraction
+        yield output
+```
+
+有了这个 wave 函数，我们可以让它按照某个固定的振幅生成一系列可供传输的值。
+
+```py
+def transmit(output):
+    if output is None:
+        print(f'Output is None')
+    else:
+        print(f'Output: {output:>5.1f}')
+
+
+def run(it):
+    for output in it:
+        transmit(output)
+
+
+run(wave(3.0, 8))
+
+>>>
+Output:   0.0
+Output:   2.1
+Output:   3.0
+Output:   2.1
+Output:   0.0
+Output:  -2.1
+Output:  -3.0
+Output:  -2.1
+```
+
+这样写可以生成基本的波形，但问题是，该函数在产生这些值的时候，只能按照刚开始给定的振幅来计算，而没办法使振幅在整个生成过程中根据某个因素发生变化（例如在发送调幅广播信号时，我们就需要这么做）。现在，我们要让生成器在计算每个值的时候，都能考虑到振幅的变化，从而实现调幅。
+
+Python 的生成器支持 send 方法，这可以让生成器变为双向通道。send 方法可以把参数发给生成器，让它成为上一条 yield 表达式的求值结果，并将生成器推进到下一条 yield 表达式，然后把 yield 右边的值返回给 send 方法的调用者。然而在一般情况下，我们还是会通过内置的 next 函数来推进生成器，按照这种写法，上一条 yield 表达式的求值结果总是 None。
+
+```py
+def my_generator():
+    received = yield 1
+    print(f'received {received}')
+
+
+it = iter(my_generator())
+output = next(it)  # Get first generator output
+print(f'output = {output}')
+try:
+    next(it)  # Run generator until it exits
+except StopIteration:
+    pass
+
+>>>
+output = 1
+received None
+```
+
+如果不通过 for 循环或内置的 next 函数推进生成器，而是改用 send 方法，那么调用方法时传入的参数就会成为上一条 yield 表达式的值，生成器拿到这个值后，会继续运行到下一条 yield 表达式那里。可是，刚开始推进生成器的时候，它是从头执行的，而不是从某一条 yield 表达式那里继续的，所以，首次调用 send 方法时，只能传 None，要是传入其他值，程序运行时就会抛出异常。
+
+```py
+def my_generator():
+    received = yield 1
+    print(f'received {received}')
+
+
+it = iter(my_generator())
+output = it.send(None)  # Get first generator output
+print(f'output {output}')
+try:
+    it.send('hello!')  # Send value into the generator
+except StopIteration:
+    pass
+
+>>>
+output 1
+received hello!
+```
+
+我们可以利用这种机制让调用者把振幅发送过来，这样函数就能根据这个输入值调整生成的正弦波幅值了。首先修改 wave 函数的代码，让它把 yield 表达式的求值结果（也就是调用者通过 send 发过来的振幅）保存到 amplitude 变量里，这样就能根据该变量计算出下次应该生成的值。
+
+然后，要修改 run 函数调用 `wave_modulating` 函数的方式。它现在必须把每次所要使用的振幅发给 `wave_modulating` 生成器。首次必须发送 None，因为此时生成器还没有遇到过 yield 表达式，它不需要知道上一条 yield 表达式的求值结果。
+
+```py
+import math
+
+
+def transmit(output):
+    if output is None:
+        print(f'Output is None')
+    else:
+        print(f'Output: {output:>5.1f}')
+
+
+def wave_modulating(steps):
+    step_size = 2 * math.pi / steps
+    amplitude = yield  # Receive initial amplitude
+    for step in range(steps):
+        radians = step * step_size
+        fraction = math.sin(radians)
+        output = amplitude * fraction
+        amplitude = yield output  # Receive next amplitude
+
+
+def run_modulating(it):
+    amplitudes = [None, 7, 7, 7, 2, 2, 2, 2, 10, 10, 10, 10, 10]
+    for amplitude in amplitudes:
+        output = it.send(amplitude)
+        transmit(output)
+
+
+run_modulating(wave_modulating(12))
+
+>>>
+Output is None
+Output:   0.0
+Output:   3.5
+Output:   6.1
+Output:   2.0
+Output:   1.7
+Output:   1.0
+Output:   0.0
+Output:  -5.0
+Output:  -8.7
+Output: -10.0
+Output:  -8.7
+Output:  -5.0
+```
+
+这样写没问题，程序可以按照每次输入的值调整输出信号的振幅。首次输出的肯定是 None，因为此时 `wave_modulating` 函数并不知道 amplitude 是多少，它只有在运行第一条 yield 表达式后，才能把调用者通过 send 发来的值保存到这个变量里。
+
+这种写法有个缺点，就是它很难让初次阅读这段代码的人立刻理解它的意思。把 yield 放在赋值语句的右侧，本身就不太直观，因为我们必须先了解生成器的这项高级特性，才能明白 yield 与 send 是如何相互配合的。
+
+现在假设程序的需求变得更复杂了。这次要生成的载波不是简单的正弦波，而是由多个信号序列构成的复合波形（complex waveform）。要实现这个需求，可以连用几条 yield from 语句，把多个生成器串接起来（参见第 33 条）。下面先验证一下，这种写法能否处理振幅固定的简单情况。
+
+```py
+def complex_wave():
+    yield from wave(7.0, 3)
+    yield from wave(2.0, 4)
+    yield from wave(10.0, 5)
+
+
+run(complex_wave())
+
+>>>
+Output:   0.0
+Output:   6.1
+Output:  -6.1
+Output:   0.0
+Output:   2.0
+Output:   0.0
+Output:  -2.0
+Output:   0.0
+Output:   9.5
+Output:   5.9
+Output:  -5.9
+Output:  -9.5
+```
+
+可以看到，利用 yield from 表达式确实可以处理比较简单的情况。那既然这样，我们再试试看，它能否处理那种采用 send 方法写成的函数。下面就用这种写法，接连多次调用 `wave_modulating` 生成器。
+
+```py
+def complex_wave_modulating():
+    yield from wave_modulating(3)
+    yield from wave_modulating(4)
+    yield from wave_modulating(5)
+
+
+run_modulating(complex_wave_modulating())
+
+>>>
+Output is None
+Output:   0.0
+Output:   6.1
+Output:  -6.1
+Output is None
+Output:   0.0
+Output:   2.0
+Output:   0.0
+Output: -10.0
+Output is None
+Output:   0.0
+Output:   9.5
+Output:   5.9
+```
+
+这样写在大方向上是对的，但问题在于：程序竟然输出了那么多 None！这是为什么呢？因为每条 yield from 表达式其实都在遍历一个嵌套进去的生成器，所以每个嵌套生成器都必须分别执行它们各自的第一条 yield 语句（也就是什么值都不带的那条 yield 语句），只有执行过这条语句之后，这些生成器才能通过 send 方法所传来的值决定这条语句的求值结果，并把这个结果放在 amplitude 变量里以计算下一次应该输出的值。所以，`complex_wave_modulating` 函数处理完前一个嵌套的生成器之后，会进入下一个嵌套的生成器，而这时就必须先把该生成器的第一条 yield 语句运行过去，这就导致后面两个嵌套生成器会各自从 amplitudes 列表里浪费掉一个，并使得每个嵌套生成器所拿到的第一个结果必定是 None，还会让最后那个嵌套生成器少执行两次。
+
+这意味着，虽然 yield from 语句与 send 方法单独用着都没问题，然而结合使用的效果却不太让人满意。当然也可以在 `run_modulating` 函数里添加一些代码，使得计算波形的步调与 amplitudes 列表提供振幅值的步调相一致，但这只能使程序越写越复杂，因为利用 send 方法写成的 `wave_modulating` 函数本身已经不太直观了，而我们又把这个生成器函数通过 yield from 语句套到了 `complex_wave_modulating` 里面，这理解起来就更加困难了。所以，笔者建议彻底抛开 send 方法，改用更简单的方案来做。
+
+最简单的一种写法，是把迭代器传给 wave 函数，让 wave 每次用到振幅的时候，通过 Python 内置的 next 函数推进这个迭代器并返回一个输入振幅。于是，这就促使多个生成器之间，产生连环反应（其他类似案例参见第 32 条）。
+
+这样，我们只需要把同一个迭代器分别传给这几条 yield from 语句里的 `wave_cascading` 就行。迭代器是有状态的（参见第 31 条），所以下一个 `wave_cascading` 会从上一个 `wave_cascading` 使用完的地方，继续往下使用 `amplitude_it` 迭代器。
+
+要想触发这个组合的生成器，只需要把振幅值放在列表中，并把针对列表制作的迭代器传给 `complex_wave_cascading` 就好。
+
+```py
+import math
+
+
+def transmit(output):
+    if output is None:
+        print(f'Output is None')
+    else:
+        print(f'Output: {output:>5.1f}')
+
+
+def wave_cascading(amplitude_it, steps):
+    step_size = 2 * math.pi / steps
+    for step in range(steps):
+        radians = step * step_size
+        fraction = math.sin(radians)
+        amplitude = next(amplitude_it)  # Get next input
+        output = amplitude * fraction
+        yield output
+
+
+def complex_wave_cascading(amplitude_it):
+    yield from wave_cascading(amplitude_it, 3)
+    yield from wave_cascading(amplitude_it, 4)
+    yield from wave_cascading(amplitude_it, 5)
+
+
+def run_cascading():
+    amplitudes = [7, 7, 7, 2, 2, 2, 2, 10, 10, 10, 10, 10]
+    it = complex_wave_cascading(iter(amplitudes))
+    for amplitude in amplitudes:
+        output = next(it)
+        transmit(output)
+
+
+run_cascading()
+
+>>>
+Output:   0.0
+Output:   6.1
+Output:  -6.1
+Output:   0.0
+Output:   2.0
+Output:   0.0
+Output:  -2.0
+Output:   0.0
+Output:   9.5
+Output:   5.9
+Output:  -5.9
+Output:  -9.5
+```
+
+这种写法最大的优点在于，迭代器可以来自任何地方，而且完全可以是动态的（例如可以用生成器函数来实现迭代器）。此方案只有一个缺陷，就是必须假设负责输入的生成器绝对能保证线程安全，但有时其实保证不了这一点。如果代码要跨越线程边界，那么用 async 函数实现可能更好（参见第 62 条）。
+
+### 总结
+
+1. send 方法可以把数据注入生成器，让它成为上一条 yield 表达式的求值结果，生成器可以把这个结果赋给变量。
+2. 把 send 方法与 yield from 表达式搭配起来使用，可能导致奇怪的结果，例如会让程序在本该输出有效值的地方输出 None。
+3. 通过迭代器向组合起来的生成器输入数据，要比采用 send 方法的那种方案好，所以尽量避免使用 send 方法。
+
 // TODO 编写高质量 Python 待完成
