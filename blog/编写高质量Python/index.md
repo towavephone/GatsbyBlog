@@ -4743,4 +4743,320 @@ Output:  -9.5
 2. 把 send 方法与 yield from 表达式搭配起来使用，可能导致奇怪的结果，例如会让程序在本该输出有效值的地方输出 None。
 3. 通过迭代器向组合起来的生成器输入数据，要比采用 send 方法的那种方案好，所以尽量避免使用 send 方法。
 
+## 第 35 条：不要通过 throw 变换生成器的状态
+
+除 yield from 表达式（参见第 33 条）与 send 方法（参见第 34 条）外，生成器还有一项高级功能，就是可以把调用者通过 throw 方法传来的 Exception 实例重新抛出。这个 throw 方法用起来很简单：如果调用了这个方法，那么生成器下次推进时，就不会像平常那样，直接走到下一条 yield 表达式那里，而是会把通过 throw 方法传入的异常重新抛出。下面用代码演示这种效果。
+
+```py
+class MyError(Exception):
+    pass
+
+
+def my_generator():
+    yield 1
+    yield 2
+    yield 3
+
+
+it = my_generator()
+print(next(it))  # Yield 1
+print(next(it))  # Yield 2
+print(it.throw(MyError('test error')))
+
+>>>
+1
+2
+Traceback ...
+__main__.MyError: test error
+```
+
+生成器函数可以用标准的 try/except 复合语句把 yield 表达式包裹起来，如果函数上次执行到了这条表达式这里，而这次即将继续执行时，又发现外界通过 throw 方法给自己注入了异常，那么这个异常就会被 try 结构捕获下来，如果捕获之后不继续抛异常，那么生成器函数会推进到下一条 yield 表达式（更多异常处理，参见第 65 条）。
+
+```py
+class MyError(Exception):
+    pass
+
+
+def my_generator():
+    yield 1
+    try:
+        yield 2
+    except MyError:
+        print('Got MyError!')
+    else:
+        yield 3
+    yield 4
+
+
+it = my_generator()
+print(next(it))  # Yield 1
+print(next(it))  # Yield 2
+print(it.throw(MyError('test error')))
+
+>>>
+1
+2
+Got MyError!
+4
+```
+
+这项机制会在生成器与调用者之间形成双向通信通道（另一种双向通信通道，参见第 34 条），这在某些情况下是有用的。例如，要编写一个偶尔可以重置的计时器程序。笔者定义下面的 Reset 异常与 timer 生成器方法，让调用者可以在 timer 给出的迭代器上通过 throw 方法注入 Reset 异常，令计时器重置。
+
+```py
+class Reset(Exception):
+    pass
+
+
+def timer(period):
+    current = period
+    while current:
+        current -= 1
+        try:
+            yield current
+        except Reset:
+            current = period
+```
+
+按照这种写法，如果 timer 正准备从 yield 表达式往下推进时，发现有人注入了 Reset 异常，那么它就会把这个异常捕获下来，并进入 except 分支，在这里它会把表示倒计时的 current 变量重新调整成最初的 period 值。
+
+这个计时器可以与外界某个按秒轮询的输入机制对接起来。为此，笔者定义一个 run 函数以驱动 timer 生成器所给出的那个 it 迭代器，并根据外界的情况做处理，如果外界要求重置，那就通过 it 迭代器的 throw 方法给计时器注入 Reset 变量，如果外界没有这样要求，那就调用 announce 函数打印生成器所给的倒计时值。
+
+```py
+class Reset(Exception):
+    pass
+
+
+def timer(period):
+    current = period
+    while current:
+        current -= 1
+        try:
+            yield current
+        except Reset:
+            current = period
+
+
+def check_for_reset():
+    # Poll for external event
+    # ...
+    pass
+
+
+def announce(remaining):
+    print(f'{remaining} ticks remaining')
+
+
+def run():
+    it = timer(4)
+    while True:
+        try:
+            if check_for_reset():
+                current = it.throw(Reset())
+            else:
+                current = next(it)
+        except StopIteration:
+            break
+        else:
+            announce(current)
+
+
+run()
+
+>>>
+3 ticks remaining
+2 ticks remaining
+1 ticks remaining
+0 ticks remaining
+```
+
+这样写没错，但是有点儿难懂，因为用了许多层嵌套结构。我们要判断 `check_for_reset` 函数的返回值，以确定是应该通过 it.throw 注入 Reset 异常，还是应该通过 next 推进迭代器。如果是要推进迭代器，那么还得捕获 StopIteration 异常：若是捕获到了这种异常，那说明迭代器已经走到终点，则要执行 break 跳出 while 循环；若没捕获到，则需要调用 announce 函数打印倒计时值。这会让代码变得很乱。
+
+有个简单的办法，能够改写这段代码，那就是用可迭代的容器对象（参见第 31 条）定义一个有状态的闭包（参见第 38 条）。下面的代码就写了这样一个 Timer 类，并通过它重新实现刚才的 timer 生成器。
+
+```py
+class Timer:
+    def __init__(self, period):
+        self.current = period
+        self.period = period
+
+    def reset(self):
+        self.current = self.period
+
+    def __iter__(self):
+        while self.current:
+            self.current -= 1
+            yield self.current
+```
+
+现在，run 函数就好写多了，因为它只需要用 for 循环迭代这个 timer 即可。这样写出来的代码，不像刚才那样有那么多层嵌套，所以读起来很容易懂。
+
+```py{29-37}
+class Reset(Exception):
+    pass
+
+
+def check_for_reset():
+    # Poll for external event
+    # ...
+    pass
+
+
+def announce(remaining):
+    print(f'{remaining} ticks remaining')
+
+
+class Timer:
+    def __init__(self, period):
+        self.current = period
+        self.period = period
+
+    def reset(self):
+        self.current = self.period
+
+    def __iter__(self):
+        while self.current:
+            self.current -= 1
+            yield self.current
+
+
+def run():
+    timer = Timer(4)
+    for current in timer:
+        if check_for_reset():
+            timer.reset()
+        announce(current)
+
+
+run()
+
+>>>
+3 ticks remaining
+2 ticks remaining
+1 ticks remaining
+0 ticks remaining
+```
+
+这样写所输出的结果与前面一样，但是这种实现方案理解起来要容易得多，即便是初次阅读这段代码的人也很容易就能读懂。凡是想用生成器与异常来实现的功能，通常都可以改用异步机制去做（参见第 60 条），那样会更好。如果确实遇到了这里讲到的这种需求，那么应该通过可迭代的类来实现生成器，而不要用 throw 方法注入异常。
+
+### 总结
+
+1. throw 方法可以把异常发送到生成器刚执行过的那条 yield 表达式那里，让这个异常在生成器下次推进时重新抛出。
+2. 通过 throw 方法注入异常，会让代码变得难懂，因为需要用多层嵌套的模板结构来抛出并捕获这种异常。
+3. 如果确实遇到了这样的特殊情况，那么应该通过类的 `__iter__` 方法实现生成器，并且专门提供一个方法，让调用者通过这个方法来触发这种特殊的状态变换逻辑。
+
+## 第 36 条：考虑用 itertools 拼装迭代器与生成器
+
+Python 内置的 itertools 模块里有很多函数，可以用来安排迭代器之间的交互关系（相关的基础知识，参见第 30 条与第 31 条）。
+
+如果要实现比较难写的迭代逻辑，那么应该先查看 itertools 的文档（在 Python 解释器界面输入 help(itertools)），说不定里面就有你能用到的函数。下面分三大类，列出其中最重要的函数。
+
+### 连接多个迭代器
+
+内置的 itertools 模块有一些函数可以把多个迭代器连成一个使用。
+
+#### chain
+
+chain 可以把多个迭代器从头到尾连成一个迭代器。
+
+```py
+import itertools
+
+it = itertools.chain([1, 2, 3], [4, 5, 6])
+print(list(it))
+
+>>>
+[1, 2, 3, 4, 5, 6]
+```
+
+#### repeat
+
+repeat 可以制作这样一个迭代器，它会不停地输出某个值。调用 repeat 时，也可以通过第二个参数指定迭代器最多能输出几次。
+
+```py
+import itertools
+
+it = itertools.repeat('hello', 3)
+print(list(it))
+
+>>>
+['hello', 'hello', 'hello']
+```
+
+#### cycle
+
+cycle 可以制作这样一个迭代器，它会循环地输出某段内容之中的各项元素。
+
+```py
+import itertools
+
+it = itertools.cycle([1, 2])
+result = [next(it) for _ in range(10)]
+print(result)
+
+>>>
+[1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
+```
+
+#### tee
+
+tee 可以让一个迭代器分裂成多个平行的迭代器，具体个数由第二个参数指定。如果这些迭代器推进的速度不一致，那么程序可能要用大量内存做缓冲，以存放进度落后的迭代器将来会用到的元素。
+
+```py
+import itertools
+
+it1, it2, it3 = itertools.tee(['first', 'second'], 3)
+print(list(it1))
+print(list(it2))
+print(list(it3))
+
+>>>
+['first', 'second']
+['first', 'second']
+['first', 'second']
+```
+
+#### zip_longest
+
+它与 Python 内置的 zip 函数类似（参见第 8 条），但区别在于，如果源迭代器的长度不同，那么它会用 fillvalue 参数的值来填补提前耗尽的那些迭代器所留下的空缺。
+
+```py
+import itertools
+
+keys = ['one', 'two', 'three']
+values = [1, 2]
+
+normal = list(zip(keys, values))
+print('zip:        ', normal)
+
+it = itertools.zip_longest(keys, values, fillvalue='nope')
+longest = list(it)
+print('zip_longest:', longest)
+
+>>>
+zip:         [('one', 1), ('two', 2)]
+zip_longest: [('one', 1), ('two', 2), ('three', 'nope')]
+```
+
+### 过滤源迭代器中的元素
+
+Python 内置的 itertools 模块里有一些函数可以过滤源迭代器中的元素。
+
+#### islice
+
+islice 可以在不拷贝数据的前提下，按照下标切割源迭代器。可以只给出切割的终点，也可以同时给出起点与终点，还可以指定步进值。这种切割方式与标准的序列切片及步进机制类似（参见第 11 条与第 12 条）。
+
+```py
+import itertools
+
+values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+first_five = itertools.islice(values, 5)
+print('First five: ', list(first_five))
+middle_odds = itertools.islice(values, 2, 8, 2)
+print('Middle odds:', list(middle_odds))
+
+>>>
+First five:  [1, 2, 3, 4, 5]
+Middle odds: [3, 5, 7]
+```
+
 // TODO 编写高质量 Python 待完成
