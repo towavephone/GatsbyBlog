@@ -5059,4 +5059,166 @@ First five:  [1, 2, 3, 4, 5]
 Middle odds: [3, 5, 7]
 ```
 
+#### takewhile
+
+takewhile 会一直从源迭代器里获取元素，直到某元素让测试函数返回 False 为止。
+
+```py
+import itertools
+
+values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+def less_than_seven(x):
+    return x < 7
+
+
+it = itertools.takewhile(less_than_seven, values)
+print(list(it))
+
+>>>
+[1, 2, 3, 4, 5, 6]
+```
+
+#### dropwhile
+
+与 takewhile 相反，dropwhile 会一直跳过源序列里的元素，直到某元素让测试函数返回 True 为止，然后它会从这个地方开始逐个取值。
+
+```py
+import itertools
+
+values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+def less_than_seven(x):
+    return x < 7
+
+
+it = itertools.dropwhile(less_than_seven, values)
+print(list(it))
+
+>>>
+[7, 8, 9, 10]
+```
+
+#### filterfalse
+
+filterfalse 和内置的 filter 函数相反，它会逐个输出源迭代器里使得测试函数返回 False 的那些元素。
+
+```py
+import itertools
+
+values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+def evens(x):
+    return x % 2 == 0
+
+
+filter_result = filter(evens, values)
+print('Filter:      ', list(filter_result))
+filter_false_result = itertools.filterfalse(evens, values)
+print('Filter false:', list(filter_false_result))
+
+>>>
+Filter:       [2, 4, 6, 8, 10]
+Filter false: [1, 3, 5, 7, 9]
+```
+
+### 用源迭代器中的元素合成新元素
+
+Python 内置的 itertools 模块里，有一些函数可以根据源迭代器中的元素合成新的元素。
+
+#### accumulate
+
+accumulate 会从源迭代器里取出一个元素，并把已经累计的结果与这个元素一起传给表示累加逻辑的函数，然后输出那个函数的计算结果，并把结果当成新的累计值。
+
+```py
+import itertools
+
+values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+sum_reduce = itertools.accumulate(values)
+print('Sum:   ', list(sum_reduce))
+
+
+def sum_modulo_20(first, second):
+    output = first + second
+    return output % 20
+
+
+modulo_reduce = itertools.accumulate(values, sum_modulo_20)
+print('Modulo:', list(modulo_reduce))
+
+>>>
+Sum:    [1, 3, 6, 10, 15, 21, 28, 36, 45, 55]
+Modulo: [1, 3, 6, 10, 15, 1, 8, 16, 5, 15]
+```
+
+这与内置的 functools 模块中 reduce 函数，实际上是一样的，只不过这个函数每次只给出一项累计值。如果调用者没有指定表示累加逻辑的双参数函数（binary function），那么默认的逻辑就是两值相加。
+
+#### product
+
+product 会从一个或多个源迭代器里获取元素，并计算笛卡尔积（Cartesian product），它可以取代那种多层嵌套的列表推导代码（参见第 28 条）。
+
+```py
+import itertools
+
+single = itertools.product([1, 2], repeat=2)
+print('Single:  ', list(single))
+
+multiple = itertools.product([1, 2], ['a', 'b'])
+print('Multiple:', list(multiple))
+
+>>>
+Single:   [(1, 1), (1, 2), (2, 1), (2, 2)]
+Multiple: [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]
+```
+
+#### permutations
+
+permutations 会考虑源迭代器所能给出的全部元素，并逐个输出由其中 N 个元素形成的每种有序排列（permutation）方式，元素相同但顺序不同，算作两种排列。
+
+```py
+import itertools
+
+it = itertools.permutations([1, 2, 3, 4], 2)
+print(list(it))
+
+>>>
+[(1, 2), (1, 3), (1, 4), (2, 1), (2, 3), (2, 4), (3, 1), (3, 2), (3, 4), (4, 1), (4, 2), (4, 3)]
+```
+
+#### combinations
+
+combinations 会考虑源迭代器所能给出的全部元素，并逐个输出由其中 N 个元素形成的每种无序组合（combination）方式，元素相同但顺序不同，算作同一种组合。
+
+```py
+import itertools
+
+it = itertools.combinations([1, 2, 3, 4], 2)
+print(list(it))
+
+>>>
+[(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+```
+
+#### `combinations_with_replacement`
+
+`combinations_with_replacement` 与 combinations 类似，但它允许同一个元素在组合里多次出现。
+
+```py
+import itertools
+
+it = itertools.combinations_with_replacement([1, 2, 3, 4], 2)
+print(list(it))
+
+>>>
+[(1, 1), (1, 2), (1, 3), (1, 4), (2, 2), (2, 3), (2, 4), (3, 3), (3, 4), (4, 4)]
+```
+
+### 总结
+
+1. itertools 包里面有三套函数可以拼装迭代器与生成器，它们分别能够连接多个迭代器，过滤源迭代器中的元素，以及用源迭代器中的元素合成新元素。
+2. 通过 help(itertools) 查看文档，了解这些函数所支持的其他参数，以及许多更为高级的函数和实用的代码范例。
+
 // TODO 编写高质量 Python 待完成
