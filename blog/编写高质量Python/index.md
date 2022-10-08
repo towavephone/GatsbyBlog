@@ -5221,4 +5221,287 @@ print(list(it))
 1. itertools 包里面有三套函数可以拼装迭代器与生成器，它们分别能够连接多个迭代器，过滤源迭代器中的元素，以及用源迭代器中的元素合成新元素。
 2. 通过 help(itertools) 查看文档，了解这些函数所支持的其他参数，以及许多更为高级的函数和实用的代码范例。
 
+# 类与接口
+
+## 第 37 条：用组合起来的类来实现多层结构，不要用嵌套的内置类型
+
+Python 内置的字典类型，很适合维护对象在生命期内的动态内部状态。所谓动态的（dynamic），是指我们无法获知那套状态会用到哪些标识符。例如，如果要用成绩册（Gradebook）记录学生的分数，而我们又没办法提前确定这些学生的名字，那么受到记录的每位学生与各自的分数，对于 Gradebook 对象来说，就属于动态的内部状态。为了实现这个需求，笔者定义下面这样一个类，让它把学生的名字当作键保存到 `_grades` 字典中，因为我们无法提前确定要记录哪些学生，所以不能将每位学生的名字都设置成这个类的一项属性。
+
+```py
+class SimpleGradebook:
+
+    def __init__(self):
+        self._grades = {}
+
+    def add_student(self, name):
+        self._grades[name] = []
+
+    def report_grade(self, name, score):
+        self._grades[name].append(score)
+
+    def average_grade(self, name):
+        grades = self._grades[name]
+        return sum(grades) / len(grades)
+
+
+book = SimpleGradebook()
+book.add_student('Isaac Newton')
+book.report_grade('Isaac Newton', 90)
+book.report_grade('Isaac Newton', 95)
+book.report_grade('Isaac Newton', 85)
+
+print(book.average_grade('Isaac Newton'))
+
+>>>
+90.0
+```
+
+字典与相关的内置类型用起来很方便，但同时也容易遭到滥用导致代码出问题。例如，我们现在要扩展这个 SimpleGradebook 类的功能，让它按照科目保存成绩，而不是把所有科目的成绩存在一起。通过修改 `_grades` 字典的用法，使它必须把键（也就是学生的名字）与另一个小字典相对应，而不是像刚才那样，直接与列表对应起来。那份小字典以各科的名称作键与一份列表对应起来，以保存学生在这一科的全部考试成绩。这次笔者用 defaultdict 来实现这个小字典，这样可以方便地处理科目名称还不存在的那些情况（参见第 17 条）。
+
+```py
+from collections import defaultdict
+
+
+class BySubjectGradebook:
+    def __init__(self):
+        self._grades = {}  # Outer dict
+
+    def add_student(self, name):
+        self._grades[name] = defaultdict(list)  # Inner dict
+```
+
+程序写到现在，还算比较直观。但是接下来，我们要编写 `report_grade` 方法来记录某位学生在某科目上的一次成绩，并且要写 `average_grade` 方法计算某位学生所有科目的平均成绩。这两个方法写起来就稍微有点复杂了，因为必须处理多层嵌套的字典结构，不过，这似乎还在可以把握的范围内。
+
+```py{11-22}
+from collections import defaultdict
+
+
+class BySubjectGradebook:
+    def __init__(self):
+        self._grades = {}  # Outer dict
+
+    def add_student(self, name):
+        self._grades[name] = defaultdict(list)  # Inner dict
+
+    def report_grade(self, name, subject, grade):
+        by_subject = self._grades[name]
+        grade_list = by_subject[subject]
+        grade_list.append(grade)
+
+    def average_grade(self, name):
+        by_subject = self._grades[name]
+        total, count = 0, 0
+        for grades in by_subject.values():
+            total += sum(grades)
+            count += len(grades)
+        return total / count
+```
+
+扩展后的类，用起来依然比较容易。
+
+```py
+book = BySubjectGradebook()
+book.add_student('Albert Einstein')
+book.report_grade('Albert Einstein', 'Math', 75)
+book.report_grade('Albert Einstein', 'Math', 65)
+book.report_grade('Albert Einstein', 'Gym', 90)
+book.report_grade('Albert Einstein', 'Gym', 95)
+print(book.average_grade('Albert Einstein'))
+
+>>>
+81.25
+```
+
+现在假设需求又变了，我们还要记录每次考试在科目里的权重（weight），因为期中考试与期末考试及随堂举行的临时考试（pop quiz）在总成绩里占的比例是不同的。实现这项功能的一种办法是改变里面那个小字典的用法，让它不要把成绩（score）直接添加到与键名（也就科目名称）相对应的那份列表里，而是先用成绩与权重构造元组，然后把（score, weight）形式的元组添加到列表里。
+
+```py
+from collections import defaultdict
+
+
+class WeightedGradebook:
+    def _init_(self):
+        self._grades = {}
+
+    def add_student(self, name):
+        self._grades[name] = defaultdict(list)
+
+    def report_grade(self, name, subject, score, weight):
+        by_subject = self._grades[name]
+        grade_list = by_subject[subject]
+        grade_list.append((score, weight))
+```
+
+`report_grade` 方法改起来似乎挺简单的，只需要把原来的成绩变为带权重的元组保存到列表里面即可。但是 `average_grade` 方法就比较难懂了，因为我们必须在循环里面再嵌套一个循环。
+
+```py
+from collections import defaultdict
+
+
+class WeightedGradebook:
+    def __init__(self):
+        self._grades = {}
+
+    def add_student(self, name):
+        self._grades[name] = defaultdict(list)
+
+    def report_grade(self, name, subject, score, weight):
+        by_subject = self._grades[name]
+        grade_list = by_subject[subject]
+        grade_list.append((score, weight))
+
+    def average_grade(self, name):
+        by_subject = self._grades[name]
+        score_sum, score_count = 0, 0
+        for subject, scores in by_subject.items():
+            subject_avg, total_weight = 0, 0
+            for score, weight in scores:
+                subject_avg += score * weight
+                total_weight += weight
+
+            score_sum += subject_avg / total_weight
+            score_count += 1
+        return score_sum / score_count
+
+
+book = WeightedGradebook()
+book.add_student('Albert Einstein')
+book.report_grade('Albert Einstein', 'Math', 75, 0.05)
+book.report_grade('Albert Einstein', 'Math', 65, 0.15)
+book.report_grade('Albert Einstein', 'Math', 70, 0.80)
+book.report_grade('Albert Einstein', 'Gym', 100, 0.40)
+book.report_grade('Albert Einstein', 'Gym', 85, 0.60)
+print(book.average_grade('Albert Einstein'))
+
+>>>
+80.25
+```
+
+这个类用起来也变得困难了，因为单看代码很难知道 `report_grade` 里面那些数字形式的位置参数表示什么意思。
+
+如果遇到的是类似这种比较复杂的需求，那么不要再嵌套字典、元组、集合、列表等内置的类型了，而是应该编写一批新类并让这些类形成一套体系。
+
+拿这个成绩册的例子来说，一开始我们并不知道后来要考虑成绩权重，所以那个时候似乎没有必要专门创建这样一套类体系。后来，当要纳入权重因素时，有人认为，这可以继续通过 Python 内置的字典与元组来实现，因为只不过是要给保存内部状态的那个结构多添加一层而已。所以，才有了刚才那种复杂的写法。其实，在需要分科目统计成绩时，就不应该继续嵌套下去了，那样会让字典里出现小字典，而小字典里又会出现列表。这种超过两层的嵌套结构，其他开发者很难看懂，而且后面维护起来也很麻烦。
+
+只要发现记录内部状态的代码开始变得复杂起来，就应该及时把这些代码拆分到多个类里。这样可以定义良好的接口，并且能够合理地封装数据。这种写法可以在接口与具体实现之间创建一层抽象。
+
+### 把多层嵌套的内置类型重构为类体系
+
+有很多种办法可以实现重构（除了这里讲的这种，第 89 条还讲了另一种）。笔者这里采用的办法是，先从依赖树的最底层做起，也就是考虑怎么记录某科目的单次考试成绩与权重。这么简单的一条信息，似乎没必要专门写一个类来记录。由于分数不需要修改，因此元组已经足够用了。下面以（score, weight）形式的元组来记录单次考试成绩，并把这种元素添加到列表里面。
+
+```py
+grades = []
+grades.append((95, 0.45))
+grades.append((85, 0.55))
+total = sum(score * weight for score, weight in grades)
+total_weight = sum(weight for _, weight in grades)
+average_grade = total / total_weight
+```
+
+汇总每次考试的权重之和（total*weight）时，不需要关注具体的成绩，所以在 `for ... in ...` 结构中用下划线（`*`）表示元组中的 score 那一部分，表示计算时忽略它。
+
+这种写法的问题在于，元组里的元素只能通过位置区分。例如，如果还要把老师的评语记在每次考试的成绩旁边，那么早前使用二元组的那些代码就全都需要修改，因为现在必须采用包含三个元素的元组才行。另外，统计成绩之和与权重之和时，还得分别用一个下划线跳过每个三元组里面表示评语的那一部分。
+
+```py
+grades = []
+grades.append((95, 0.45, 'Great job'))
+grades.append((85, 0.55, 'Better next time'))
+total = sum(score * weight for score, weight, _ in grades)
+total_weight = sum(weight for _, weight, _ in grades)
+average_grade = total / total_weight
+```
+
+元组拖得太长，就跟字典套得太深一样，都不好维护。所以只要发现元组里的元素超过两个，就应该考虑其他办法了。
+
+Python 内置的 collections 模块里有个具名元组（namedtuple）类型，恰好可以满足这样的需求，这种类型很容易就能定义出小型的类以表示不可变的数据。
+
+```py
+from collections import namedtuple
+
+Grade = namedtuple('Grade', ('score', 'weight'))
+```
+
+这样的类，既可以通过位置参数构造，也可以用关键字参数来创建。每个属性都有名字，因此可以根据属性名称访问字段，如果将来需求发生变化（例如需要修改数据，或是要转变成一个简单的数据容器），也很容易就能把这种 namedtuple 改写成普通的类。
+
+### namedtuple 的局限
+
+虽然 namedtuple 可以用于许多场合，但我们一定要知道在哪些情况下不适合用它。
+
+1. namedtuple 类无法指定默认的参数值。如果数据的可选属性比较多，那么采用这种类来表示，会很不方便。在属性较多的情况下，应该改用内置的 dataclasses 模块实现。
+2. namedtuple 实例的属性值仍然可以通过数字下标与迭代来访问，所以可能还是会有人（尤其是那些通过你发布的 API 来编程的人）会采用这种方式访问这些属性，这样的话，将来就不太容易把它转成普通的类了。如果无法完全控制这些 namedtuple 实例的用法，那么最好还是明确定义一个新的类。
+
+有了叫作 Grade 的具名元组，我们就可以写出表示科目的 Subject 类，让它容纳许多个这样的元组。
+
+然后，就可以写一个表示学生的 Student 类，用它来记录某位学生各科目（Subject）的考试成绩。
+
+最后，写这样一个表示成绩册的 Gradebook 容器类，把每位学生的名字与表示这位学生的 Student 对象关联起来，如果成绩册里还没有记录过这位学生，那么在调用 `get_student` 方法时，Gradebook 就会构造一个默认的 Student 对象给调用者使用。
+
+```py
+from collections import namedtuple, defaultdict
+
+Grade = namedtuple('Grade', ('score', 'weight'))
+
+
+class Subject:
+    def __init__(self):
+        self._grades = []
+
+    def report_grade(self, score, weight):
+        self._grades.append(Grade(score, weight))
+
+    def average_grade(self):
+        total, total_weight = 0, 0
+        for grade in self._grades:
+            total += grade.score * grade.weight
+            total_weight += grade.weight
+        return total / total_weight
+
+
+class Student:
+    def __init__(self):
+        self._subjects = defaultdict(Subject)
+
+    def get_subject(self, name):
+        return self._subjects[name]
+
+    def average_grade(self):
+        total, count = 0, 0
+        for subject in self._subjects.values():
+            total += subject.average_grade()
+            count += 1
+        return total / count
+
+
+class Gradebook:
+    def __init__(self):
+        self._students = defaultdict(Student)
+
+    def get_student(self, name):
+        return self._students[name]
+
+
+book = Gradebook()
+albert = book.get_student('Albert Einstein')
+math = albert.get_subject('Math')
+math.report_grade(75, 0.05)
+math.report_grade(65, 0.15)
+math.report_grade(70, 0.80)
+gym = albert.get_subject('Gym')
+gym.report_grade(100, 0.40)
+gym.report_grade(85, 0.60)
+print(albert.average_grade())
+
+>>>
+80.25
+```
+
+这些类的代码所占篇幅，虽然比原来那种写法长了一倍，但理解起来却要容易得多。而且用这些类写出来的调用代码，也比原来更清晰、更便于扩展。
+
+另外，还可以提供一些向后兼容的方法，帮助大家把采用旧式 API 所写的代码迁移到这种通过对象体系所设计的方案之中。
+
+### 总结
+
+1. 不要在字典里嵌套字典、长元组，以及用其他内置类型构造的复杂结构。
+2. namedtuple 能够实现出轻量级的容器，以存放不可变的数据，而且将来可以灵活地转化成普通的类。
+3. 如果发现用字典来维护内部状态的那些代码已经越写越复杂了，那么就应该考虑改用多个类来实现。
+
 // TODO 编写高质量 Python 待完成
