@@ -5397,7 +5397,7 @@ total_weight = sum(weight for _, weight in grades)
 average_grade = total / total_weight
 ```
 
-汇总每次考试的权重之和（total*weight）时，不需要关注具体的成绩，所以在 `for ... in ...` 结构中用下划线（`*`）表示元组中的 score 那一部分，表示计算时忽略它。
+汇总每次考试的权重之和（`total * weight`）时，不需要关注具体的成绩，所以在 `for ... in ...` 结构中用下划线（`*`）表示元组中的 score 那一部分，表示计算时忽略它。
 
 这种写法的问题在于，元组里的元素只能通过位置区分。例如，如果还要把老师的评语记在每次考试的成绩旁边，那么早前使用二元组的那些代码就全都需要修改，因为现在必须采用包含三个元素的元组才行。另外，统计成绩之和与权重之和时，还得分别用一个下划线跳过每个三元组里面表示评语的那一部分。
 
@@ -5503,5 +5503,205 @@ print(albert.average_grade())
 1. 不要在字典里嵌套字典、长元组，以及用其他内置类型构造的复杂结构。
 2. namedtuple 能够实现出轻量级的容器，以存放不可变的数据，而且将来可以灵活地转化成普通的类。
 3. 如果发现用字典来维护内部状态的那些代码已经越写越复杂了，那么就应该考虑改用多个类来实现。
+
+## 第 38 条：让简单的接口接受函数，而不是类的实例
+
+Python 有许多内置的 API，都允许我们传入某个函数来定制它的行为。这种函数可以叫作挂钩（hook），API 在执行过程中，会回调（call back）这些挂钩函数。例如，list 类型的 sort 方法就带有可选的 key 参数，如果明确指定了这个参数，那么它就会按照你提供的挂钩函数来决定列表中每个元素的先后顺序（参见第 14 条）。下面的代码把内置的 len 函数当成挂钩传给 key 参数，让 sort 方法根据长度排列这些名字。
+
+```py
+names = ['Socrates', 'Archimedes', 'Plato', 'Aristotle']
+names.sort(key=len)
+print(names)
+
+>>>
+['Plato', 'Socrates', 'Aristotle', 'Archimedes']
+```
+
+在其他编程语言中，挂钩可能会用抽象类（abstract class）来定义。但在 Python 中，许多挂钩都是无状态的函数（stateless function），带有明确的参数与返回值。挂钩用函数来描述，要比定义成类更简单。用作挂钩的函数与别的函数一样，都是 Python 里的头等（first-class）对象，也就是说，这些函数与方法可以像 Python 中其他值那样传递与引用。
+
+例如，我们要定制 defaultdict 类的行为（相关的知识，参见第 17 条）。这种 defaultdict 数据结构允许调用者提供一个函数，用来在键名缺失的情况下，创建与这个键相对应的值。只要字典发现调用者想要访问的键不存在，就会触发这个函数，以返回应该与键相关联的默认值。下面定义一个 `log_missing` 函数作为键名缺失时的挂钩，该函数总是会把这种键的默认值设为 0。
+
+```py
+def log_missing():
+    print('Key added')
+    return 0
+```
+
+下面这段代码通过定制的 defaultdict 字典，把 increments 列表里面描述的增量添加到 current 这个普通字典所提供的初始量上面，但字典里一开始没有 red 和 orange 这两个键，因此 `log_missing` 这个挂钩函数会触发两次，每次它都会打印 Key added 信息。
+
+```py
+from collections import defaultdict
+
+
+def log_missing():
+    print('Key added')
+    return 0
+
+
+current = {'green': 12, 'blue': 3}
+increments = [
+    ('red', 5),
+    ('blue', 17),
+    ('orange', 9),
+]
+result = defaultdict(log_missing, current)
+print('Before:', dict(result))
+for key, amount in increments:
+    result[key] += amount
+print('After:', dict(result))
+
+>>>
+Before: {'green': 12, 'blue': 3}
+Key added
+Key added
+After: {'green': 12, 'blue': 20, 'red': 5, 'orange': 9}
+```
+
+通过 `log_missing` 这样的挂钩函数，我们很容易构建出便于测试的 API，这种 API 可以把挂钩所实现的附加效果（side effect）与数据本身所应具备的确定行为分开。例如，假设我们要在传给 defaultdict 的挂钩里面，统计它总共遇到了多少次键名缺失的情况。要实现这项功能，其中一个办法是采用有状态的闭包（stateful closure，参见第 21 条）。下面就定义一个辅助函数，把 missing 闭包当作挂钩传给 defaultdict 字典，以便为缺失的键提供默认值。
+
+```py
+def increment_with_report(current, increments):
+    added_count = 0
+
+    def missing():
+        nonlocal added_count  # Stateful closure
+        added_count += 1
+        return 0
+
+    result = defaultdict(missing, current)
+    for key, amount in increments:
+        result[key] += amount
+
+    return result, added_count
+```
+
+运行这个辅助函数处理前面的数据，可以得到预期的结果（可以看到，键名缺失的情况确实出现了两次，函数返回的 count 值也为 2）。统计键名缺失次数所用的 `added_count` 状态是由 missing 挂钩维护的，采用挂钩来运作的 defaultdict 字典并不需要关注这个细节。于是，这就体现了把简单函数传给接口的另一个好处，也就是方便稍后添加新的功能，因为我们可以把实现这项功能所用的状态隐藏在这个简单的闭包里面。
+
+```py{25-26}
+from collections import defaultdict
+
+
+def increment_with_report(current, increments):
+    added_count = 0
+
+    def missing():
+        nonlocal added_count  # Stateful closure
+        added_count += 1
+        return 0
+
+    result = defaultdict(missing, current)
+    for key, amount in increments:
+        result[key] += amount
+
+    return result, added_count
+
+
+current = {'green': 12, 'blue': 3}
+increments = [
+    ('red', 5),
+    ('blue', 17),
+    ('orange', 9),
+]
+result, count = increment_with_report(current, increments)
+assert count == 2
+```
+
+与无状态的闭包函数相比，用有状态的闭包作为挂钩写出来的代码会难懂一些。为了让代码更清晰，可以专门定义一个小类，把原本由闭包所维护的状态给封装起来。
+
+```py
+class CountMissing:
+    def __init__(self):
+        self.added = 0
+
+    def missing(self):
+        self.added += 1
+        return 0
+```
+
+在其他编程语言中，可能需要修改 defaultdict 以便与 CountMissing 接口相适应。但在 Python 中，方法与函数都是头等的（first-class）对象，因此可以直接通过对象引用它所属的 CountMissing 类里的 missing 方法，并把这个方法传给 defaultdict 充当挂钩，让字典可以用这个挂钩制作默认值。在 Python 中，这种通过对象实例而引用的方法，很容易就能满足函数的接口
+
+```py{19-23}
+from collections import defaultdict
+
+
+class CountMissing:
+    def __init__(self):
+        self.added = 0
+
+    def missing(self):
+        self.added += 1
+        return 0
+
+
+current = {'green': 12, 'blue': 3}
+increments = [
+    ('red', 5),
+    ('blue', 17),
+    ('orange', 9),
+]
+counter = CountMissing()
+result = defaultdict(counter.missing, current)  # Method ref
+for key, amount in increments:
+    result[key] += amount
+assert counter.added == 2
+```
+
+把有状态的闭包所具备的行为，改用辅助类来实现，要比前面的 `increment_with_report` 函数更清晰。但如果单看这个类，可能没办法立刻了解它的意图。CountMissing 对象应该由谁构造？missing 方法应该由谁调用？这个类将来还会不会再增加 public 方法？这些疑惑都必须在看到 defaultdict 的用法之后才能解开。
+
+为了让这个类的意义更加明确，可以给它定义名为 `__call__` 的特殊方法。这会让这个类的对象能够像函数那样得到调用。同时，也让内置的 callable 函数能够针对这种实例返回 True 值，用以表示这个实例与普通的函数或方法类似，都是可调用的。凡是能够像这样（在后面加一对括号来）执行的对象，都叫作 callable。
+
+```py
+class BetterCountMissing:
+    def __init__(self):
+        self.added = 0
+
+    def __call__(self):
+        self.added += 1
+        return 0
+
+
+counter = BetterCountMissing()
+assert counter() == 0
+assert callable(counter)
+```
+
+下面，就用这样的 BetterCountMissing 实例给 defaultdict 当挂钩，让它在字典里没有键名时，创建默认的键值，并把这种情况记入键名缺失的总次数里。
+
+```py{19-23}
+from collections import defaultdict
+
+
+class BetterCountMissing:
+    def __init__(self):
+        self.added = 0
+
+    def __call__(self):
+        self.added += 1
+        return 0
+
+
+current = {'green': 12, 'blue': 3}
+increments = [
+    ('red', 5),
+    ('blue', 17),
+    ('orange', 9),
+]
+counter = BetterCountMissing()
+result = defaultdict(counter, current)
+for key, amount in increments:
+    result[key] += amount
+assert counter.added == 2
+```
+
+上面这段代码要比 CountMissing 更清晰，因为它里面有 `__call__` 方法，这说明这个类的实例可像普通的函数那样使用（例如可以传给 API 当挂钩）。即便是初次看到这段代码，也能明白这个类的主要目标。因为你应该会注意到那个比较显眼的 `__call__` 方法。它强烈暗示着这个类可以像有状态的闭包那样使用。
+
+总之，最大的优势在于，defaultdict 仍然不需要关注 `__call__` 方法触发之后究竟会做什么。它只知道自己可以用这样一个挂钩，来给缺失的键制作默认值。Python 很容易就能设计这种把挂钩函数当参数来用的接口，面对这种接口，调用者可以采用最适合自己的，把符合接口要求的东西传进去。
+
+### 总结
+
+1. 如果想设计简单的 Python 接口，让组件之间能够通过接口交互，那么可以考虑让接口接受挂钩函数，而不一定非得定义新类，并要求使用者传入这种类的实例。
+2. Python 的函数与方法都是头等对象，这意味着它们可以像其他类型那样，用在表达式里。
+3. 某个类如果定义了 `__call__` 特殊方法，那么它的实例就可以像普通的 Python 函数那样调用。
+4. 如果想用函数来维护状态，那么可以考虑定义一个带有 `__call__` 方法的新类，而不要用有状态的闭包去实现。
 
 // TODO 编写高质量 Python 待完成
