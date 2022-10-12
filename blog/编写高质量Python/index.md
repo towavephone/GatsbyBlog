@@ -1,6 +1,6 @@
 ---
 title: 编写高质量Python
-date: 2022-9-15 11:45:45
+date: 2022-10-12 14:46:04
 path: /writing-high-quality-python/
 tags: 后端, python, 读书笔记
 ---
@@ -5703,5 +5703,370 @@ assert counter.added == 2
 2. Python 的函数与方法都是头等对象，这意味着它们可以像其他类型那样，用在表达式里。
 3. 某个类如果定义了 `__call__` 特殊方法，那么它的实例就可以像普通的 Python 函数那样调用。
 4. 如果想用函数来维护状态，那么可以考虑定义一个带有 `__call__` 方法的新类，而不要用有状态的闭包去实现。
+
+## 第 39 条：通过 @classmethod 多态来构造同一体系中的各类对象
+
+在 Python 中，不仅对象支持多态，类也支持多态。类的多态是什么意思，这样做有什么好处？
+
+多态机制使同一体系中的多个类可以按照各自独有的方式来实现同一个方法，这意味着这些类都可以满足同一套接口，或者都可以当作某个抽象类来使用，同时，它们又能在这个前提下，实现各自的功能（参见第 43 条）。
+
+例如，要实现一套 MapReduce（映射-归纳/映射-化简）流程，并且以一个通用的类来表示输入数据。于是，笔者就定义了这样一个 InputData 类，并把 read 方法留给子类去实现。
+
+```py
+class InputData:
+    def read(self):
+        raise NotImplementedError
+```
+
+然后，编写一个具体的 InputData 子类，例如，可以从磁盘文件中读取数据的 PathInputData 类。
+
+```py
+class PathInputData(InputData):
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    def read(self):
+        with open(self.path) as f:
+            return f.read()
+```
+
+通用的 InputData 类以后可能会有很多个像 PathInputData 这样的子类，每个子类都会实现标准的 read 接口，并按照各自的方式把需要处理的数据读取进来。例如，有的 InputData 子类可从网上读取数据，有的 InputData 可读取压缩格式的数据并将其解压成普通数据，等等。
+
+除了输入数据要通用，我们还想让处理 MapReduce 任务的工作节点（Worker）也能有一套通用的抽象接口，这样不同的 Worker 就可以通过这套标准的接口来消耗输入数据。
+
+```py
+class Worker:
+    def __init__(self, input_data):
+        self.input_data = input_data
+        self.result = None
+
+    def map(self):
+        raise NotImplementedError
+
+    def reduce(self, other):
+        raise NotImplementedError
+```
+
+下面，我们定义一种具体的 Worker 子类，使它按照特定的方式实现 MapReduce。也就是统计每份数据里的换行符个数，然后把所有的统计值汇总起来。
+
+```py
+class LineCountWorker(Worker):
+    def map(self):
+        data = self.input_data.read()
+        self.result = data.count('\n')
+
+    def reduce(self, other):
+        self.result += other.result
+```
+
+这样实现似乎不错，但接下来会碰到一个大难题，也就是如何把这些组件拼接起来。输入数据与工作节点都有各自的类体系，而且这两套体系也抽象出了合理的接口，然而，它们都必须落实到具体的对象上面，只有构造出了具体对象，才能写出有用的程序。问题是，这些对象由谁来构造？构造出来之后，怎么编排 MapReduce 流程？
+
+最简单的办法，是编写几个辅助函数，手动构建这些对象并把它们连接起来。例如，可以采用下面的辅助函数读取目录中的内容，并给目录下每份文件构造一个 PathInputData 实例。
+
+```py
+import os
+
+
+def generate_inputs(data_dir):
+    for name in os.listdir(data_dir):
+        yield PathInputData(os.path.join(data_dir, name))
+```
+
+接下来，再编写一个辅助函数，针对 `generate_inputs` 返回的每个 InputData 实例分别创建相应的 LineCountWorker 对象。
+
+```py
+def create_workers(input_list):
+    workers = []
+    for input_data in input_list:
+        workers.append(LineCountWorker(input_data))
+    return workers
+```
+
+然后，将这些 Worker 实例的映射（map）工作分发到多个线程中去执行（参见第 53 条）。反复调用 reduce，把这些 Worker 计算出的结果合并成一个值。
+
+```py
+from threading import Thread
+
+
+def execute(workers):
+    threads = [Thread(target=w.map) for w in workers]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    first, *rest = workers
+    for worker in rest:
+        first.reduce(worker)
+    return first.result
+```
+
+最后，编写一个函数，将刚才那三个环节串起来。
+
+```py
+def mapreduce(data_dir):
+    inputs = generate_inputs(data_dir)
+    workers = create_workers(inputs)
+    return execute(workers)
+```
+
+可以看到，该函数可以很好地处理随机制造出的这批输入文件。
+
+```py{73-84}
+import random
+from threading import Thread
+import os
+
+
+class InputData:
+    def read(self):
+        raise NotImplementedError
+
+
+class PathInputData(InputData):
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    def read(self):
+        with open(self.path) as f:
+            return f.read()
+
+
+class Worker:
+    def __init__(self, input_data):
+        self.input_data = input_data
+        self.result = None
+
+    def map(self):
+        raise NotImplementedError
+
+    def reduce(self, other):
+        raise NotImplementedError
+
+
+class LineCountWorker(Worker):
+    def map(self):
+        data = self.input_data.read()
+        self.result = data.count('\n')
+
+    def reduce(self, other):
+        self.result += other.result
+
+
+def generate_inputs(data_dir):
+    for name in os.listdir(data_dir):
+        yield PathInputData(os.path.join(data_dir, name))
+
+
+def create_workers(input_list):
+    workers = []
+    for input_data in input_list:
+        workers.append(LineCountWorker(input_data))
+    return workers
+
+
+def mapreduce(data_dir):
+    inputs = generate_inputs(data_dir)
+    workers = create_workers(inputs)
+    return execute(workers)
+
+
+def execute(workers):
+    threads = [Thread(target=w.map) for w in workers]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    first, *rest = workers
+    for worker in rest:
+        first.reduce(worker)
+    return first.result
+
+
+def write_test_files(tmpdir):
+    os.makedirs(tmpdir)
+    print('generate dir is:', os.path.abspath(tmpdir))
+    for i in range(100):
+        with open(os.path.join(tmpdir, str(i)), 'w') as f:
+            f.write('\n' * random.randint(0, 100))
+
+
+tmpdir = 'test_inputs'
+write_test_files(tmpdir)
+result = mapreduce(tmpdir)
+print(f'There are {result} lines')
+
+>>>
+generate dir is: /home/123/Desktop/test_inputs
+There are 4884 lines
+```
+
+然而这样做有个大问题，就是 mapreduce 函数根本不通用。假如要使用其他的 InputData 或 Worker 子类，那就必须修改 `generate_inputs`、`create_workers` 与 mapreduce 的代码，以匹配新类的用法。
+
+这个问题的根本原因在于，构造对象的办法不够通用。在其他编程语言中，可以利用构造函数多态（constructor polymorphism）来解决，也就是子类不仅要具备与超类一致的构造函数，而且还必须各自提供一个特殊的构造函数以实现和自身有关的构造逻辑。这样，刚才那些辅助方法在编排 MapReduce 流程时，就可以按照超类的形式统一地构造这些对象，并使其根据所属的子类分别去触发相关的特殊构造函数（类似工厂模式）。但是我们在 Python 里不能这样做，因为 Python 的类只能有一个构造方法（即 `__init__` 方法），没办法要求所有的 InputData 子类都采用同一种写法来定义 `__init__`（因为它们必须用各自不同的数据来完成构造）。
+
+这个问题，最好是能够通过类方法多态（class method polymorphism）来解决。这种多态与 InputData.read 所体现的实例方法多态（instance method polymorphism）很像，只不过它针对的是类，而不是这些类的对象。
+
+我们现在运用方法多态来实现 MapReduce 流程所用到的这些类。首先改写 InputData 类，把 `generate_inputs` 方法放到该类里面并声明成通用的 @classmethod，这样它的所有子类都可以通过同一个接口来新建具体的 InputData 实例。
+
+```py
+class GenericInputData:
+    def read(self):
+        raise NotImplementedError
+
+    @classmethod
+    def generate_inputs(cls, config):
+        raise NotImplementedError
+```
+
+新的 `generate_inputs` 方法带有一个叫作 config 的字典参数，调用者可以把一系列配置信息放到字典里中，让具体的 GenericInputData 子类去解读。例如 PathInputData 这个子类就会通过 `data_dir` 键从字典里寻找含有输入文件的那个目录。
+
+```py
+class PathInputData(GenericInputData):
+    @classmethod
+    def generate_inputs(cls, config):
+        data_dir = config['data_dir']
+        for name in os.listdir(data_dir):
+            yield cls(os.path.join(data_dir, name))
+```
+
+然后，可以用类似的思路改写前面的 Worker 类。把名叫 `create_workers` 的辅助方法移到这个类里面并且也声明成 @classmethod。新方法的 `input_class` 参数将会是 GenericInputData 的某个子类，我们要通过这个参数触发那个子类的 `generate_inputs` 方法，以创建出 Worker 所需的输入信息。有了输入信息之后，通过 `cls(input_data)` 这个通用的形式来调用构造函数，这样创建的实例，其类型是 cls 所表示的具体 GenericWorker 子类。
+
+```py
+class GenericWorker:
+    def __init__(self, input_data):
+        self.input_data = input_data
+        self.result = None
+
+    def map(self):
+        raise NotImplementedError
+
+    def reduce(self, other):
+        raise NotImplementedError
+
+    @classmethod
+    def create_workers(cls, input_class, config):
+        workers = []
+        for input_data in input_class.generate_inputs(config):
+            workers.append(cls(input_data))
+        return workers
+```
+
+请注意，上面的代码创建输入信息时，用的是 `input_class.generate_inputs` 这样的写法，这么写正是为了触发类多态机制，以便将 `generate_inputs` 派发到 `input_class` 所表示的那个实际子类上面。另外还要注意，在构造 GenericWorker 的子类对象时，用的是 `cls(...)` 这样的通用写法，而没有直接调用 `__init__` 方法。
+
+接下来要修改具体的 Worker 类，这其实很简单，只需要把超类的名称改为 GenericWorker 就好。
+
+最后，重新编写 mapreduce 函数，让它通过 `worker_class.create_workers` 来创建工作节点，这样它就变得通用了。
+
+把原来那套实现方案所处理的随机文件，再采用这套新的工作节点来处理，可以产生相同的结果。区别只在于，这次调用 mapreduce 时，必须多传几个参数，因为它现在是个通用的函数，必须把实际的输入数据与实际的工作节点告诉它。
+
+```py{6,10-12,15,24-28,31,42-47,50,59-61,87-90}
+import random
+from threading import Thread
+import os
+
+
+class GenericInputData:
+    def read(self):
+        raise NotImplementedError
+
+    @classmethod
+    def generate_inputs(cls, config):
+        raise NotImplementedError
+
+
+class PathInputData(GenericInputData):
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    def read(self):
+        with open(self.path) as f:
+            return f.read()
+
+    @classmethod
+    def generate_inputs(cls, config):
+        data_dir = config['data_dir']
+        for name in os.listdir(data_dir):
+            yield cls(os.path.join(data_dir, name))
+
+
+class GenericWorker:
+    def __init__(self, input_data):
+        self.input_data = input_data
+        self.result = None
+
+    def map(self):
+        raise NotImplementedError
+
+    def reduce(self, other):
+        raise NotImplementedError
+
+    @classmethod
+    def create_workers(cls, input_class, config):
+        workers = []
+        for input_data in input_class.generate_inputs(config):
+            workers.append(cls(input_data))
+        return workers
+
+
+class LineCountWorker(GenericWorker):
+    def map(self):
+        data = self.input_data.read()
+        self.result = data.count('\n')
+
+    def reduce(self, other):
+        self.result += other.result
+
+
+def mapreduce(worker_class, input_class, config):
+    workers = worker_class.create_workers(input_class, config)
+    return execute(workers)
+
+
+def execute(workers):
+    threads = [Thread(target=w.map) for w in workers]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    first, *rest = workers
+    for worker in rest:
+        first.reduce(worker)
+    return first.result
+
+
+def write_test_files(tmpdir):
+    os.makedirs(tmpdir)
+    print('generate dir is:', os.path.abspath(tmpdir))
+    for i in range(100):
+        with open(os.path.join(tmpdir, str(i)), 'w') as f:
+            f.write('\n' * random.randint(0, 100))
+
+
+tmpdir = 'test_inputs'
+write_test_files(tmpdir)
+config = {
+    'data_dir': tmpdir
+}
+result = mapreduce(LineCountWorker, PathInputData, config)
+print(f'There are {result} lines')
+
+>>>
+generate dir is: /home/123/Desktop/test_inputs
+There are 5373 lines
+```
+
+这套方案让我们能够随意编写其他的 GenericInputData 与 GenericWorker 子类，而不用再花时间去调整它们之间的拼接代码（glue code）。
+
+### 总结
+
+1. Python 只允许每个类有一个构造方法，也就是 `__init__` 方法。
+2. 如果想在超类中用通用的代码构造子类实例，那么可以考虑定义 @classmethod 方法，并在里面用 `cls(...)` 的形式构造具体的子类对象。
+3. 通过类方法多态机制，我们能够以通用的形式构造并拼接具体的子类对象。
 
 // TODO 编写高质量 Python 待完成
