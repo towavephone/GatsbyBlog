@@ -6069,4 +6069,246 @@ There are 5373 lines
 2. 如果想在超类中用通用的代码构造子类实例，那么可以考虑定义 @classmethod 方法，并在里面用 `cls(...)` 的形式构造具体的子类对象。
 3. 通过类方法多态机制，我们能够以通用的形式构造并拼接具体的子类对象。
 
+## 第 40 条：通过 super 初始化超类
+
+以前有种简单的写法，能在子类里面执行超类的初始化逻辑，那就是直接在超类名称上调用 `__init__` 方法并把子类实例传进去。
+
+```py
+class MyBaseClass:
+    def __init__(self, value):
+        self.value = value
+
+
+class MyChildClass(MyBaseClass):
+    def __init__(self):
+        MyBaseClass.__init__(self, 5)
+```
+
+这个办法能够应对比较简单的类体系，但是在其他的情况下容易出现问题。
+
+假如某个类继承了多个超类（一般来说不应该采用多重继承，笔者这里只是举例而已，参见第 41 条），那么直接调用超类的 `__init__` 方法会让代码产生误会。
+
+直接调用 `__init__` 方法所产生的第一个问题在于，超类的构造逻辑不一定会按照它们在子类 class 语句中的声明顺序执行。例如，在 MyBaseClass 之外再定义两个类，让它们也分别去操纵本实例的 value 字段。
+
+```py
+class TimesTwo:
+    def __init__(self):
+        self.value *= 2
+
+
+class PlusFive:
+    def __init__(self):
+        self.value += 5
+```
+
+下面这个子类继承了刚才那三个类，而且它在 class 语句里指定的超类顺序与它执行那些超类的 `__init__` 时所用的顺序一致。
+
+```py
+class OneWay(MyBaseClass, TimesTwo, PlusFive):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        TimesTwo.__init__(self)
+        PlusFive.__init__(self)
+```
+
+这样写，程序会按正常顺序初始化那几个超类。
+
+```py{23-24}
+class MyBaseClass:
+    def __init__(self, value):
+        self.value = value
+
+
+class TimesTwo:
+    def __init__(self):
+        self.value *= 2
+
+
+class PlusFive:
+    def __init__(self):
+        self.value += 5
+
+
+class OneWay(MyBaseClass, TimesTwo, PlusFive):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        TimesTwo.__init__(self)
+        PlusFive.__init__(self)
+
+
+foo = OneWay(5)
+print('First ordering value is (5 * 2) + 5 =', foo.value)
+
+>>>
+First ordering value is (5 * 2) + 5 = 15
+```
+
+但如果子类在 class 语句里指定的超类顺序，与它执行那些超类的 `__init__` 时的顺序不同，那么运行结果就会让人困惑（例如这次先声明它继承 PlusFive 类，然后才声明它继承 TimesTwo 类，但执行 `__init__` 的顺序却刚好相反）。
+
+```py
+class AnotherWay(MyBaseClass, PlusFive, TimesTwo):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        TimesTwo.__init_(self)
+        PlusFive.__init_(self)
+```
+
+该子类调整了两个超类的声明顺序，但没有相应调整构造逻辑的执行顺序，因此它还是会跟前面那个子类一样，先初始化 TimesTwo，然后初始化 PlusFive。这样写，就让初次看到这段代码的人很难理解程序的运行结果，他们以为程序先加 5，再乘 2，这样算出来是 20；但实际上，程序依照的是 `__init__` 的调用顺序，而不是 class 语句中的声明顺序，这是个很难察觉的问题。
+
+直接调用 `__init__` 所产生的第二个问题在于，无法正确处理菱形继承（diamond inheritance）。这种继承指的是子类通过类体系里两条不同路径的类继承了同一个超类。如果采用刚才那种常见的写法来调用超类的 `__init__`，那么会让超类的初始化逻辑重复执行，从而引发混乱。例如，下面先从 MyBaseClass 派生出两个子类。
+
+```py
+class MyBaseClass:
+    def __init__(self, value):
+        self.value = value
+
+
+class TimesSeven(MyBaseClass):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        self.value *= 7
+
+
+class PlusNine(MyBaseClass):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        self.value += 9
+```
+
+然后，定义最终的子类，让它分别继承刚才那两个类，这样 MyBaseClass 就会出现在菱形体系的顶端。
+
+```py{18-25}
+class MyBaseClass:
+    def __init__(self, value):
+        self.value = value
+
+
+class TimesSeven(MyBaseClass):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        self.value *= 7
+
+
+class PlusNine(MyBaseClass):
+    def __init__(self, value):
+        MyBaseClass.__init__(self, value)
+        self.value += 9
+
+
+class ThisWay(TimesSeven, PlusNine):
+    def __init__(self, value):
+        TimesSeven.__init__(self, value)
+        PlusNine.__init__(self, value)
+
+
+foo = ThisWay(5)
+print('Should be (5 * 7) + 9 = 44 but is', foo.value)
+
+>>>
+Should be (5 * 7) + 9 = 44 but is 14
+```
+
+当 ThisWay 调用第二个超类的 `__init__` 时，那个方法会再度触发 MyBaseClass 的 `__init__`，导致 self.value 重新变成 5。所以，最后的结果是 5 + 9 = 14，而不是 `(5 * 7) + 9 = 44`，因为早前由 `TimesSeven.__init__` 所做的初始化效果已经被第二次执行的 `MyBaseClass.__init__` 覆盖了。这是个违背直觉的结果，如果情况更为复杂，那么调试起来会特别困难。
+
+为了解决这些问题，Python 内置了 super 函数并且规定了标准的方法解析顺序（method resolution order，MRO）。super 能够确保菱形继承体系中的共同超类只初始化一次（其他案例参见第 48 条）。MRO 可以确定超类之间的初始化顺序，它遵循 C3 线性化（C3 linearization）算法。
+
+下面再创建一套菱形的类体系，但是这次，我们改用 `super()` 来调用超类的初始化逻辑。
+
+位于菱形结构顶端的 MyBaseClass，会率先初始化，而且只会初始化一次。接下来，程序会参照菱形底端那个子类在 class 语句里声明超类时的顺序，来执行菱形结构中部的那两个超类。
+
+```py
+class MyBaseClass:
+    def __init__(self, value):
+        self.value = value
+
+
+class TimesSevenCorrect(MyBaseClass):
+    def __init__(self, value):
+        super().__init__(value)
+        self.value *= 7
+
+
+class PlusNineCorrect(MyBaseClass):
+    def __init__(self, value):
+        super().__init__(value)
+        self.value += 9
+
+
+class GoodWay(TimesSevenCorrect, PlusNineCorrect):
+    def __init__(self, value):
+        super().__init__(value)
+
+
+foo = GoodWay(5)
+print('Should be 7 * (5 + 9) = 98 but is', foo.value)
+
+>>>
+Should be 7 * (5 + 9) = 98 but is 98
+```
+
+这个执行顺序，似乎与看上去的相反。既然 GoodWay 在指定超类时，先写的是 TimesSevenCorrect，那就应该先执行 `TimesSevenCorrect.__init__` 才对，这样结果应该是 `(5 * 7) + 9 = 44`。但实际上并非如此。这两个超类之间的初始化顺序，要由子类的 MRO 确定，它可以通过 mro 方法来查询。
+
+```py
+mro_str = '\n'.join(repr(cls) for cls in GoodWay.mro())
+print(mro_str)
+
+>>>
+<class '__main__.GoodWay'>
+<class '__main__.TimesSevenCorrect'>
+<class '__main__.PlusNineCorrect'>
+<class '__main__.MyBaseClass'>
+<class 'object'>
+```
+
+调用 GoodWay(5) 时，会先触发 `TimesSevenCorrect.__init__`，进而触发 `PlusNineCorrect.__init__`，而这又会触发 `MyBaseClass.__init__`。程序到达菱形结构的顶端后，开始执行 MyBaseClass 的初始化逻辑，然后按照与刚才相反的顺序，依次执行 PlusNineCorrect、TimesSevenCorrect 与 GoodWay 的初始化逻辑。所以，程序首先会在 `MyBaseClass.__init__` 中，把 value 设为 5，然后在 `PlusNineCorrect.__init__` 里面给它加 9，这样就成了 14，接着又会在 `TimesSevenCorrect.__init__` 里面将它乘 7，于是等于 98。
+
+除了可以应对菱形继承结构，通过 super() 调用 `__init__`，与在子类内通过类名直接调用 `__init__` 相比，可使代码更容易维护。现在不用从子类里面指名调用 `MyBaseClass.__init__` 方法了，因此可以把 MyBaseClass 改成其他名字，或者让 TimesSevenCorrect 与 PlusNineCorrect 从另外一个超类里面继承，这些改动都无须调整 super 这一部分的代码。假如像原来那样写，那就必须手工修改 `__init__` 方法前面的类名。
+
+super 函数也可以用双参数的形式调用。第一个参数表示从这个类型开始（不含该类型本身）按照方法解析顺序（MRO）向上搜索，而解析顺序则要由第二个参数所在类型的 `__mro__` 决定。例如，按照下面这种写法，如果在 super 所返回的内容上调用 `__init__` 方法，那么程序会从 ExplicitTrisect 类型开始（不含该类型本身）按照 MRO 向上搜索，直至找到这样的 `__init__` 方法为止，而解析顺序是由第二个参数（self）所属的类型（ExplicitTrisect）决定的，所以解析顺序是 `ExplicitTrisect -> MyBaseClass -> object`。
+
+```py
+class ExplicitTrisect(MyBaseClass):
+    def __init__(self, value):
+        super(ExplicitTrisect, self).__init__(value)
+        self.value /= 3
+```
+
+一般来说，在类的 `__init__` 方法里面通过 super 初始化实例时，不需要采用双参数的形式，而是可以直接采用不带参数的写法调用 super，这样 Python 编译器会自动将 `__class__` 和 self 当成参数传递进去。所以，下面这两种写法跟刚才那种写法是同一个意思。
+
+```py
+class MyBaseClass:
+    def __init__(self, value):
+        self.value = value
+
+
+class ExplicitTrisect(MyBaseClass):
+    def __init__(self, value):
+        super(ExplicitTrisect, self).__init__(value)
+        self.value /= 3
+
+
+class AutomaticTrisect(MyBaseClass):
+    def __init__(self, value):
+        super(__class__, self).__init__(value)
+        self.value /= 3
+
+
+class ImplicitTrisect(MyBaseClass):
+    def __init__(self, value):
+        super().__init__(value)
+        self.value /= 3
+
+
+assert ExplicitTrisect(9).value == 3
+assert AutomaticTrisect(9).value == 3
+assert ImplicitTrisect(9).value == 3
+```
+
+只有一种情况需要明确给 super 指定参数，这就是：我们想从子类里面访问超类对某项功能所做的实现方案，而那种方案可能已经被子类覆盖掉了（例如，在封装或复用功能时，就会遇到这样的情况）。
+
+### 总结
+
+1. Python 有标准的方法解析顺序（MRO）规则，可以用来判定超类之间的初始化顺序，并解决菱形继承问题。
+2. 可以通过 Python 内置的 super 函数正确触发超类的 `__init__` 逻辑。一般情况下，不需要给这个函数指定参数。
+
 // TODO 编写高质量 Python 待完成
