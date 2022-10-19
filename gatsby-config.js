@@ -100,7 +100,7 @@ module.exports = {
             }
           },
           {
-            resolve: `gatsby-remark-design-system`,
+            resolve: `gatsby-remark-design-system-towavephone`,
             options: {
               // Class prefix for all elements of the design system specimens
               // This prefix also needs to be set on wrapper components in your Gatsby project
