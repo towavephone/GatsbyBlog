@@ -6311,4 +6311,57 @@ assert ImplicitTrisect(9).value == 3
 1. Python 有标准的方法解析顺序（MRO）规则，可以用来判定超类之间的初始化顺序，并解决菱形继承问题。
 2. 可以通过 Python 内置的 super 函数正确触发超类的 `__init__` 逻辑。一般情况下，不需要给这个函数指定参数。
 
+## 第 41 条：考虑用 mix-in 类来表示可组合的功能
+
+Python 是面向对象的编程语言，而且内置了相关的机制，使开发者能够正确处理多重继承（参见第 40 条）。尽管如此，但还是应该尽量少用多重继承。
+
+如果既要通过多重继承来方便地封装逻辑，又想避开可能出现的问题，那么就应该把有待继承的类写成 mix-in 类。这种类只提供一小套方法给子类去沿用，而不定义自己实例级别的属性，也不需要 `__init__` 构造函数。
+
+在 Python 里很容易编写 mix-in，因为无论对象是什么类型，我们都可以方便地检视（inspect）它当前的状态。这种动态检测机制，让我们只需要把通用的功能在 mix-in 实现一遍即可，将来也可以把这项功能应用到其他许多类里面。可以把这些 mix-in 类有层次地组合起来，从而用相当少的代码表达出丰富的功能。
+
+例如，现在要实现这样一个功能，把内存中的 Python 对象表示成字典形式以便做序列化（serialization）处理。不妨将这项功能写为通用代码，以供其他类使用。
+
+为了演示这种做法，笔者定义下面这个 mix-in，让它提供名为 `to_dict` 的 public 方法。凡是想支持这项功能的类，都可以从 mix-in 继承。
+
+```py
+class ToDictMixin:
+    def to_dict(self):
+        return self._traverse_dict(self.__dict__)
+```
+
+具体的实现代码写得很直观，我们可以通过 isinstance 函数动态地检视值的类型，并利用 hasattr 函数判断值里面有没有叫作 `__dict__` 的字典。
+
+```py
+def _traverse_dict(self, instance_dict):
+    output = {}
+    for key, value in instance_dict.items():
+        output[key] = self._traverse(key, value)
+    return output
+
+
+def _traverse(self, key, value):
+    if isinstance(value, ToDictMixin):
+        return value.to_dict()
+    elif isinstance(value, dict):
+        return self._traverse_dict(value)
+    elif isinstance(value, list):
+        return [self._traverse(key, i) for i in value]
+    elif hasattr(value, '__dict__'):
+        return self._traverse_dict(value.__dict__)
+    else:
+        return value
+```
+
+下面以二叉树为例，演示如何使表示二叉树的 BinaryTree 类具备刚才那个 mix-in 所提供的功能。
+
+```py
+class BinaryTree(ToDictMixin):
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+```
+
+定义了这样的 BinaryTree 类后，很容易就能把二叉树里面那些相互关联的 Python 对象转换成字典的形式。
+
 // TODO 编写高质量 Python 待完成
