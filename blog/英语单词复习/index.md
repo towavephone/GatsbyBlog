@@ -77,3 +77,276 @@ n. 储藏柜，陈列柜，内阁
 name: Valuable pieces of china were on display in a glass-fronted cabinet.
 isSound: true
 ```
+
+## postulate
+
+### Pronunciation
+
+postulate['pɑːstʃəleɪt]
+
+```audio
+name: postulate
+isSound: true
+```
+
+### Meaning
+
+1. v. 假定
+2. n. 假设
+
+### Root
+
+1. 词根：postul，恳求
+2. 后缀：ate，动词后缀，表示做，造成，使之成，做什么事
+3. 记忆：postul 恳求，要求 + ate 动词后缀，表示做，造成
+
+### Derivative
+
+1. postulat`or`：请愿者，假定者
+
+### Sentence
+
+```audio
+name: Arguments postulating differing standards for human rights in different cultures.
+isSound: true
+```
+
+## march
+
+### Pronunciation
+
+march[mɑːrtʃ]
+
+```audio
+name: march
+isSound: true
+```
+
+### Meaning
+
+1. v. 行进，前进；示威游行
+2. n. 行进，前进；示威游行
+
+### Phrase
+
+March of the Penguins（帝企鹅日记）
+
+### Derivative
+
+1. `counter`march：向反方向前进
+2. march`er`：游行示威者
+3. march`ing`：行军的；步进式的；
+
+### Sentence
+
+```audio
+name: We marched 50 km across the foothills
+isSound: true
+```
+
+## curriculum
+
+### Pronunciation
+
+curriculum[kə'rɪkjələm]
+
+```audio
+name: curriculum
+isSound: true
+```
+
+### Meaning
+
+n. 课程
+
+### Root
+
+1. 词根：curr 跑
+2. 后缀：culum 名词后缀，指小的
+3. 记忆：curr 跑，由 kers 而来 + i + culum 名词后缀，指小的
+
+### Phrase
+
+National Curriculum（英格兰和威尔士 5 到 16 岁学生的）全国统一课程
+
+### Derivative
+
+1. curricul`ar`：课程的
+2. `extra`curricul`ar`：课外的；工作之余的
+
+### Sentence
+
+```audio
+name: Math is an intrinsic part of the school curriculum.
+isSound: true
+```
+
+## restraint
+
+### Pronunciation
+
+restraint[rɪ'streɪnt]
+
+```audio
+name: restraint
+isSound: true
+```
+
+### Meaning
+
+n. 限制；克制；约束力；阻止；座椅安全带
+
+### Root
+
+1. 前缀：re 回，往后，对立
+2. 词根：strain 拉紧，绑
+3. 记忆：restrain 抑制，控制 + t = restraint 克制
+
+### Phrase
+
+fiscal restraint：财政紧缩；财政约束
+
+### Derivative
+
+1. strain：压力；张力；类型；旋律；菌株；系；品种；拉伤
+2. restrain：制止；抑制；限制
+3. self-restraint：自我克制
+
+### Sentence
+
+```audio
+name: The food prices continue to rise without restaint.
+isSound: true
+```
+
+## quiz
+
+### Pronunciation
+
+quiz[kwɪz]
+
+```audio
+name: quiz
+isSound: true
+```
+
+### Meaning
+
+1. n. 智力竞赛；测试
+2. v. 询问；测验
+
+### Derivative
+
+1. quiz`zical`：诧异的，感到好笑的
+2. quizzical`ly`：诧异地，感到好笑地
+3. quizmaster：（电视的、广播的）智力问答节目主持人，提问人
+
+### Sentence
+
+```audio
+name: We'll have a quiz at the end of the show.
+isSound: true
+```
+
+## authorize
+
+### Pronunciation
+
+authorize['ɔ:θəraɪz]
+
+```audio
+name: authorize
+isSound: true
+```
+
+### Meaning
+
+v. 批准，准许
+
+### Root
+
+1. 词根：auth 作者
+2. 后缀：or 名词后缀，与 ... 相关的人（某地人，职业）
+3. 后缀：ize 动词后缀（同 ise），表示 “...化”，照 ... 的样子做，按 ... 的方式处理，使成为 ...
+
+### Derivative
+
+1. author`ise`：批准，授权
+2. authorit`arian`：专制的，独裁的
+3. author`ity`：官方，当权；职权；官方许可；权威人士；权威
+
+### Sentence
+
+```audio
+name: Only the president can authorize a nuclear attack.
+isSound: true
+```
+
+## swell
+
+### Pronunciation
+
+swell[swel]
+
+```audio
+name: swell
+isSound: true
+```
+
+### Meaning
+
+1. v. 膨胀，肿胀；（使）扩大，（使）增加
+2. adj. 极好的
+3. n. 波涛起伏
+
+### Phrase
+
+swell up（身体部位）肿胀
+
+### Derivative
+
+1. swollen：肿起的，肿胀的；上涨的
+2. swell`ing`：肿胀，肿大
+
+### Sentence
+
+```audio
+name: Her arm was beginning to swell up where bee had stung her.
+isSound: true
+```
+
+## attempt
+
+### Pronunciation
+
+attempt[ə'tempt]
+
+```audio
+name: attempt
+isSound: true
+```
+
+### Meaning
+
+1. v. 企图，试图，尝试
+2. n. 企图，试图，尝试
+
+### Root
+
+1. 前缀：at 朝向，朝着 ... 的方向；表加强
+2. 词根：temp 尝试，触摸
+
+### Phrase
+
+1. attempt to：试图；企图
+2. in an attempt to：力图；试图
+3. make no attempt to：不尝试做某事
+
+### Derivative
+
+### Sentence
+
+```audio
+name: He attempted to escape through a window.
+isSound: true
+```
