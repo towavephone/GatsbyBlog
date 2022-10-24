@@ -6364,4 +6364,288 @@ class BinaryTree(ToDictMixin):
 
 定义了这样的 BinaryTree 类后，很容易就能把二叉树里面那些相互关联的 Python 对象转换成字典的形式。
 
+```py{31-34}
+class ToDictMixin:
+    def _traverse_dict(self, instance_dict):
+        output = {}
+        for key, value in instance_dict.items():
+            output[key] = self._traverse(key, value)
+        return output
+
+    def _traverse(self, key, value):
+        if isinstance(value, ToDictMixin):
+            return value.to_dict()
+        elif isinstance(value, dict):
+            return self._traverse_dict(value)
+        elif isinstance(value, list):
+            return [self._traverse(key, i) for i in value]
+        elif hasattr(value, '__dict__'):
+            return self._traverse_dict(value.__dict__)
+        else:
+            return value
+
+    def to_dict(self):
+        return self._traverse_dict(self.__dict__)
+
+
+class BinaryTree(ToDictMixin):
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+tree = BinaryTree(10,
+                  left=BinaryTree(7, right=BinaryTree(9)),
+                  right=BinaryTree(13, left=BinaryTree(11)))
+print(tree.to_dict())
+
+>>>
+{'value': 10, 'left': {'value': 7, 'left': None, 'right': {'value': 9, 'left': None, 'right': None}}, 'right': {'value': 13, 'left': {'value': 11, 'left': None, 'right': None}, 'right': None}}
+```
+
+mix-in 最妙的地方在于，子类既可以沿用它所提供的功能，又可以对其中一些地方做自己的处理。例如，我们从普通的二叉树（BinaryTree）派生了一个子类，让这种特殊的 BinaryTreeWithParent 二叉树能够把指向上级节点的引用保留下来。但问题是，这种二叉树的 `to_dict` 方法是从 ToDictMixin 继承来的，它所触发的 `_traverse` 方法，在面对循环引用时，会无休止地递归下去。
+
+```py
+class BinaryTreeWithParent(BinaryTree):
+    def __init__(self, value, left=None,
+                 right=None, parent=None):
+        super().__init__(value, left=left, right=right)
+        self.parent = parent
+```
+
+为了避免无限循环，我们可以覆盖 `BinaryTreeWithParent._traverse` 方法，让它对指向上级节点的引用做专门处理，而对于其他的值，则继续沿用从 mix-in 继承的 `_traverse` 逻辑。下面这段代码，首先判断当前值是不是指向上级节点的引用。如果是，就直接返回上级节点的 value 值；如果不是，那就通过内置的 super 函数沿用由 mix-in 超类所给出默认实现方案。
+
+```py
+def _traverse(self, key, value):
+   if (isinstance(value, BinaryTreeWithParent) and
+            key == 'parent'):
+      return value.value  # Prevent cycles
+   else:
+      return super()._traverse(key, value)
+```
+
+现在调用 `BinaryTreeWithParent.to_dict` 就没有问题了，因为它所触发的是 BinaryTreeWithParent 自己的 `_traverse` 方法，该方法不会再递归地处理循环引用。
+
+```py{37-42}
+class ToDictMixin:
+    def _traverse_dict(self, instance_dict):
+        output = {}
+        for key, value in instance_dict.items():
+            output[key] = self._traverse(key, value)
+        return output
+
+    def _traverse(self, key, value):
+        if isinstance(value, ToDictMixin):
+            return value.to_dict()
+        elif isinstance(value, dict):
+            return self._traverse_dict(value)
+        elif isinstance(value, list):
+            return [self._traverse(key, i) for i in value]
+        elif hasattr(value, '__dict__'):
+            return self._traverse_dict(value.__dict__)
+        else:
+            return value
+
+    def to_dict(self):
+        return self._traverse_dict(self.__dict__)
+
+
+class BinaryTree(ToDictMixin):
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class BinaryTreeWithParent(BinaryTree):
+    def __init__(self, value, left=None,
+                 right=None, parent=None):
+        super().__init__(value, left=left, right=right)
+        self.parent = parent
+
+    def _traverse(self, key, value):
+        if (isinstance(value, BinaryTreeWithParent) and
+                key == 'parent'):
+            return value.value  # Prevent cycles
+        else:
+            return super()._traverse(key, value)
+
+
+root = BinaryTreeWithParent(10)
+root.left = BinaryTreeWithParent(7, parent=root)
+root.left.right = BinaryTreeWithParent(9, parent=root.left)
+print(root.to_dict())
+
+>>>
+{'value': 10, 'left': {'value': 7, 'left': None, 'right': {'value': 9, 'left': None, 'right': None, 'parent': 7}, 'parent': 10}, 'right': None, 'parent': None}
+```
+
+只要 `BinaryTreeWithParent._traverse` 没问题，带有 BinaryTreeWithParent 属性的其他类就可以直接继承 ToDictMixin，这样的话，程序在把这种对象转化成字典时，会自动对其中的 BinaryTreeWithParent 属性做出正确处理。
+
+```py{45-48,55-56}
+class ToDictMixin:
+    def _traverse_dict(self, instance_dict):
+        output = {}
+        for key, value in instance_dict.items():
+            output[key] = self._traverse(key, value)
+        return output
+
+    def _traverse(self, key, value):
+        if isinstance(value, ToDictMixin):
+            return value.to_dict()
+        elif isinstance(value, dict):
+            return self._traverse_dict(value)
+        elif isinstance(value, list):
+            return [self._traverse(key, i) for i in value]
+        elif hasattr(value, '__dict__'):
+            return self._traverse_dict(value.__dict__)
+        else:
+            return value
+
+    def to_dict(self):
+        return self._traverse_dict(self.__dict__)
+
+
+class BinaryTree(ToDictMixin):
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class BinaryTreeWithParent(BinaryTree):
+    def __init__(self, value, left=None,
+                 right=None, parent=None):
+        super().__init__(value, left=left, right=right)
+        self.parent = parent
+
+    def _traverse(self, key, value):
+        if (isinstance(value, BinaryTreeWithParent) and
+                key == 'parent'):
+            return value.value  # Prevent cycles
+        else:
+            return super()._traverse(key, value)
+
+
+class NamedSubTree(ToDictMixin):
+    def __init__(self, name, tree_with_parent):
+        self.name = name
+        self.tree_with_parent = tree_with_parent
+
+
+root = BinaryTreeWithParent(10)
+root.left = BinaryTreeWithParent(7, parent=root)
+root.left.right = BinaryTreeWithParent(9, parent=root.left)
+
+my_tree = NamedSubTree('foobar', root.left.right)
+print(my_tree.to_dict())  # No infinite loop
+
+>>>
+{'name': 'foobar', 'tree_with_parent': {'value': 9, 'left': None, 'right': None, 'parent': 7}}
+```
+
+多个 mix-in 可以组合起来用。例如，我们要再写一个 mix-in，让所有的类都可以通过继承它来实现 JSON 序列化功能。在编写这个 mix-in 时，假设继承了它的那个类肯定有自己的 `to_dict` 方法（这个方法有可能是从另一个 mix-in（如 ToDictMixin）继承的）。
+
+```py
+import json
+
+
+class JsonMixin:
+    @classmethod
+    def from_json(cls, data):
+        kwargs = json.loads(data)
+        return cls(**kwargs)
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+```
+
+请注意，JsonMixin 既定义了实例方法，也定义了类方法。于是，继承了这个 mix-in 的其他类也会拥有这两种行为。在本例中，继承 JsonMixin 的类只需要提供 `to_dict` 方法以及能够接受关键字参数的 `__init__` 方法即可（参见第 23 条）。
+
+有了这样两个 mix-in，我们很容易就能创建一套含有工具类的体系，让其中的各种类型都可以把对象序列化成 JSON 格式并且能够根据 JSON 格式的数据创建这样的对象。而这只需要开发者按照固定的样式多写一点点代码即可。例如，可以用这样一套由数据类所构成的体系表示数据中心的各种设备与它们之间的结构关系。
+
+```py
+import json
+
+
+class ToDictMixin:
+    def _traverse_dict(self, instance_dict):
+        output = {}
+        for key, value in instance_dict.items():
+            output[key] = self._traverse(key, value)
+        return output
+
+    def _traverse(self, key, value):
+        if isinstance(value, ToDictMixin):
+            return value.to_dict()
+        elif isinstance(value, dict):
+            return self._traverse_dict(value)
+        elif isinstance(value, list):
+            return [self._traverse(key, i) for i in value]
+        elif hasattr(value, '__dict__'):
+            return self._traverse_dict(value.__dict__)
+        else:
+            return value
+
+    def to_dict(self):
+        return self._traverse_dict(self.__dict__)
+
+
+class JsonMixin:
+    @classmethod
+    def from_json(cls, data):
+        kwargs = json.loads(data)
+        return cls(**kwargs)
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+
+class Switch(ToDictMixin, JsonMixin):
+    def __init__(self, ports=None, speed=None):
+        self.ports = ports
+        self.speed = speed
+
+
+class Machine(ToDictMixin, JsonMixin):
+    def __init__(self, cores=None, ram=None, disk=None):
+        self.cores = cores
+        self.ram = ram
+        self.disk = disk
+
+
+class DatacenterRack(ToDictMixin, JsonMixin):
+    def __init__(self, switch=None, machines=None):
+        self.switch = Switch(**switch)
+        self.machines = [
+            Machine(**kwargs) for kwargs in machines]
+
+
+serialized = """{
+    "switch": {"ports": 5, "speed": 1e9},
+    "machines": [
+        {"cores": 8, "ram": 32e9, "disk": 5e12},
+        {"cores": 4, "ram": 16e9, "disk": 1e12},
+        {"cores": 2, "ram": 4e9, "disk": 500e9}
+    ]
+}
+"""
+
+deserialized = DatacenterRack.from_json(serialized)
+roundtrip = deserialized.to_json()
+assert json.loads(serialized) == json.loads(roundtrip)
+```
+
+这样写之后，我们很容易就能根据 JSON 格式的信息把这些对象还原出来，另外，也可以把它们再序列化成 JSON 格式。下面我们就先把 serialized 变量所指的一段 JSON 信息反序列化（也就是还原）成 DatacenterRack 对象，然后再把这个对象序列化成 JSON 信息并保存到 roundtrip 变量，最后通过 json.loads 方法验证这两个变量中的信息是否等效。
+
+对于 JsonMixin 这样的 mix-in 来说，即便直接继承它的那个类还通过类体系中的其他更高层类型间接地继承了它，程序也依然能够正常运行，因为 Python 可以把相关的方法正确地派发给 JsonMixin 类。
+
+### 总结
+
+1. 超类最好能写成不带实例属性与 `__init__` 方法的 mix-in 类，以避免由多重继承所引发的一些问题。
+2. 如果子类要定制（或者说修改）mix-in 所提供的功能，那么可以在自己的代码里面覆盖相关的实例方法。
+3. 根据需求，mix-in 可以只提供实例方法，也可以只提供类方法，还可以同时提供这两种方法。
+4. 把每个 mix-in 所提供的简单功能组合起来，可以实现比较复杂的功能。
+
 // TODO 编写高质量 Python 待完成
