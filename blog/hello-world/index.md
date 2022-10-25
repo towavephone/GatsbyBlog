@@ -132,6 +132,11 @@ src: "/sound.mp3"
 span: 6
 ```
 
+```audio
+name: ?<>\|+-!~`-=+&*^%$# We'll have a quiz at the end of the show.(this is a test":'@!\][{}.,()_")
+isSound: true
+```
+
 ```color
 name: Smaragd
 color: #939d7b

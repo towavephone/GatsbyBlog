@@ -350,3 +350,70 @@ isSound: true
 name: He attempted to escape through a window.
 isSound: true
 ```
+
+## embody
+
+### Meaning
+
+1. v. 具体表现，体现；包含，包括，收录
+
+### Sentence
+
+```audio
+name: Words embody thoughts and feelings.
+isSound: true
+```
+
+## ephemeral
+
+### Meaning
+
+1. adj，短暂的，瞬间的
+
+### Sentence
+
+```audio
+name: He talked about the country's ephemeral unity being shattered by the defeat.
+isSound: true
+```
+
+## decipher
+
+### Meaning
+
+1. v. 辨认，破译
+
+### Sentence
+
+```audio
+name: I'm still no closer to deciphering the code.
+isSound: true
+```
+
+## project
+
+### Meaning
+
+1. n. 项目；方案，计划；工程，课题
+2. v. 预计；向 ... 表现；投掷；投射，放映
+
+### Sentence
+
+```audio
+name: Our project is already well underway.
+isSound: true
+```
+
+## custom
+
+### Meaning
+
+1. n. 风俗，习俗；光顾；习惯
+2. adj. 定制的
+
+### Sentence
+
+```audio
+name: Chung has tried to adapt to local customs.
+isSound: true
+```
