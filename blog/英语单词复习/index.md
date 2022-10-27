@@ -417,3 +417,70 @@ isSound: true
 name: Chung has tried to adapt to local customs.
 isSound: true
 ```
+
+## category
+
+### Meaning
+
+1. n. 类别，种类
+
+### Sentence
+
+```audio
+name: This book clearly falls into the category of the fictionalised autobiography.
+isSound: true
+```
+
+## soccer
+
+### Meaning
+
+1. n.（英式）足球
+
+### Sentence
+
+```audio
+name: Do you play soccer?
+isSound: true
+```
+
+## pioneer
+
+### Meaning
+
+1. n. 先锋，先驱，拓荒者
+2. v. 开创，倡导
+
+### Sentence
+
+```audio
+name: DJ Kool Herc is a pioneer in developing of hip hop music.
+isSound: true
+```
+
+## attorney
+
+### Meaning
+
+1. n. 律师，代理人
+
+### Sentence
+
+```audio
+name: I wanted to be an attorney when I was kid.
+isSound: true
+```
+
+## tile
+
+### Meaning
+
+1. n. 瓷砖，瓦片
+2. v. 铺
+
+### Sentence
+
+```audio
+name: This store is decorated in blue tile.
+isSound: true
+```
