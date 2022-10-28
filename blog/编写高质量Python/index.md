@@ -6648,4 +6648,111 @@ assert json.loads(serialized) == json.loads(roundtrip)
 3. 根据需求，mix-in 可以只提供实例方法，也可以只提供类方法，还可以同时提供这两种方法。
 4. 把每个 mix-in 所提供的简单功能组合起来，可以实现比较复杂的功能。
 
+## 第 42 条：优先考虑用 public 属性表示应受保护的数据，不要用 private 属性表示
+
+Python 类的属性只有两种访问级别，也就是 public 与 private。
+
+```py
+class MyObject:
+    def __init__(self):
+        self.public_field = 5
+        self.__private_field = 10
+
+    def get_private_field(self):
+        return self.__private_field
+```
+
+public 属性能够公开访问，只需要在对象后面加上圆点操作符（dot operator），并写出属性的名称即可。
+
+```py{10-11}
+class MyObject:
+    def __init__(self):
+        self.public_field = 5
+        self.__private_field = 10
+
+    def get_private_field(self):
+        return self.__private_field
+
+
+foo = MyObject()
+assert foo.public_field == 5
+```
+
+如果属性名以两个下划线开头，那么即为 private 字段。属性所在的类可以通过实例方法访问该属性。
+
+```py{11}
+class MyObject:
+    def __init__(self):
+        self.public_field = 5
+        self.__private_field = 10
+
+    def get_private_field(self):
+        return self.__private_field
+
+
+foo = MyObject()
+assert foo.get_private_field() == 10
+```
+
+但如果在类的外面直接通过对象访问 private 字段，那么程序就会抛出异常。
+
+```py{11}
+class MyObject:
+    def __init__(self):
+        self.public_field = 5
+        self.__private_field = 10
+
+    def get_private_field(self):
+        return self.__private_field
+
+
+foo = MyObject()
+foo.__private_field
+
+>>>
+Traceback ...
+AttributeError: 'MyObject' object has no attribute '__private_field'
+```
+
+类方法（@classmethod）可以访问本类的 private 属性，因为这种方法也是在这个类（class）的范围里面声明的。
+
+```py
+class MyOtherObject:
+    def __init__(self):
+        self.__private_field = 71
+
+    @classmethod
+    def get_private_field_of_instance(cls, instance):
+        return instance.__private_field
+
+
+bar = MyOtherObject()
+assert MyOtherObject.get_private_field_of_instance(bar) == 71
+```
+
+private 字段只给这个类自己使用，子类不能访问超类的 private 字段。
+
+```py
+class MyParentObject:
+    def _init_(self):
+        self.__private_field = 71
+
+
+class MyChildObject(MyParentObject):
+    def get_private_field(self):
+        return self.__private_field
+
+
+baz = MyChildObject()
+baz.get_private_field()
+
+>>>
+Traceback ...
+AttributeError: 'MyChildObject' object has no attribute '_MyChildObject__private_field'
+```
+
+这种防止其他类访问 private 属性的功能，其实仅仅是通过变换属性名称而实现的。当 Python 编译器看到 `MyChildObject.get_private_field` 这样的方法想要访问 `__private_field` 属性时，它会把下划线和类名加在这个属性名称的前面，所以代码实际上访问的是 `_MyChildObject__private_field`。在上面的例子中，`__private_field` 是在 MyParentObject 的 `__init__` 里面定义的，所以，它变换之后的真实名称是 `_MyParentObject__private_field`。子类不能通过 `__private_field` 来访问这个属性，因为这样写实际上是在访问不存在的 `_MyChildObject__private_field`，而不是 `_MyParentObject__private_field`。
+
+了解名称变换规则后，我们就可以从任何一个类里面访问 private 属性。无论是子类还是外部的类，都可以不经许可就访问到这些属性。
+
 // TODO 编写高质量 Python 待完成

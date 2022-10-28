@@ -9,9 +9,9 @@ tags: 前端, React, Redux
 
 Redux 是 JavaScript 状态容器，提供可预测化的状态管理
 
-可以让你构建一致化的应用，运行于不同的环境（客户端、服务器、原生应用），并且易于测试。不仅于此，它还提供 超爽的开发体验，比如有一个时间旅行调试器可以编辑后实时预览
+可以让你构建一致化的应用，运行于不同的环境（客户端、服务器、原生应用），并且易于测试。不仅于此，它还提供超爽的开发体验，比如有一个时间旅行调试器可以编辑后实时预览
 
-Redux 由 Flux 演变而来，但受 Elm 的启发，避开了 Flux 的复杂性。 不管你有没有使用过它们，只需几分钟就能上手 Redux
+Redux 由 Flux 演变而来，但受 Elm 的启发，避开了 Flux 的复杂性。不管你有没有使用过它们，只需几分钟就能上手 Redux
 
 # 三大原则
 
@@ -29,7 +29,7 @@ Redux 由 Flux 演变而来，但受 Elm 的启发，避开了 Flux 的复杂性
 
 # Action
 
-action 是把数据从应用传到 store 的有效载荷，它是 store 数据的唯一来源，通过 store.dispatch()将 action 传到 store。
+action 是把数据从应用传到 store 的有效载荷，它是 store 数据的唯一来源，通过 store.dispatch() 将 action 传到 store。
 
 添加新 todo 任务的 action 是这样的
 
@@ -47,7 +47,7 @@ const ADD_TODO='ADD_TODO'
 import { ADD_TODO, REMOVE_TODO } from '../actionTypes';
 ```
 
-要尽量减少在`action`中传递的数据，比如以下例子就比把整个任务对象传过去要好
+要尽量减少在 action 中传递的数据，比如以下例子就比把整个任务对象传过去要好
 
 ```js
 {
@@ -67,16 +67,16 @@ import { ADD_TODO, REMOVE_TODO } from '../actionTypes';
 
 ## Action 创建函数
 
-action 创建函数就是生成 action 的方法，注意区别`action`和`action创建函数`
+action 创建函数就是生成 action 的方法，注意区别 `action` 和 `action 创建函数`
 
 在 redux 的 action 创建函数只是简单返回一个 action
 
 ```js
 function addTodo(text) {
-  return {
-    type: ADD_TODO,
-    text
-  };
+   return {
+      type: ADD_TODO,
+      text
+   };
 }
 ```
 
@@ -86,11 +86,11 @@ function addTodo(text) {
 
 ```js
 function addTodoWithDispatch(text) {
-  const action = {
-    type: ADD_TODO,
-    text
-  };
-  dispatch(action);
+   const action = {
+      type: ADD_TODO,
+      text
+   };
+   dispatch(action);
 }
 ```
 
@@ -115,7 +115,7 @@ boundAddTodo(text);
 boundCompleteTodo(index);
 ```
 
-store 里能直接通过 store.dispatch() 调用 dispatch() 方法，但是多数情况下你会使用 react-redux 提供的 connect() 帮助器来调用。bindActionCreators() 可以自动把多个 action 创建函数 绑定到 dispatch() 方法上
+store 里能直接通过 store.dispatch() 调用 dispatch() 方法，但是多数情况下你会使用 react-redux 提供的 connect() 帮助器来调用。bindActionCreators() 可以自动把多个 action 创建函数绑定到 dispatch() 方法上
 
 Action 创建函数也可以是异步非纯函数
 
@@ -135,9 +135,9 @@ export const SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER';
  */
 
 export const VisibilityFilters = {
-  SHOW_ALL: 'SHOW_ALL',
-  SHOW_COMPLETED: 'SHOW_COMPLETED',
-  SHOW_ACTIVE: 'SHOW_ACTIVE'
+   SHOW_ALL: 'SHOW_ALL',
+   SHOW_COMPLETED: 'SHOW_COMPLETED',
+   SHOW_ACTIVE: 'SHOW_ACTIVE'
 };
 
 /*
@@ -145,15 +145,15 @@ export const VisibilityFilters = {
  */
 
 export function addTodo(text) {
-  return { type: ADD_TODO, text };
+   return { type: ADD_TODO, text };
 }
 
 export function toggleTodo(index) {
-  return { type: TOGGLE_TODO, index };
+   return { type: TOGGLE_TODO, index };
 }
 
 export function setVisibilityFilter(filter) {
-  return { type: SET_VISIBILITY_FILTER, filter };
+   return { type: SET_VISIBILITY_FILTER, filter };
 }
 ```
 
@@ -188,7 +188,7 @@ reducer 指定了应用状态的变化如何响应 actions 并发送到 store �
 }
 ```
 
-> 开发复杂的应用时，不可避免会有一些数据相互引用。建议你尽可能地把 state 范式化，不存在嵌套。把所有数据放到一个对象里，每个数据以 ID 为主键，不同实体或列表间通过 ID 相互引用数据。把应用的 state 想像成数据库。这种方法在 normalizr 文档里有详细阐述。例如，实际开发中，在 state 里同时存放 todosById: { id -> todo } 和 todos: array<id> 是比较好的方式，本文中为了保持示例简单没有这样处理
+> 开发复杂的应用时，不可避免会有一些数据相互引用。建议你尽可能地把 state 范式化，不存在嵌套。把所有数据放到一个对象里，每个数据以 ID 为主键，不同实体或列表间通过 ID 相互引用数据。把应用的 state 想像成数据库。这种方法在 normalizr 文档里有详细阐述。例如，实际开发中，在 state 里同时存放 `todosById: { id -> todo }` 和 `todos: array<id>` 是比较好的方式，本文中为了保持示例简单没有这样处理
 
 ## Action 处理
 
@@ -202,7 +202,7 @@ redux 是一个纯函数，接收旧的 state 和 action，返回新的 state
 
 - 修改传入参数
 - 执行有副作用的操作，如 API 请求与路由跳转
-- 调用非纯函数，如`Date.now()`或`Math.random()`
+- 调用非纯函数，如 `Date.now()` 或 `Math.random()`
 
 在以后的章节会介绍如何执行有副作用的操作，只要传入参数相同，返回计算得到的下一个 state 就一定相同。没有特殊情况、没有副作用，没有 API 请求、没有变量修改，单纯执行计算
 
@@ -212,18 +212,18 @@ redux 是一个纯函数，接收旧的 state 和 action，返回新的 state
 import { VisibilityFilters } from './actions';
 
 const initialState = {
-  visibilityFilter: VisibilityFilters.SHOW_ALL,
-  todos: []
+   visibilityFilter: VisibilityFilters.SHOW_ALL,
+   todos: []
 };
 
 function todoApp(state, action) {
-  if (typeof state === 'undefined') {
-    return initialState;
-  }
+   if (typeof state === 'undefined') {
+      return initialState;
+   }
 
-  // 这里暂不处理任何 action，
-  // 仅返回传入的 state。
-  return state;
+   // 这里暂不处理任何 action，
+   // 仅返回传入的 state。
+   return state;
 }
 ```
 
@@ -231,81 +231,76 @@ function todoApp(state, action) {
 
 ```js
 function todoApp(state = initialState, action) {
-  // 这里暂不处理任何 action，
-  // 仅返回传入的 state。
-  return state;
+   // 这里暂不处理任何 action，
+   // 仅返回传入的 state。
+   return state;
 }
 ```
 
-现在可以处理 SET_VISIBILITY_FILTER，需要做的只是改变 state 中的 visibilityFilter
+现在可以处理 `SET_VISIBILITY_FILTER`，需要做的只是改变 state 中的 visibilityFilter
 
 ```js
 function todoApp(state = initialState, action) {
-  switch (action.type) {
-    case SET_VISIBILITY_FILTER:
-      return Object.assign({}, state, {
-        visibilityFilter: action.filter
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case SET_VISIBILITY_FILTER:
+         return Object.assign({}, state, {
+            visibilityFilter: action.filter
+         });
+      default:
+         return state;
+   }
 }
 ```
 
 注意
 
-1. 不要修改 state。 使用 Object.assign() 新建了一个副本。不能这样使用 Object.assign(state, { visibilityFilter: action.filter })，因为它会改变第一个参数的值。你必须把第一个参数设置为空对象。你也可以开启对 ES7 提案对象展开运算符的支持, 从而使用 { ...state, ...newState } 达到相同的目的
+1. 不要修改 state。 使用 Object.assign() 新建了一个副本。不能这样使用 `Object.assign(state, { visibilityFilter: action.filter })`，因为它会改变第一个参数的值。你必须把第一个参数设置为空对象。你也可以开启对 ES7 提案对象展开运算符的支持, 从而使用 `{ ...state, ...newState }` 达到相同的目的
 2. 在 default 情况下返回旧的 state。遇到未知的 action 时，一定要返回旧的 state
 
 **Object.assign 须知**
 
-Object.assign() 是 ES6 特性，但多数浏览器并不支持。你要么使用 polyfill，Babel 插件，或者使用其它库如 \_.assign() 提供的帮助方法
+Object.assign() 是 ES6 特性，但多数浏览器并不支持。你要么使用 polyfill，Babel 插件，或者使用其它库如 `_.assign()` 提供的帮助方法
 
 **switch 和样板代码须知**
 
 switch 语句并不是严格意义上的样板代码。Flux 中真实的样板代码是概念性的：更新必须要发送、Store 必须要注册到 Dispatcher、Store 必须是对象（开发同构应用时变得非常复杂）。为了解决这些问题，Redux 放弃了 event emitters（事件发送器），转而使用纯 reducer
 
-很不幸到现在为止，还有很多人存在一个误区：根据文档中是否使用 switch 来决定是否使用它。如果你不喜欢 switch，完全可以自定义一个 createReducer 函数来接收一个事件处理函数列表，参照"减少样板代码"
+很不幸到现在为止，还有很多人存在一个误区：根据文档中是否使用 switch 来决定是否使用它。如果你不喜欢 switch，完全可以自定义一个 createReducer 函数来接收一个事件处理函数列表，参照 "减少样板代码"
 
 ## 处理多个 action
 
-还有两个 action 要处理。就像我们处理 SET_VISIBILITY_FILTER 一样，我们引入 ADD_TODO 和 TOGGLE_TODO 两个 actions 并且扩展我们的 reducer 去处理 ADD_TODO
+还有两个 action 要处理。就像我们处理 `SET_VISIBILITY_FILTER` 一样，我们引入 `ADD_TODO` 和 `TOGGLE_TODO` 两个 actions 并且扩展我们的 reducer 去处理 `ADD_TODO`
 
 ```js
-import {
-  ADD_TODO,
-  TOGGLE_TODO,
-  SET_VISIBILITY_FILTER,
-  VisibilityFilters
-} from './actions'
+import { ADD_TODO, TOGGLE_TODO, SET_VISIBILITY_FILTER, VisibilityFilters } from './actions';
 
-...
+// ...
 
 function todoApp(state = initialState, action) {
-  switch (action.type) {
-    case SET_VISIBILITY_FILTER:
-      return Object.assign({}, state, {
-        visibilityFilter: action.filter
-      })
-    case ADD_TODO:
-      return Object.assign({}, state, {
-        todos: [
-          ...state.todos,
-          {
-            text: action.text,
-            completed: false
-          }
-        ]
-      })
-    default:
-      return state
-  }
+   switch (action.type) {
+      case SET_VISIBILITY_FILTER:
+         return Object.assign({}, state, {
+            visibilityFilter: action.filter
+         });
+      case ADD_TODO:
+         return Object.assign({}, state, {
+            todos: [
+               ...state.todos,
+               {
+                  text: action.text,
+                  completed: false
+               }
+            ]
+         });
+      default:
+         return state;
+   }
 }
 ```
 
 如上，不直接修改 state 中的字段，而是返回新对象。新的 todos 对象就相当于旧的 todos 在末尾加上新建的 todo。而这个新的 todo 又是基于 action 中的数据创建的。
 
-最后，TOGGLE_TODO 的实现也很好理解：
+最后，`TOGGLE_TODO` 的实现也很好理解：
 
 ```js
 case TOGGLE_TODO:
@@ -321,7 +316,7 @@ case TOGGLE_TODO:
   })
 ```
 
-我们需要修改数组中指定的数据项而又不希望导致突变, 因此我们的做法是在创建一个新的数组后, 将那些无需修改的项原封不动移入, 接着对需修改的项用新生成的对象替换。(译者注：Javascript 中的对象存储时均是由值和指向值的引用两个部分构成。此处突变指直接修改引用所指向的值, 而引用本身保持不变。) 如果经常需要这类的操作，可以选择使用帮助类 React-addons-update，updeep，或者使用原生支持深度更新的库 Immutable。最后，时刻谨记永远不要在克隆 state 前修改它。
+我们需要修改数组中指定的数据项而又不希望导致突变, 因此我们的做法是在创建一个新的数组后, 将那些无需修改的项原封不动移入, 接着对需修改的项用新生成的对象替换。（译者注：Javascript 中的对象存储时均是由值和指向值的引用两个部分构成。此处突变指直接修改引用所指向的值, 而引用本身保持不变。）如果经常需要这类的操作，可以选择使用帮助类 React-addons-update，updeep，或者使用原生支持深度更新的库 Immutable。最后，时刻谨记永远不要在克隆 state 前修改它。
 
 ## 拆分 reducer
 
@@ -329,46 +324,46 @@ case TOGGLE_TODO:
 
 ```js
 function todos(state = [], action) {
-  switch (action.type) {
-    case ADD_TODO:
-      return [
-        ...state,
-        {
-          text: action.text,
-          completed: false
-        }
-      ];
-    case TOGGLE_TODO:
-      return state.map((todo, index) => {
-        if (index === action.index) {
-          return Object.assign({}, todo, {
-            completed: !todo.completed
-          });
-        }
-        return todo;
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case ADD_TODO:
+         return [
+            ...state,
+            {
+               text: action.text,
+               completed: false
+            }
+         ];
+      case TOGGLE_TODO:
+         return state.map((todo, index) => {
+            if (index === action.index) {
+               return Object.assign({}, todo, {
+                  completed: !todo.completed
+               });
+            }
+            return todo;
+         });
+      default:
+         return state;
+   }
 }
 
 function todoApp(state = initialState, action) {
-  switch (action.type) {
-    case SET_VISIBILITY_FILTER:
-      return Object.assign({}, state, {
-        visibilityFilter: action.filter
-      });
-    case ADD_TODO:
-      return Object.assign({}, state, {
-        todos: todos(state.todos, action)
-      });
-    case TOGGLE_TODO:
-      return Object.assign({}, state, {
-        todos: todos(state.todos, action)
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case SET_VISIBILITY_FILTER:
+         return Object.assign({}, state, {
+            visibilityFilter: action.filter
+         });
+      case ADD_TODO:
+         return Object.assign({}, state, {
+            todos: todos(state.todos, action)
+         });
+      case TOGGLE_TODO:
+         return Object.assign({}, state, {
+            todos: todos(state.todos, action)
+         });
+      default:
+         return state;
+   }
 }
 ```
 
@@ -376,7 +371,7 @@ function todoApp(state = initialState, action) {
 
 下面深入一下如何做 reducer 合成，能否抽出一个 reducer 专门管理 visibilityFilter？当然可以
 
-首先引用，让我们使用 ES6 对象结构去声明 SHOW_ALL
+首先引用，让我们使用 ES6 对象结构去声明 `SHOW_ALL`
 
 ```js
 const { SHOW_ALL } = VisibilityFilters;
@@ -386,12 +381,12 @@ const { SHOW_ALL } = VisibilityFilters;
 
 ```js
 function visibilityFilter(state = SHOW_ALL, action) {
-  switch (action.type) {
-    case SET_VISIBILITY_FILTER:
-      return action.filter;
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case SET_VISIBILITY_FILTER:
+         return action.filter;
+      default:
+         return state;
+   }
 }
 ```
 
@@ -399,56 +394,56 @@ function visibilityFilter(state = SHOW_ALL, action) {
 
 ```js
 function todos(state = [], action) {
-  switch (action.type) {
-    case ADD_TODO:
-      return [
-        ...state,
-        {
-          text: action.text,
-          completed: false
-        }
-      ];
-    case TOGGLE_TODO:
-      return state.map((todo, index) => {
-        if (index === action.index) {
-          return Object.assign({}, todo, {
-            completed: !todo.completed
-          });
-        }
-        return todo;
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case ADD_TODO:
+         return [
+            ...state,
+            {
+               text: action.text,
+               completed: false
+            }
+         ];
+      case TOGGLE_TODO:
+         return state.map((todo, index) => {
+            if (index === action.index) {
+               return Object.assign({}, todo, {
+                  completed: !todo.completed
+               });
+            }
+            return todo;
+         });
+      default:
+         return state;
+   }
 }
 
 function visibilityFilter(state = SHOW_ALL, action) {
-  switch (action.type) {
-    case SET_VISIBILITY_FILTER:
-      return action.filter;
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case SET_VISIBILITY_FILTER:
+         return action.filter;
+      default:
+         return state;
+   }
 }
 
 function todoApp(state = {}, action) {
-  return {
-    visibilityFilter: visibilityFilter(state.visibilityFilter, action),
-    todos: todos(state.todos, action)
-  };
+   return {
+      visibilityFilter: visibilityFilter(state.visibilityFilter, action),
+      todos: todos(state.todos, action)
+   };
 }
 ```
 
 注意每个 reducer 只负责管理全局 state 中它负责的一部分，每个 reducer 的 state 参数都不同，分别对应它管理的那部分的数据
 
-最后，redux 提供了 combineReducers()工具类来做上面 todoApp 做的事情，这样就能消灭一些样板代码，有了它，可以这样重构 todoAPP
+最后，redux 提供了 combineReducers() 工具类来做上面 todoApp 做的事情，这样就能消灭一些样板代码，有了它，可以这样重构 todoAPP
 
 ```js
 import { combineReducers } from 'redux';
 
 const todoApp = combineReducers({
-  visibilityFilter,
-  todos
+   visibilityFilter,
+   todos
 });
 
 export default todoApp;
@@ -458,25 +453,25 @@ export default todoApp;
 
 ```js
 const reducer = combineReducers({
-  a: doSomethingWithA,
-  b: processB,
-  c: c
+   a: doSomethingWithA,
+   b: processB,
+   c: c
 });
 ```
 
 ```js
 function reducer(state = {}, action) {
-  return {
-    a: doSomethingWithA(state.a, action),
-    b: processB(state.b, action),
-    c: c(state.c, action)
-  };
+   return {
+      a: doSomethingWithA(state.a, action),
+      b: processB(state.b, action),
+      c: c(state.c, action)
+   };
 }
 ```
 
 combineReducers() 所做的只是生成一个函数，这个函数来调用你的一系列 reducer，每个 reducer 根据它们的 key 来筛选出 state 中的一部分数据并处理，然后这个生成的函数再将所有 reducer 的结果合并成一个大的对象，没有任何魔法。正如其他 reducers，如果 combineReducers() 中包含的所有 reducers 都没有更改 state，那么也就不会创建一个新的对象
 
-> combineReducers 接收一个对象，可以把所有顶级的 reducer 放到一个独立的文件中，通过 export 暴露出每个 reducer 函数，然后使用 import \* as reducers 得到一个以它们名字作为 key 的 object
+> combineReducers 接收一个对象，可以把所有顶级的 reducer 放到一个独立的文件中，通过 export 暴露出每个 reducer 函数，然后使用 `import * as reducers` 得到一个以它们名字作为 key 的 object
 
 ```js
 import { combineReducers } from 'redux';
@@ -493,41 +488,41 @@ import { ADD_TODO, TOGGLE_TODO, SET_VISIBILITY_FILTER, VisibilityFilters } from 
 const { SHOW_ALL } = VisibilityFilters;
 
 function visibilityFilter(state = SHOW_ALL, action) {
-  switch (action.type) {
-    case SET_VISIBILITY_FILTER:
-      return action.filter;
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case SET_VISIBILITY_FILTER:
+         return action.filter;
+      default:
+         return state;
+   }
 }
 
 function todos(state = [], action) {
-  switch (action.type) {
-    case ADD_TODO:
-      return [
-        ...state,
-        {
-          text: action.text,
-          completed: false
-        }
-      ];
-    case TOGGLE_TODO:
-      return state.map((todo, index) => {
-        if (index === action.index) {
-          return Object.assign({}, todo, {
-            completed: !todo.completed
-          });
-        }
-        return todo;
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case ADD_TODO:
+         return [
+            ...state,
+            {
+               text: action.text,
+               completed: false
+            }
+         ];
+      case TOGGLE_TODO:
+         return state.map((todo, index) => {
+            if (index === action.index) {
+               return Object.assign({}, todo, {
+                  completed: !todo.completed
+               });
+            }
+            return todo;
+         });
+      default:
+         return state;
+   }
 }
 
 const todoApp = combineReducers({
-  visibilityFilter,
-  todos
+   visibilityFilter,
+   todos
 });
 
 export default todoApp;
@@ -540,14 +535,14 @@ export default todoApp;
 Store 就是把他们联系到一起的对象，store 有以下职责
 
 - 维持应用的 state
-- 提供 getState()方法获取 state
-- 提供 dispatch(action)方法更新 state
-- 通过 subscribe(listener)注册监听器
-- 通过 subscribe(listener)返回的函数注销监听器
+- 提供 getState() 方法获取 state
+- 提供 dispatch(action) 方法更新 state
+- 通过 subscribe(listener) 注册监听器
+- 通过 subscribe(listener) 返回的函数注销监听器
 
 Redux 应用只有一个单一的 store，但需要拆分数据处理逻辑时，要使用 reducer 组合而不是创建多个 store
 
-根据已有的 reducer 来创建 store 是非常容易的，在前一个章节中，我们使用 combineReducers()将多个 reducer 合并成一个，现在我们将其导入，并传递 createStore()
+根据已有的 reducer 来创建 store 是非常容易的，在前一个章节中，我们使用 combineReducers() 将多个 reducer 合并成一个，现在我们将其导入，并传递 createStore()
 
 ```js
 import { createStore } from 'redux';
@@ -563,7 +558,7 @@ let store = createStore(todoApp, window.STATE_FROM_SERVER);
 
 ## 发起 Actions
 
-现在我们已经创建好了 store ，让我们来验证一下！虽然还没有界面，我们已经可以测试数据处理逻辑了
+现在我们已经创建好了 store，让我们来验证一下！虽然还没有界面，我们已经可以测试数据处理逻辑了
 
 ```js
 import { addTodo, toggleTodo, setVisibilityFilter, VisibilityFilters } from './actions';
@@ -599,7 +594,7 @@ unsubscribe();
 
 这意味着应用中所有的数据都遵守相同的生命周期，这样可以让应用变得更加可预测且容易理解，同时也鼓励做数据规范化，这样可以避免使用多个且独立的无法相互引用的重复数据
 
-如果这些理由还不足以令你信服，读一下 动机 和 Flux 案例，这里面有更加详细的单向数据流优势分析。虽然 Redux 并不是严格意义上的 Flux，但它们有共同的设计思想
+如果这些理由还不足以令你信服，读一下 `动机` 和 `Flux 案例`，这里面有更加详细的单向数据流优势分析。虽然 Redux 并不是严格意义上的 Flux，但它们有共同的设计思想
 
 ## Redux 的生命周期
 
@@ -624,19 +619,19 @@ store 会把两个参数传入 reducer，当前的 state 和 action，例如在�
 ```js
 // 当前应用的 state（todos 列表和选中的过滤器）
 let previousState = {
-  visibleTodoFilter: 'SHOW_ALL',
-  todos: [
-    {
-      text: 'Read the docs.',
-      complete: false
-    }
-  ]
+   visibleTodoFilter: 'SHOW_ALL',
+   todos: [
+      {
+         text: 'Read the docs.',
+         complete: false
+      }
+   ]
 };
 
 // 将要执行的 action（添加一个 todo）
 let action = {
-  type: 'ADD_TODO',
-  text: 'Understand the flow.'
+   type: 'ADD_TODO',
+   text: 'Understand the flow.'
 };
 
 // reducer 返回处理后的应用状态
@@ -647,24 +642,24 @@ let nextState = todoApp(previousState, action);
 
 ### 根 reducer 应该把多个子 reducer 输出合并成一个单一的 state 树
 
-根 reducer 的结构完全由你决定。Redux 原生提供 combineReducers()辅助函数，来把根 reducer 拆分成多个函数，用于分别处理 state 树的一个分支
+根 reducer 的结构完全由你决定。Redux 原生提供 combineReducers() 辅助函数，来把根 reducer 拆分成多个函数，用于分别处理 state 树的一个分支
 
 下面演示 combineReducers() 如何使用。假如你有两个 reducer：一个是 todo 列表，另一个是当前选择的过滤器设置
 
 ```js
 function todos(state = [], action) {
-  // 省略处理逻辑...
-  return nextState;
+   // 省略处理逻辑...
+   return nextState;
 }
 
 function visibleTodoFilter(state = 'SHOW_ALL', action) {
-  // 省略处理逻辑...
-  return nextState;
+   // 省略处理逻辑...
+   return nextState;
 }
 
 let todoApp = combineReducers({
-  todos,
-  visibleTodoFilter
+   todos,
+   visibleTodoFilter
 });
 ```
 
@@ -679,8 +674,8 @@ let nextVisibleTodoFilter = visibleTodoFilter(state.visibleTodoFilter, action);
 
 ```js
 return {
-  todos: nextTodos,
-  visibleTodoFilter: nextVisibleTodoFilter
+   todos: nextTodos,
+   visibleTodoFilter: nextVisibleTodoFilter
 };
 ```
 
@@ -732,15 +727,15 @@ Redux 的 React 绑定库是基于容器组件和展示组件相分离的开发�
 
 还记得当初如何设计 state 根对象的结构吗？现在就要定义与它匹配的界面的层次结构。其实这不是 Redux 相关的工作，React 开发思想在这方面解释的非常棒
 
-我们的概要设计很简单。我们想要显示一个 todo 项的列表。一个 todo 项被点击后，会增加一条删除线并标记 completed。我们会显示用户新增一个 todo 字段。在 footer 里显示一个可切换的显示全部/只显示 completed 的/只显示 incompleted 的 todos
+我们的概要设计很简单。我们想要显示一个 todo 项的列表。一个 todo 项被点击后，会增加一条删除线并标记 completed。我们会显示用户新增一个 todo 字段。在 footer 里显示一个可切换的显示全部 / 只显示 completed 的 / 只显示 incompleted 的 todos
 
 ### 展示组件
 
 以下的这些组件（和它们的 props ）就是从这个设计里来的
 
 - TodoList 用于显示 todos 列表
-- todos: Array 以 { text, completed } 形式显示的 todo 项数组
-- onTodoClick(index: number) 当 todo 项被点击时调用的回调函数
+- todos: Array 以 `{ text, completed }` 形式显示的 todo 项数组
+- `onTodoClick(index: number)` 当 todo 项被点击时调用的回调函数
 - Todo 一个 todo 项
 - text: string 显示的文本内容
 - completed: boolean todo 项是否显示删除线
@@ -764,7 +759,7 @@ Redux 的 React 绑定库是基于容器组件和展示组件相分离的开发�
 
 有时很难分清到底该使用容器组件还是展示组件。例如，有时表单和函数严重耦合在一起，如这个小的组件
 
-- AddTodo 含有“Add”按钮的输入框
+- AddTodo 含有 “Add” 按钮的输入框
 
 技术上讲可以把它分成两个组件，但一开始就这么做有点早。在一些非常小的组件里混用容器和展示是可以的。当业务变复杂后，如何拆分就很明显了。所以现在就使用混合型的吧
 
@@ -783,20 +778,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Todo = ({ onClick, completed, text }) => (
-  <li
-    onClick={onClick}
-    style={{
-      textDecoration: completed ? 'line-through' : 'none'
-    }}
-  >
-    {text}
-  </li>
+   <li
+      onClick={onClick}
+      style={{
+         textDecoration: completed ? 'line-through' : 'none'
+      }}
+   >
+      {text}
+   </li>
 );
 
 Todo.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  completed: PropTypes.bool.isRequired,
-  text: PropTypes.string.isRequired
+   onClick: PropTypes.func.isRequired,
+   completed: PropTypes.bool.isRequired,
+   text: PropTypes.string.isRequired
 };
 
 export default Todo;
@@ -810,22 +805,22 @@ import PropTypes from 'prop-types';
 import Todo from './Todo';
 
 const TodoList = ({ todos, onTodoClick }) => (
-  <ul>
-    {todos.map((todo, index) => (
-      <Todo key={index} {...todo} onClick={() => onTodoClick(index)} />
-    ))}
-  </ul>
+   <ul>
+      {todos.map((todo, index) => (
+         <Todo key={index} {...todo} onClick={() => onTodoClick(index)} />
+      ))}
+   </ul>
 );
 
 TodoList.propTypes = {
-  todos: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      completed: PropTypes.bool.isRequired,
-      text: PropTypes.string.isRequired
-    }).isRequired
-  ).isRequired,
-  onTodoClick: PropTypes.func.isRequired
+   todos: PropTypes.arrayOf(
+      PropTypes.shape({
+         id: PropTypes.number.isRequired,
+         completed: PropTypes.bool.isRequired,
+         text: PropTypes.string.isRequired
+      }).isRequired
+   ).isRequired,
+   onTodoClick: PropTypes.func.isRequired
 };
 
 export default TodoList;
@@ -838,27 +833,27 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Link = ({ active, children, onClick }) => {
-  if (active) {
-    return <span>{children}</span>;
-  }
+   if (active) {
+      return <span>{children}</span>;
+   }
 
-  return (
-    <a
-      href=''
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
-    >
-      {children}
-    </a>
-  );
+   return (
+      <a
+         href=''
+         onClick={(e) => {
+            e.preventDefault();
+            onClick();
+         }}
+      >
+         {children}
+      </a>
+   );
 };
 
 Link.propTypes = {
-  active: PropTypes.bool.isRequired,
-  children: PropTypes.node.isRequired,
-  onClick: PropTypes.func.isRequired
+   active: PropTypes.bool.isRequired,
+   children: PropTypes.node.isRequired,
+   onClick: PropTypes.func.isRequired
 };
 
 export default Link;
@@ -871,13 +866,13 @@ import React from 'react';
 import FilterLink from '../containers/FilterLink';
 
 const Footer = () => (
-  <p>
-    Show: <FilterLink filter='SHOW_ALL'>All</FilterLink>
-    {', '}
-    <FilterLink filter='SHOW_ACTIVE'>Active</FilterLink>
-    {', '}
-    <FilterLink filter='SHOW_COMPLETED'>Completed</FilterLink>
-  </p>
+   <p>
+      Show: <FilterLink filter='SHOW_ALL'>All</FilterLink>
+      {', '}
+      <FilterLink filter='SHOW_ACTIVE'>Active</FilterLink>
+      {', '}
+      <FilterLink filter='SHOW_COMPLETED'>Completed</FilterLink>
+   </p>
 );
 
 export default Footer;
@@ -891,33 +886,33 @@ export default Footer;
 
 ```js
 const getVisibleTodos = (todos, filter) => {
-  switch (filter) {
-    case 'SHOW_COMPLETED':
-      return todos.filter((t) => t.completed);
-    case 'SHOW_ACTIVE':
-      return todos.filter((t) => !t.completed);
-    case 'SHOW_ALL':
-    default:
-      return todos;
-  }
+   switch (filter) {
+      case 'SHOW_COMPLETED':
+         return todos.filter((t) => t.completed);
+      case 'SHOW_ACTIVE':
+         return todos.filter((t) => !t.completed);
+      case 'SHOW_ALL':
+      default:
+         return todos;
+   }
 };
 
 const mapStateToProps = (state) => {
-  return {
-    todos: getVisibleTodos(state.todos, state.visibilityFilter)
-  };
+   return {
+      todos: getVisibleTodos(state.todos, state.visibilityFilter)
+   };
 };
 ```
 
-除了读取 state，容器组件还能分发 action。类似的方式，可以定义 mapDispatchToProps() 方法接收 dispatch() 方法并返回期望注入到展示组件的 props 中的回调方法。例如，我们希望 VisibleTodoList 向 TodoList 组件中注入一个叫 onTodoClick 的 props ，还希望 onTodoClick 能分发 TOGGLE_TODO 这个 action
+除了读取 state，容器组件还能分发 action。类似的方式，可以定义 mapDispatchToProps() 方法接收 dispatch() 方法并返回期望注入到展示组件的 props 中的回调方法。例如，我们希望 VisibleTodoList 向 TodoList 组件中注入一个叫 onTodoClick 的 props ，还希望 onTodoClick 能分发 `TOGGLE_TODO` 这个 action
 
 ```js
 const mapDispatchToProps = (dispatch) => {
-  return {
-    onTodoClick: (id) => {
-      dispatch(toggleTodo(id));
-    }
-  };
+   return {
+      onTodoClick: (id) => {
+         dispatch(toggleTodo(id));
+      }
+   };
 };
 ```
 
@@ -927,8 +922,8 @@ const mapDispatchToProps = (dispatch) => {
 import { connect } from 'react-redux';
 
 const VisibleTodoList = connect(
-  mapStateToProps,
-  mapDispatchToProps
+   mapStateToProps,
+   mapDispatchToProps
 )(TodoList);
 
 export default VisibleTodoList;
@@ -946,22 +941,22 @@ import { setVisibilityFilter } from '../actions';
 import Link from '../components/Link';
 
 const mapStateToProps = (state, ownProps) => {
-  return {
-    active: ownProps.filter === state.visibilityFilter
-  };
+   return {
+      active: ownProps.filter === state.visibilityFilter
+   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onClick: () => {
-      dispatch(setVisibilityFilter(ownProps.filter));
-    }
-  };
+   return {
+      onClick: () => {
+         dispatch(setVisibilityFilter(ownProps.filter));
+      }
+   };
 };
 
 const FilterLink = connect(
-  mapStateToProps,
-  mapDispatchToProps
+   mapStateToProps,
+   mapDispatchToProps
 )(Link);
 
 export default FilterLink;
@@ -975,33 +970,33 @@ import { toggleTodo } from '../actions';
 import TodoList from '../components/TodoList';
 
 const getVisibleTodos = (todos, filter) => {
-  switch (filter) {
-    case 'SHOW_ALL':
-      return todos;
-    case 'SHOW_COMPLETED':
-      return todos.filter((t) => t.completed);
-    case 'SHOW_ACTIVE':
-      return todos.filter((t) => !t.completed);
-  }
+   switch (filter) {
+      case 'SHOW_ALL':
+         return todos;
+      case 'SHOW_COMPLETED':
+         return todos.filter((t) => t.completed);
+      case 'SHOW_ACTIVE':
+         return todos.filter((t) => !t.completed);
+   }
 };
 
 const mapStateToProps = (state) => {
-  return {
-    todos: getVisibleTodos(state.todos, state.visibilityFilter)
-  };
+   return {
+      todos: getVisibleTodos(state.todos, state.visibilityFilter)
+   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {
-    onTodoClick: (id) => {
-      dispatch(toggleTodo(id));
-    }
-  };
+   return {
+      onTodoClick: (id) => {
+         dispatch(toggleTodo(id));
+      }
+   };
 };
 
 const VisibleTodoList = connect(
-  mapStateToProps,
-  mapDispatchToProps
+   mapStateToProps,
+   mapDispatchToProps
 )(TodoList);
 
 export default VisibleTodoList;
@@ -1019,29 +1014,29 @@ import { connect } from 'react-redux';
 import { addTodo } from '../actions';
 
 let AddTodo = ({ dispatch }) => {
-  let input;
+   let input;
 
-  return (
-    <div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!input.value.trim()) {
-            return;
-          }
-          dispatch(addTodo(input.value));
-          input.value = '';
-        }}
-      >
-        <input
-          ref={(node) => {
-            input = node;
-          }}
-        />
-        <button type='submit'>Add Todo</button>
-      </form>
-    </div>
-  );
+   return (
+      <div>
+         <form
+            onSubmit={(e) => {
+               e.preventDefault();
+               if (!input.value.trim()) {
+                  return;
+               }
+               dispatch(addTodo(input.value));
+               input.value = '';
+            }}
+         >
+            <input
+               ref={(node) => {
+                  input = node;
+               }}
+            />
+            <button type='submit'>Add Todo</button>
+         </form>
+      </div>
+   );
 };
 AddTodo = connect()(AddTodo);
 
@@ -1059,11 +1054,11 @@ import AddTodo from '../containers/AddTodo';
 import VisibleTodoList from '../containers/VisibleTodoList';
 
 const App = () => (
-  <div>
-    <AddTodo />
-    <VisibleTodoList />
-    <Footer />
-  </div>
+   <div>
+      <AddTodo />
+      <VisibleTodoList />
+      <Footer />
+   </div>
 );
 
 export default App;
@@ -1073,7 +1068,7 @@ export default App;
 
 所有容器组件都可以访问 Redux store，所以可以手动监听它。一种方式是把它以 props 的形式传入到所有容器组件中。但这太麻烦了，因为必须要用 store 把展示组件包裹一层，仅仅是因为恰好在组件树中渲染了一个容器组件
 
-建议的方式是使用指定的 React Redux 组件 <Provider> 来魔法般的让所有容器组件都可以访问 store，而不必显示地传递它。只需要在渲染根组件时使用即可
+建议的方式是使用指定的 React Redux 组件 `<Provider>` 来魔法般的让所有容器组件都可以访问 store，而不必显示地传递它。只需要在渲染根组件时使用即可
 
 `index.js`
 
@@ -1088,10 +1083,10 @@ import App from './components/App';
 let store = createStore(todoApp);
 
 render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root')
+   <Provider store={store}>
+      <App />
+   </Provider>,
+   document.getElementById('root')
 );
 ```
 
@@ -1106,32 +1101,32 @@ import { Provider, connect } from 'react-redux';
 
 // React component
 class Counter extends Component {
-  render() {
-    const { value, onIncreaseClick } = this.props;
-    return (
-      <div>
-        <span>{value}</span>
-        <button onClick={onIncreaseClick}>Increase</button>
-      </div>
-    );
-  }
+   render() {
+      const { value, onIncreaseClick } = this.props;
+      return (
+         <div>
+            <span>{value}</span>
+            <button onClick={onIncreaseClick}>Increase</button>
+         </div>
+      );
+   }
 }
 
 Counter.propTypes = {
-  value: PropTypes.number.isRequired,
-  onIncreaseClick: PropTypes.func.isRequired
+   value: PropTypes.number.isRequired,
+   onIncreaseClick: PropTypes.func.isRequired
 };
 
 // 这是一个 reducer，形式为 (state, action) => state 的纯函数。
 // 描述了 action 如何把 state 转变成下一个 state。
 function counter(state = { count: 0 }, action) {
-  const count = state.count;
-  switch (action.type) {
-    case 'increase':
-      return { count: count + 1 };
-    default:
-      return state;
-  }
+   const count = state.count;
+   switch (action.type) {
+      case 'increase':
+         return { count: count + 1 };
+      default:
+         return state;
+   }
 }
 
 // Redux store存放应用状态
@@ -1140,9 +1135,9 @@ const store = createStore(counter);
 // Map Redux state to component props
 // 可以手动订阅更新，也可以事件绑定到视图层
 function mapStateToProps(state) {
-  return {
-    value: state.count
-  };
+   return {
+      value: state.count
+   };
 }
 
 // Action
@@ -1150,22 +1145,22 @@ const increaseAction = { type: 'increase' };
 
 // Map Redux actions to component props
 function mapDispatchToProps(dispatch) {
-  return {
-    // 改变内部 state 惟一方法是 dispatch 一个 action
-    onIncreaseClick: () => dispatch(increaseAction)
-  };
+   return {
+      // 改变内部 state 惟一方法是 dispatch 一个 action
+      onIncreaseClick: () => dispatch(increaseAction)
+   };
 }
 
 // Connected Component
 const App = connect(
-  mapStateToProps,
-  mapDispatchToProps
+   mapStateToProps,
+   mapDispatchToProps
 )(Counter);
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root')
+   <Provider store={store}>
+      <App />
+   </Provider>,
+   document.getElementById('root')
 );
 ```

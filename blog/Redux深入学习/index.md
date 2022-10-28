@@ -17,15 +17,15 @@ tags: 前端, React, Redux
 
 - 一种通知 reducer 请求开始的 action
 
-对于这种 action，reducer 可能会切换一下 state 中的 isFetching 标记。以此来告诉 UI 来显示加载界面。
+   对于这种 action，reducer 可能会切换一下 state 中的 isFetching 标记。以此来告诉 UI 来显示加载界面。
 
 - 一种通知 reducer 请求成功的 action
 
-对于这种 action，reducer 可能会把接收到的新数据合并到 state 中，并重置 isFetching。UI 则会隐藏加载界面，并显示接收到的数据。
+   对于这种 action，reducer 可能会把接收到的新数据合并到 state 中，并重置 isFetching。UI 则会隐藏加载界面，并显示接收到的数据。
 
 - 一种通知 reducer 请求失败的 action
 
-对于这种 action，reducer 可能会重置 isFetching。另外，有些 reducer 会保存这些失败信息，并在 UI 里显示出来
+   对于这种 action，reducer 可能会重置 isFetching。另外，有些 reducer 会保存这些失败信息，并在 UI 里显示出来
 
 为了区分这三种 action，可能在 action 里添加一个专门的 status 字段作为标记位
 
@@ -57,10 +57,10 @@ tags: 前端, React, Redux
 export const SELECT_SUBREDDIT = 'SELECT_SUBREDDIT';
 
 export function selectSubreddit(subreddit) {
-  return {
-    type: SELECT_SUBREDDIT,
-    subreddit
-  };
+   return {
+      type: SELECT_SUBREDDIT,
+      subreddit
+   };
 }
 ```
 
@@ -70,42 +70,42 @@ export function selectSubreddit(subreddit) {
 export const INVALIDATE_SUBREDDIT = 'INVALIDATE_SUBREDDIT';
 
 export function invalidatesubreddit(subreddit) {
-  return {
-    type: INVALIDATE_SUBREDDIT,
-    subreddit
-  };
+   return {
+      type: INVALIDATE_SUBREDDIT,
+      subreddit
+   };
 }
 ```
 
 这些是用户操作来控制的 action。也有另外一类 action，是由网络请求来控制。后面会介绍如何使用它们，现在，我们只是来定义它们
 
-当需要获取指定 subreddit 的帖子的时候，需要 dispatch REQUEST_POSTS action
+当需要获取指定 subreddit 的帖子的时候，需要 dispatch `REQUEST_POSTS` action
 
 ```js
 export const REQUEST_POSTS = 'REQUEST_POSTS';
 
 export function requestPosts(subreddit) {
-  return {
-    type: REQUEST_POSTS,
-    subreddit
-  };
+   return {
+      type: REQUEST_POSTS,
+      subreddit
+   };
 }
 ```
 
-把 REQUEST_POSTS 和 SELECT_SUBREDDIT 或 INVALIDATE_SUBREDDIT 分开很重要。虽然它们的发生有先后顺序，但随着应用变得复杂，有些用户操作（比如，预加载最流行的 subreddit，或者一段时间后自动刷新过期数据）后需要马上请求数据。路由变化时也可能需要请求数据，所以一开始如果把请求数据和特定的 UI 事件耦合到一起是不明智的
+把 `REQUEST_POSTS` 和 `SELECT_SUBREDDIT` 或 `INVALIDATE_SUBREDDIT` 分开很重要。虽然它们的发生有先后顺序，但随着应用变得复杂，有些用户操作（比如，预加载最流行的 subreddit，或者一段时间后自动刷新过期数据）后需要马上请求数据。路由变化时也可能需要请求数据，所以一开始如果把请求数据和特定的 UI 事件耦合到一起是不明智的
 
-最后，当收到请求响应时，我们会 dispatch RECEIVE_POSTS
+最后，当收到请求响应时，我们会 dispatch `RECEIVE_POSTS`
 
 ```js
 export const RECEIVE_POSTS = 'RECEIVE_POSTS';
 
 export function receivePosts(subreddit, json) {
-  return {
-    type: RECEIVE_POSTS,
-    subreddit,
-    posts: json.data.children.map((child) => child.data),
-    receivedAt: Date.now()
-  };
+   return {
+      type: RECEIVE_POSTS,
+      subreddit,
+      posts: json.data.children.map((child) => child.data),
+      receivedAt: Date.now()
+   };
 }
 ```
 
@@ -221,60 +221,60 @@ import { combineReducers } from 'redux';
 import { SELECT_SUBREDDIT, INVALIDATE_SUBREDDIT, REQUEST_POSTS, RECEIVE_POSTS } from '../actions';
 
 function selectedsubreddit(state = 'reactjs', action) {
-  switch (action.type) {
-    case SELECT_SUBREDDIT:
-      return action.subreddit;
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case SELECT_SUBREDDIT:
+         return action.subreddit;
+      default:
+         return state;
+   }
 }
 
 function posts(
-  state = {
-    isFetching: false,
-    didInvalidate: false,
-    items: []
-  },
-  action
+   state = {
+      isFetching: false,
+      didInvalidate: false,
+      items: []
+   },
+   action
 ) {
-  switch (action.type) {
-    case INVALIDATE_SUBREDDIT:
-      return Object.assign({}, state, {
-        didInvalidate: true
-      });
-    case REQUEST_POSTS:
-      return Object.assign({}, state, {
-        isFetching: true,
-        didInvalidate: false
-      });
-    case RECEIVE_POSTS:
-      return Object.assign({}, state, {
-        isFetching: false,
-        didInvalidate: false,
-        items: action.posts,
-        lastUpdated: action.receivedAt
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case INVALIDATE_SUBREDDIT:
+         return Object.assign({}, state, {
+            didInvalidate: true
+         });
+      case REQUEST_POSTS:
+         return Object.assign({}, state, {
+            isFetching: true,
+            didInvalidate: false
+         });
+      case RECEIVE_POSTS:
+         return Object.assign({}, state, {
+            isFetching: false,
+            didInvalidate: false,
+            items: action.posts,
+            lastUpdated: action.receivedAt
+         });
+      default:
+         return state;
+   }
 }
 
 function postsBySubreddit(state = {}, action) {
-  switch (action.type) {
-    case INVALIDATE_SUBREDDIT:
-    case RECEIVE_POSTS:
-    case REQUEST_POSTS:
-      return Object.assign({}, state, {
-        [action.subreddit]: posts(state[action.subreddit], action)
-      });
-    default:
-      return state;
-  }
+   switch (action.type) {
+      case INVALIDATE_SUBREDDIT:
+      case RECEIVE_POSTS:
+      case REQUEST_POSTS:
+         return Object.assign({}, state, {
+            [action.subreddit]: posts(state[action.subreddit], action)
+         });
+      default:
+         return state;
+   }
 }
 
 const rootReducer = combineReducers({
-  postsBySubreddit,
-  selectedsubreddit
+   postsBySubreddit,
+   selectedsubreddit
 });
 
 export default rootReducer;
@@ -282,15 +282,15 @@ export default rootReducer;
 
 上面代码有两个有趣的点
 
-- 使用 ES6 计算属性语法，使用 Object.assign() 来简洁高效地更新 state[action.subreddit]
+- 使用 ES6 计算属性语法，使用 Object.assign() 来简洁高效地更新 `state[action.subreddit]`
 
-```js
-return Object.assign({}, state, {
-  [action.subreddit]: posts(state[action.subreddit], action)
-});
-```
+   ```js
+   return Object.assign({}, state, {
+      [action.subreddit]: posts(state[action.subreddit], action)
+   });
+   ```
 
-- 我们提取出 posts(state, action) 来管理指定帖子列表的 state。这就是 reducer 组合 ！我们还可以借此机会把 reducer 分拆成更小的 reducer，这种情况下，我们把对象内列表的更新代理到了 posts reducer 上。在真实场景的案例中甚至更进一步，里面介绍了如何做一个 reducer 工厂来生成参数化的分页 reducer
+- 我们提取出 posts(state, action) 来管理指定帖子列表的 state。这就是 reducer 组合。我们还可以借此机会把 reducer 分拆成更小的 reducer，这种情况下，我们把对象内列表的更新代理到了 posts reducer 上。在真实场景的案例中甚至更进一步，里面介绍了如何做一个 reducer 工厂来生成参数化的分页 reducer
 
 记住 reducer 只是函数而已，所以你可以尽情使用函数组合和高阶函数这些特性
 
@@ -309,28 +309,28 @@ import fetch from 'cross-fetch';
 
 export const REQUEST_POSTS = 'REQUEST_POSTS';
 function requestPosts(subreddit) {
-  return {
-    type: REQUEST_POSTS,
-    subreddit
-  };
+   return {
+      type: REQUEST_POSTS,
+      subreddit
+   };
 }
 
 export const RECEIVE_POSTS = 'RECEIVE_POSTS';
 function receivePosts(subreddit, json) {
-  return {
-    type: RECEIVE_POSTS,
-    subreddit,
-    posts: json.data.children.map((child) => child.data),
-    receivedAt: Date.now()
-  };
+   return {
+      type: RECEIVE_POSTS,
+      subreddit,
+      posts: json.data.children.map((child) => child.data),
+      receivedAt: Date.now()
+   };
 }
 
 export const INVALIDATE_SUBREDDIT = 'INVALIDATE_SUBREDDIT';
 export function invalidateSubreddit(subreddit) {
-  return {
-    type: INVALIDATE_SUBREDDIT,
-    subreddit
-  };
+   return {
+      type: INVALIDATE_SUBREDDIT,
+      subreddit
+   };
 }
 
 // 来看一下我们写的第一个 thunk action 创建函数！
@@ -338,44 +338,44 @@ export function invalidateSubreddit(subreddit) {
 // store.dispatch(fetchPosts('reactjs'))
 
 export function fetchPosts(subreddit) {
-  // Thunk middleware 知道如何处理函数。
-  // 这里把 dispatch 方法通过参数的形式传给函数，
-  // 以此来让它自己也能 dispatch action。
+   // Thunk middleware 知道如何处理函数。
+   // 这里把 dispatch 方法通过参数的形式传给函数，
+   // 以此来让它自己也能 dispatch action。
 
-  return function(dispatch) {
-    // 首次 dispatch：更新应用的 state 来通知
-    // API 请求发起了。
+   return function(dispatch) {
+      // 首次 dispatch：更新应用的 state 来通知
+      // API 请求发起了。
 
-    dispatch(requestPosts(subreddit));
+      dispatch(requestPosts(subreddit));
 
-    // thunk middleware 调用的函数可以有返回值，
-    // 它会被当作 dispatch 方法的返回值传递。
+      // thunk middleware 调用的函数可以有返回值，
+      // 它会被当作 dispatch 方法的返回值传递。
 
-    // 这个案例中，我们返回一个等待处理的 promise。
-    // 这并不是 redux middleware 所必须的，但这对于我们而言很方便。
+      // 这个案例中，我们返回一个等待处理的 promise。
+      // 这并不是 redux middleware 所必须的，但这对于我们而言很方便。
 
-    return fetch(`http://www.subreddit.com/r/${subreddit}.json`)
-      .then(
-        (response) => response.json(),
-        // 不要使用 catch，因为会捕获
-        // 在 dispatch 和渲染中出现的任何错误，
-        // 导致 'Unexpected batch number' 错误。
-        // https://github.com/facebook/react/issues/6895
-        (error) => console.log('An error occurred.', error)
-      )
-      .then((json) =>
-        // 可以多次 dispatch！
-        // 这里，使用 API 请求结果来更新应用的 state。
+      return fetch(`http://www.subreddit.com/r/${subreddit}.json`)
+         .then(
+            (response) => response.json(),
+            // 不要使用 catch，因为会捕获
+            // 在 dispatch 和渲染中出现的任何错误，
+            // 导致 'Unexpected batch number' 错误。
+            // https://github.com/facebook/react/issues/6895
+            (error) => console.log('An error occurred.', error)
+         )
+         .then((json) =>
+            // 可以多次 dispatch！
+            // 这里，使用 API 请求结果来更新应用的 state。
 
-        dispatch(receivePosts(subreddit, json))
-      );
-  };
+            dispatch(receivePosts(subreddit, json))
+         );
+   };
 }
 ```
 
 ### fetch 使用须知
 
-本示例使用了 fetch API。它是替代 XMLHttpRequest 用来发送网络请求的非常新的 API。由于目前大多数浏览器原生还不支持它，建议你使用 cross_fetch 库：
+本示例使用了 fetch API。它是替代 XMLHttpRequest 用来发送网络请求的非常新的 API。由于目前大多数浏览器原生还不支持它，建议你使用 `cross_fetch` 库：
 
 ```js
 // 每次使用 `fetch` 前都这样调用一下
@@ -405,11 +405,11 @@ import rootReducer from './reducers';
 const loggerMiddleware = createLogger();
 
 const store = createStore(
-  rootReducer,
-  applyMiddleware(
-    thunkMiddleware, // 允许我们 dispatch() 函数
-    loggerMiddleware // 一个很便捷的 middleware，用来打印 action 日志
-  )
+   rootReducer,
+   applyMiddleware(
+      thunkMiddleware, // 允许我们 dispatch() 函数
+      loggerMiddleware // 一个很便捷的 middleware，用来打印 action 日志
+   )
 );
 
 store.dispatch(selectSubreddit('reactjs'));
@@ -425,66 +425,66 @@ import fetch from 'cross-fetch';
 
 export const REQUEST_POSTS = 'REQUEST_POSTS';
 function requestPosts(subreddit) {
-  return {
-    type: REQUEST_POSTS,
-    subreddit
-  };
+   return {
+      type: REQUEST_POSTS,
+      subreddit
+   };
 }
 
 export const RECEIVE_POSTS = 'RECEIVE_POSTS';
 function receivePosts(subreddit, json) {
-  return {
-    type: RECEIVE_POSTS,
-    subreddit,
-    posts: json.data.children.map((child) => child.data),
-    receivedAt: Date.now()
-  };
+   return {
+      type: RECEIVE_POSTS,
+      subreddit,
+      posts: json.data.children.map((child) => child.data),
+      receivedAt: Date.now()
+   };
 }
 
 export const INVALIDATE_SUBREDDIT = 'INVALIDATE_SUBREDDIT';
 export function invalidateSubreddit(subreddit) {
-  return {
-    type: INVALIDATE_SUBREDDIT,
-    subreddit
-  };
+   return {
+      type: INVALIDATE_SUBREDDIT,
+      subreddit
+   };
 }
 
 function fetchPosts(subreddit) {
-  return (dispatch) => {
-    dispatch(requestPosts(subreddit));
-    return fetch(`http://www.reddit.com/r/${subreddit}.json`)
-      .then((response) => response.json())
-      .then((json) => dispatch(receivePosts(subreddit, json)));
-  };
+   return (dispatch) => {
+      dispatch(requestPosts(subreddit));
+      return fetch(`http://www.reddit.com/r/${subreddit}.json`)
+         .then((response) => response.json())
+         .then((json) => dispatch(receivePosts(subreddit, json)));
+   };
 }
 
 function shouldFetchPosts(state, subreddit) {
-  const posts = state.postsBySubreddit[subreddit];
-  if (!posts) {
-    return true;
-  } else if (posts.isFetching) {
-    return false;
-  } else {
-    return posts.didInvalidate;
-  }
+   const posts = state.postsBySubreddit[subreddit];
+   if (!posts) {
+      return true;
+   } else if (posts.isFetching) {
+      return false;
+   } else {
+      return posts.didInvalidate;
+   }
 }
 
 export function fetchPostsIfNeeded(subreddit) {
-  // 注意这个函数也接收了 getState() 方法
-  // 它让你选择接下来 dispatch 什么。
+   // 注意这个函数也接收了 getState() 方法
+   // 它让你选择接下来 dispatch 什么。
 
-  // 当缓存的值是可用时，
-  // 减少网络请求很有用。
+   // 当缓存的值是可用时，
+   // 减少网络请求很有用。
 
-  return (dispatch, getState) => {
-    if (shouldFetchPosts(getState(), subreddit)) {
-      // 在 thunk 里 dispatch 另一个 thunk！
-      return dispatch(fetchPosts(subreddit));
-    } else {
-      // 告诉调用代码不需要再等待。
-      return Promise.resolve();
-    }
-  };
+   return (dispatch, getState) => {
+      if (shouldFetchPosts(getState(), subreddit)) {
+         // 在 thunk 里 dispatch 另一个 thunk！
+         return dispatch(fetchPosts(subreddit));
+      } else {
+         // 告诉调用代码不需要再等待。
+         return Promise.resolve();
+      }
+   };
 }
 ```
 
@@ -516,13 +516,13 @@ Dispatch 同步 action 与异步 action 间并没有区别，所以就不展开�
 
 # 异步数据流
 
-默认情况下，createStore() 所创建的 Redux store 没有使用 middleware，所以只支持 同步数据流
+默认情况下，createStore() 所创建的 Redux store 没有使用 middleware，所以只支持同步数据流
 
 你可以使用 applyMiddleware() 来增强 createStore()。虽然这不是必须的，但是它可以帮助你用简便的方式来描述异步的 action
 
 像 redux-thunk 或 redux-promise 这样支持异步的 middleware 都包装了 store 的 dispatch() 方法，以此来让你 dispatch 一些除了 action 以外的其他内容，例如：函数或者 Promise。你所使用的任何 middleware 都可以以自己的方式解析你 dispatch 的任何内容，并继续传递 actions 给下一个 middleware。比如，支持 Promise 的 middleware 能够拦截 Promise，然后为每个 Promise 异步地 dispatch 一对 begin/end actions
 
-当 middleware 链中的最后一个 middleware 开始 dispatch action 时，这个 action 必须是一个普通对象。这是 同步式的 Redux 数据流 开始的地方（译注：这里应该是指，你可以使用任意多异步的 middleware 去做你想做的事情，但是需要使用普通对象作为最后一个被 dispatch 的 action ，来将处理流程带回同步方式）
+当 middleware 链中的最后一个 middleware 开始 dispatch action 时，这个 action 必须是一个普通对象。这是 同步式的 Redux 数据流 开始的地方（译注：这里应该是指，你可以使用任意多异步的 middleware 去做你想做的事情，但是需要使用普通对象作为最后一个被 dispatch 的 action，来将处理流程带回同步方式）
 
 # Middleware
 
@@ -574,9 +574,9 @@ console.log('next state', store.getState());
 
 ```js
 function dispatchAndLog(store, action) {
-  console.log('dispatching', action);
-  store.dispatch(action);
-  console.log('next state', store.getState());
+   console.log('dispatching', action);
+   store.dispatch(action);
+   console.log('next state', store.getState());
 }
 ```
 
@@ -595,10 +595,10 @@ dispatchAndLog(store, addTodo('Use Redux'));
 ```js
 let next = store.dispatch;
 store.dispatch = function dispatchAndLog(action) {
-  console.log('dispatching', action);
-  let result = next(action);
-  console.log('next state', store.getState());
-  return result;
+   console.log('dispatching', action);
+   let result = next(action);
+   console.log('next state', store.getState());
+   return result;
 };
 ```
 
@@ -618,31 +618,31 @@ store.dispatch = function dispatchAndLog(action) {
 
 ```js
 function patchStoreToAddLogging(store) {
-  let next = store.dispatch;
-  store.dispatch = function dispatchAndLog(action) {
-    console.log('dispatching', action);
-    let result = next(action);
-    console.log('next state', store.getState());
-    return result;
-  };
+   let next = store.dispatch;
+   store.dispatch = function dispatchAndLog(action) {
+      console.log('dispatching', action);
+      let result = next(action);
+      console.log('next state', store.getState());
+      return result;
+   };
 }
 
 function patchStoreToAddCrashReporting(store) {
-  let next = store.dispatch;
-  store.dispatch = function dispatchAndReportErrors(action) {
-    try {
-      return next(action);
-    } catch (err) {
-      console.error('捕获一个异常!', err);
-      Raven.captureException(err, {
-        extra: {
-          action,
-          state: store.getState()
-        }
-      });
-      throw err;
-    }
-  };
+   let next = store.dispatch;
+   store.dispatch = function dispatchAndReportErrors(action) {
+      try {
+         return next(action);
+      } catch (err) {
+         console.error('捕获一个异常!', err);
+         Raven.captureException(err, {
+            extra: {
+               action,
+               state: store.getState()
+            }
+         });
+         throw err;
+      }
+   };
 }
 ```
 
@@ -661,17 +661,17 @@ Monkeypatching 本质上是一种 hack。“将任意的方法替换成你想要
 
 ```js
 function logger(store) {
-  let next = store.dispatch;
+   let next = store.dispatch;
 
-  // 我们之前的做法:
-  // store.dispatch = function dispatchAndLog(action) {
+   // 我们之前的做法:
+   // store.dispatch = function dispatchAndLog(action) {
 
-  return function dispatchAndLog(action) {
-    console.log('dispatching', action);
-    let result = next(action);
-    console.log('next state', store.getState());
-    return result;
-  };
+   return function dispatchAndLog(action) {
+      console.log('dispatching', action);
+      let result = next(action);
+      console.log('next state', store.getState());
+      return result;
+   };
 }
 ```
 
@@ -679,11 +679,11 @@ function logger(store) {
 
 ```js
 function applyMiddlewareByMonkeypatching(store, middlewares) {
-  middlewares = middlewares.slice();
-  middlewares.reverse();
+   middlewares = middlewares.slice();
+   middlewares.reverse();
 
-  // 在每一个 middleware 中变换 dispatch 方法。
-  middlewares.forEach((middleware) => (store.dispatch = middleware(store)));
+   // 在每一个 middleware 中变换 dispatch 方法。
+   middlewares.forEach((middleware) => (store.dispatch = middleware(store)));
 }
 ```
 
@@ -701,15 +701,15 @@ applyMiddlewareByMonkeypatching(store, [logger, crashReporter]);
 
 ```js
 function logger(store) {
-  // 这里的 next 必须指向前一个 middleware 返回的函数：
-  let next = store.dispatch;
+   // 这里的 next 必须指向前一个 middleware 返回的函数：
+   let next = store.dispatch;
 
-  return function dispatchAndLog(action) {
-    console.log('dispatching', action);
-    let result = next(action);
-    console.log('next state', store.getState());
-    return result;
-  };
+   return function dispatchAndLog(action) {
+      console.log('dispatching', action);
+      let result = next(action);
+      console.log('next state', store.getState());
+      return result;
+   };
 }
 ```
 
@@ -721,40 +721,40 @@ function logger(store) {
 
 ```js
 function logger(store) {
-  return function wrapDispatchToAddLogging(next) {
-    return function dispatchAndLog(action) {
-      console.log('dispatching', action);
-      let result = next(action);
-      console.log('next state', store.getState());
-      return result;
-    };
-  };
+   return function wrapDispatchToAddLogging(next) {
+      return function dispatchAndLog(action) {
+         console.log('dispatching', action);
+         let result = next(action);
+         console.log('next state', store.getState());
+         return result;
+      };
+   };
 }
 ```
 
-现在是“我们该更进一步”的时刻了，所以可能会多花一点时间来让它变的更为合理一些。这些串联函数很吓人。ES6 的箭头函数可以使其 柯里化 ，从而看起来更舒服一些:
+现在是 “我们该更进一步” 的时刻了，所以可能会多花一点时间来让它变的更为合理一些。这些串联函数很吓人。ES6 的箭头函数可以使其柯里化 ，从而看起来更舒服一些:
 
 ```js
 const logger = (store) => (next) => (action) => {
-  console.log('dispatching', action);
-  let result = next(action);
-  console.log('next state', store.getState());
-  return result;
+   console.log('dispatching', action);
+   let result = next(action);
+   console.log('next state', store.getState());
+   return result;
 };
 
 const crashReporter = (store) => (next) => (action) => {
-  try {
-    return next(action);
-  } catch (err) {
-    console.error('Caught an exception!', err);
-    Raven.captureException(err, {
-      extra: {
-        action,
-        state: store.getState()
-      }
-    });
-    throw err;
-  }
+   try {
+      return next(action);
+   } catch (err) {
+      console.error('Caught an exception!', err);
+      Raven.captureException(err, {
+         extra: {
+            action,
+            state: store.getState()
+         }
+      });
+      throw err;
+   }
 };
 ```
 
@@ -771,21 +771,21 @@ Middleware 接收了一个 next() 的 dispatch 函数，并返回一个 dispatch
 // 这 *并不是* Redux 的 API.
 
 function applyMiddleware(store, middlewares) {
-  middlewares = middlewares.slice();
-  middlewares.reverse();
+   middlewares = middlewares.slice();
+   middlewares.reverse();
 
-  let dispatch = store.dispatch;
-  middlewares.forEach((middleware) => (dispatch = middleware(store)(dispatch)));
+   let dispatch = store.dispatch;
+   middlewares.forEach((middleware) => (dispatch = middleware(store)(dispatch)));
 
-  return Object.assign({}, store, { dispatch });
+   return Object.assign({}, store, { dispatch });
 }
 ```
 
 这与 Redux 中 applyMiddleware() 的实现已经很接近了，但是有三个重要的不同之处：
 
-- 它只暴露一个 store API 的子集给 middleware：dispatch(action) 和 getState()。
+- 它只暴露一个 store API 的子集给 `middleware：dispatch(action)` 和 getState()。
 - 它用了一个非常巧妙的方式，以确保如果你在 middleware 中调用的是 store.dispatch(action) 而不是 next(action)，那么这个操作会再次遍历包含当前 middleware 在内的整个 middleware 链。这对异步的 middleware 非常有用，正如我们在之前的章节中提到的。
-- 为了保证你只能应用 middleware 一次，它作用在 createStore() 上而不是 store 本身。因此它的签名不是 (store, middlewares) => store， 而是 (...middlewares) => (createStore) => createStore。
+- 为了保证你只能应用 middleware 一次，它作用在 createStore() 上而不是 store 本身。因此它的签名不是 `(store, middlewares) => store`， 而是 `(...middlewares) => (createStore) => createStore`。
 
 由于在使用之前需要先应用方法到 createStore() 之上有些麻烦，createStore() 也接受将希望被应用的函数作为最后一个可选参数传入。
 
@@ -795,25 +795,25 @@ function applyMiddleware(store, middlewares) {
 
 ```js
 const logger = (store) => (next) => (action) => {
-  console.log('dispatching', action);
-  let result = next(action);
-  console.log('next state', store.getState());
-  return result;
+   console.log('dispatching', action);
+   let result = next(action);
+   console.log('next state', store.getState());
+   return result;
 };
 
 const crashReporter = (store) => (next) => (action) => {
-  try {
-    return next(action);
-  } catch (err) {
-    console.error('Caught an exception!', err);
-    Raven.captureException(err, {
-      extra: {
-        action,
-        state: store.getState()
-      }
-    });
-    throw err;
-  }
+   try {
+      return next(action);
+   } catch (err) {
+      console.error('Caught an exception!', err);
+      Raven.captureException(err, {
+         extra: {
+            action,
+            state: store.getState()
+         }
+      });
+      throw err;
+   }
 };
 ```
 
@@ -824,9 +824,9 @@ import { createStore, combineReducers, applyMiddleware } from 'redux';
 
 let todoApp = combineReducers(reducers);
 let store = createStore(
-  todoApp,
-  // applyMiddleware() 告诉 createStore() 如何处理中间件
-  applyMiddleware(logger, crashReporter)
+   todoApp,
+   // applyMiddleware() 告诉 createStore() 如何处理中间件
+   applyMiddleware(logger, crashReporter)
 );
 ```
 
@@ -844,30 +844,30 @@ store.dispatch(addTodo('Use Redux'));
  * 记录所有被发起的 action 以及产生的新的 state。
  */
 const logger = (store) => (next) => (action) => {
-  console.group(action.type);
-  console.info('dispatching', action);
-  let result = next(action);
-  console.log('next state', store.getState());
-  console.groupEnd(action.type);
-  return result;
+   console.group(action.type);
+   console.info('dispatching', action);
+   let result = next(action);
+   console.log('next state', store.getState());
+   console.groupEnd(action.type);
+   return result;
 };
 
 /**
  * 在 state 更新完成和 listener 被通知之后发送崩溃报告。
  */
 const crashReporter = (store) => (next) => (action) => {
-  try {
-    return next(action);
-  } catch (err) {
-    console.error('Caught an exception!', err);
-    Raven.captureException(err, {
-      extra: {
-        action,
-        state: store.getState()
-      }
-    });
-    throw err;
-  }
+   try {
+      return next(action);
+   } catch (err) {
+      console.error('Caught an exception!', err);
+      Raven.captureException(err, {
+         extra: {
+            action,
+            state: store.getState()
+         }
+      });
+      throw err;
+   }
 };
 
 /**
@@ -875,15 +875,15 @@ const crashReporter = (store) => (next) => (action) => {
  * 在这个案例中，让 `dispatch` 返回一个取消 timeout 的函数。
  */
 const timeoutScheduler = (store) => (next) => (action) => {
-  if (!action.meta || !action.meta.delay) {
-    return next(action);
-  }
+   if (!action.meta || !action.meta.delay) {
+      return next(action);
+   }
 
-  let timeoutId = setTimeout(() => next(action), action.meta.delay);
+   let timeoutId = setTimeout(() => next(action), action.meta.delay);
 
-  return function cancel() {
-    clearTimeout(timeoutId);
-  };
+   return function cancel() {
+      clearTimeout(timeoutId);
+   };
 };
 
 /**
@@ -891,38 +891,38 @@ const timeoutScheduler = (store) => (next) => (action) => {
  * 在这个案例中，让 `dispatch` 返回一个从队列中移除该 action 的函数。
  */
 const rafScheduler = (store) => (next) => {
-  let queuedActions = [];
-  let frame = null;
+   let queuedActions = [];
+   let frame = null;
 
-  function loop() {
-    frame = null;
-    try {
-      if (queuedActions.length) {
-        next(queuedActions.shift());
+   function loop() {
+      frame = null;
+      try {
+         if (queuedActions.length) {
+            next(queuedActions.shift());
+         }
+      } finally {
+         maybeRaf();
       }
-    } finally {
+   }
+
+   function maybeRaf() {
+      if (queuedActions.length && !frame) {
+         frame = requestAnimationFrame(loop);
+      }
+   }
+
+   return (action) => {
+      if (!action.meta || !action.meta.raf) {
+         return next(action);
+      }
+
+      queuedActions.push(action);
       maybeRaf();
-    }
-  }
 
-  function maybeRaf() {
-    if (queuedActions.length && !frame) {
-      frame = requestAnimationFrame(loop);
-    }
-  }
-
-  return (action) => {
-    if (!action.meta || !action.meta.raf) {
-      return next(action);
-    }
-
-    queuedActions.push(action);
-    maybeRaf();
-
-    return function cancel() {
-      queuedActions = queuedActions.filter((a) => a !== action);
-    };
-  };
+      return function cancel() {
+         queuedActions = queuedActions.filter((a) => a !== action);
+      };
+   };
 };
 
 /**
@@ -931,11 +931,11 @@ const rafScheduler = (store) => (next) => {
  * 这个 promise 会被 `dispatch` 返回，因此调用者可以处理 rejection。
  */
 const vanillaPromise = (store) => (next) => (action) => {
-  if (typeof action.then !== 'function') {
-    return next(action);
-  }
+   if (typeof action.then !== 'function') {
+      return next(action);
+   }
 
-  return Promise.resolve(action).then(store.dispatch);
+   return Promise.resolve(action).then(store.dispatch);
 };
 
 /**
@@ -946,21 +946,21 @@ const vanillaPromise = (store) => (next) => (action) => {
  * 为了方便起见，`dispatch` 会返回这个 promise 让调用者可以等待。
  */
 const readyStatePromise = (store) => (next) => (action) => {
-  if (!action.promise) {
-    return next(action);
-  }
+   if (!action.promise) {
+      return next(action);
+   }
 
-  function makeAction(ready, data) {
-    let newAction = Object.assign({}, action, { ready }, data);
-    delete newAction.promise;
-    return newAction;
-  }
+   function makeAction(ready, data) {
+      let newAction = Object.assign({}, action, { ready }, data);
+      delete newAction.promise;
+      return newAction;
+   }
 
-  next(makeAction(false));
-  return action.promise.then(
-    (result) => next(makeAction(true, { result })),
-    (error) => next(makeAction(true, { error }))
-  );
+   next(makeAction(false));
+   return action.promise.then(
+      (result) => next(makeAction(true, { result })),
+      (error) => next(makeAction(true, { error }))
+   );
 };
 
 /**
@@ -972,31 +972,31 @@ const readyStatePromise = (store) => (next) => (action) => {
  * `dispatch` 会返回被发起函数的返回值。
  */
 const thunk = (store) => (next) => (action) =>
-  typeof action === 'function' ? action(store.dispatch, store.getState) : next(action);
+   typeof action === 'function' ? action(store.dispatch, store.getState) : next(action);
 
 // 你可以使用以上全部的 middleware！（当然，这不意味着你必须全都使用。）
 let todoApp = combineReducers(reducers);
 let store = createStore(
-  todoApp,
-  applyMiddleware(rafScheduler, timeoutScheduler, thunk, vanillaPromise, readyStatePromise, logger, crashReporter)
+   todoApp,
+   applyMiddleware(rafScheduler, timeoutScheduler, thunk, vanillaPromise, readyStatePromise, logger, crashReporter)
 );
 ```
 
 # 搭配 React Router
 
-现在你想在你的 Redux 应用中使用路由功能，可以搭配使用 React Router 来实现。 Redux 和 React Router 将分别成为你数据和 URL 的事实来源（the source of truth）。 在大多数情况下， 最好 将他们分开，除非你需要时光旅行和回放 action 来触发 URL 改变。
+现在你想在你的 Redux 应用中使用路由功能，可以搭配使用 React Router 来实现。 Redux 和 React Router 将分别成为你数据和 URL 的事实来源（the source of truth）。在大多数情况下， 最好 将他们分开，除非你需要时光旅行和回放 action 来触发 URL 改变。
 
 ## 安装 React Router
 
-可以使用 npm 来安装 React Router。本教程基于 react-router@^2.7.0 。
+可以使用 npm 来安装 React Router。本教程基于 react-router@^2.7.0。
 
 `npm install --save react-router`
 
 ## 配置后备(fallback) URL
 
-在集成 React Router 之前，我们需要配置一下我们的开发服务器。 显然，我们的开发服务器无法感知配置在 React Router 中的 route。 比如：你想访问并刷新 /todos，由于是一个单页面应用，你的开发服务器需要生成并返回 index.html。 这里，我们将演示如何在流行的开发服务器上启用这项功能。
+在集成 React Router 之前，我们需要配置一下我们的开发服务器。显然，我们的开发服务器无法感知配置在 React Router 中的 route。比如：你想访问并刷新 `/todos`，由于是一个单页面应用，你的开发服务器需要生成并返回 index.html。这里，我们将演示如何在流行的开发服务器上启用这项功能。
 
-> 使用 Create React App 须知如果你是使用 Create React App （你可以点击这里了解更多，译者注）工具来生成项目，会自动为你配置好后备(fallback) URL。
+> 使用 Create React App 须知如果你是使用 Create React App（你可以点击这里了解更多，译者注）工具来生成项目，会自动为你配置好后备 (fallback) URL。
 
 ## 配置 Express
 
@@ -1004,15 +1004,15 @@ let store = createStore(
 
 ```js
 app.get('/*', (req, res) => {
-  res.sendfile(path.join(__dirname, 'index.html'));
+   res.sendfile(path.join(__dirname, 'index.html'));
 });
 ```
 
 ## 配置 WebpackDevServer
 
-如果你正在使用 WebpackDevServer 来返回你的 index.html 页面， 你可以增加如下配置到 webpack.config.dev.js：
+如果你正在使用 WebpackDevServer 来返回你的 index.html 页面， 你可以增加如下配置到 `webpack.config.dev.js`：
 
-```json
+```js
 devServer: {
   historyApiFallback: true,
 }
@@ -1028,53 +1028,53 @@ devServer: {
 import { Router, Route, browserHistory } from 'react-router';
 ```
 
-在 React 应用中，通常你会用 `<Router />` 包裹 `<Route />`。 如此，当 URL 变化的时候，`<Router />` 将会匹配到指定的路由，然后渲染路由绑定的组件。 `<Route />` 用来显式地把路由映射到应用的组件结构上。 用 path 指定 URL，用 component 指定路由命中 URL 后需要渲染的那个组件。
+在 React 应用中，通常你会用 `<Router />` 包裹 `<Route />`。如此，当 URL 变化的时候，`<Router />` 将会匹配到指定的路由，然后渲染路由绑定的组件。`<Route />` 用来显式地把路由映射到应用的组件结构上。用 path 指定 URL，用 component 指定路由命中 URL 后需要渲染的那个组件。
 
 ```js
 const Root = () => (
-  <Router>
-    <Route path='/' component={App} />
-  </Router>
+   <Router>
+      <Route path='/' component={App} />
+   </Router>
 );
 ```
 
-另外，在我们的 Redux 应用中，我们仍将使用 <Provider />。 <Provider /> 是由 React Redux 提供的高阶组件，用来让你将 Redux 绑定到 React （详见 搭配 React）。
+另外，在我们的 Redux 应用中，我们仍将使用 `<Provider />`。`<Provider />` 是由 React Redux 提供的高阶组件，用来让你将 Redux 绑定到 React（详见 搭配 React）。
 
-然后，我们从 React Redux 导入 <Provider />：
+然后，我们从 React Redux 导入 `<Provider />`：
 
 ```js
 import { Provider } from 'react-redux';
 ```
 
-我们将用 <Provider /> 包裹 <Router />，以便于路由处理器可以访问 store（暂时未找到相关中文翻译，译者注）。
+我们将用 `<Provider />` 包裹 `<Router />`，以便于路由处理器可以访问 store（暂时未找到相关中文翻译，译者注）。
 
 ```js
 const Root = ({ store }) => (
-  <Provider store={store}>
-    <Router>
-      <Route path='/' component={App} />
-    </Router>
-  </Provider>
+   <Provider store={store}>
+      <Router>
+         <Route path='/' component={App} />
+      </Router>
+   </Provider>
 );
 ```
 
-现在，如果 URL 匹配到 '/'，将会渲染 `<App />` 组件。此外，我们将在 '/' 后面增加参数 (:filter), 当我们尝试从 URL 中读取参数 (:filter)，需要以下代码：
+现在，如果 URL 匹配到 `/`，将会渲染 `<App />` 组件。此外，我们将在 `/` 后面增加参数 `(:filter)`, 当我们尝试从 URL 中读取参数 `(:filter)`，需要以下代码：
 
 ```js
 <Route path='/(:filter)' component={App} />
 ```
 
-也许你想将 '#' 从 URL 中移除（例如：http://localhost:3000/#/?_k=4sbb0i）。 你需要从 React Router 导入 browserHistory 来实现：
+也许你想将 `#` 从 URL 中移除（例如：`http://localhost:3000/#/?_k=4sbb0i`）。你需要从 React Router 导入 browserHistory 来实现：
 
 ```js
 import { Router, Route, browserHistory } from 'react-router';
 ```
 
-然后将它传给 <Router /> 来移除 URL 中的 '#'：
+然后将它传给 `<Router />` 来移除 URL 中的 `#`：
 
 ```js
 <Router history={browserHistory}>
-  <Route path='/(:filter)' component={App} />
+   <Route path='/(:filter)' component={App} />
 </Router>
 ```
 
@@ -1089,15 +1089,15 @@ import { Router, Route, browserHistory } from 'react-router';
 import App from './App';
 
 const Root = ({ store }) => (
-  <Provider store={store}>
-    <Router history={browserHistory}>
-      <Route path='/(:filter)' component={App} />
-    </Router>
-  </Provider>
+   <Provider store={store}>
+      <Router history={browserHistory}>
+         <Route path='/(:filter)' component={App} />
+      </Router>
+   </Provider>
 );
 
 Root.propTypes = {
-  store: PropTypes.object.isRequired
+   store: PropTypes.object.isRequired
 };
 
 export default Root;
@@ -1105,7 +1105,7 @@ export default Root;
 
 ## 通过 React Router 导航
 
-React Router 提供了 `<Link />` 来实现导航功能。 下面将举例演示。现在，修改我们的容器组件 `<FilterLink />` ，这样我们就可以使用 `<FilterLink />` 来改变 URL。你可以通过 activeStyle 属性来指定激活状态的样式。
+React Router 提供了 `<Link />` 来实现导航功能。下面将举例演示。现在，修改我们的容器组件 `<FilterLink />`，这样我们就可以使用 `<FilterLink />` 来改变 URL。你可以通过 activeStyle 属性来指定激活状态的样式。
 
 `containers/FilterLink.js`
 
@@ -1114,15 +1114,15 @@ import React from 'react';
 import { Link } from 'react-router';
 
 const FilterLink = ({ filter, children }) => (
-  <Link
-    to={filter === 'all' ? '' : filter}
-    activeStyle={{
-      textDecoration: 'none',
-      color: 'black'
-    }}
-  >
-    {children}
-  </Link>
+   <Link
+      to={filter === 'all' ? '' : filter}
+      activeStyle={{
+         textDecoration: 'none',
+         color: 'black'
+      }}
+   >
+      {children}
+   </Link>
 );
 
 export default FilterLink;
@@ -1135,16 +1135,16 @@ import React from 'react';
 import FilterLink from '../containers/FilterLink';
 
 const Footer = () => (
-  <p>
-    Show: <FilterLink filter='all'>All</FilterLink>
-    {', '}
-    <FilterLink filter='active'>Active</FilterLink>
-    {', '}
-    <FilterLink filter='completed'>Completed</FilterLink>
-  </p>
+   <p>
+      Show: <FilterLink filter='all'>All</FilterLink>
+      {', '}
+      <FilterLink filter='active'>Active</FilterLink>
+      {', '}
+      <FilterLink filter='completed'>Completed</FilterLink>
+   </p>
 );
 
 export default Footer;
 ```
 
-这时，如果你点击 <FilterLink />，你将看到你的 URL 在 '/complete'，'/active'，'/' 间切换。 甚至还支持浏览的回退功能，可以从历史记录中找到之前的 URL 并回退。
+这时，如果你点击 `<FilterLink />`，你将看到你的 URL 在 `/complete`，`/active`，`/` 间切换。甚至还支持浏览的回退功能，可以从历史记录中找到之前的 URL 并回退。
