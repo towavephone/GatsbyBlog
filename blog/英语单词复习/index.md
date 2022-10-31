@@ -484,3 +484,70 @@ isSound: true
 name: This store is decorated in blue tile.
 isSound: true
 ```
+
+## willow
+
+### Meaning
+
+1. n. 柳，柳树
+
+### Sentence
+
+```audio
+name: There are willows along the riverbank.
+isSound: true
+```
+
+## sequence
+
+### Meaning
+
+1. n. 排序，一系列，顺序，一组镜头
+2. v. 按顺序排列，测定序列
+
+### Sentence
+
+```audio
+name: I have to attend a sequence of meetings today.
+isSound: true
+```
+
+## cart
+
+### Meaning
+
+1. n. 运货马车，手推车
+2. v. 运送，运输
+
+### Sentence
+
+```audio
+name: Don't put any more on the cart, or it'll break.
+isSound: true
+```
+
+## bony
+
+### Meaning
+
+1. adj. 骨瘦如柴的，多刺的
+
+### Sentence
+
+```audio
+name: I used to have a baby face, but now it becomes a bony face.
+isSound: true
+```
+
+## feeble
+
+### Meaning
+
+1. adj. 虚弱的，无力的，无效的，不佳的
+
+### Sentence
+
+```audio
+name: He told them he was old and feeble and was not able to work so far.
+isSound: true
+```

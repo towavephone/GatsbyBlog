@@ -5319,7 +5319,7 @@ from collections import defaultdict
 
 
 class WeightedGradebook:
-    def _init_(self):
+    def __init__(self):
         self._grades = {}
 
     def add_student(self, name):
@@ -6734,7 +6734,7 @@ private 字段只给这个类自己使用，子类不能访问超类的 private 
 
 ```py
 class MyParentObject:
-    def _init_(self):
+    def __init__(self):
         self.__private_field = 71
 
 
@@ -6754,5 +6754,161 @@ AttributeError: 'MyChildObject' object has no attribute '_MyChildObject__private
 这种防止其他类访问 private 属性的功能，其实仅仅是通过变换属性名称而实现的。当 Python 编译器看到 `MyChildObject.get_private_field` 这样的方法想要访问 `__private_field` 属性时，它会把下划线和类名加在这个属性名称的前面，所以代码实际上访问的是 `_MyChildObject__private_field`。在上面的例子中，`__private_field` 是在 MyParentObject 的 `__init__` 里面定义的，所以，它变换之后的真实名称是 `_MyParentObject__private_field`。子类不能通过 `__private_field` 来访问这个属性，因为这样写实际上是在访问不存在的 `_MyChildObject__private_field`，而不是 `_MyParentObject__private_field`。
 
 了解名称变换规则后，我们就可以从任何一个类里面访问 private 属性。无论是子类还是外部的类，都可以不经许可就访问到这些属性。
+
+```py{12}
+class MyParentObject:
+    def __init__(self):
+        self.__private_field = 71
+
+
+class MyChildObject(MyParentObject):
+    def get_private_field(self):
+        return self.__private_field
+
+
+baz = MyChildObject()
+assert baz._MyParentObject__private_field == 71
+```
+
+查看该对象的属性字典，就会发现 private 属性的名称其实是以变换后的名称存储的。
+
+```py
+print(baz.__dict__)
+
+>>>
+{'_MyParentObject__private_field': 71}
+```
+
+为什么 Python 不从语法上严格禁止其他类访问 private 属性呢？这可以用一句常见的 Python 格言来回答：我们都是成年人了（We are all consenting adults here）。意思是说，我们用不着让编程语言把自己给拦住。你可以按照自己的想法扩展某个类的功能，同时也必须考虑到这样做的风险，并为此负责。Python 开发者相信，虽然开放访问权限可能导致别人不按默认方式扩展这个类，但总比封闭起来要好。
+
+另外，Python 里面还有一些挂钩函数可以访问到这种属性（参见第 47 条），我们可以通过这些机制按需操纵对象的内部数据。既然这样，那即便 Python 阻止我们通过圆点加名称的办法访问 private 属性，我们也还是有其他办法能访问到，那么 Python 阻止 private 属性访问又有何意义？
+
+为了减少在不知情情况下访问内部数据而造成的损伤，Python 开发者会按照风格指南里面建议的方式来给字段命名（参见第 2 条）。以单下划线开头的字段（例如 `_protected_field`），习惯上叫作受保护的（protected）字段，表示这个类以外的用户在使用这种字段时必须慎重。
+
+尽管如此，有许多 Python 新手还是喜欢把内部的 API 设计成 private 字段，想通过这种写法防止子类或外部类访问这些字段。
+
+```py
+class MyStringClass:
+    def __init__(self, value):
+        self.__value = value
+
+    def get_value(self):
+        return str(self.__value)
+
+
+foo = MyStringClass(5)
+assert foo.get_value() == '5'
+```
+
+这么写不对。因为总会有开发者（也包括你自己）想要继承这个类，并给里面添加新的行为，或采用更高效的办法来实现已有的行为（例如他可能觉得，`MyStringClass.get_value` 总是返回字符串的方式的效率不高）。如果把属性设为 private，那么子类在覆盖或扩充这个类的时候，就必须采用变换之后的名称来访问那个属性，这会让代码变得很容易出错。例如，在写这样一个子类时，就不得不去访问超类中的 private 字段。
+
+```py
+class MyStringClass:
+    def __init__(self, value):
+        self.__value = value
+
+    def get_value(self):
+        return str(self.__value)
+
+
+class MyIntegerSubclass(MyStringClass):
+    def get_value(self):
+        return int(self._MyStringClass__value)
+
+
+foo = MyIntegerSubclass('5')
+assert foo.get_value() == 5
+```
+
+这样写的问题是，如果类体系发生变动，那么引用 private 属性的那些代码就失效了。例如，MyIntegerSubclass 类的直接超类（也就是 MyStringClass）本身现在也继承自一个类（叫作 MyBaseClass），而且它把早前的 `__value` 属性移到了那个类里面。
+
+```py
+class MyBaseClass:
+    def __init__(self, value):
+        self.__value = value
+
+    def get_value(self):
+        return self.__value
+
+
+class MyStringClass(MyBaseClass):
+    def get_value(self):
+        return str(super().get_value())  # Updated
+
+
+class MyIntegerSubclass(MyStringClass):
+    def get_value(self):
+        return int(self._MyStringClass__value)  # Not updated
+
+
+foo = MyIntegerSubclass(5)
+foo.get_value()
+
+>>>
+Traceback ...
+AttributeError: 'MyIntegerSubclass' object has no attribute '_MyStringClass__value'
+```
+
+现在的 `__value` 属性，是在 MyBaseClass 里面设置的，而不是在 MyStringClass 里面，所以 MyIntegerSubclass 没办法再通过 `self._MyStringClass__value` 访问这个属性。
+
+一般来说，这种属性应该设置成 protected 字段，这样虽然有可能导致子类误用，但还是要比直接设为 private 好。我们可以在每个 protected 字段的文档里面详细解释，告诉用户这是属于可以由子类来操作的内部 API，还是属于完全不应该触碰的数据。这样的文档，既可以给别人提供建议，也可以指导自己安全地扩充代码。
+
+```py
+class MyStringClass:
+    def __init__(self, value):
+        # This stores the user-supplied value for the object.
+        # It should be coercible to a string. Once assigned in
+        # the object it should be treated as immutable.
+        self._value = value
+```
+
+只有一种情况是可以考虑用 private 属性解决的，就是子类属性有可能与超类重名的情况。如果子类定义属性时使用的名称，恰巧与超类相同，那就会出现这个问题。
+
+```py
+class ApiClass:
+    def __init__(self):
+        self._value = 5
+
+    def get(self):
+        return self._value
+
+
+class Child(ApiClass):
+    def __init__(self):
+        super().__init__()
+        self._value = 'hello'  # Conflicts
+
+
+a = Child()
+print(f'{a.get()} and {a._value} should be different')
+```
+
+如果超类属于开放给外界使用的 API，那么你就没办法预料哪些子类会继承它，也不知道那些子类会添加什么属性，此时很有可能出现这个问题，而且你无法通过重构代码来解决。属性名越常见（如本例中的 value），越容易发生冲突。为了减少冲突，我们可以把超类的属性设计成 private 属性，使子类的属性名不太可能与超类重复。
+
+```py
+class ApiClass:
+    def __init__(self):
+        self.__value = 5  # Double underscore
+
+    def get(self):
+        return self.__value  # Double underscore
+
+
+class Child(ApiClass):
+    def __init__(self):
+        super().__init__()
+        self._value = 'hello'  # OK!
+
+
+a = Child()
+print(f'{a.get()} and {a._value} are different')
+```
+
+### 总结
+
+1. Python 编译器无法绝对禁止外界访问 private 属性。
+2. 从一开始就应该考虑允许其他类能继承这个类，并利用其中的内部 API 与属性去实现更多功能，而不是把它们藏起来。
+3. 把需要保护的数据设计成 protected 字段，并用文档加以解释，而不要通过 private 属性限制访问。
+4. 只有在子类不受控制且名称有可能与超类冲突时，才可以考虑给超类设计 private 属性。
 
 // TODO 编写高质量 Python 待完成
