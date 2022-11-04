@@ -6911,4 +6911,275 @@ print(f'{a.get()} and {a._value} are different')
 3. 把需要保护的数据设计成 protected 字段，并用文档加以解释，而不要通过 private 属性限制访问。
 4. 只有在子类不受控制且名称有可能与超类冲突时，才可以考虑给超类设计 private 属性。
 
+## 第 43 条：自定义的容器类型应该从 collections.abc 继承
+
+编写 Python 程序时，要花很多精力来定义类，以存放数据并描述这种对象与其他对象之间的关系。每个 Python 类其实都是某种容器，可以把属性与功能封装进来。除了自定义的类之外，Python 本身还提供了一些内置的容器类型，例如列表（list）、元组（tuple）、集合（set）、字典（dict）等，也可以用来管理数据。
+
+如果要定义的是那种用法比较简单的类，那么我们自然就会想到直接从 Python 内置的容器类型里面继承，例如通过继承 list 类型实现某种序列。下面就是笔者自己定制的一种 list 类型，它在 list 的基础上提供了 frequency 方法，用来计算每个元素出现的次数。
+
+```py
+class FrequencyList(list):
+    def __init__(self, members):
+        super().__init__(members)
+
+    def frequency(self):
+        counts = {}
+        for item in self:
+            counts[item] = counts.get(item, 0) + 1
+        return counts
+```
+
+继承 list 类，可以自动获得标准的 Python 列表所具备的各项功能。这样的话，其他开发者就可以像使用普通列表那样使用 FrequencyList 了。此外，我们还可以定义其他一些方法，来提供想要实现的各种行为。
+
+```py{12-17}
+class FrequencyList(list):
+    def __init__(self, members):
+        super().__init__(members)
+
+    def frequency(self):
+        counts = {}
+        for item in self:
+            counts[item] = counts.get(item, 0) + 1
+        return counts
+
+
+foo = FrequencyList(['a', 'b', 'a', 'c', 'b', 'a', 'd'])
+print('Length is', len(foo))
+
+print(foo.pop())
+print('After pop:', repr(foo))
+print('Frequency:', foo.frequency())
+
+>>>
+Length is 7
+d
+After pop: ['a', 'b', 'a', 'c', 'b', 'a']
+Frequency: {'a': 3, 'b': 2, 'c': 1}
+```
+
+有的时候，某个对象所属的类本身虽然不是 list 的子类，但我们还是想让它能像 list 那样，可以通过下标来访问。例如，下面这个表示二叉树节点的 BinaryNode 类就不是 list 的子类，但我们想让它能够像序列（list 或 tuple 等）那样，通过下标来访问。
+
+```py
+class BinaryNode:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+```
+
+我们需要怎么做，才能让这个类可以像序列一样访问呢？答案是，需要实现一些名称特殊的实例方法。当通过下标访问序列中的元素时：
+
+```py
+bar = [1, 2, 3]
+bar[0]
+```
+
+Python 会把访问操作解读为：
+
+```py
+bar.__getitem__(0)
+```
+
+所以，为了让 BinaryNode 类能像序列那样使用，我们可以定义 `__getitem__` 方法（一般叫作 dunder getitem，其中的 dunder 为 double underscore（双下划线）的简称）。这个方法可以按照深度优先的方式遍历 BinaryNode 对象所表示的二叉树。
+
+```py
+class BinaryNode:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class IndexableNode(BinaryNode):
+    def _traverse(self):
+        if self.left is not None:
+            yield from self.left._traverse()
+        yield self
+        if self.right is not None:
+            yield from self.right._traverse()
+
+    def __getitem__(self, index):
+        for i, item in enumerate(self._traverse()):
+            if i == index:
+                return item.value
+        raise IndexError(f'Index {index} is out of range')
+
+
+tree = IndexableNode(
+    10,
+    left=IndexableNode(
+        5,
+        left=IndexableNode(2),
+        right=IndexableNode(
+            6,
+            right=IndexableNode(7))),
+    right=IndexableNode(
+        15,
+        left=IndexableNode(11)))
+
+print('LRR is', tree.left.right.right.value)
+print('Index 0 is', tree[0])
+print('Index 1 is', tree[1])
+print('11 in the tree?', 11 in tree)
+print('17 in the tree?', 17 in tree)
+print('Tree is', list(tree))
+
+>>>
+LRR is 7
+Index 0 is 2
+Index 1 is 5
+11 in the tree? True
+17 in the tree? False
+Tree is [2, 5, 6, 7, 10, 11, 15]
+```
+
+我们可以像使用 BinaryNode 那样，用这种定制过的 IndexableNode 对象来构造二叉树。
+
+我们既可以像访问列表那样来访问二叉树中的节点，也可以明确通过 left 与 right 属性来访问。
+
+但问题是，除了下标索引，list 实例还支持其他一些功能，所以只实现 `__getitem__` 这样一个特殊方法是不够的。例如，我们现在还是没办法像查询 list 长度那样查询这种二叉树的长度（元素总数）。
+
+```py
+len(tree)
+
+>>>
+Traceback ...
+TypeError: object of type 'IndexableNode' has no len()
+```
+
+要想让定制的二叉树支持内置的 len 函数，必须再实现一个特殊方法，也就是 `__len__` 方法。
+
+```py{22-25}
+class BinaryNode:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class SequenceNode(BinaryNode):
+    def _traverse(self):
+        if self.left is not None:
+            yield from self.left._traverse()
+        yield self
+        if self.right is not None:
+            yield from self.right._traverse()
+
+    def __getitem__(self, index):
+        for i, item in enumerate(self._traverse()):
+            if i == index:
+                return item.value
+        raise IndexError(f'Index {index} is out of range')
+
+    def __len__(self):
+        for count, _ in enumerate(self._traverse(), 1):
+            pass
+        return count
+
+
+tree = SequenceNode(
+    10,
+    left=SequenceNode(
+        5,
+        left=SequenceNode(2),
+        right=SequenceNode(
+            6,
+            right=SequenceNode(7))),
+    right=SequenceNode(
+        15,
+        left=SequenceNode(11)))
+
+print('Tree length is', len(tree))
+
+>>>
+Tree length is 7
+```
+
+实现完这样两个方法之后，我们仍然没办法让这种二叉树具备列表所应支持的全套功能。因为，有些 Python 开发者可能还想在二叉树上面调用 count 与 index 等方法，他们觉得，既然 list 或 tuple 这样的序列支持这些方法，那二叉树也应该支持才对。这样看来，要定制一个与标准容器兼容的类，似乎比想象中麻烦。
+
+为了方便大家定制容器，Python 内置的 collections.abc 模块定义了一系列抽象基类（abstract base class），把每种容器类型应该提供的所有常用方法都写了出来。我们只需要从这样的抽象基类里面继承就好。同时，如果忘了实现某些必备的方法，那么程序会报错，提醒我们这些方法必须实现。
+
+```py
+from collections.abc import Sequence
+
+
+class BadType(Sequence):
+    pass
+
+
+foo = BadType()
+
+>>>
+Traceback ...
+TypeError: Can't instantiate abstract class BadType with abstract methods __getitem__, __len__
+```
+
+如果这些必备的方法都已经实现好了，那我们就可以从 collections.abc 模块的抽象基类里面继承了。例如，下面这个 BetterNode 二叉树类就是正确的，因为它已经通过继承前面的 SequenceNode 类实现了序列容器所应支持的全部必备方法，至于其他一些方法（例如 index 与 count）则会由 Sequence 这个抽象基类自动帮我们实现（它在实现的时候，会借助 BetterNode 从 SequenceNode 继承的那些必备方法）。
+
+```py
+from collections.abc import Sequence
+
+
+class BinaryNode:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class SequenceNode(BinaryNode):
+    def _traverse(self):
+        if self.left is not None:
+            yield from self.left._traverse()
+        yield self
+        if self.right is not None:
+            yield from self.right._traverse()
+
+    def __getitem__(self, index):
+        for i, item in enumerate(self._traverse()):
+            if i == index:
+                return item.value
+        raise IndexError(f'Index {index} is out of range')
+
+    def __len__(self):
+        for count, _ in enumerate(self._traverse(), 1):
+            pass
+        return count
+
+
+class BetterNode(SequenceNode, Sequence):
+    pass
+
+
+tree = BetterNode(
+    10,
+    left=BetterNode(
+        5,
+        left=BetterNode(2),
+        right=BetterNode(
+            6,
+            right=BetterNode(7))),
+    right=BetterNode(
+        15,
+        left=BetterNode(11))
+)
+
+print('Index of 7 is', tree.index(7))
+print('Count of 10 is', tree.count(10))
+
+>>>
+Index of 7 is 3
+Count of 10 is 1
+```
+
+对于定制集合或可变映射等复杂的容器类型来说，继承 collections.abc 模块里的 Set 或 MutableMapping 等抽象基类所带来的好处会更加明显。假如自己从头开始实现，那必须编写大量的特殊方法才能让这些容器类的对象也能像标准的 Python 容器那样使用。
+
+collections.abc 模块要求子类必须实现某些特殊方法，另外，Python 在比较或排列对象时，还会用到其他一些特殊方法，无论定制的是不是容器类，有时为了支持某些功能，你都必须定义相关的特殊方法才行（案例参见第 73 条）。
+
+### 总结
+
+1. 如果要编写的新类比较简单，那么可以直接从 Python 的容器类型（例如 list 或 dict）里面继承。
+2. 如果想让定制的容器类型能像标准的 Python 容器那样使用，那么有可能要编写许多特殊方法。
+3. 可以从 collections.abc 模块里的抽象基类之中派生自己的容器类型，这样可以让容器自动具备相关的功能，同时又可以保证没有把实现这些功能所必备的方法给漏掉。
+
 // TODO 编写高质量 Python 待完成

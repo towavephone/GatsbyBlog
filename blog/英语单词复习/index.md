@@ -551,3 +551,30 @@ isSound: true
 name: He told them he was old and feeble and was not able to work so far.
 isSound: true
 ```
+
+## monotonous
+
+### Meaning
+
+1. adj. 单调乏味的
+
+### Sentence
+
+```audio
+name: Like most office jobs, my work is very monotonous.
+isSound: true
+```
+
+## mighty
+
+### Meaning
+
+1. adj. 强有力的，雄伟的
+2. adv. 非常
+
+### Sentence
+
+```audio
+name: There was just a flash and a mighty bang.
+isSound: true
+```
