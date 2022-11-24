@@ -62,6 +62,8 @@ function main() {
     const pixelRatio = window.devicePixelRatio;
 
     // 高分辨率处理
+    // 也可以用 renderer.setPixelRatio(window.devicePixelRatio) 但不建议，原因如下：
+    // 有时需要知道 canvas 绘图缓冲区的确切尺寸，可能尺寸和实际渲染的对不上
     const width = canvas.clientWidth * pixelRatio || 0;
     const height = canvas.clientHeight * pixelRatio || 0;
     // clientWidth 代表拉伸后的宽度（即真实宽度），width 代表拉伸前的宽度

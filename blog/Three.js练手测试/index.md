@@ -22,3 +22,21 @@ path: /three-js-practice-test/
 3. 支持高分屏
 
 [test-2](embedded-codesandbox://three-js-practice-test/test-2?module=index.js)
+
+# 测试三
+
+绘制常见的图元
+
+[test-3](embedded-codesandbox://three-js-practice-test/test-3?module=index.js)
+
+# 测试四
+
+太阳，地球，月球模拟
+
+[test-4](embedded-codesandbox://three-js-practice-test/test-4?module=index.js)
+
+# 测试五
+
+实现坦克多视角切换
+
+[test-5](embedded-codesandbox://three-js-practice-test/test-5?module=index.js)
