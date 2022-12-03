@@ -35,14 +35,24 @@ function main() {
     light.shadow.camera.near = 1;
     light.shadow.camera.far = 50;
     light.shadow.bias = 0.001;
+
+    const helper = new THREE.DirectionalLightHelper(light);
+    scene.add(helper);
+
+    const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+    scene.add(cameraHelper);
   }
 
   {
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(1, 2, 4);
     scene.add(light);
+
+    const helper = new THREE.DirectionalLightHelper(light);
+    scene.add(helper);
   }
 
+  // 地板
   const groundGeometry = new THREE.PlaneGeometry(50, 50);
   const groundMaterial = new THREE.MeshPhongMaterial({ color: 0xcc8866 });
   const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -62,8 +72,10 @@ function main() {
   const bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
   bodyMesh.position.y = 1.4;
   bodyMesh.castShadow = true;
+  bodyMesh.receiveShadow = true;
   tank.add(bodyMesh);
 
+  // 车身上的相机
   const tankCameraFov = 75;
   const tankCamera = makeCamera(tankCameraFov);
   tankCamera.position.y = 3;
@@ -98,6 +110,7 @@ function main() {
     return mesh;
   });
 
+  // 坦克头
   const domeRadius = 2;
   const domeWidthSubdivisions = 12;
   const domeHeightSubdivisions = 12;
@@ -119,6 +132,7 @@ function main() {
   bodyMesh.add(domeMesh);
   domeMesh.position.y = 0.5;
 
+  // 炮管
   const turretWidth = 0.1;
   const turretHeight = 0.1;
   const turretLength = carLength * 0.75 * 0.2;

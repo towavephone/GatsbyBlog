@@ -40,3 +40,9 @@ path: /three-js-practice-test/
 实现坦克多视角切换
 
 [test-5](embedded-codesandbox://three-js-practice-test/test-5?module=index.js)
+
+# 测试六
+
+实现常见的不同材质
+
+[test-6](embedded-codesandbox://three-js-practice-test/test-6?module=index.js)
