@@ -46,3 +46,21 @@ path: /three-js-practice-test/
 实现常见的不同材质
 
 [test-6](embedded-codesandbox://three-js-practice-test/test-6?module=index.js)
+
+# 测试七
+
+多个纹理加载
+
+[test-7](embedded-codesandbox://three-js-practice-test/test-7?module=index.js)
+
+# 测试八
+
+实现过滤和 mipmaps
+
+[test-8](embedded-codesandbox://three-js-practice-test/test-8?module=index.js)
+
+# 测试九
+
+重复，偏移，旋转，包裹一个纹理
+
+[test-9](embedded-codesandbox://three-js-practice-test/test-9?module=index.js)

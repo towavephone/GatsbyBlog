@@ -1,0 +1,43 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#c {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.btn-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.btn {
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 0.5em;
+  margin: 1em;
+  font-size: small;
+  border-radius: 0.5em;
+  line-height: 1.2;
+  user-select: none;
+}
+
+.filter-caption {
+  position: absolute;
+  color: white;
+  line-height: 1.1;
+  font-family: monospace;
+  font-size: small;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
