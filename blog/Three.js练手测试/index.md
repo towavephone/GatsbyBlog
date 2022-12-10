@@ -64,3 +64,45 @@ path: /three-js-practice-test/
 重复，偏移，旋转，包裹一个纹理
 
 [test-9](embedded-codesandbox://three-js-practice-test/test-9?module=index.js)
+
+# 测试十
+
+创建环境光
+
+[test-10](embedded-codesandbox://three-js-practice-test/test-10?module=index.js)
+
+# 测试十一
+
+创建半球光
+
+[test-11](embedded-codesandbox://three-js-practice-test/test-11?module=index.js)
+
+# 测试十二
+
+创建方向光
+
+[test-12](embedded-codesandbox://three-js-practice-test/test-12?module=index.js)
+
+# 测试十三
+
+创建点光源
+
+[test-13](embedded-codesandbox://three-js-practice-test/test-13?module=index.js)
+
+# 测试十四
+
+创建聚光灯
+
+[test-14](embedded-codesandbox://three-js-practice-test/test-14?module=index.js)
+
+# 测试十五
+
+创建矩形区域光
+
+[test-15](embedded-codesandbox://three-js-practice-test/test-15?module=index.js)
+
+# 测试十六
+
+模拟实际的光照衰减
+
+[test-16](embedded-codesandbox://three-js-practice-test/test-16?module=index.js)
