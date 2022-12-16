@@ -106,3 +106,27 @@ path: /three-js-practice-test/
 模拟实际的光照衰减
 
 [test-16](embedded-codesandbox://three-js-practice-test/test-16?module=index.js)
+
+# 测试十七
+
+实现透视摄像
+
+[test-17](embedded-codesandbox://three-js-practice-test/test-17?module=index.js)
+
+# 测试十八
+
+z 冲突实例
+
+[test-18](embedded-codesandbox://three-js-practice-test/test-18?module=index.js)
+
+# 测试十九
+
+实现正交摄像
+
+[test-19](embedded-codesandbox://three-js-practice-test/test-19?module=index.js)
+
+# 测试二十
+
+正交摄像模拟实现 2d canvas
+
+[test-20](embedded-codesandbox://three-js-practice-test/test-20?module=index.js)

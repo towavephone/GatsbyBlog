@@ -1225,7 +1225,7 @@ http.createServer(callback).listen(80, function() {
 
 上例中有几点需要注意：
 
-1. 如果是通过 sudo 获取 root 权限的，运行程序的用户的 UID 和 GID 保存在环境变量 SUDO_UID 和 SUDO_GID 里边。如果是通过 chmod +s 方式获取 root 权限的，运行程序的用户的 UID 和 GID 可直接通过 process.getuid 和 process.getgid 方法获取。
+1. 如果是通过 sudo 获取 root 权限的，运行程序的用户的 UID 和 GID 保存在环境变量 `SUDO_UID` 和 `SUDO_GID` 里边。如果是通过 chmod +s 方式获取 root 权限的，运行程序的用户的 UID 和 GID 可直接通过 process.getuid 和 process.getgid 方法获取。
 2. process.setuid 和 process.setgid 方法只接受 number 类型的参数。
 3. 降权时必须先降 GID 再降 UID，否则顺序反过来的话就没权限更改程序的 GID 了。
 
@@ -1293,7 +1293,7 @@ process.on('message', function(msg) {
 });
 ```
 
-可以看到，父进程在创建子进程时，在 options.stdio 字段中通过 ipc 开启了一条 IPC 通道，之后就可以监听子进程对象的 message 事件接收来自子进程的消息，并通过.send 方法给子进程发送消息。在子进程这边，可以在 process 对象上监听 message 事件接收来自父进程的消息，并通过.send 方法向父进程发送消息。数据在传递过程中，会先在发送端使用 JSON.stringify 方法序列化，再在接收端使用 JSON.parse 方法反序列化。
+可以看到，父进程在创建子进程时，在 options.stdio 字段中通过 ipc 开启了一条 IPC 通道，之后就可以监听子进程对象的 message 事件接收来自子进程的消息，并通过 .send 方法给子进程发送消息。在子进程这边，可以在 process 对象上监听 message 事件接收来自父进程的消息，并通过 .send 方法向父进程发送消息。数据在传递过程中，会先在发送端使用 JSON.stringify 方法序列化，再在接收端使用 JSON.parse 方法反序列化。
 
 ### 如何守护子进程
 
