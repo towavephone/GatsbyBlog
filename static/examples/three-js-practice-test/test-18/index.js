@@ -7,10 +7,11 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 // 如果上面的方案不行的话，那你就遇到了为什么不能无脑使用这种解决方案的情况了。截止 2018 年 9 月，绝大多数台式机可以，但几乎没有移动设备支持这个功能。
 // 另外，最好别用这种解决方案，因为这会大大降低运行速度。即便是现在跑得好好地，选择太小的 near 和太大的 far 最终也会遇到同样的问题。
 function main() {
-  const canvas = document.querySelector('#c1');
+  const canvas = document.querySelector('#c');
+  const view1Elem = document.querySelector('#view1');
+  const view2Elem = document.querySelector('#view2');
   const renderer = new THREE.WebGLRenderer({ canvas });
-  const canvas2 = document.querySelector('#c2');
-  const renderer2 = new THREE.WebGLRenderer({ canvas: canvas2, logarithmicDepthBuffer: true });
+  const renderer2 = new THREE.WebGLRenderer({ canvas, logarithmicDepthBuffer: true });
 
   const fov = 45;
   const aspect = 2; // the canvas default
@@ -62,9 +63,13 @@ function main() {
     .name('far')
     .onChange(updateCamera);
 
-  const controls = new OrbitControls(camera, canvas);
+  const controls = new OrbitControls(camera, view1Elem);
   controls.target.set(0, 5, 0);
   controls.update();
+
+  const controls2 = new OrbitControls(camera, view2Elem);
+  controls2.target.set(0, 5, 0);
+  controls2.update();
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('black');
@@ -126,22 +131,50 @@ function main() {
     return needResize;
   }
 
+  function setScissorForElement(renderer, elem) {
+    const canvasRect = canvas.getBoundingClientRect();
+    const elemRect = elem.getBoundingClientRect();
+
+    // compute a canvas relative rectangle
+    const right = Math.min(elemRect.right, canvasRect.right) - canvasRect.left;
+    const left = Math.max(0, elemRect.left - canvasRect.left);
+    const bottom = Math.min(elemRect.bottom, canvasRect.bottom) - canvasRect.top;
+    const top = Math.max(0, elemRect.top - canvasRect.top);
+
+    const width = Math.min(canvasRect.width, right - left);
+    const height = Math.min(canvasRect.height, bottom - top);
+
+    // setup the scissor to only render to that part of the canvas
+    const positiveYUpBottom = canvasRect.height - bottom;
+    renderer.setScissor(left, positiveYUpBottom, width, height);
+    renderer.setViewport(left, positiveYUpBottom, width, height);
+
+    // return the aspect
+    return width / height;
+  }
+
   function render() {
-    if (resizeRendererToDisplaySize(renderer)) {
-      const canvas = renderer.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    resizeRendererToDisplaySize(renderer);
+
+    // turn on the scissor
+    renderer.setScissorTest(true);
+
+    {
+      const aspect = setScissorForElement(renderer, view1Elem);
+
+      // adjust the camera for this aspect
+      camera.aspect = aspect;
       camera.updateProjectionMatrix();
+
+      // render
+      renderer.render(scene, camera);
     }
 
-    renderer.render(scene, camera);
-
-    if (resizeRendererToDisplaySize(renderer2)) {
-      const canvas = renderer2.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      camera.updateProjectionMatrix();
+    {
+      setScissorForElement(renderer, view2Elem);
+      // render
+      renderer2.render(scene, camera);
     }
-
-    renderer2.render(scene, camera);
 
     requestAnimationFrame(render);
   }
