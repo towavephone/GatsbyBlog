@@ -1,6 +1,6 @@
 ---
 title: Three.js练手测试
-date: 2022-12-16 17:28:17
+date: 2022-12-19 17:29:39
 categories:
    - 前端
 tags: 前端, three.js, WebGL, 练手测试
@@ -130,3 +130,27 @@ z 冲突实例
 正交摄像模拟实现 2d canvas
 
 [test-20](embedded-codesandbox://three-js-practice-test/test-20?module=index.js)
+
+# 测试二十一
+
+假阴影贴图实现
+
+[test-21](embedded-codesandbox://three-js-practice-test/test-21?module=index.js)
+
+<!-- # 测试二十二
+
+定向光阴影
+
+[test-22](embedded-codesandbox://three-js-practice-test/test-22?module=index.js)
+
+# 测试二十三
+
+聚光灯阴影
+
+[test-23](embedded-codesandbox://three-js-practice-test/test-23?module=index.js)
+
+# 测试二十四
+
+点光源阴影
+
+[test-24](embedded-codesandbox://three-js-practice-test/test-24?module=index.js) -->
