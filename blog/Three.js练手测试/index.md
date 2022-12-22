@@ -137,7 +137,7 @@ z 冲突实例
 
 [test-21](embedded-codesandbox://three-js-practice-test/test-21?module=index.js)
 
-<!-- # 测试二十二
+# 测试二十二
 
 定向光阴影
 
@@ -153,4 +153,4 @@ z 冲突实例
 
 点光源阴影
 
-[test-24](embedded-codesandbox://three-js-practice-test/test-24?module=index.js) -->
+[test-24](embedded-codesandbox://three-js-practice-test/test-24?module=index.js)
