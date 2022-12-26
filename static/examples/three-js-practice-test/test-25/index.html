@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js - Fog</title>
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+  </head>
+
+  <body>
+    <div class="spread">
+      <div>
+        <div data-diagram="fog" style="height: 300px; touch-action: none;"></div>
+        <div class="code">THREE.Fog</div>
+      </div>
+      <div>
+        <div data-diagram="fogExp2" style="height: 300px; touch-action: none;"></div>
+        <div class="code">THREE.FogExp2</div>
+      </div>
+    </div>
+    <div class="spread">
+      <div>
+        <div data-diagram="fogBlueBackgroundRed" style="height: 300px; touch-action: none;" class="border"></div>
+        <div class="code">fog blue, background red</div>
+      </div>
+      <div>
+        <div data-diagram="fogBlueBackgroundBlue" style="height: 300px; touch-action: none;" class="border"></div>
+        <div class="code">fog blue, background blue</div>
+      </div>
+    </div>
+    <div class="spread">
+      <div>
+        <div data-diagram="fogHouseAll" style="height: 300px;" class="border"></div>
+        <div class="code">fog: true, all</div>
+      </div>
+    </div>
+    <div class="spread">
+      <div>
+        <div data-diagram="fogHouseInsideNoFog" style="height: 300px;" class="border"></div>
+        <div class="code">fog: true, only outside materials</div>
+      </div>
+    </div>
+    <script async src="./build/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./build/three.module.js",
+          "three/addons/": "./build/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./threejs-lesson-utils.js"></script>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

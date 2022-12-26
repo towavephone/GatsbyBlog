@@ -154,3 +154,16 @@ z 冲突实例
 点光源阴影
 
 [test-24](embedded-codesandbox://three-js-practice-test/test-24?module=index.js)
+
+# 测试二十五
+
+1. 实现 2 种雾
+2. 是否受雾的影响参数
+
+[test-25](embedded-codesandbox://three-js-practice-test/test-25?module=index.js)
+
+<!-- # 测试二十六
+
+雾的各项参数
+
+[test-26](embedded-codesandbox://three-js-practice-test/test-26?module=index.js) -->
