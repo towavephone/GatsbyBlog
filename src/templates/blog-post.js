@@ -10,6 +10,7 @@ import domQuery from 'dom-helpers/query';
 import { throttle, get } from 'lodash';
 import cx from 'classnames';
 import { Resizable } from 're-resizable';
+import SparkMD5 from 'spark-md5'
 
 import BulletListTags from '../components/BulletListTags';
 import NavigateLink from '../components/NavigateLink';
@@ -53,7 +54,7 @@ export default class Template extends Component {
         repo: 'GatsbyBlog',
         admin: ['towavephone'],
         owner: 'towavephone',
-        id: post.frontmatter.path,
+        id: post.frontmatter.path.length > 50 ? SparkMD5.hash(post.frontmatter.path) : post.frontmatter.path,
         title: post.frontmatter.title,
         body: post.frontmatter.path + post.excerpt,
         distractionFreeMode: true,

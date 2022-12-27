@@ -14232,6 +14232,11 @@ space-separated-tokens@^1.0.0:
   resolved "https://registry.npmmirror.com/space-separated-tokens/download/space-separated-tokens-1.1.4.tgz#27910835ae00d0adfcdbd0ad7e611fb9544351fa"
   integrity sha1-J5EINa4A0K3829CtfmEfuVRDUfo=
 
+spark-md5@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npmmirror.com/spark-md5/-/spark-md5-3.0.2.tgz#7952c4a30784347abcee73268e473b9c0167e3fc"
+  integrity sha512-wcFzz9cDfbuqe0FZzfi2or1sgyIrsDwmPwfZC4hiNidPdPINjeUwNfv5kldczoEAcjl9Y1L3SM7Uz2PUEQzxQw==
+
 sparkles@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/sparkles/download/sparkles-1.0.1.tgz#008db65edce6c50eec0c5e228e1945061dd0437c"
