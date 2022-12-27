@@ -162,8 +162,14 @@ z 冲突实例
 
 [test-25](embedded-codesandbox://three-js-practice-test/test-25?module=index.js)
 
-<!-- # 测试二十六
+# 测试二十六
 
 雾的各项参数
 
-[test-26](embedded-codesandbox://three-js-practice-test/test-26?module=index.js) -->
+[test-26](embedded-codesandbox://three-js-practice-test/test-26?module=index.js)
+
+# 测试二十七
+
+实现简单的渲染目标
+
+[test-27](embedded-codesandbox://three-js-practice-test/test-27?module=index.js)
