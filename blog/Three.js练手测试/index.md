@@ -173,3 +173,21 @@ z 冲突实例
 实现简单的渲染目标
 
 [test-27](embedded-codesandbox://three-js-practice-test/test-27?module=index.js)
+
+# 测试二十八
+
+创建一个使用 BufferGeometry 的方块
+
+[test-28](embedded-codesandbox://three-js-practice-test/test-28?module=index.js)
+
+# 测试二十九
+
+使用 BufferGeometry 方块的重复顶点数据索引化
+
+[test-29](embedded-codesandbox://three-js-practice-test/test-29?module=index.js)
+
+# 测试三十
+
+使用类型数组 TypedArrays 动态更新顶点数据的任何一部分
+
+[test-30](embedded-codesandbox://three-js-practice-test/test-30?module=index.js)
