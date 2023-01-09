@@ -191,3 +191,9 @@ z 冲突实例
 使用类型数组 TypedArrays 动态更新顶点数据的任何一部分
 
 [test-30](embedded-codesandbox://three-js-practice-test/test-30?module=index.js)
+
+# 测试三十一
+
+按需渲染（不使用 requestAnimationFrame）
+
+[test-31](embedded-codesandbox://three-js-practice-test/test-31?module=index.js)
