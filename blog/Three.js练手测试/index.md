@@ -197,3 +197,14 @@ z 冲突实例
 按需渲染（不使用 requestAnimationFrame）
 
 [test-31](embedded-codesandbox://three-js-practice-test/test-31?module=index.js)
+
+# 测试三十二
+
+canvas 截图：
+
+1. 截图前调用一次渲染代码
+2. 防止 canvas 被清空（即使使用 `preserveDrawingBuffer: true` 切换横竖屏、切换分辨率还是会清空）
+
+这里使用方案一，方案二不推荐
+
+[test-32](embedded-codesandbox://three-js-practice-test/test-32?module=index.js)

@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -14,12 +13,7 @@ function main() {
   camera.position.z = 2;
 
   const controls = new OrbitControls(camera, canvas);
-  // 增加惯性
-  controls.enableDamping = true;
-  controls.target.set(0, 0, 0);
   controls.update();
-
-  const gui = new GUI();
 
   const scene = new THREE.Scene();
 
@@ -36,21 +30,6 @@ function main() {
   const boxDepth = 1;
   const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-  class ColorGUIHelper {
-    constructor(object, prop) {
-      this.object = object;
-      this.prop = prop;
-    }
-
-    get value() {
-      return `#${this.object[this.prop].getHexString()}`;
-    }
-
-    set value(hexString) {
-      this.object[this.prop].set(hexString);
-    }
-  }
-
   function makeInstance(geometry, color, x) {
     const material = new THREE.MeshPhongMaterial({ color });
 
@@ -59,23 +38,14 @@ function main() {
 
     cube.position.x = x;
 
-    const folder = gui.addFolder(`Cube${x}`);
-    folder
-      .addColor(new ColorGUIHelper(material, 'color'), 'value')
-      .name('color')
-      .onChange(requestRenderIfNotRequested);
-    folder
-      .add(cube.scale, 'x', 0.1, 1.5)
-      .name('scale x')
-      .onChange(requestRenderIfNotRequested);
-    folder.open();
-
     return cube;
   }
 
-  makeInstance(geometry, 0x44aa88, 0);
-  makeInstance(geometry, 0x8844aa, -2);
-  makeInstance(geometry, 0xaa8844, 2);
+  const cubes = [
+    makeInstance(geometry, 0x44aa88, 0),
+    makeInstance(geometry, 0x8844aa, -2),
+    makeInstance(geometry, 0xaa8844, 2)
+  ];
 
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -88,34 +58,55 @@ function main() {
     return needResize;
   }
 
-  let renderRequested = false;
+  const state = {
+    time: 0
+  };
 
   function render() {
-    // 代表此帧已经渲染，此时 renderRequested 被消费即为 false
-    renderRequested = false;
-
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
 
-    // 下一帧触发 controls 的 change 事件
-    controls.update();
+    cubes.forEach((cube, ndx) => {
+      const speed = 1 + ndx * 0.1;
+      const rot = state.time * speed;
+      cube.rotation.x = rot;
+      cube.rotation.y = rot;
+    });
+
     renderer.render(scene, camera);
   }
-  render();
 
-  function requestRenderIfNotRequested() {
-    if (!renderRequested) {
-      renderRequested = true;
-      // 不能直接调用 render，否则死循环，需要在一个新帧执行
-      requestAnimationFrame(render);
-    }
+  function animate(time) {
+    state.time = time * 0.001;
+
+    render();
+
+    requestAnimationFrame(animate);
   }
+  requestAnimationFrame(animate);
 
-  controls.addEventListener('change', requestRenderIfNotRequested);
-  window.addEventListener('resize', requestRenderIfNotRequested);
+  const elem = document.querySelector('#screenshot');
+  elem.addEventListener('click', () => {
+    render();
+    canvas.toBlob((blob) => {
+      saveBlob(blob, `screencapture-${canvas.width}x${canvas.height}.png`);
+    });
+  });
+
+  const saveBlob = (function() {
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style.display = 'none';
+    return function saveData(blob, fileName) {
+      const url = window.URL.createObjectURL(blob);
+      a.href = url;
+      a.download = fileName;
+      a.click();
+    };
+  })();
 }
 
 main();
