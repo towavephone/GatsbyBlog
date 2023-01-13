@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js - TabIndex</title>
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+  </head>
+
+  <body>
+    <div class="spread">
+      <div>
+        <canvas width="100" height="100" id="c1"></canvas>
+        <div>tabindex not set</div>
+      </div>
+      <div>
+        <canvas width="100" height="100" id="c2" tabindex="0"></canvas>
+        <div>focus style not set</div>
+      </div>
+      <div>
+        <canvas width="100" height="100" id="c3" tabindex="1"></canvas>
+        <div>tabindex and<br />focus style set</div>
+      </div>
+    </div>
+    <script src="./index.js"></script>
+  </body>
+</html>

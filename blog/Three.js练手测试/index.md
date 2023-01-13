@@ -208,3 +208,27 @@ canvas 截图：
 这里使用方案一，方案二不推荐
 
 [test-32](embedded-codesandbox://three-js-practice-test/test-32?module=index.js)
+
+# 测试三十三
+
+canvas 获取键盘输入
+
+[test-33](embedded-codesandbox://three-js-practice-test/test-33?module=index.js)
+
+# 测试三十四
+
+透明化 canvas
+
+[test-34](embedded-codesandbox://three-js-practice-test/test-34?module=index.js)
+
+# 测试三十五
+
+大量对象的优化方案：合并几何体
+
+优化前：
+
+[test-35](embedded-codesandbox://three-js-practice-test/test-35?module=index.js)
+
+优化后：
+
+[test-35-2](embedded-codesandbox://three-js-practice-test/test-35-2?module=index.js)
