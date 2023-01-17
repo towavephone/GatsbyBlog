@@ -232,3 +232,9 @@ canvas 获取键盘输入
 优化后：
 
 [test-35-2](embedded-codesandbox://three-js-practice-test/test-35-2?module=index.js)
+
+# 测试三十六
+
+优化对象的同时保持动画效果
+
+[test-36](embedded-codesandbox://three-js-practice-test/test-36?module=index.js)
