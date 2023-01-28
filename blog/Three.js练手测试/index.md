@@ -238,3 +238,9 @@ canvas 获取键盘输入
 优化对象的同时保持动画效果
 
 [test-36](embedded-codesandbox://three-js-practice-test/test-36?module=index.js)
+
+# 测试三十七
+
+离屏渲染画布
+
+[test-37](embedded-codesandbox://three-js-practice-test/test-37?module=index.js)
