@@ -244,3 +244,9 @@ canvas 获取键盘输入
 离屏渲染画布
 
 [test-37](embedded-codesandbox://three-js-practice-test/test-37?module=index.js)
+
+# 测试三十八
+
+加载 .OBJ 文件
+
+[test-38](embedded-codesandbox://three-js-practice-test/test-38?module=index.js)
