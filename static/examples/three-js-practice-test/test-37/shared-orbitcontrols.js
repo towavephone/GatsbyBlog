@@ -2,8 +2,6 @@ import * as THREE from './build/three.module.js';
 import { OrbitControls } from './build/jsm/controls/OrbitControls.js';
 
 export function init(data) {
-  /* eslint-disable-line no-unused-vars */
-
   const { canvas, inputElement } = data;
   const renderer = new THREE.WebGLRenderer({ canvas });
 
