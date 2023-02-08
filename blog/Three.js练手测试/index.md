@@ -256,3 +256,23 @@ canvas 获取键盘输入
 加载 .gltf 文件
 
 [test-39](embedded-codesandbox://three-js-practice-test/test-39?module=index.js)
+
+# 测试四十
+
+透明图片背景，使用 css
+
+[test-40](embedded-codesandbox://three-js-practice-test/test-40?module=index.js)
+
+透明图片背景，使用 threejs 渲染，可被后期效果影响
+
+[test-40-2](embedded-codesandbox://three-js-practice-test/test-40-2?module=index.js)
+
+# 测试四十一
+
+立方体贴图实现天空盒
+
+[test-41](embedded-codesandbox://three-js-practice-test/test-41?module=index.js)
+
+等距矩形贴图实现天空盒
+
+[test-41-2](embedded-codesandbox://three-js-practice-test/test-41-2?module=index.js)
