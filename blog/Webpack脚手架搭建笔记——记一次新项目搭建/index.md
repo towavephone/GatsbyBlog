@@ -7,7 +7,7 @@ tags: 前端, 前端构建工具, webpack, 预研
 path: /webpack-template-new-project/
 ---
 
-接上文[Webpack 升级优化——记一次产品端升级](/webpack-upgrade-about-product/)
+接上文 [Webpack 升级优化——记一次产品端升级](/webpack-upgrade-about-product/)
 
 最近需要开发一个新产品，此时需要一个新框架来承载新产品的开发，根据前端主管的建议，建议我在他已经开发出的新框架上进行改造，这里记录一下改造的关键点
 

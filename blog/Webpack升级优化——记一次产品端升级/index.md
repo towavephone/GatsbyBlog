@@ -7,7 +7,7 @@ tags: 前端, 前端构建工具, webpack, 预研
 path: /webpack-upgrade-about-product/
 ---
 
-接上文[Webpack 配置笔记](/webpack-config-note/)
+接上文 [Webpack 配置笔记](/webpack-config-note/)
 
 # 分包策略
 

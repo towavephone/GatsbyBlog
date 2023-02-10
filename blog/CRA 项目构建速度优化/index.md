@@ -18,6 +18,9 @@ path: /cra-project-build-speed-optimize/
 3. npm 切换到 pnpm
 4. npm install 校验命令
 5. 针对线上使用的 `hard-source-webpack-plugin` 硬缓存插件报错的修复过程
+6. preload-webpack-plugin 失效处理
+7. 分包失效问题
+8. 修复 fastRefresh 在 worker 报错
 
 # 具体功能
 
@@ -683,6 +686,97 @@ class FixHardSourceWebpackPlugin {
 
 module.exports = FixHardSourceWebpackPlugin;
 ```
+
+### 后续问题
+
+在代码变动之后，如果通过缓存生成，查看编译后的代码还是之前的老代码，需要暂时关闭缓存待以后解决
+
+## preload-webpack-plugin 失效处理
+
+### 背景
+
+此插件在 pnpm 下不生效，在 npm 下反而生效
+
+### 原因
+
+require 指向的 html-webpack-plugin 不是同一个，导致 hook 不能被调用，具体见 [issue](https://github.com/jantimon/html-webpack-plugin/issues/1091#issuecomment-434708455)
+
+### 解决方案
+
+升级到 3.0.0-beta.4 即可，对比可知源码做了以上处理
+
+3.0.0-beta.3 代码：
+
+```js
+if (!hook) {
+   const HtmlWebpackPlugin = require('html-webpack-plugin');
+   hook = HtmlWebpackPlugin.getHooks(compilation).beforeEmit;
+}
+```
+
+3.0.0-beta.4 代码：
+
+```js
+if (!hook) {
+   const [HtmlWebpackPlugin] = compiler.options.plugins.filter(
+      (plugin) => plugin.constructor.name === 'HtmlWebpackPlugin'
+   );
+   assert(HtmlWebpackPlugin, 'Unable to find an instance of ' + 'HtmlWebpackPlugin in the current compilation.');
+   hook = HtmlWebpackPlugin.constructor.getHooks(compilation).beforeEmit;
+}
+```
+
+## 分包失效问题
+
+### 背景
+
+发现分包结果和原来的不一致，比原来大很多，比如看下面的三方库
+
+原来的
+
+![](res/2023-02-10-11-51-16.png)
+
+新的
+
+![](res/2023-02-10-11-52-53.png)
+
+### 原因
+
+经分析 treeShaking 失效，说明 main 没有识别到 es6 的语法
+
+### 解决方案
+
+需要注释掉 mainFields 这一行，默认 cra 已做了 es6 语法的处理
+
+```js
+// localConfig.resolve.mainFields = ['jsnext:main', 'main'];
+```
+
+## 修复 fastRefresh 在 worker 报错
+
+### 背景
+
+如果一个文件导出函数时被前端代码和 worker 同时使用时报错
+
+![](res/2023-02-10-11-58-09.png)
+
+### 原因
+
+在 development 模式下，如果一个文件里面的 function 同时被 worker 和前端文件使用（即被前端的 `babel-loader/react-refresh` 处理过，此时就有了 fastRefresh 的插件代码），而 fastRefresh 里面没有针对 worker 运行环境的处理，此时会报错
+
+### 方案
+
+需要对 `$RefreshReg$` 做兼容处理，即确保只在开发环境的 worker 添加以下代码（注意这里的代码必须写成单独的文件并使用 import 放在 worker 的第一行，否则会因为执行时机的问题不起作用）
+
+```js
+global.$RefreshReg$ = () => {}
+global.$RefreshSig$ = () => {}
+```
+
+1. 不对 worker 文件做 babel 处理（此方案改动较大，不现实）
+2. 在 worker-loader 前插入新的 loader，此 loader 插入以上代码，注意只在 development 环境插入一行代码
+   1. 找现成的插入代码的 loader
+   2. 自己写 loader
 
 # 效果展示
 

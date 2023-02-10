@@ -8,7 +8,7 @@ date: 2018-04-27 16:14:18
 original: https://github.com/DMQ/mvvm
 ---
 
-接上文[腾讯面试总结](/tx-interview-part-1-summary/)
+接上文 [腾讯面试总结](/tx-interview-part-1-summary/)
 
 ## 剖析 Vue 实现原理
 
