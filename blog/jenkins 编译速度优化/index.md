@@ -961,3 +961,10 @@ pipeline {
 # 优化效果
 
 ![](res/2023-02-10-12-22-15.png)
+
+# 后期展望
+
+1. 后端 jenkins 增量构建优化
+2. gitlab 发布评论触发 jenkins 等环境的一键部署
+3. [webpack 懒编译](https://github.com/towavephone/webpack-lazy-build-demo)，模仿 webpack5 与 vite 的懒编译思路
+4. [rust 相关前端工具链](https://github.com/i5ting/learn-rust-for-fe)，例如 Bun，Next.js，swc，Turbopack
