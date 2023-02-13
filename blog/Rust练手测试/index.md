@@ -2,10 +2,14 @@
 title: Rust练手测试
 date: 2022-08-02 17:24:05
 categories:
-  - 后端
+   - 后端
 tags: 后端, Rust, 练手测试
 path: /rust-practice-test/
 ---
+
+# 背景知识
+
+[Rust 语言圣经](https://course.rs/about-book.html)
 
 # 变量绑定与解构
 
@@ -869,6 +873,96 @@ fn main() {
     assert!(size_of_val(&unit) == 0);
 
     println!("Success!")
+}
+```
+
+## 语句与表达式
+
+### 问题一
+
+```rust
+// 使用两种方法让代码工作起来
+fn main() {
+    let v = {
+        let mut x = 1;
+        x += 2
+    };
+
+    assert_eq!(v, 3);
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let v = {
+        let mut x = 1;
+        x += 2
+    };
+
+    assert_eq!(v, ());
+}
+```
+
+```rust
+fn main() {
+    let v = {
+        let mut x = 1;
+        x += 2;
+        x
+    };
+
+    assert_eq!(v, 3);
+}
+```
+
+### 问题二
+
+```rust
+fn main() {
+    let v = (let x = 3);
+
+    assert!(v == 3);
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let v = {
+        let x = 3;
+        x
+    };
+
+    assert!(v == 3);
+}
+```
+
+### 问题三
+
+```rust
+fn main() {
+    let s = sum(1, 2);
+    assert_eq!(s, 3);
+}
+
+fn sum(x: i32, y: i32) -> i32 {
+    x + y;
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let s = sum(1, 2);
+    assert_eq!(s, 3);
+}
+
+fn sum(x: i32, y: i32) -> i32 {
+    x + y
 }
 ```
 
