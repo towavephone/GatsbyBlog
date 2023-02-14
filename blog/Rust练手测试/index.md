@@ -966,4 +966,183 @@ fn sum(x: i32, y: i32) -> i32 {
 }
 ```
 
+## 函数
+
+### 问题一
+
+```rust
+fn main() {
+    // 不要修改下面两行代码!
+    let (x, y) = (1, 2);
+    let s = sum(x, y);
+
+    assert_eq!(s, 3);
+}
+
+fn sum(x, y: i32) {
+    x + y;
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let (x, y) = (1, 2);
+    let s = sum(x, y);
+
+    assert_eq!(s, 3);
+}
+
+fn sum(x: i32, y: i32) -> i32 {
+    x + y
+}
+```
+
+### 问题二
+
+```rust
+fn main() {
+    print();
+}
+
+// 使用另一个类型来替代 i32
+fn print() -> i32 {
+    println!("hello,world");
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    print();
+}
+
+fn print() -> () {
+    println!("hello,world");
+}
+```
+
+### 问题三
+
+```rust
+// 用两种方法求解
+fn main() {
+    never_return();
+}
+
+fn never_return() -> ! {
+    // 实现这个函数，不要修改函数签名!
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    never_return();
+}
+
+fn never_return() -> ! {
+    loop {}
+}
+```
+
+```rust
+fn main() {
+    never_return();
+}
+
+fn never_return() -> ! {
+    panic!("error")
+}
+```
+
+### 问题四
+
+```rust
+fn main() {
+    println!("Success!");
+}
+
+fn get_option(tp: u8) -> Option<i32> {
+    match tp {
+        1 => {
+            // TODO
+        }
+        _ => {
+            // TODO
+        }
+    };
+
+    // 这里与其返回一个 None，不如使用发散函数替代
+    never_return_fn()
+}
+
+// 使用三种方法实现以下发散函数
+fn never_return_fn() -> ! {}
+```
+
+#### 我的解答
+
+```rust
+fn never_return_fn() -> ! {
+    panic!()
+}
+```
+
+```rust
+fn never_return_fn() -> ! {
+    todo!();
+}
+```
+
+```rust
+fn never_return_fn() -> ! {
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(1))
+    }
+}
+```
+
+### 问题五
+
+```rust
+fn main() {
+    // 填空
+    let b = __;
+
+    let _v = match b {
+        true => 1,
+        // 发散函数也可以用于 `match` 表达式，用于替代任何类型的值
+        false => {
+            println!("Success!");
+            panic!("we have no value for `false`, but we can panic")
+        }
+    };
+
+    println!("Exercise Failed if printing out this line!");
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let b = false;
+
+    let _v = match b {
+        true => 1,
+        // 发散函数也可以用于 `match` 表达式，用于替代任何类型的值
+        false => {
+            println!("Success!");
+            panic!("we have no value for `false`, but we can panic")
+        }
+    };
+
+    println!("Exercise Failed if printing out this line!");
+}
+```
+
 // TODO https://zh.practice.rs/basic-types/statements-expressions.html
