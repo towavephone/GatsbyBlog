@@ -5,7 +5,6 @@ categories:
    - 运维
 tags: 运维, jenkins, 预研
 path: /jenkins-build-speed-optimize/
-draft: true
 ---
 
 # 需求背景

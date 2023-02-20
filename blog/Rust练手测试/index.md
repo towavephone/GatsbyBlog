@@ -1145,4 +1145,524 @@ fn main() {
 }
 ```
 
+# 所有权与借用
+
+## 所有权
+
+### 问题一
+
+```rust
+fn main() {
+    // 使用尽可能多的方法来通过编译
+    let x = String::from("hello, world");
+    let y = x;
+    println!("{},{}", x, y);
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let x = String::from("hello, world");
+    let y = x.clone();
+    println!("{},{}", x, y);
+}
+```
+
+```rust
+fn main() {
+    let x = String::from("hello, world");
+    let y = &x;
+    println!("{},{}", x, y);
+}
+```
+
+```rust
+fn main() {
+    let x = "hello, world";
+    let y = x;
+    println!("{},{}", x, y);
+}
+```
+
+```rust
+fn main() {
+    let x = String::from("hello, world");
+    let y = x.as_str();
+    println!("{},{}", x, y);
+}
+```
+
+### 问题二
+
+```rust
+// 不要修改 main 中的代码
+fn main() {
+    let s1 = String::from("hello, world");
+    let s2 = take_ownership(s1);
+
+    println!("{}", s2);
+}
+
+// 只能修改下面的代码!
+fn take_ownership(s: String) {
+    println!("{}", s);
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let s1 = String::from("hello, world");
+    let s2 = take_ownership(s1);
+
+    println!("{}", s2);
+}
+
+fn take_ownership(s: String) -> String {
+    println!("{}", s);
+    s
+}
+```
+
+### 问题三
+
+```rust
+fn main() {
+    let s = give_ownership();
+    println!("{}", s);
+}
+
+// 只能修改下面的代码!
+fn give_ownership() -> String {
+    let s = String::from("hello, world");
+    // convert String to Vec
+    // 将 String 转换成 Vec 类型
+    let _s = s.into_bytes();
+    s
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let s = give_ownership();
+    println!("{}", s);
+}
+
+fn give_ownership() -> String {
+    let s = String::from("hello, world");
+    // convert String to Vec
+    // 将 String 转换成 Vec 类型
+    let _s = s.as_bytes();
+    s
+}
+```
+
+```rust
+fn main() {
+    let s = give_ownership();
+    println!("{}", s);
+}
+
+// Only modify the code below!
+fn give_ownership() -> String {
+    let s = String::from("hello, world");
+    s
+}
+```
+
+### 问题四
+
+```rust
+// 修复错误，不要删除任何代码行
+fn main() {
+    let s = String::from("hello, world");
+
+    print_str(s);
+
+    println!("{}", s);
+}
+
+fn print_str(s: String)  {
+    println!("{}",s)
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let s = String::from("hello, world");
+
+    print_str(&s);
+
+    println!("{}", s);
+}
+
+fn print_str(s: &String) {
+    println!("{}", s)
+}
+```
+
+```rust
+fn main() {
+    let s = String::from("hello, world");
+
+    print_str(s.clone());
+
+    println!("{}", s);
+}
+
+fn print_str(s: String)  {
+    println!("{}",s)
+}
+```
+
+### 问题五
+
+```rust
+// 不要使用 clone，使用 copy 的方式替代
+fn main() {
+    let x = (1, 2, (), "hello".to_string());
+    let y = x.clone();
+    println!("{:?}, {:?}", x, y);
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let x = (1, 2, (), "hello");
+    let y = x;
+    println!("{:?}, {:?}", x, y);
+}
+```
+
+### 问题六
+
+```rust
+fn main() {
+    let s = String::from("hello, ");
+    
+    // 只修改下面这行代码 !
+    let s1 = s;
+
+    s1.push_str("world")
+}
+```
+
+#### 我的解答
+
+```rust
+fn main() {
+    let s = String::from("hello, ");
+
+    // 只修改下面这行代码 !
+    let mut s1 = s;
+
+    s1.push_str("world")
+}
+```
+
+### 问题七
+
+```rust
+fn main() {
+    let x = Box::new(5);
+    
+    let ...      // 完成该行代码，不要修改其它行！
+    
+    *y = 4;
+    
+    assert_eq!(*x, 5);
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题八
+
+```rust
+fn main() {
+   let t = (String::from("hello"), String::from("world"));
+
+   let _s = t.0;
+
+   // 仅修改下面这行代码，且不要使用 `_s`
+   println!("{:?}", t);
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题九
+
+```rust
+fn main() {
+   let t = (String::from("hello"), String::from("world"));
+
+   // 填空，不要修改其它代码
+   let (__, __) = __;
+
+   println!("{:?}, {:?}, {:?}", s1, s2, t); // -> "hello", "world", ("hello", "world")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+## 引用与借用
+
+### 问题一
+
+```rust
+fn main() {
+   let x = 5;
+   // 填写空白处
+   let p = __;
+
+   println!("x 的内存地址是 {:p}", p); // output: 0x16fa3ac84
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+```rust
+fn main() {
+    let x = 5;
+    let y = &x;
+
+    // 只能修改以下行
+    assert_eq!(5, y);
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+```rust
+// 修复错误
+fn main() {
+    let mut s = String::from("hello, ");
+
+    borrow_object(s)
+}
+
+fn borrow_object(s: &String) {}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题四
+
+```rust
+// 修复错误
+fn main() {
+    let mut s = String::from("hello, ");
+
+    push_str(s)
+}
+
+fn push_str(s: &mut String) {
+    s.push_str("world")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题五
+
+```rust
+fn main() {
+    let mut s = String::from("hello, ");
+
+    // 填写空白处，让代码工作
+    let p = __;
+    
+    p.push_str("world");
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题六
+
+```rust
+fn main() {
+    let c = '中';
+
+    let r1 = &c;
+    // 填写空白处，但是不要修改其它行的代码
+    let __ r2 = c;
+
+    assert_eq!(*r1, *r2);
+    
+    // 判断两个内存地址的字符串是否相等
+    assert_eq!(get_addr(r1),get_addr(r2));
+}
+
+// 获取传入引用的内存地址的字符串形式
+fn get_addr(r: &char) -> String {
+    format!("{:p}", r)
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题七
+
+```rust
+// 移除代码某个部分，让它工作
+// 你不能移除整行的代码！
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    println!("{}, {}", r1, r2);
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题八
+
+```rust
+fn main() {
+    // 通过修改下面一行代码来修复错误
+    let  s = String::from("hello, ");
+
+    borrow_object(&mut s)
+}
+
+fn borrow_object(s: &mut String) {}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题九
+
+```rust
+// 下面的代码没有任何错误
+fn main() {
+    let mut s = String::from("hello, ");
+
+    borrow_object(&s);
+    
+    s.push_str("world");
+}
+
+fn borrow_object(s: &String) {}
+```
+
+#### 我的解答
+
+```rust
+// 注释掉一行代码让它工作
+fn main() {
+    let mut s = String::from("hello, ");
+
+    let r1 = &mut s;
+    r1.push_str("world");
+    let r2 = &mut s;
+    r2.push_str("!");
+    
+    println!("{}",r1);
+}
+```
+
+### 问题十
+
+```rust
+
+fn main() {
+    let mut s = String::from("hello, ");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    // 在下面增加一行代码人为制造编译错误：cannot borrow `s` as mutable more than once at a time
+    // 你不能同时使用 r1 和 r2
+}
+
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题十一
+
+```rust
+fn main() {
+    let mut s = String::from("hello, ");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    // 在下面增加一行代码人为制造编译错误：cannot borrow `s` as mutable more than once at a time
+    // 你不能同时使用 r1 和 r2
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
 // TODO https://zh.practice.rs/basic-types/statements-expressions.html
