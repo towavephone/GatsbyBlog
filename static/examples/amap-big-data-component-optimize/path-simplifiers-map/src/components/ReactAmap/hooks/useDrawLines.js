@@ -29,7 +29,9 @@ const batchRender = (pathSimplifierIns, lines) => {
         return;
       }
       const splitLines = lines.slice(0, page * size + size);
-      console.log('draw splitLines length', splitLines.length);
+      if (page + 1 >= totalPage) {
+        console.log('draw polylines length', lines.length);
+      }
       // pathSimplifierIns.setDataImmediate(splitLines);
       pathSimplifierIns.setData(splitLines);
       page++;
@@ -60,7 +62,7 @@ const renderLines = (map, pathSimplifierIns, data) => {
   });
   // pathSimplifierIns.setDataImmediate(polylines)
   batchRender(pathSimplifierIns, polylines);
-  console.log('total polylines length', polylines.length);
+  // console.log('total polylines length', polylines.length);
 };
 
 const END_EVENTS = ['zoomend', 'moveend', 'resize'];

@@ -14,7 +14,7 @@
 - [Chrome 调试技巧](https://blog.towavephone.com/chrome-debug-practice/)
 - [富文本框疑难点处理过程](https://blog.towavephone.com/rich-input-question)
 - [ReactPlayer 之 IE 兼容性研究](https://blog.towavephone.com/reactplayer-ie-compatibility/)
-- [Webpack4 配置笔记](https://blog.towavephone.com/webpack4-config-note/)
+- [webpack 配置笔记](https://blog.towavephone.com/webpack-config-note/)
 
 ## 截图
 
