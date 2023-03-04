@@ -693,7 +693,7 @@ module.exports = FixHardSourceWebpackPlugin;
 
 ## preload-webpack-plugin 失效处理
 
-### 背景
+### 需求背景
 
 此插件在 pnpm 下不生效，在 npm 下反而生效
 
@@ -728,7 +728,7 @@ if (!hook) {
 
 ## 分包失效问题
 
-### 背景
+### 需求背景
 
 发现分包结果和原来的不一致，比原来大很多，比如看下面的三方库
 
@@ -754,7 +754,7 @@ if (!hook) {
 
 ## 修复 fastRefresh 在 worker 报错
 
-### 背景
+### 需求背景
 
 如果一个文件导出函数时被前端代码和 worker 同时使用时报错
 
@@ -769,14 +769,69 @@ if (!hook) {
 需要对 `$RefreshReg$` 做兼容处理，即确保只在开发环境的 worker 添加以下代码（注意这里的代码必须写成单独的文件并使用 import 放在 worker 的第一行，否则会因为执行时机的问题不起作用）
 
 ```js
-global.$RefreshReg$ = () => {}
-global.$RefreshSig$ = () => {}
+global.$RefreshReg$ = () => {};
+global.$RefreshSig$ = () => {};
 ```
 
 1. 不对 worker 文件做 babel 处理（此方案改动较大，不现实）
 2. 在 worker-loader 前插入新的 loader，此 loader 插入以上代码，注意只在 development 环境插入一行代码
    1. 找现成的插入代码的 loader
    2. 自己写 loader
+
+## 懒编译
+
+### 需求背景
+
+目前老项目在开发模式下全量编译过慢，而有时只需要开发少数几个页面
+
+### 选型过程
+
+因老项目使用的是 webpack4，历史代码太多不好升级，所以需要通过模仿 webpack5 的懒编译实现，有以下几个选型
+
+1. [web-packing](https://github.com/bahmutov/web-packing) 实现了网络请求来打包对应组件，实现思路类似懒编译，但和理想中的相差较远
+2. [webpack-virtual-modules](https://github.com/sysgears/webpack-virtual-modules) 实现了在内存中动态创建文件，但需要重新开始写懒编译效果
+3. [vue-dynamic-module-example](https://github.com/lisiyizu/vue-dynamic-module-example) 实现了在 vue 中懒编译文件，但只能在命令行中指定要编译哪些模块，不能从网络请求来决定编译哪些模块
+4. [lazy-compile-webpack-plugin](https://github.com/liximomo/lazy-compile-webpack-plugin) 基本实现了根据请求来编译对应页面的效果，但请求一个页面会触发多次编译，且二次请求这个页面还会触发编译
+5. [lazy-build-webpack-plugin](https://github.com/devtreehouse/lazy-build-webpack-plugin) 修复以上问题，但在老项目里面运行会出现循环依赖的报错
+6. [towavephone/lazy-build-webpack-plugin](https://github.com/towavephone/lazy-build-webpack-plugin) 修复循环依赖问题
+
+### 具体实现
+
+config-overrides.js
+
+```js
+const LazyBuildWebpackPlugin = require('@towavephone/lazy-build-webpack-plugin');
+
+const { LAZY_BUILD } = process.env;
+
+// 默认不开启懒编译
+LAZY_BUILD &&
+   addWebpackPlugin(
+      // 以下三个和热更新有关的三方库会导致页面不停刷新，造成此原因的链接如下
+      // https://github.com/towavephone/lazy-build-webpack-plugin/blob/2a2654f8ea22b015caaef7d5bc961b851f92033d/lib/loaders/entry-loader.js#L15
+      new LazyBuildWebpackPlugin({
+         ignores: [/\b(react-dev-utils|dev-server|react-refresh-webpack-plugin)\b/]
+      })
+   );
+```
+
+index.js
+
+```js
+// 主入口需要加这几行代码，否则懒编译完成后页面不刷新
+if (module.hot) {
+   module.hot.accept();
+}
+```
+
+### 编译效果
+
+1. 懒编译开启前，即全量编译．时长在 3 分钟左右
+2. 懒编译开启后，即单页面编译，随机挑选一个页面，时长在 20 秒左右
+
+### 源码解析
+
+// TODO 懒编译插件源码解析
 
 # 效果展示
 

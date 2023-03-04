@@ -957,6 +957,292 @@ pipeline {
 }
 ```
 
+## 版本四
+
+1. 生成时间戳优化，因为现有的时间戳是精确到秒的，还是有产生冲突的概率，改成毫秒（更好的方式是生成唯一性的 id）
+
+```groovy{25-26}
+gitlab_repo = "${params.gitlab_repo}"
+def split = gitlab_repo.split("/")
+def repo_name = split[1]
+branch_name = "${params.branch_name}"
+def split2 = branch_name.split("/")
+def branch_last_name = split2[split2.length-1]
+dockerhub_repo = "${params.dockerhub_repo}"
+parameter = "${params.parameter}"
+repo_url = "仓库地址"
+use_cache = "${params.use_cache}"
+cache_version ="${params.cache_version}"
+is_cache_project = "${params.is_cache_project}"
+
+def cache_arg = ""
+
+if (use_cache == 'false') {
+    cache_arg = "--no-cache"
+}
+
+build_node = "${params.build_node}"
+build_node_ip = 'build机器地址'
+clone_node = '部署机器标签'
+
+def createVersion() {
+   long ymd = System.currentTimeMillis()
+   return "${ymd}"
+}
+ymd = createVersion()
+image_version = "1.0.9.${ymd}"
+
+work_dir = "项目名称_${ymd}"
+work_cache_dir = "项目名称_cache"
+
+println("gitlab_repo branch=${gitlab_repo} ${branch_name}")
+println("repo_name=${repo_name}, image_version=${image_version}")
+println("dockerhub_repo=${dockerhub_repo}")
+println("cache_arg=${cache_arg}")
+println("cache_version=${cache_version}")
+
+build_user=""
+node{
+    wrap([$class: 'BuildUser']) {
+        build_user = env.BUILD_USER
+    }
+}
+println("build_user=${build_user}")
+
+default_description = "@${build_user} ${gitlab_repo} ${branch_name}:${image_version}"
+currentBuild.description = "${default_description}"
+
+pipeline {
+    agent {
+        node {
+            label "${build_node}"
+        }
+    }
+
+    environment {
+        repo_name1 = "${repo_name}"
+        branch_last_name1 = "${branch_last_name}"
+    }
+
+    stages {
+      stage ('Cache') {
+         failFast true
+         parallel {
+            stage('Cache Workspace') {
+                agent {
+                    node {
+                        label "${build_node}"
+                    }
+                }
+                steps {
+                    lock("lock-cache-workspace") {
+                    sh """
+                        cd /home/jenkins/workspace/apps/项目名称/
+                        # rm -rf ${work_cache_dir}
+                        if [ ${is_cache_project} = 'true' ]
+                        then
+                            if [ ! -d ${work_cache_dir} ]
+                            then
+                                echo "Cache Workspace not found"
+                            else
+                                cp -r ${work_cache_dir} ${work_dir}
+                                cd ${work_dir} && ls
+                                echo "Cache Workspace restore successful"
+                            fi
+                        fi
+                    """
+                    }
+                }
+            }
+
+            stage('Cache Repo') {
+                agent {
+                    node {
+                        label "${clone_node}"
+                    }
+                }
+                steps {
+                    lock("lock-cache-repo") {
+                    sh """
+                        # vi clone.sh
+                        # 这里每次都要 cd 到具体路径，否则同一时间内执行默认会跑到别的目录下，比如 项目名称@2、项目名称@3 这种目录
+                        cd /data/xmotors_ai_shared/sre/sre-workspace/workspace/项目名称
+                        # rm -rf ${work_cache_dir}
+                        if [ ${is_cache_project} = 'true' ]
+                        then
+                            if [ ! -d ${work_cache_dir} ]
+                            then
+                                echo "Cache Repo not found"
+                            else
+                                cp -r ${work_cache_dir} ${work_dir}
+                                cd ${work_dir} && ls
+                                echo "Cache Repo restore successful"
+                            fi
+                        fi
+                    """
+                    }
+                }
+            }
+         }
+      }
+
+      stage("Clone Repo"){
+         agent {
+            node {
+                label "${clone_node}" //'部署机器标签'
+            }
+         }
+         steps {
+            sh """
+            # ls -la
+            cd /data/xmotors_ai_shared/sre/sre-workspace/workspace/项目名称
+            if [ ! -d ${work_dir} ]
+            then
+                cp /data/xmotors_ai_shared/sre/saved_repo/clone.sh .
+                bash clone.sh ${gitlab_repo} ${branch_name} ${work_dir}
+            else
+                cd ${work_dir}
+                # 1、为了让脚本检测，2、master 拉取最新
+                git checkout master
+                git pull origin master
+
+                if [ ${branch_name} != 'master' ]
+                then
+                    # 强制拉取远程代码到本地
+                    git fetch --force origin ${branch_name}:${branch_name}
+                    git checkout origin/${branch_name}
+                fi
+                cd ..
+            fi
+            # ls -la
+            cp /data/xmotors_ai_shared/sre/saved_repo/judge_has_master_commit.py ./
+            /usr/bin/python3 judge_has_master_commit.py ${work_dir} 机器人webhook
+            """
+         }
+      }
+
+      stage("Scp to build_node") {
+         agent {
+             node {
+                 label "${clone_node}" //'部署机器标签'
+             }
+         }
+         steps {
+            echo "Scp to ${build_node}/${build_node_ip}"
+            sh """
+                cd /data/xmotors_ai_shared/sre/sre-workspace/workspace/项目名称
+                # pwd
+                # 这里的 -c 选项比较重要，比较校验和
+                rsync -Lrzvc -R ${work_dir}/前端目录名称/ jenkins@${build_node_ip}:/home/jenkins/workspace/apps/项目名称/
+                if [ \$? -ne 0 ]
+                then
+                    echo "Found some error when copy the repo"
+                fi
+                # rm -fr ${work_dir} || true
+            """
+         }
+      }
+
+      stage('Build docker images') {
+         agent {
+             node {
+                 label "${build_node}"
+             }
+         }
+         steps {
+            sh """
+                cd /home/jenkins/workspace/apps/项目名称/${work_dir}/前端目录名称/
+                if [ ! -f Dockerfile-client-buildkit ]
+                then
+                    echo "No available 前端目录名称/Dockerfile-client-buildkit in workspace"
+                    exit 1
+                fi
+                # docker info
+                # docker -v
+                DOCKER_BUILDKIT=1 docker build ${cache_arg} --build-arg=BUILDKIT_CACHE_MOUNT_NS=${cache_version} -t docker远程仓库地址/${dockerhub_repo}:${image_version} -f ./Dockerfile-client-buildkit .
+                # docker build -t docker远程仓库地址/${dockerhub_repo}:${image_version} -f ./Dockerfile-client-buildkit .
+                docker push docker远程仓库地址/${dockerhub_repo}:${image_version}
+                # pwd
+                # ls
+             """
+        }
+      }
+
+      stage ('Post Cache') {
+         failFast true
+         parallel {
+            stage('Post Cache Workspace') {
+                agent {
+                    node {
+                        label "${build_node}"
+                    }
+                }
+                steps {
+                    lock("lock-cache-workspace") {
+                    sh """
+                        cd /home/jenkins/workspace/apps/项目名称/
+                        if [ ${is_cache_project} = 'true' ]
+                        then
+                            rm -rf ${work_cache_dir}
+                            mv ${work_dir} ${work_cache_dir}
+                            echo 'Post Cache Workspace'
+                        else
+                            rm -rf ${work_dir}
+                        fi
+                    """
+                    }
+                }
+            }
+
+            stage('Post Cache Repo') {
+                agent {
+                    node {
+                        label "${clone_node}"
+                    }
+                }
+                steps {
+                    lock("lock-cache-repo") {
+                    sh """
+                        cd /data/xmotors_ai_shared/sre/sre-workspace/workspace/项目名称
+                        if [ ${is_cache_project} = 'true' ]
+                        then
+                            # 加锁的原因: 1.否则 cp 读缓存时没有缓存
+                            rm -rf ${work_cache_dir}
+                            # 这里存在竞争，后编译成功的重命名才有效，即使后编译的缓存也不太影响具体的增量更新逻辑
+                            # 加锁的原因: 2.同时如果有另一个 job 在 mv 时，这里会移动到 work_cache_dir 目录下，而不是重命名
+                            mv ${work_dir} ${work_cache_dir}
+                            echo 'Post Cache Repo successful'
+                        else
+                            rm -rf ${work_dir}
+                        fi
+                    """
+                    }
+                }
+            }
+         }
+      }
+    }
+
+    post {
+        always {
+            echo 'I have finished'
+        }
+        success {
+            echo "build ${gitlab_repo} ${branch_name}:${image_version}, succeed!"
+            sh """
+            curl -X POST -H "Content-Type: application/json" -d '{"msg_type":"text","content":{"text":"@${build_user} 项目名称 notify: ${gitlab_repo} ${branch_name}:${image_version}, succeed!"}}' 机器人webhook
+            """
+        }
+        failure {
+            echo "build ${gitlab_repo} ${branch_name}:${image_version}, failed!"
+            sh """
+            curl -X POST -H "Content-Type: application/json" -d '{"msg_type":"text","content":{"text":"@${build_user} 项目名称 notify: ${gitlab_repo} ${branch_name}:${image_version}, failed!"}}' 机器人webhook
+            """
+        }
+    }
+}
+```
+
 # 优化效果
 
 ![](res/2023-02-10-12-22-15.png)
