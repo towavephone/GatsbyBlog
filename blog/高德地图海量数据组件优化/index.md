@@ -140,7 +140,7 @@ const loadMyPathSimplifier = () => {
 
 ### 实现效果
 
-[path-simplifier](embedded-codesandbox://amap-big-data-component-optimize/path-simplifier)
+[path-simplifier-map](embedded-codesandbox://amap-big-data-component-optimize/path-simplifier-map)
 
 ## Polyline
 
@@ -212,8 +212,8 @@ const handleClearLines = (map, clearLines) => {
 
 #### v2.0
 
-[polyline-2](embedded-codesandbox://amap-big-data-component-optimize/polyline-2)
+[polyline-2-map](embedded-codesandbox://amap-big-data-component-optimize/polyline-2-map)
 
 #### v1.4
 
-[polyline-1](embedded-codesandbox://amap-big-data-component-optimize/polyline-1)
+[polyline-1-map](embedded-codesandbox://amap-big-data-component-optimize/polyline-1-map)

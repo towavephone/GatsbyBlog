@@ -3,7 +3,7 @@ export function getAllCountryInfo() {
     .then((response) => response.json())
     .then((result) => {
       const { name, path } = result;
-      const repeatCount = 10000;
+      const repeatCount = 1000;
       const results = [];
       for (let i = 0; i < repeatCount; i++) {
         const offset = -0.001 * i;
