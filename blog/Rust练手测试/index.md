@@ -2315,12 +2315,11 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 修复代码中的错误，不要新增代码行!
 fn main() {
     let arr = [1, 2, 3];
     let s1: &[i32] = &arr[0..2];
 
-    let s2: &str = "hello, world" as &str;
+    let s2: &str = "hello, world";
 }
 ```
 
@@ -2346,9 +2345,9 @@ fn main() {
 
     let slice = &arr[..2];
 
-    // 修改数字 `8` 让代码工作
-    // 小提示: 切片和数组不一样，它是引用。如果是数组的话，那下面的 `assert!` 将会通过： '中'和'国'是char类型，char类型是Unicode编码，大小固定为4字节，两个字符为8字节。
+    // 16 是切片大小
     assert!(std::mem::size_of_val(&slice) == 16);
+    // 8 是数组大小
     assert!(std::mem::size_of_val(slice) == 8);
 }
 ```
@@ -2369,7 +2368,7 @@ fn main() {
 ```rust
 fn main() {
     let arr: [i32; 5] = [1, 2, 3, 4, 5];
-    // 填空让代码工作起来
+    // let slice: &[i32] = &arr[1..=3];
     let slice: &[i32] = &arr[1..4];
     assert_eq!(slice, &[2, 3, 4]);
 }
@@ -2396,7 +2395,7 @@ fn main() {
     let s = String::from("hello");
 
     let slice1 = &s[0..2];
-    // 填空，不要再使用 0..2
+    // let slice2 = &s[..=1];
     let slice2 = &s[..2];
 
     assert_eq!(slice1, slice2);
@@ -2420,7 +2419,6 @@ fn main() {
 ```rust
 fn main() {
     let s = "你好，世界";
-    // 修改以下代码行，让代码工作起来
     let slice = &s[0..3];
 
     assert!(slice == "你");
@@ -2450,18 +2448,16 @@ fn first_character(s: &str) -> &str {
 #### 我的解答
 
 ```rust
-// 修复所有错误
 fn main() {
     let mut s = String::from("hello world");
 
-    // 这里, &s 是 `&String` 类型，但是 `first_character` 函数需要的是 `&str` 类型。
-    // 尽管两个类型不一样，但是代码仍然可以工作，原因是 `&String` 会被隐式地转换成 `&str` 类型，如果大家想要知道更多，可以看看 Deref 章节: https://course.rs/advance/smart-pointer/deref.html
     let ch = first_character(&s);
 
-    // s.clear(); // error!
-
     println!("the first character is: {}", ch);
+
+    s.clear(); // error!
 }
+
 fn first_character(s: &str) -> &str {
     &s[..1]
 }
@@ -2753,7 +2749,7 @@ fn main() {
         age,
     };
 
-    // how can you believe sunface is only 18? 
+    // how can you believe sunface is only 18?
     p.age = 30;
 
     // 填空
@@ -2792,7 +2788,7 @@ struct Person {
     name: String,
     age: u8,
 }
-fn main() {} 
+fn main() {}
 
 fn build_person(name: String, age: u8) -> Person {
     Person {
@@ -2810,7 +2806,7 @@ struct Person {
     name: String,
     age: u8,
 }
-fn main() {} 
+fn main() {}
 
 fn build_person(name: String, age: u8) -> Person {
     Person {
@@ -2839,7 +2835,7 @@ fn main() {
     };
 
     let u2 = set_email(u1);
-} 
+}
 
 fn set_email(u: User) -> User {
     User {
@@ -2868,7 +2864,7 @@ fn main() {
     };
 
     let u2 = set_email(u1);
-} 
+}
 
 fn set_email(u: User) -> User {
     User {
@@ -2940,7 +2936,7 @@ fn main() {
     };
 
     // 通过这种解构式模式匹配，person.name 的所有权被转移给新的变量 `name`
-    // 但是，这里 `age` 变量确是对 person.age 的引用, 这里 ref 的使用相当于: let age = &person.age 
+    // 但是，这里 `age` 变量确是对 person.age 的引用, 这里 ref 的使用相当于: let age = &person.age
     let Person { name, ref age } = person;
 
     println!("The person's age is {}", age);
@@ -2974,7 +2970,7 @@ fn main() {
 
     // 只能修改这一行
     println!("{}, {}, {:?}",f.name, f.data, f);
-} 
+}
 ```
 
 #### 我的解答
@@ -3029,7 +3025,7 @@ fn main() {
     // 通过 `as` 可以将枚举值强转为整数类型
     assert_eq!(Number::One, Number1::One);
     assert_eq!(Number1::One, Number2::One);
-} 
+}
 ```
 
 #### 我的解答
@@ -3060,7 +3056,7 @@ fn main() {
     // 通过 `as` 可以将枚举值强转为整数类型
     assert_eq!(Number::One as u8, Number1::One as u8);
     assert_eq!(Number1::One as u8, Number2::One as u8);
-} 
+}
 ```
 
 ### 问题二
@@ -3077,7 +3073,7 @@ enum Message {
 fn main() {
     let msg1 = Message::Move{__}; // 使用x = 1, y = 2 来初始化
     let msg2 = Message::Write(__); // 使用 "hello, world!" 来初始化
-} 
+}
 ```
 
 #### 我的解答
@@ -3116,7 +3112,7 @@ fn main() {
     } else {
         panic!("不要让这行代码运行！");
     }
-} 
+}
 ```
 
 #### 我的解答
@@ -3162,7 +3158,7 @@ fn main() {
     for msg in msgs {
         show_message(msg)
     }
-} 
+}
 
 fn show_message(msg: Message) {
     println!("{}", msg);
@@ -3209,10 +3205,10 @@ fn main() {
 
     if let __ = six {
         println!("{}", n)
-    } 
-        
+    }
+
     panic!("不要让这行代码运行！");
-} 
+}
 
 fn plus_one(x: Option<i32>) -> Option<i32> {
     match x {
@@ -3234,10 +3230,10 @@ fn main() {
     if let Some(n) = six {
         println!("{}", n);
         return
-    } 
-        
+    }
+
     panic!("不要让这行代码运行！");
-} 
+}
 
 fn plus_one(x: Option<i32>) -> Option<i32> {
     match x {
