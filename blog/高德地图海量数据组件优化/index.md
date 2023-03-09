@@ -140,7 +140,7 @@ const loadMyPathSimplifier = () => {
 
 ### 实现效果
 
-[path-simplifiers-map](embedded-codesandbox://amap-big-data-component-optimize/path-simplifiers-map?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+[path-simplifiers](embedded-codesandbox://amap-big-data-component-optimize/path-simplifiers?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
 
 ## Polyline
 
@@ -212,8 +212,17 @@ const handleClearLines = (map, clearLines) => {
 
 #### v2.0
 
-[polyline-2-map](embedded-codesandbox://amap-big-data-component-optimize/polyline-2-map?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+[polyline-2](embedded-codesandbox://amap-big-data-component-optimize/polyline-2?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
 
 #### v1.4
 
-[polyline-1-map](embedded-codesandbox://amap-big-data-component-optimize/polyline-1-map?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+[polyline-1](embedded-codesandbox://amap-big-data-component-optimize/polyline-1?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+
+# 未来优化点
+
+参考资料：[16 毫秒的挑战：图表库渲染优化](https://www.infoq.cn/article/ByHjSpUD0KrhKSulyYED)
+
+1. 增量复用已有节点
+2. 大数据内存占用优化
+3. 根据分片运行时间自动调整分片大小
+4. 换 3d 渲染（3d 的缩放拖拽是通过摄像头视角改变来实现的，理论上比 2d 的渲染要快）

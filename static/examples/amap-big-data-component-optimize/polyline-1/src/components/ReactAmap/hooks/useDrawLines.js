@@ -2,9 +2,9 @@ import { debounce, get } from 'lodash';
 import { useAsyncEffect, useLatest } from 'ahooks';
 import { useEffect } from 'react';
 
-import { requestHostCallback, shouldYieldToHost, requestHostTimeout } from '@/utils/SchedulerHostConfig';
+import { requestHostCallback, shouldYieldToHost, requestHostTimeout, cancelHostCallback } from '@/utils/SchedulerHostConfig';
 
-const SIZE = 100;
+const SIZE = 50;
 
 const batchRender = (map, lines) => {
   const size = SIZE;
@@ -92,6 +92,7 @@ const renderLines = (map, data) => {
   // console.log('total polylines length', polylines.length);
 };
 
+const START_EVENTS = ['zoomstart', 'movestart'];
 const END_EVENTS = ['zoomend', 'moveend', 'resize'];
 
 const Index = ({ map, data }) => {
@@ -102,18 +103,34 @@ const Index = ({ map, data }) => {
       return;
     }
 
+    const handleStartEvents = () => {
+      console.log('cancelHostCallback')
+      cancelHostCallback()
+    }
+
     const handleEndEvents = debounce((...param) => {
-      console.log('event', param);
+      console.log('renderLines start', param);
       renderLines(map, dataRef.current);
     }, 1000);
+
+    START_EVENTS.forEach((event) => {
+      console.log('add start event', event);
+      map.on(event, handleStartEvents);
+    });
+  
     END_EVENTS.forEach((event) => {
-      console.log('add event', event);
+      console.log('add end event', event);
       map.on(event, handleEndEvents);
     });
 
     return () => {
+      START_EVENTS.forEach((event) => {
+        console.log('remove start event', event);
+        map.clearEvents(event);
+      });
+
       END_EVENTS.forEach((event) => {
-        console.log('remove event', event);
+        console.log('remove end event', event);
         map.clearEvents(event);
       });
     };

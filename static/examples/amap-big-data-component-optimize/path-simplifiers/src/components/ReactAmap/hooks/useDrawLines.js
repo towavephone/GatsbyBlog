@@ -3,7 +3,7 @@ import { useAsyncEffect, useLatest } from 'ahooks';
 import AMapLoader from '@amap/amap-jsapi-loader';
 import { useEffect, useState } from 'react';
 
-import { requestHostCallback, shouldYieldToHost } from '@/utils/SchedulerHostConfig';
+import { requestHostCallback, shouldYieldToHost, cancelHostCallback } from '@/utils/SchedulerHostConfig';
 
 const isPointInView = (map, lonLat) => {
   const bounds = map.getBounds();
@@ -18,7 +18,7 @@ const isPointInView = (map, lonLat) => {
 };
 
 const batchRender = (pathSimplifierIns, lines) => {
-  const size = 100;
+  const size = 50;
   const totalPage = Math.ceil(lines.length / size);
 
   const render = () => {
@@ -65,8 +65,6 @@ const renderLines = (map, pathSimplifierIns, data) => {
   // console.log('total polylines length', polylines.length);
 };
 
-const END_EVENTS = ['zoomend', 'moveend', 'resize'];
-
 const loadMyPathSimplifier = () => {
   return new Promise((resolve) => {
     window.AMapUI.load(['lib/utils'], function(utils) {
@@ -95,6 +93,9 @@ const loadMyPathSimplifier = () => {
     });
   });
 };
+
+const START_EVENTS = ['zoomstart', 'movestart'];
+const END_EVENTS = ['zoomend', 'moveend', 'resize'];
 
 const Index = ({ map, data }) => {
   const dataRef = useLatest(data);
@@ -155,20 +156,36 @@ const Index = ({ map, data }) => {
       }
     });
 
+    const handleStartEvents = () => {
+      console.log('cancelHostCallback')
+      cancelHostCallback()
+    }
+
     const handleEndEvents = debounce((...param) => {
-      console.log('event', param);
+      console.log('renderLines start', param);
       renderLines(map, pathSimplifierIns, dataRef.current);
     }, 1000);
+
+    START_EVENTS.forEach((event) => {
+      console.log('add start event', event);
+      map.on(event, handleStartEvents);
+    });
+  
     END_EVENTS.forEach((event) => {
-      console.log('add event', event);
+      console.log('add end event', event);
       map.on(event, handleEndEvents);
     });
 
     setPathSimplifier(pathSimplifierIns);
 
     return () => {
+      START_EVENTS.forEach((event) => {
+        console.log('remove start event', event);
+        map.clearEvents(event);
+      });
+    
       END_EVENTS.forEach((event) => {
-        console.log('remove event', event);
+        console.log('remove end event', event);
         map.clearEvents(event);
       });
     };
