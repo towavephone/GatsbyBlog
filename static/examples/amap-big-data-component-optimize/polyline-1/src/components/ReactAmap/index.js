@@ -1,7 +1,6 @@
 import AMapLoader from '@amap/amap-jsapi-loader';
 import React, { useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useAsyncEffect } from 'ahooks';
-import { Spin } from 'antd';
 
 import useDrawLines from './hooks/useDrawLines';
 
@@ -42,11 +41,7 @@ const ReactAmap = ({ data = [], loading }, ref) => {
     data
   });
 
-  return (
-    <Spin spinning={loading}>
-      <div ref={domRef} className={styles.map} />
-    </Spin>
-  );
+  return <div ref={domRef} className={styles.map} />;
 };
 
 export default forwardRef(ReactAmap);

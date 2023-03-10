@@ -140,7 +140,7 @@ const loadMyPathSimplifier = () => {
 
 ### 实现效果
 
-[path-simplifiers](embedded-codesandbox://amap-big-data-component-optimize/path-simplifiers?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+[path-simplifiers](embedded-codesandbox://amap-big-data-component-optimize/path-simplifiers?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1&view=preview)
 
 ## Polyline
 
@@ -212,11 +212,11 @@ const handleClearLines = (map, clearLines) => {
 
 #### v2.0
 
-[polyline-2](embedded-codesandbox://amap-big-data-component-optimize/polyline-2?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+[polyline-2](embedded-codesandbox://amap-big-data-component-optimize/polyline-2?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1&view=preview)
 
 #### v1.4
 
-[polyline-1](embedded-codesandbox://amap-big-data-component-optimize/polyline-1?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1)
+[polyline-1](embedded-codesandbox://amap-big-data-component-optimize/polyline-1?module=/src/components/ReactAmap/hooks/useDrawLines.js&runonclick=1&view=preview)
 
 # 未来优化点
 

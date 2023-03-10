@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { } from 'react';
 import { useRequest } from 'ahooks';
 import simplify from 'simplify-js';
 

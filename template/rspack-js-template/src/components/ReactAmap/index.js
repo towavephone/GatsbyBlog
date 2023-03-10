@@ -22,7 +22,7 @@ const ReactAmap = ({ data = [], loading }, ref) => {
   useAsyncEffect(async () => {
     await AMapLoader.load({
       key: 'cc1b3b4a8dddb5dfbd6752a407dd8fc5',
-      version: '2.0',
+      version: '1.4.15',
       plugins: ['AMap.Scale', 'AMap.ToolBar']
     });
     const map = new window.AMap.Map(domRef.current, {
@@ -41,7 +41,9 @@ const ReactAmap = ({ data = [], loading }, ref) => {
     data
   });
 
-  return <div ref={domRef} className={styles.map} />;
+  return (
+    <div ref={domRef} className={styles.map} />
+  );
 };
 
 export default forwardRef(ReactAmap);

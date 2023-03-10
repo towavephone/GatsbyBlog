@@ -1,14 +1,13 @@
 import AMapLoader from '@amap/amap-jsapi-loader';
 import React, { useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useAsyncEffect } from 'ahooks';
-import { Spin } from 'antd';
 
 import useDrawLines from './hooks/useDrawLines';
 
 import styles from './index.module.less';
 
 // eslint-disable-next-line react/prop-types
-const ReactAmap = ({ data = [], loading, mode = 'simple' }, ref) => {
+const ReactAmap = ({ data = [], loading }, ref) => {
   const domRef = useRef(null);
   const [map, setMap] = useState();
 
@@ -42,11 +41,7 @@ const ReactAmap = ({ data = [], loading, mode = 'simple' }, ref) => {
     data
   });
 
-  return (
-    <Spin spinning={loading} >
-      <div ref={domRef} className={styles.map} />
-    </Spin>
-  );
+  return <div ref={domRef} className={styles.map} />;
 };
 
 export default forwardRef(ReactAmap);
