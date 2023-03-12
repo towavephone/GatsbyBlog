@@ -276,3 +276,5 @@ canvas 获取键盘输入
 等距矩形贴图实现天空盒
 
 [test-41-2](embedded-codesandbox://three-js-practice-test/test-41-2?module=index.js)
+
+// TODO threejs 练手测试

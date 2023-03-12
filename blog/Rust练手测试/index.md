@@ -1069,10 +1069,8 @@ fn main() {
 fn get_option(tp: u8) -> Option<i32> {
     match tp {
         1 => {
-            // TODO
         }
         _ => {
-            // TODO
         }
     };
 
@@ -2482,9 +2480,7 @@ fn main() {
 ```rust
 fn main() {
     let _t0: (u8,i16) = (0, -1);
-    // 元组的成员还可以是一个元组
     let _t1: (u8, (i16, u32)) = (0, (-1, 1));
-    // 填空让代码工作
     let t: (u8, u16, i64, &str, String) = (1u8, 2u16, 3i64, "hello", String::from(", world"));
 }
 ```
@@ -2502,7 +2498,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 修改合适的地方，让代码工作
 fn main() {
     let t = ("i", "am", "sunface");
     assert_eq!(t.2, "sunface");
@@ -2522,7 +2517,10 @@ fn main() {
 #### 我的解答
 
 ```rust
-
+fn main() {
+    let too_long_tuple = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    println!("too long tuple: {:?}", too_long_tuple);
+}
 ```
 
 ### 问题四
@@ -2546,7 +2544,6 @@ fn main() {
 fn main() {
     let tup = (1, 6.4, "hello");
 
-    // 填空
     let (x, z, y) = tup;
 
     assert_eq!(x, 1);
@@ -2576,7 +2573,6 @@ fn main() {
 fn main() {
     let (x, y, z);
 
-    // 填空
     (y, z, x) = (1, 2, 3);
 
     assert_eq!(x, 3);
@@ -2605,7 +2601,6 @@ fn sum_multiply(nums: (i32, i32)) -> (i32, i32) {
 
 ```rust
 fn main() {
-    // 填空，需要稍微计算下
     let (x, y) = sum_multiply((2, 3));
 
     assert_eq!(x, 5);
@@ -2640,7 +2635,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// fix the error
 struct Person {
     name: String,
     age: u8,
@@ -2681,18 +2675,14 @@ fn do_something_with_unit(u: __) {   }
 ```rust
 struct Unit;
 trait SomeTrait {
-    // ...定义一些行为
 }
 
-// 我们并不关心结构体中有什么数据(字段)，但我们关心它的行为。
-// 因此这里我们使用没有任何字段的单元结构体，然后为它实现一些行为
 impl SomeTrait for Unit {}
 fn main() {
     let u = Unit;
     do_something_with_unit(u);
 }
 
-// 填空，让代码工作
 fn do_something_with_unit(u: Unit) {}
 ```
 
@@ -2718,7 +2708,6 @@ fn check_color(p: Color) {
 #### 我的解答
 
 ```rust
-// 填空并修复错误
 struct Color(i32, i32, i32);
 struct Point(i32, i32, i32);
 fn main() {
@@ -2760,7 +2749,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 填空并修复错误，不要增加或移除代码行
 struct Person {
     name: String,
     age: u8,
@@ -2772,10 +2760,8 @@ fn main() {
         age,
     };
 
-    // how can you believe sunface is only 18?
     p.age = 30;
 
-    // 填空
     p.name = String::from("sunfei");
 }
 ```
@@ -2801,7 +2787,6 @@ fn build_person(name: String, age: u8) -> Person {
 #### 我的解答
 
 ```rust
-// 填空
 struct Person {
     name: String,
     age: u8,
@@ -2848,7 +2833,6 @@ fn set_email(u: User) -> User {
 #### 我的解答
 
 ```rust
-// 填空，让代码工作
 struct User {
     active: bool,
     username: String,
@@ -2900,7 +2884,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 填空，让代码工作
 #[derive(Debug)]
 struct Rectangle {
     width: u32,
@@ -2910,13 +2893,13 @@ struct Rectangle {
 fn main() {
     let scale = 2;
     let rect1 = Rectangle {
-        width: dbg!(30 * scale), // 打印 debug 信息到标准错误输出 stderr,并将 `30 * scale` 的值赋给 `width`
+        width: dbg!(30 * scale),
         height: 50,
     };
 
-    dbg!(&rect1); // 打印 debug 信息到标准错误输出 stderr
+    dbg!(&rect1);
 
-    println!("{:#?}", rect1); // 打印 debug 信息到标准输出 stdout
+    println!("{:#?}", rect1);
 }
 ```
 
@@ -2976,7 +2959,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 修复错误
 #[derive(Debug)]
 struct File {
     name: String,
@@ -2990,7 +2972,6 @@ fn main() {
 
     let _name = f.name;
 
-    // 只能修改这一行
     println!("{}, {}", _name, f.data);
 }
 ```
@@ -3031,7 +3012,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 修复错误
 enum Number {
     Zero,
     One,
@@ -3044,7 +3024,6 @@ enum Number1 {
     Two,
 }
 
-// C语言风格的枚举定义
 enum Number2 {
     Zero = 0,
     One = 1,
@@ -3053,7 +3032,6 @@ enum Number2 {
 
 
 fn main() {
-    // 通过 `as` 可以将枚举值强转为整数类型
     assert_eq!(Number::One as u8, Number1::One as u8);
     assert_eq!(Number1::One as u8, Number2::One as u8);
 }
@@ -3079,7 +3057,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 填空
 enum Message {
     Quit,
     Move { x: i32, y: i32 },
@@ -3088,8 +3065,8 @@ enum Message {
 }
 
 fn main() {
-    let msg1 = Message::Move { x: 1, y: 2 }; // 使用x = 1, y = 2 来初始化
-    let msg2 = Message::Write(String::from("hello, world!")); // 使用 "hello, world!" 来初始化
+    let msg1 = Message::Move { x: 1, y: 2 };
+    let msg2 = Message::Write(String::from("hello, world!"));
 }
 ```
 
@@ -3118,7 +3095,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 仅填空并修复错误
 enum Message {
     Quit,
     Move { x: i32, y: i32 },
@@ -3168,7 +3144,6 @@ fn show_message(msg: Message) {
 #### 我的解答
 
 ```rust
-// 填空，并修复错误
 #[derive(Debug)]
 enum Message {
     Quit,
@@ -3221,7 +3196,6 @@ fn plus_one(x: Option<i32>) -> Option<i32> {
 #### 我的解答
 
 ```rust
-// 填空让 `println` 输出，同时添加一些代码不要让最后一行的 `panic` 执行到
 fn main() {
     let five = Some(5);
     let six = plus_one(five);
@@ -3312,45 +3286,32 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 填空，让代码运行
 use crate::List::*;
 
 enum List {
-    // Cons: 链表中包含有值的节点，节点是元组类型，第一个元素是节点的值，第二个元素是指向下一个节点的指针
     Cons(u32, Box<List>),
-    // Nil: 链表中的最后一个节点，用于说明链表的结束
     Nil,
 }
 
-// 为枚举实现一些方法
 impl List {
-    // 创建空的链表
     fn new() -> List {
-        // 因为没有节点，所以直接返回 Nil 节点
-        // 枚举成员 Nil 的类型是 List
         Nil
     }
 
-    // 在老的链表前面新增一个节点，并返回新的链表
     fn prepend(self, elem: u32) -> List {
         Cons(elem, Box::new(self))
     }
 
-    // 返回链表的长度
     fn len(&self) -> u32 {
         match *self {
-            // 这里我们不能拿走 tail 的所有权，因此需要获取它的引用
             Cons(_, ref tail) => 1 + tail.len(),
-            // 空链表的长度为 0
             Nil => 0
         }
     }
 
-    // 返回链表的字符串表现形式，用于打印输出
     fn stringify(&self) -> String {
         match *self {
             Cons(head, ref tail) => {
-                // 递归生成字符串
                 format!("{}, {}", head, tail.stringify())
             },
             Nil => {
@@ -3361,18 +3322,854 @@ impl List {
 }
 
 fn main() {
-    // 创建一个新的链表(也是空的)
     let mut list = List::new();
 
-    // 添加一些元素
     list = list.prepend(1);
     list = list.prepend(2);
     list = list.prepend(3);
 
-    // 打印列表的当前状态
     println!("链表的长度是: {}", list.len());
     println!("{}", list.stringify());
 }
 ```
 
-// TODO https://zh.practice.rs/compound-types/string.html
+// TODO 练习到这里
+
+# 流程控制
+
+## 问题一
+
+```rust
+// 填空
+fn main() {
+    let n = 5;
+
+    if n < 0 {
+        println!("{} is negative", n);
+    } __ n > 0 {
+        println!("{} is positive", n);
+    } __ {
+        println!("{} is zero", n);
+    }
+} 
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题二
+
+```rust
+// 修复错误
+fn main() {
+    let n = 5;
+
+    let big_n =
+        if n < 10 && n > -10 {
+            println!(" 数字太小，先增加 10 倍再说");
+
+            10 * n
+        } else {
+            println!("数字太大，我们得让它减半");
+
+            n / 2.0 ;
+        }
+
+    println!("{} -> {}", n, big_n);
+} 
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题三
+
+```rust
+fn main() {
+    for n in 1..=100 { // 修改此行，让代码工作
+        if n == 100 {
+            panic!("NEVER LET THIS RUN")
+        }
+    }
+} 
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题四
+
+```rust
+// 修复错误，不要新增或删除代码行
+fn main() {
+    let names = [String::from("liming"),String::from("hanmeimei")];
+    for name in names {
+        // do something with name...
+    }
+
+    println!("{:?}", names);
+
+    let numbers = [1, 2, 3];
+    // numbers中的元素实现了 Copy，因此无需转移所有权
+    for n in numbers {
+        // do something with name...
+    }
+    
+    println!("{:?}", numbers);
+} 
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题五
+
+```rust
+fn main() {
+    let a = [4,3,2,1];
+
+    // 通过索引和值的方式迭代数组 `a` 
+    for (i,v) in a.__ {
+        println!("第{}个元素是{}",i+1,v);
+    }
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题六
+
+```rust
+// 填空，让最后一行的  println! 工作 !
+fn main() {
+    // 一个计数值
+    let mut n = 1;
+
+    // 当条件为真时，不停的循环
+    while n __ 10 {
+        if n % 15 == 0 {
+            println!("fizzbuzz");
+        } else if n % 3 == 0 {
+            println!("fizz");
+        } else if n % 5 == 0 {
+            println!("buzz");
+        } else {
+            println!("{}", n);
+        }
+
+
+        __;
+    }
+
+    println!("n 的值是 {}, 循环结束",n);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题七
+
+```rust
+// 填空，不要修改其它代码
+fn main() {
+    let mut n = 0;
+    for i in 0..=100 {
+       if n == 66 {
+           __
+       }
+       n += 1;
+    }
+
+    assert_eq!(n, 66);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题八
+
+```rust
+// 填空，不要修改其它代码
+fn main() {
+    let mut n = 0;
+    for i in 0..=100 {
+       if n != 66 {
+           n+=1;
+           __;
+       }
+       
+       __
+    }
+
+    assert_eq!(n, 66);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题九
+
+```rust
+// 填空，不要修改其它代码
+fn main() {
+    let mut count = 0u32;
+
+    println!("Let's count until infinity!");
+
+    // 无限循环
+    loop {
+        count += 1;
+
+        if count == 3 {
+            println!("three");
+
+            // 跳过当此循环的剩余代码
+            __;
+        }
+
+        println!("{}", count);
+
+        if count == 5 {
+            println!("OK, that's enough");
+
+            __;
+        }
+    }
+
+    assert_eq!(count, 5);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题十
+
+```rust
+// 填空
+fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            __;
+        }
+    };
+
+    assert_eq!(result, 20);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题十一
+
+```rust
+// 填空
+fn main() {
+    let mut count = 0;
+    'outer: loop {
+        'inner1: loop {
+            if count >= 20 {
+                // 这只会跳出 inner1 循环
+                break 'inner1; // 这里使用 `break` 也是一样的
+            }
+            count += 2;
+        }
+
+        count += 5;
+
+        'inner2: loop {
+            if count >= 30 {
+                break 'outer;
+            }
+
+            continue 'outer;
+        }
+    }
+
+    assert!(count == __)
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+# 模式匹配
+
+## match 和 if let
+
+### 问题一
+
+```rust
+// 填空
+enum Direction {
+    East,
+    West,
+    North,
+    South,
+}
+
+fn main() {
+    let dire = Direction::South;
+    match dire {
+        Direction::East => println!("East"),
+        __  => { // 在这里匹配 South 或 North
+            println!("South or North");
+        },
+        _ => println!(__),
+    };
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题二
+
+```rust
+fn main() {
+    let boolean = true;
+
+    // 使用 match 表达式填空，并满足以下条件
+    //
+    // boolean = true => binary = 1
+    // boolean = false => binary = 0
+    let binary = __;
+
+    assert_eq!(binary, 1);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题三
+
+```rust
+// 填空
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn main() {
+    let msgs = [
+        Message::Quit,
+        Message::Move{x:1, y:3},
+        Message::ChangeColor(255,255,0)
+    ];
+
+    for msg in msgs {
+        show_message(msg)
+    }
+} 
+
+fn show_message(msg: Message) {
+    match msg {
+        __ => { // 这里匹配 Message::Move
+            assert_eq!(a, 1);
+            assert_eq!(b, 3);
+        },
+        Message::ChangeColor(_, g, b) => {
+            assert_eq!(g, __);
+            assert_eq!(b, __);
+        }
+        __ => println!("no data in these variants")
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题四
+
+```rust
+fn main() {
+    let alphabets = ['a', 'E', 'Z', '0', 'x', '9' , 'Y'];
+
+    // 使用 `matches` 填空
+    for ab in alphabets {
+        assert!(__)
+    }
+} 
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题五
+
+```rust
+enum MyEnum {
+    Foo,
+    Bar
+}
+
+fn main() {
+    let mut count = 0;
+
+    let v = vec![MyEnum::Foo,MyEnum::Bar,MyEnum::Foo];
+    for e in v {
+        if e == MyEnum::Foo { // 修复错误，只能修改本行代码
+            count += 1;
+        }
+    }
+
+    assert_eq!(count, 2);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题六
+
+```rust
+fn main() {
+    let o = Some(7);
+
+    // 移除整个 `match` 语句块，使用 `if let` 替代
+    match o {
+        Some(i) => {
+            println!("This is a really long string and `{:?}`", i);
+        }
+        _ => {}
+    };
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题七
+
+```rust
+// 填空
+enum Foo {
+    Bar(u8)
+}
+
+fn main() {
+    let a = Foo::Bar(1);
+
+    __ {
+        println!("foobar 持有的值是: {}", i);
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题八
+
+```rust
+enum Foo {
+    Bar,
+    Baz,
+    Qux(u32)
+}
+
+fn main() {
+    let a = Foo::Qux(10);
+
+    // 移除以下代码，使用 `match` 代替
+    if let Foo::Bar = a {
+        println!("match foo::bar")
+    } else if let Foo::Baz = a {
+        println!("match foo::baz")
+    } else {
+        println!("match others")
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题九
+
+```rust
+// 就地修复错误
+fn main() {
+    let age = Some(30);
+    if let Some(age) = age { // 创建一个新的变量，该变量与之前的 `age` 变量同名
+       assert_eq!(age, Some(30));
+    } // 新的 `age` 变量在这里超出作用域
+    
+    match age {
+        // `match` 也能实现变量遮蔽
+        Some(age) =>  println!("age 是一个新的变量，它的值是 {}",age),
+        _ => ()
+    }
+ }
+```
+
+#### 我的解答
+
+```rust
+```
+
+## 模式
+
+### 问题一
+
+```rust
+fn main() {}
+fn match_number(n: i32) {
+    match n {
+        // 匹配一个单独的值
+        1 => println!("One!"),
+        // 使用 `|` 填空，不要使用 `..` 或 `..=`
+        __ => println!("match 2 -> 5"),
+        // 匹配一个闭区间的数值序列
+        6..=10 => {
+            println!("match 6 -> 10")
+        },
+        _ => {
+            println!("match 11 -> +infinite")
+        }
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题二
+
+```rust
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    // 填空，让 p 匹配第二个分支
+    let p = Point { x: __, y: __ };
+
+    match p {
+        Point { x, y: 0 } => println!("On the x axis at {}", x),
+        // 第二个分支
+        Point { x: 0..=5, y: y@ (10 | 20 | 30) } => println!("On the y axis at {}", y),
+        Point { x, y } => println!("On neither axis: ({}, {})", x, y),
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题三
+
+```rust
+// 修复错误
+enum Message {
+    Hello { id: i32 },
+}
+
+fn main() {
+    let msg = Message::Hello { id: 5 };
+
+    match msg {
+        Message::Hello {
+            id:  3..=7,
+        } => println!("id 值的范围在 [3, 7] 之间: {}", id),
+        Message::Hello { id: newid@10 | 11 | 12 } => {
+            println!("id 值的范围在 [10, 12] 之间: {}", newid)
+        }
+        Message::Hello { id } => println!("Found some other id: {}", id),
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题四
+
+```rust
+// 填空让代码工作，必须使用 `split`
+fn main() {
+    let num = Some(4);
+    let split = 5;
+    match num {
+        Some(x) __ => assert!(x < split),
+        Some(x) => assert!(x >= split),
+        None => (),
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题五
+
+```rust
+// 填空，让代码工作
+fn main() {
+    let numbers = (2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048);
+
+    match numbers {
+        __ => {
+           assert_eq!(first, 2);
+           assert_eq!(last, 2048);
+        }
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题六
+
+```rust
+// 修复错误，尽量少地修改代码
+// 不要移除任何代码行
+fn main() {
+    let mut v = String::from("hello,");
+    let r = &mut v;
+
+    match r {
+       &mut value => value.push_str(" world!") 
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+# 方法
+
+## 问题一
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // 完成 area 方法，返回矩形 Rectangle 的面积
+    fn area
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+
+    assert_eq!(rect1.area(), 1500);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题二
+
+```rust
+// 只填空，不要删除任何代码行!
+#[derive(Debug)]
+struct TrafficLight {
+    color: String,
+}
+
+impl TrafficLight {
+    pub fn show_state(__)  {
+        println!("the current state is {}", __.color);
+    }
+}
+fn main() {
+    let light = TrafficLight{
+        color: "red".to_owned(),
+    };
+    // 不要拿走 `light` 的所有权
+    light.show_state();
+    // 否则下面代码会报错
+    println!("{:?}", light);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题三
+
+```rust
+struct TrafficLight {
+    color: String,
+}
+
+impl TrafficLight {
+    // 使用 `Self` 填空
+    pub fn show_state(__)  {
+        println!("the current state is {}", self.color);
+    }
+
+    // 填空，不要使用 `Self` 或其变体
+    pub fn change_state(__) {
+        self.color = "green".to_string()
+    }
+}
+fn main() {}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题四
+
+```rust
+#[derive(Debug)]
+struct TrafficLight {
+    color: String,
+}
+
+impl TrafficLight {
+    // 1. 实现下面的关联函数 `new`,
+    // 2. 该函数返回一个 TrafficLight 实例，包含 `color` "red"
+    // 3. 该函数必须使用 `Self` 作为类型，不能在签名或者函数体中使用 `TrafficLight`
+    pub fn new() 
+
+    pub fn get_state(&self) -> &str {
+        &self.color
+    }
+}
+
+fn main() {
+    let light = TrafficLight::new();
+    assert_eq!(light.get_state(), "red");
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题五
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+// 使用多个 `impl` 语句块重写下面的代码
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+
+fn main() {}
+```
+
+### 我的解答
+
+```rust
+```
+
+## 问题六
+
+```rust
+#[derive(Debug)]
+enum TrafficLightColor {
+    Red,
+    Yellow,
+    Green,
+}
+
+// 为 TrafficLightColor 实现所需的方法
+impl TrafficLightColor {
+    
+}
+
+fn main() {
+    let c = TrafficLightColor::Yellow;
+
+    assert_eq!(c.color(), "yellow");
+
+    println!("{:?}",c);
+}
+```
+
+### 我的解答
+
+```rust
+```
+
+// TODO https://zh.practice.rs/generics-traits/intro.html
