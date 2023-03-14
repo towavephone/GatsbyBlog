@@ -3351,12 +3351,24 @@ fn main() {
     } __ {
         println!("{} is zero", n);
     }
-} 
+}
 ```
 
 ### 我的解答
 
 ```rust
+// 填空
+fn main() {
+    let n = 0;
+
+    if n < 0 {
+        println!("{} is negative", n);
+    } else if n > 0 {
+        println!("{} is positive", n);
+    } else {
+        println!("{} is zero", n);
+    }
+}
 ```
 
 ## 问题二
@@ -3378,12 +3390,28 @@ fn main() {
         }
 
     println!("{} -> {}", n, big_n);
-} 
+}
 ```
 
 ### 我的解答
 
 ```rust
+// 修复错误
+fn main() {
+    let n = 11;
+
+    let big_n = if n < 10 && n > -10 {
+        println!(" 数字太小，先增加 10 倍再说");
+
+        10 * n
+    } else {
+        println!("数字太大，我们得让它减半");
+
+        n / 2
+    };
+
+    println!("{} -> {}", n, big_n);
+}
 ```
 
 ## 问题三
@@ -3395,12 +3423,19 @@ fn main() {
             panic!("NEVER LET THIS RUN")
         }
     }
-} 
+}
 ```
 
 ### 我的解答
 
 ```rust
+fn main() {
+    for n in 1..100 { // 修改此行，让代码工作
+        if n == 100 {
+            panic!("NEVER LET THIS RUN")
+        }
+    }
+}
 ```
 
 ## 问题四
@@ -3420,14 +3455,31 @@ fn main() {
     for n in numbers {
         // do something with name...
     }
-    
+
     println!("{:?}", numbers);
-} 
+}
 ```
 
 ### 我的解答
 
 ```rust
+// 修复错误，不要新增或删除代码行
+fn main() {
+    let names = [String::from("liming"), String::from("hanmeimei")];
+    for name in &names {
+        // do something with name...
+    }
+
+    println!("{:?}", names);
+
+    let numbers = [1, 2, 3];
+    // numbers 中的元素实现了 Copy，因此无需转移所有权
+    for n in numbers {
+        // do something with name...
+    }
+
+    println!("{:?}", numbers);
+}
 ```
 
 ## 问题五
@@ -3436,7 +3488,7 @@ fn main() {
 fn main() {
     let a = [4,3,2,1];
 
-    // 通过索引和值的方式迭代数组 `a` 
+    // 通过索引和值的方式迭代数组 `a`
     for (i,v) in a.__ {
         println!("第{}个元素是{}",i+1,v);
     }
@@ -3446,12 +3498,20 @@ fn main() {
 ### 我的解答
 
 ```rust
+fn main() {
+    let a = [4, 3, 2, 1];
+
+    // 通过索引和值的方式迭代数组 `a`
+    for (i, v) in a.iter().enumerate() {
+        println!("第{}个元素是{}", i + 1, v);
+    }
+}
 ```
 
 ## 问题六
 
 ```rust
-// 填空，让最后一行的  println! 工作 !
+// 填空，让最后一行的 println! 工作 !
 fn main() {
     // 一个计数值
     let mut n = 1;
@@ -3479,6 +3539,28 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 填空，让最后一行的  println! 工作 !
+fn main() {
+    // 一个计数值
+    let mut n = 1;
+
+    // 当条件为真时，不停的循环
+    while n < 10 {
+        if n % 15 == 0 {
+            println!("fizzbuzz");
+        } else if n % 3 == 0 {
+            println!("fizz");
+        } else if n % 5 == 0 {
+            println!("buzz");
+        } else {
+            println!("{}", n);
+        }
+
+        n = n + 1;
+    }
+
+    println!("n 的值是 {}, 循环结束", n);
+}
 ```
 
 ## 问题七
@@ -3501,6 +3583,18 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 填空，不要修改其它代码
+fn main() {
+    let mut n = 0;
+    for i in 0..=100 {
+        if n == 66 {
+            break;
+        }
+        n += 1;
+    }
+
+    assert_eq!(n, 66);
+}
 ```
 
 ## 问题八
@@ -3514,7 +3608,7 @@ fn main() {
            n+=1;
            __;
        }
-       
+
        __
     }
 
@@ -3525,6 +3619,18 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 填空，不要修改其它代码
+fn main() {
+    let mut n = 0;
+    for i in 0..=100 {
+        if n != 66 {
+            n += 1;
+            continue;
+        }
+    }
+
+    assert_eq!(n, 66);
+}
 ```
 
 ## 问题九
@@ -3563,6 +3669,34 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 填空，不要修改其它代码
+fn main() {
+    let mut count = 0u32;
+
+    println!("Let's count until infinity!");
+
+    // 无限循环
+    loop {
+        count += 1;
+
+        if count == 3 {
+            println!("three");
+
+            // 跳过当此循环的剩余代码
+            continue;
+        }
+
+        println!("{}", count);
+
+        if count == 5 {
+            println!("OK, that's enough");
+
+            break;
+        }
+    }
+
+    assert_eq!(count, 5);
+}
 ```
 
 ## 问题十
@@ -3587,6 +3721,20 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 填空
+fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    };
+
+    assert_eq!(result, 20);
+}
 ```
 
 ## 问题十一
@@ -3622,6 +3770,31 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 填空
+fn main() {
+    let mut count = 0;
+    'outer: loop {
+        'inner1: loop {
+            if count >= 20 {
+                // 这只会跳出 inner1 循环
+                break 'inner1; // 这里使用 `break` 也是一样的
+            }
+            count += 2;
+        }
+
+        count += 5;
+
+        'inner2: loop {
+            if count >= 30 {
+                break 'outer;
+            }
+
+            continue 'outer;
+        }
+    }
+
+    assert!(count == 30)
+}
 ```
 
 # 模式匹配
@@ -3654,6 +3827,25 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 填空
+enum Direction {
+    East,
+    West,
+    North,
+    South,
+}
+
+fn main() {
+    let dire = Direction::South;
+    match dire {
+        Direction::East => println!("East"),
+        Direction::South | Direction::North => {
+            // 在这里匹配 South 或 North
+            println!("South or North");
+        }
+        _ => println!("West"),
+    };
+}
 ```
 
 ### 问题二
@@ -3675,6 +3867,20 @@ fn main() {
 #### 我的解答
 
 ```rust
+fn main() {
+    let boolean = true;
+
+    // 使用 match 表达式填空，并满足以下条件
+    //
+    // boolean = true => binary = 1
+    // boolean = false => binary = 0
+    let binary = match boolean {
+        true => 1,
+        false => 0,
+    };
+
+    assert_eq!(binary, 1);
+}
 ```
 
 ### 问题三
@@ -3698,7 +3904,7 @@ fn main() {
     for msg in msgs {
         show_message(msg)
     }
-} 
+}
 
 fn show_message(msg: Message) {
     match msg {
@@ -3718,6 +3924,40 @@ fn show_message(msg: Message) {
 #### 我的解答
 
 ```rust
+// 填空
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn main() {
+    let msgs = [
+        Message::Quit,
+        Message::Move { x: 1, y: 3 },
+        Message::ChangeColor(255, 255, 0),
+    ];
+
+    for msg in msgs {
+        show_message(msg)
+    }
+}
+
+fn show_message(msg: Message) {
+    match msg {
+        Message::Move { x: a, y: b } => {
+            // 这里匹配 Message::Move
+            assert_eq!(a, 1);
+            assert_eq!(b, 3);
+        }
+        Message::ChangeColor(_, g, b) => {
+            assert_eq!(g, 255);
+            assert_eq!(b, 0);
+        }
+        __ => println!("no data in these variants"),
+    }
+}
 ```
 
 ### 问题四
@@ -3730,12 +3970,20 @@ fn main() {
     for ab in alphabets {
         assert!(__)
     }
-} 
+}
 ```
 
 #### 我的解答
 
 ```rust
+fn main() {
+    let alphabets = ['a', 'E', 'Z', '0', 'x', '9', 'Y'];
+
+    // 使用 `matches` 填空
+    for ab in alphabets {
+        assert!(matches!(ab, 'a'..='z' | 'A'..='Z' | '0'..='9'))
+    }
+}
 ```
 
 ### 问题五
@@ -3763,6 +4011,43 @@ fn main() {
 #### 我的解答
 
 ```rust
+enum MyEnum {
+    Foo,
+    Bar
+}
+
+fn main() {
+    let mut count = 0;
+
+    let v = vec![MyEnum::Foo,MyEnum::Bar,MyEnum::Foo];
+    for e in v {
+        if matches!(e, MyEnum::Foo) { // 修复错误，只能修改本行代码
+            count += 1;
+        }
+    }
+
+    assert_eq!(count, 2);
+}
+```
+
+```rust
+enum MyEnum {
+    Foo,
+    Bar
+}
+
+fn main() {
+    let mut count = 0;
+
+    let v = vec![MyEnum::Foo,MyEnum::Bar,MyEnum::Foo];
+    for e in v {
+        if let MyEnum::Foo = e { // 修复错误，只能修改本行代码
+            count += 1;
+        }
+    }
+
+    assert_eq!(count, 2);
+}
 ```
 
 ### 问题六
@@ -3784,6 +4069,13 @@ fn main() {
 #### 我的解答
 
 ```rust
+fn main() {
+    let o = Some(7);
+
+    if let Some(i) = o {
+        println!("This is a really long string and `{:?}`", i);
+    }
+}
 ```
 
 ### 问题七
@@ -3806,6 +4098,18 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 填空
+enum Foo {
+    Bar(u8),
+}
+
+fn main() {
+    let a = Foo::Bar(1);
+
+    if let Foo::Bar(i) = a {
+        println!("foobar 持有的值是: {}", i);
+    }
+}
 ```
 
 ### 问题八
@@ -3834,6 +4138,21 @@ fn main() {
 #### 我的解答
 
 ```rust
+enum Foo {
+    Bar,
+    Baz,
+    Qux(u32),
+}
+
+fn main() {
+    let a = Foo::Qux(10);
+
+    match a {
+        Foo::Bar => println!("match foo::bar"),
+        Foo::Baz => println!("match foo::baz"),
+        _ => println!("match others"),
+    }
+}
 ```
 
 ### 问题九
@@ -3845,7 +4164,7 @@ fn main() {
     if let Some(age) = age { // 创建一个新的变量，该变量与之前的 `age` 变量同名
        assert_eq!(age, Some(30));
     } // 新的 `age` 变量在这里超出作用域
-    
+
     match age {
         // `match` 也能实现变量遮蔽
         Some(age) =>  println!("age 是一个新的变量，它的值是 {}",age),
@@ -3857,6 +4176,19 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 就地修复错误
+fn main() {
+    let age = Some(30);
+    if let Some(age) = age { // 创建一个新的变量，该变量与之前的 `age` 变量同名
+        assert_eq!(age, 30);
+    } // 新的 `age` 变量在这里超出作用域
+
+    match age {
+        // `match` 也能实现变量遮蔽
+        Some(age) => println!("age 是一个新的变量，它的值是 {}", age),
+        _ => (),
+    }
+}
 ```
 
 ## 模式
@@ -3885,6 +4217,7 @@ fn match_number(n: i32) {
 #### 我的解答
 
 ```rust
+
 ```
 
 ### 问题二
@@ -3911,6 +4244,7 @@ fn main() {
 #### 我的解答
 
 ```rust
+
 ```
 
 ### 问题三
@@ -3939,6 +4273,7 @@ fn main() {
 #### 我的解答
 
 ```rust
+
 ```
 
 ### 问题四
@@ -3959,6 +4294,7 @@ fn main() {
 #### 我的解答
 
 ```rust
+
 ```
 
 ### 问题五
@@ -3980,6 +4316,7 @@ fn main() {
 #### 我的解答
 
 ```rust
+
 ```
 
 ### 问题六
@@ -3992,7 +4329,7 @@ fn main() {
     let r = &mut v;
 
     match r {
-       &mut value => value.push_str(" world!") 
+       &mut value => value.push_str(" world!")
     }
 }
 ```
@@ -4000,6 +4337,7 @@ fn main() {
 #### 我的解答
 
 ```rust
+
 ```
 
 # 方法
@@ -4027,6 +4365,7 @@ fn main() {
 ### 我的解答
 
 ```rust
+
 ```
 
 ## 问题二
@@ -4057,6 +4396,7 @@ fn main() {
 ### 我的解答
 
 ```rust
+
 ```
 
 ## 问题三
@@ -4083,6 +4423,7 @@ fn main() {}
 ### 我的解答
 
 ```rust
+
 ```
 
 ## 问题四
@@ -4097,7 +4438,7 @@ impl TrafficLight {
     // 1. 实现下面的关联函数 `new`,
     // 2. 该函数返回一个 TrafficLight 实例，包含 `color` "red"
     // 3. 该函数必须使用 `Self` 作为类型，不能在签名或者函数体中使用 `TrafficLight`
-    pub fn new() 
+    pub fn new()
 
     pub fn get_state(&self) -> &str {
         &self.color
@@ -4113,6 +4454,7 @@ fn main() {
 ### 我的解答
 
 ```rust
+
 ```
 
 ## 问题五
@@ -4141,6 +4483,7 @@ fn main() {}
 ### 我的解答
 
 ```rust
+
 ```
 
 ## 问题六
@@ -4155,7 +4498,7 @@ enum TrafficLightColor {
 
 // 为 TrafficLightColor 实现所需的方法
 impl TrafficLightColor {
-    
+
 }
 
 fn main() {
@@ -4170,6 +4513,7 @@ fn main() {
 ### 我的解答
 
 ```rust
+
 ```
 
 // TODO https://zh.practice.rs/generics-traits/intro.html
