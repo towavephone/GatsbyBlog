@@ -13,9 +13,9 @@ path: /rust-practice-test/
 
 # 变量绑定与解构
 
-## 绑定和可变性
+## 问题一
 
-### 变量只有在初始化后才能被使用
+变量只有在初始化后才能被使用
 
 ```rust
 // 修复下面代码的错误并尽可能少的修改
@@ -26,7 +26,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 // 修复下面代码的错误并尽可能少的修改
@@ -37,7 +37,9 @@ fn main() {
 }
 ```
 
-### 可以使用 mut 将变量标记为可变
+## 问题二
+
+可以使用 mut 将变量标记为可变
 
 ```rust
 // 完形填空，让代码编译
@@ -49,7 +51,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 // 完形填空，让代码编译
@@ -61,11 +63,9 @@ fn main() {
 }
 ```
 
-## 变量作用域
+## 问题三
 
-### 作用域是一个变量在程序中能够保持合法的范围
-
-#### 问题一
+作用域是一个变量在程序中能够保持合法的范围
 
 ```rust
 // 修复下面代码的错误并使用尽可能少的改变
@@ -79,7 +79,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+### 我的解答
 
 ```rust
 // 修复下面代码的错误并使用尽可能少的改变
@@ -93,7 +93,7 @@ fn main() {
 }
 ```
 
-##### 最佳解答
+### 最佳解答
 
 ```rust
 fn main() {
@@ -106,7 +106,7 @@ fn main() {
 }
 ```
 
-#### 问题二
+## 问题四
 
 ```rust
 // 修复错误
@@ -119,7 +119,7 @@ fn define_x() {
 }
 ```
 
-##### 我的解答
+### 我的解答
 
 ```rust
 // 修复错误
@@ -134,7 +134,7 @@ fn define_x() -> &'static str {
 }
 ```
 
-##### 最佳解答
+### 最佳解答
 
 ```rust
 fn main() {
@@ -148,9 +148,9 @@ fn define_x() -> String {
 }
 ```
 
-## 变量遮蔽（Shadowing）
+## 问题五
 
-### 若后面的变量声明的名称和之前的变量相同，则我们说：第一个变量被第二个同名变量遮蔽了（shadowing）
+若后面的变量声明的名称和之前的变量相同，则我们说：第一个变量被第二个同名变量遮蔽了（shadowing）
 
 ```rust
 // 只允许修改 `assert_eq!` 来让 `println!` 工作(在终端输出 `42`)
@@ -168,7 +168,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 // 只允许修改 `assert_eq!` 来让 `println!` 工作(在终端输出 `42`)
@@ -186,7 +186,9 @@ fn main() {
 }
 ```
 
-### 删除一行代码以通过编译
+## 问题六
+
+删除一行代码以通过编译
 
 ```rust
 fn main() {
@@ -203,7 +205,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 fn main() {
@@ -218,9 +220,9 @@ fn main() {
 }
 ```
 
-## 未使用的变量
+## 问题七
 
-### 使用以下方法来修复编译器输出的 warning:
+使用以下方法来修复编译器输出的 warning:
 
 - 一种方法
 - 两种方法
@@ -235,7 +237,7 @@ fn main() {
 // compiler warning: unused variable: `x`
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 fn main() {
@@ -254,9 +256,9 @@ fn main() {
 // compiler warning: unused variable: `x`
 ```
 
-## 变量解构
+## 问题八
 
-### 我们可以将 let 跟一个模式一起使用来解构一个元组，最终将它解构为多个独立的变量
+我们可以将 let 跟一个模式一起使用来解构一个元组，最终将它解构为多个独立的变量
 
 ```rust
 // 修复下面代码的错误并尽可能少的修改
@@ -269,7 +271,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 // 修复下面代码的错误并尽可能少的修改
@@ -293,9 +295,9 @@ fn main() {
 }
 ```
 
-## 解构式赋值
+## 问题九
 
-### 在赋值语句的左式中使用元组、切片或结构体进行匹配赋值。
+在赋值语句的左式中使用元组、切片或结构体进行匹配赋值。
 
 ```rust
 fn main() {
@@ -307,7 +309,7 @@ fn main() {
 }
 ```
 
-#### 我的解答
+### 我的解答
 
 ```rust
 fn main() {
@@ -323,11 +325,9 @@ fn main() {
 
 ## 数值类型
 
-### 整数
+### 问题一
 
-#### 如果我们没有显式的给予变量一个类型，那编译器会自动帮我们推导一个类型
-
-##### 问题一
+如果我们没有显式的给予变量一个类型，那编译器会自动帮我们推导一个类型
 
 ```rust
 // 移除某个部分让代码工作
@@ -341,7 +341,7 @@ fn main() {
 }
 ```
 
-###### 我的解答
+#### 我的解答
 
 ```rust
 // 移除某个部分让代码工作
@@ -355,7 +355,7 @@ fn main() {
 }
 ```
 
-###### 最佳解答
+#### 最佳解答
 
 ```rust
 fn main() {
@@ -368,7 +368,7 @@ fn main() {
 }
 ```
 
-##### 问题二
+### 问题二
 
 ```rust
 // 填空
@@ -377,7 +377,7 @@ fn main() {
 }
 ```
 
-###### 我的解答
+#### 我的解答
 
 ```rust
 // 填空
@@ -386,7 +386,7 @@ fn main() {
 }
 ```
 
-##### 问题三
+### 问题三
 
 ```rust
 //  修改 `assert_eq!` 让代码工作
@@ -401,7 +401,7 @@ fn type_of<T>(_: &T) -> String {
 }
 ```
 
-###### 我的解答
+#### 我的解答
 
 ```rust
 //  修改 `assert_eq!` 让代码工作
@@ -416,7 +416,7 @@ fn type_of<T>(_: &T) -> String {
 }
 ```
 
-##### 问题四
+### 问题四
 
 ```rust
 // 填空，让代码工作
@@ -426,7 +426,7 @@ fn main() {
 }
 ```
 
-###### 我的解答
+#### 我的解答
 
 ```rust
 // 填空，让代码工作
@@ -436,7 +436,7 @@ fn main() {
 }
 ```
 
-##### 问题五
+### 问题五
 
 ```rust
 // 解决代码中的错误和 `panic`
@@ -447,7 +447,7 @@ fn main() {
 }
 ```
 
-###### 我的解答
+#### 我的解答
 
 ```rust
 // 解决代码中的错误和 `panic`
@@ -458,7 +458,7 @@ fn main() {
 }
 ```
 
-###### 最佳解答
+#### 最佳解答
 
 ```rust
 fn main() {
@@ -468,7 +468,7 @@ fn main() {
 }
 ```
 
-##### 问题六
+### 问题六
 
 ```rust
 // 修改 `assert!` 让代码工作
@@ -478,7 +478,7 @@ fn main() {
 }
 ```
 
-###### 我的解答
+#### 我的解答
 
 ```rust
 // 修改 `assert!` 让代码工作
@@ -488,9 +488,7 @@ fn main() {
 }
 ```
 
-### 浮点数
-
-#### 问题一
+### 问题七
 
 ```rust
 // 将 ? 替换成你的答案
@@ -501,7 +499,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 将 ? 替换成你的答案
@@ -512,7 +510,7 @@ fn main() {
 }
 ```
 
-#### 问题二
+### 问题八
 
 使用两种方法来让下面代码工作
 
@@ -522,7 +520,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 fn main() {
@@ -536,9 +534,7 @@ fn main() {
 }
 ```
 
-### 序列 Range
-
-#### 问题一
+### 问题九
 
 两个目标:
 
@@ -560,7 +556,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 fn main() {
@@ -577,7 +573,7 @@ fn main() {
 }
 ```
 
-##### 最佳解答
+#### 最佳解答
 
 ```rust
 fn main() {
@@ -594,7 +590,7 @@ fn main() {
 }
 ```
 
-#### 问题二
+### 问题十
 
 ```rust
 // 填空
@@ -605,7 +601,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 填空
@@ -616,7 +612,7 @@ fn main() {
 }
 ```
 
-### 计算
+### 问题十一
 
 ```rust
 // 填空，并解决错误
@@ -682,9 +678,7 @@ fn main() {
 
 ## 字符、布尔、单元类型
 
-### 字符
-
-#### 问题一
+### 问题一
 
 ```rust
 //  修改 2 处 `assert_eq!` 让代码工作
@@ -701,7 +695,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 修改 2 处 `assert_eq!` 让代码工作
@@ -718,7 +712,7 @@ fn main() {
 }
 ```
 
-#### 问题二
+### 问题二
 
 ```rust
 // 修改一行让代码正常打印
@@ -732,7 +726,7 @@ fn print_char(c : char) {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 修改一行让代码正常打印
@@ -746,9 +740,7 @@ fn print_char(c: char) {
 }
 ```
 
-### 布尔
-
-#### 问题一
+### 问题三
 
 ```rust
 // 使成功打印
@@ -762,7 +754,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 使成功打印
@@ -776,7 +768,7 @@ fn main() {
 }
 ```
 
-#### 问题二
+### 问题四
 
 ```rust
 fn main() {
@@ -788,7 +780,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 fn main() {
@@ -800,9 +792,7 @@ fn main() {
 }
 ```
 
-### 单元类型
-
-#### 问题一
+### 问题五
 
 ```rust
 // 让代码工作，但不要修改 `implicitly_ret_unit` !
@@ -825,7 +815,7 @@ fn explicitly_ret_unit() -> () {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 让代码工作，但不要修改 `implicitly_ret_unit` !
@@ -848,7 +838,7 @@ fn explicitly_ret_unit() -> () {
 }
 ```
 
-#### 问题二
+### 问题六
 
 单元类型占用的内存大小是多少？
 
@@ -863,7 +853,7 @@ fn main() {
 }
 ```
 
-##### 我的解答
+#### 我的解答
 
 ```rust
 // 让代码工作：修改 `assert!` 中的 `4`
@@ -1060,6 +1050,8 @@ fn never_return() -> ! {
 ```
 
 ### 问题四
+
+发散函数(Diverging function)不会返回任何值，因此它们可以用于替代需要返回任何值的地方
 
 ```rust
 fn main() {
@@ -1343,6 +1335,8 @@ fn main() {
 
 ### 问题六
 
+当所有权转移时，可变性也可以随之改变
+
 ```rust
 fn main() {
     let s = String::from("hello, ");
@@ -1386,7 +1380,7 @@ fn main() {
 fn main() {
     let x = Box::new(5);
 
-    let mut y = Box::new(1);    // 完成该行代码，不要修改其它行！
+    let mut y = Box::new(1);
 
     *y = 4;
 
@@ -1395,6 +1389,10 @@ fn main() {
 ```
 
 ### 问题八
+
+当解构一个变量时，可以同时使用 move 和引用模式绑定的方式。当这么做时，部分 move 就会发生：变量中一部分的所有权被转移给其它变量，而另一部分我们获取了它的引用。
+
+在这种情况下，原变量将无法再被使用，但是它没有转移所有权的那一部分依然可以使用，也就是之前被引用的那部分。
 
 ```rust
 fn main() {
@@ -1438,7 +1436,6 @@ fn main() {
 fn main() {
     let t = (String::from("hello"), String::from("world"));
 
-    // 填空，不要修改其它代码
     let (ref s1, ref s2) = t;
 
     println!("{:?}, {:?}, {:?}", s1, s2, t); // -> "hello", "world", ("hello", "world")
@@ -1449,7 +1446,6 @@ fn main() {
 fn main() {
     let t = (String::from("hello"), String::from("world"));
 
-    // 填空，不要修改其它代码
     let (ref s1, ref s2) = t.clone();
 
     println!("{:?}, {:?}, {:?}", s1, s2, t); // -> "hello", "world", ("hello", "world")
@@ -1459,6 +1455,8 @@ fn main() {
 ## 引用与借用
 
 ### 问题一
+
+引用
 
 ```rust
 fn main() {
@@ -1590,6 +1588,8 @@ fn main() {
 
 ### 问题六
 
+ref 与 & 类似，可以用来获取一个值的引用，但是它们的用法有所不同。
+
 ```rust
 fn main() {
     let c = '中';
@@ -1617,22 +1617,21 @@ fn main() {
     let c = '中';
 
     let r1 = &c;
-    // 填写空白处，但是不要修改其它行的代码
     let ref r2 = c;
 
     assert_eq!(*r1, *r2);
 
-    // 判断两个内存地址的字符串是否相等
     assert_eq!(get_addr(r1), get_addr(r2));
 }
 
-// 获取传入引用的内存地址的字符串形式
 fn get_addr(r: &char) -> String {
     format!("{:p}", r)
 }
 ```
 
 ### 问题七
+
+借用规则
 
 ```rust
 // 移除代码某个部分，让它工作
@@ -1664,6 +1663,8 @@ fn main() {
 
 ### 问题八
 
+错误: 从不可变对象借用可变
+
 ```rust
 fn main() {
     // 通过修改下面一行代码来修复错误
@@ -1679,7 +1680,6 @@ fn borrow_object(s: &mut String) {}
 
 ```rust
 fn main() {
-    // 通过修改下面一行代码来修复错误
     let mut s = String::from("hello, ");
 
     borrow_object(&mut s)
@@ -1688,7 +1688,21 @@ fn main() {
 fn borrow_object(s: &mut String) {}
 ```
 
+```rust
+fn main() {
+    let mut s = String::from("hello, ");
+
+    borrow_object(&s);
+
+    s.push_str("world");
+}
+
+fn borrow_object(s: &String) {}
+```
+
 ### 问题九
+
+NLL
 
 ```rust
 // 注释掉一行代码让它工作
@@ -1707,7 +1721,6 @@ fn main() {
 #### 我的解答
 
 ```rust
-// 注释掉一行代码让它工作
 fn main() {
     let mut s = String::from("hello, ");
 
@@ -1743,8 +1756,6 @@ fn main() {
     let r1 = &mut s;
     let r2 = &mut s;
 
-    // 在下面增加一行代码人为制造编译错误：cannot borrow `s` as mutable more than once at a time
-    // 你不能同时使用 r1 和 r2
     println!("{}", r1)
 }
 ```
@@ -1754,6 +1765,8 @@ fn main() {
 ## 字符串
 
 ### 问题一
+
+正常情况下我们无法使用 str 类型，但是可以使用 &str 来替代
 
 ```rust
 // 修复错误，不要新增代码行
@@ -1771,6 +1784,8 @@ fn main() {
 ```
 
 ### 问题二
+
+如果要使用 str 类型，只能配合 Box。 & 可以用来将 `Box<str>` 转换为 &str 类型
 
 ```rust
 // 使用至少两种方法来修复错误
@@ -1809,6 +1824,8 @@ fn greetings(s: &str) {
 ```
 
 ### 问题三
+
+String 是定义在标准库中的类型，分配在堆上，可以动态的增长。它的底层存储是动态字节数组的方式(`Vec<u8>`)，但是与字节数组不同，String 是 UTF-8 编码。
 
 ```rust
 // 填空
@@ -1872,6 +1889,8 @@ fn main() {
 
 ### 问题五
 
+我们可以用 replace 方法来替换指定的子字符串
+
 ```rust
 // 填空
 fn main() {
@@ -1895,6 +1914,8 @@ fn main() {
 ```
 
 ### 问题六
+
+你只能将 String 跟 &str 类型进行拼接，并且 String 的所有权在此过程中会被 move
 
 ```rust
 // 修复所有错误，不要删除任何一行代码
@@ -1920,6 +1941,8 @@ fn main() {
 ```
 
 ### 问题七
+
+我们可以使用两种方法将 &str 转换成 String 类型
 
 ```rust
 // 使用至少两种方法来修复错误
@@ -1969,6 +1992,8 @@ fn greetings(s: String) {
 ```
 
 ### 问题八
+
+我们可以使用 String::from 或 `to_string` 将 &str 转换成 String 类型
 
 ```rust
 // 使用两种方法来解决错误，不要新增代码行
@@ -2056,6 +2081,8 @@ fn main() {
 
 ### 问题十
 
+有时候需要转义的字符很多，我们会希望使用更方便的方式来书写字符串: raw string.
+
 ```rust
 /* 填空并修复所有错误 */
 fn main() {
@@ -2090,13 +2117,14 @@ fn main() {
     let delimiter = r###"A string with "# in it. And even "##!"###;
     println!("{}", delimiter);
 
-    // 填空
     let long_delimiter = r###"Hello, "##""###;
     assert_eq!(long_delimiter, "Hello, \"##\"")
 }
 ```
 
 ### 问题十一
+
+你无法通过索引的方式去访问字符串中的某个字符，但是可以使用切片的方式 `&s1[start..end]`，但是 start 和 end 必须准确落在字符的边界处
 
 ```rust
 fn main() {
@@ -2145,6 +2173,8 @@ fn main() {
 
 ### 问题十三
 
+我们可以使用三方库 `utf8_slice` 来访问 UTF-8 字符串的某个子串，但是与之前不同的是，该库索引的是字符，而不是字节
+
 ```rust
 use utf8_slice;
 fn main() {
@@ -2158,6 +2188,8 @@ fn main() {
 ## 数组
 
 ### 问题一
+
+数组的类型是 [T; Length]，就如你所看到的，数组的长度是类型签名的一部分，因此数组的长度必须在编译期就已知
 
 ```rust
 fn main() {
@@ -2207,6 +2239,8 @@ fn main() {
 
 ### 问题三
 
+数组中的所有元素可以一起初始化为同一个值
+
 ```rust
 fn main() {
     // 填空
@@ -2230,6 +2264,8 @@ fn main() {
 
 ### 问题四
 
+数组中的所有元素必须是同一类型
+
 ```rust
 fn main() {
     // 修复错误
@@ -2246,6 +2282,8 @@ fn main() {
 ```
 
 ### 问题五
+
+数组的下标索引从 0 开始
 
 ```rust
 fn main() {
@@ -2270,6 +2308,8 @@ fn main() {
 ```
 
 ### 问题六
+
+越界索引会导致代码的 panic
 
 ```rust
 // 修复代码中的错误
@@ -2300,6 +2340,8 @@ fn main() {
 
 ### 问题一
 
+这里 `[i32]` 和 str 都是切片类型，但是直接使用它们会造成编译错误，如下代码所示。为了解决，你需要使用切片的引用： `&[i32]`，&str
+
 ```rust
 // 修复代码中的错误，不要新增代码行!
 fn main() {
@@ -2323,6 +2365,10 @@ fn main() {
 
 ### 问题二
 
+一个切片引用占用了 2 个字大小的内存空间(从现在开始，为了简洁性考虑，如无特殊原因，我们统一使用切片来特指切片引用)。该切片的第一个字是指向数据的指针，第二个字是切片的长度。字的大小取决于处理器架构，例如在 x86-64 上，字的大小是 64 位也就是 8 个字节，那么一个切片引用就是 16 个字节大小。
+
+切片(引用)可以用来借用数组的某个连续的部分，对应的签名是 `&[T]`，大家可以与数组的签名对比下 `[T; Length]`。
+
 ```rust
 fn main() {
     let arr: [char; 3] = ['中', '国', '人'];
@@ -2330,7 +2376,7 @@ fn main() {
     let slice = &arr[..2];
 
     // 修改数字 `8` 让代码工作
-    // 小提示: 切片和数组不一样，它是引用。如果是数组的话，那下面的 `assert!` 将会通过： '中'和'国'是char类型，char类型是Unicode编码，大小固定为4字节，两个字符为8字节。
+    // 小提示: 切片和数组不一样，它是引用。如果是数组的话，那下面的 `assert!` 将会通过： '中'和'国'是 char 类型，char 类型是 Unicode 编码，大小固定为 4 字节，两个字符为 8 字节。
     assert!(std::mem::size_of_val(&slice) == 8);
 }
 ```
@@ -2425,6 +2471,8 @@ fn main() {
 
 ### 问题六
 
+&String 可以被隐式地转换成 &str 类型
+
 ```rust
 // 修复所有错误
 fn main() {
@@ -2465,6 +2513,8 @@ fn first_character(s: &str) -> &str {
 
 ### 问题一
 
+元组中的元素可以是不同的类型。元组的类型签名是(T1, T2, ...), 这里 T1, T2 是相对应的元组成员的类型
+
 ```rust
 fn main() {
     let _t0: (u8,i16) = (0, -1);
@@ -2487,6 +2537,8 @@ fn main() {
 
 ### 问题二
 
+可以使用索引来获取元组的成员
+
 ```rust
 // 修改合适的地方，让代码工作
 fn main() {
@@ -2506,6 +2558,8 @@ fn main() {
 
 ### 问题三
 
+过长的元组无法被打印输出
+
 ```rust
 // 修复代码错误
 fn main() {
@@ -2524,6 +2578,8 @@ fn main() {
 ```
 
 ### 问题四
+
+使用模式匹配来解构元组
 
 ```rust
 fn main() {
@@ -2554,6 +2610,8 @@ fn main() {
 
 ### 问题五
 
+解构式赋值
+
 ```rust
 fn main() {
     let (x, y, z);
@@ -2582,6 +2640,8 @@ fn main() {
 ```
 
 ### 问题六
+
+元组可以用于函数的参数和返回值
 
 ```rust
 fn main() {
@@ -2615,6 +2675,8 @@ fn sum_multiply(nums: (i32, i32)) -> (i32, i32) {
 ## 结构体
 
 ### 问题一
+
+对于结构体，我们必须为其中的每一个字段都指定具体的值
 
 ```rust
 // fix the error
@@ -2652,6 +2714,8 @@ fn main() {
 
 ### 问题二
 
+单元结构体没有任何字段
+
 ```rust
 struct Unit;
 trait SomeTrait {
@@ -2687,6 +2751,8 @@ fn do_something_with_unit(u: Unit) {}
 ```
 
 ### 问题三
+
+元组结构体看起来跟元组很像，但是它拥有一个结构体的名称，该名称可以赋予它一定的意义。由于它并不关心内部数据到底是什么名称，因此此时元组结构体就非常适合
 
 ```rust
 // 填空并修复错误
@@ -2724,6 +2790,8 @@ fn check_color(p: Point) {
 ```
 
 ### 问题四
+
+你可以在实例化一个结构体时将它整体标记为可变的，但是 Rust 不允许我们将结构体的某个字段专门指定为可变的
 
 ```rust
 // 填空并修复错误，不要增加或移除代码行
@@ -2768,6 +2836,8 @@ fn main() {
 
 ### 问题五
 
+使用结构体字段初始化缩略语法可以减少一些重复代码
+
 ```rust
 // 填空
 struct Person {
@@ -2802,6 +2872,8 @@ fn build_person(name: String, age: u8) -> Person {
 ```
 
 ### 问题六
+
+你可以使用结构体更新语法基于一个结构体实例来构造另一个
 
 ```rust
 // 填空，让代码工作
@@ -2860,6 +2932,8 @@ fn set_email(u: User) -> User {
 
 ### 问题七
 
+我们可以使用 `#[derive(Debug)]` 让结构体变成可打印的.
+
 ```rust
 // 填空，让代码工作
 #[__]
@@ -2904,6 +2978,10 @@ fn main() {
 ```
 
 ### 问题八
+
+当解构一个变量时，可以同时使用 move 和引用模式绑定的方式。当这么做时，部分 move 就会发生：变量中一部分的所有权被转移给其它变量，而另一部分我们获取了它的引用。
+
+在这种情况下，原变量将无法再被使用，但是它没有转移所有权的那一部分依然可以使用，也就是之前被引用的那部分。
 
 ```rust
 fn main() {
@@ -2980,6 +3058,8 @@ fn main() {
 
 ### 问题一
 
+在创建枚举时，你可以使用显式的整数设定枚举成员的值
+
 ```rust
 // 修复错误
 enum Number {
@@ -3039,6 +3119,8 @@ fn main() {
 
 ### 问题二
 
+枚举成员可以持有各种类型的值
+
 ```rust
 // 填空
 enum Message {
@@ -3071,6 +3153,8 @@ fn main() {
 ```
 
 ### 问题三
+
+枚举成员中的值可以使用模式匹配来获取
 
 ```rust
 // 仅填空并修复错误
@@ -3114,6 +3198,8 @@ fn main() {
 ```
 
 ### 问题四
+
+使用枚举对类型进行同一化
 
 ```rust
 // 填空，并修复错误
@@ -3171,6 +3257,8 @@ fn show_message(msg: Message) {
 
 ### 问题五
 
+Rust 中没有 null，我们通过 `Option<T>` 枚举来处理值为空的情况
+
 ```rust
 // 填空让 `println` 输出，同时添加一些代码不要让最后一行的 `panic` 执行到
 fn main() {
@@ -3218,6 +3306,8 @@ fn plus_one(x: Option<i32>) -> Option<i32> {
 ```
 
 ### 问题六
+
+使用枚举来实现链表
 
 ```rust
 // 填空，让代码运行
@@ -3373,6 +3463,8 @@ fn main() {
 
 ## 问题二
 
+if / else 可以用作表达式来进行赋值
+
 ```rust
 // 修复错误
 fn main() {
@@ -3415,6 +3507,8 @@ fn main() {
 ```
 
 ## 问题三
+
+for in 可以用于迭代一个迭代器，例如序列 a..b
 
 ```rust
 fn main() {
@@ -3510,6 +3604,8 @@ fn main() {
 
 ## 问题六
 
+当条件为 true 时，while 将一直循环
+
 ```rust
 // 填空，让最后一行的 println! 工作 !
 fn main() {
@@ -3565,6 +3661,8 @@ fn main() {
 
 ## 问题七
 
+使用 break 可以跳出循环
+
 ```rust
 // 填空，不要修改其它代码
 fn main() {
@@ -3598,6 +3696,8 @@ fn main() {
 ```
 
 ## 问题八
+
+continue 会结束当次循环并立即开始下一次循环
 
 ```rust
 // 填空，不要修改其它代码
@@ -3634,6 +3734,8 @@ fn main() {
 ```
 
 ## 问题九
+
+loop 一般都需要配合 break 或 continue 一起使用
 
 ```rust
 // 填空，不要修改其它代码
@@ -3701,6 +3803,8 @@ fn main() {
 
 ## 问题十
 
+loop 是一个表达式，因此我们可以配合 break 来返回一个值
+
 ```rust
 // 填空
 fn main() {
@@ -3738,6 +3842,8 @@ fn main() {
 ```
 
 ## 问题十一
+
+当有多层循环时，你可以使用 continue 或 break 来控制外层的循环。要实现这一点，外部的循环必须拥有一个标签 `'label`, 然后在 break 或 continue 时指定该标签
 
 ```rust
 // 填空
@@ -3850,6 +3956,8 @@ fn main() {
 
 ### 问题二
 
+match 是一个表达式，因此可以用在赋值语句中
+
 ```rust
 fn main() {
     let boolean = true;
@@ -3884,6 +3992,8 @@ fn main() {
 ```
 
 ### 问题三
+
+使用 match 匹配出枚举成员持有的值
 
 ```rust
 // 填空
@@ -3961,6 +4071,8 @@ fn show_message(msg: Message) {
 ```
 
 ### 问题四
+
+matches! 看起来像 match, 但是它可以做一些特别的事情
 
 ```rust
 fn main() {
@@ -4051,6 +4163,8 @@ fn main() {
 ```
 
 ### 问题六
+
+在有些时候, 使用 match 匹配枚举有些太重了，此时 if let 就非常适合
 
 ```rust
 fn main() {
@@ -4195,6 +4309,8 @@ fn main() {
 
 ### 问题一
 
+使用 | 可以匹配多个值, 而使用 ..= 可以匹配一个闭区间的数值序列
+
 ```rust
 fn main() {}
 fn match_number(n: i32) {
@@ -4217,10 +4333,27 @@ fn match_number(n: i32) {
 #### 我的解答
 
 ```rust
-
+fn main() {}
+fn match_number(n: i32) {
+    match n {
+        // 匹配一个单独的值
+        1 => println!("One!"),
+        // 使用 `|` 填空，不要使用 `..` 或 `..=`
+        2 | 3 | 4 | 5 => println!("match 2 -> 5"),
+        // 匹配一个闭区间的数值序列
+        6..=10 => {
+            println!("match 6 -> 10")
+        }
+        _ => {
+            println!("match 11 -> +infinite")
+        }
+    }
+}
 ```
 
 ### 问题二
+
+@ 操作符可以让我们将一个与模式相匹配的值绑定到新的变量上
 
 ```rust
 struct Point {
@@ -4244,7 +4377,22 @@ fn main() {
 #### 我的解答
 
 ```rust
+struct Point {
+    x: i32,
+    y: i32,
+}
 
+fn main() {
+    // 填空，让 p 匹配第二个分支
+    let p = Point { x: 0, y: 10 };
+
+    match p {
+        Point { x, y: 0 } => println!("On the x axis at {}", x),
+        // 第二个分支
+        Point { x: 0..=5, y: y@ (10 | 20 | 30) } => println!("On the y axis at {}", y),
+        Point { x, y } => println!("On neither axis: ({}, {})", x, y),
+    }
+}
 ```
 
 ### 问题三
@@ -4273,10 +4421,29 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 修复错误
+enum Message {
+    Hello { id: i32 },
+}
 
+fn main() {
+    let msg = Message::Hello { id: 5 };
+
+    match msg {
+        Message::Hello { id: id @ 3..=7 } => println!("id 值的范围在 [3, 7] 之间: {}", id),
+        Message::Hello {
+            id: newid @ (10 | 11 | 12),
+        } => {
+            println!("id 值的范围在 [10, 12] 之间: {}", newid)
+        }
+        Message::Hello { id } => println!("Found some other id: {}", id),
+    }
+}
 ```
 
 ### 问题四
+
+匹配守卫（match guard）是一个位于 match 分支模式之后的额外 if 条件，它能为分支模式提供更进一步的匹配条件。
 
 ```rust
 // 填空让代码工作，必须使用 `split`
@@ -4294,10 +4461,21 @@ fn main() {
 #### 我的解答
 
 ```rust
-
+// 填空让代码工作，必须使用 `split`
+fn main() {
+    let num = Some(4);
+    let split = 5;
+    match num {
+        Some(x) if (x < split) => assert!(x < split),
+        Some(x) => assert!(x >= split),
+        None => (),
+    }
+}
 ```
 
 ### 问题五
+
+使用 .. 忽略一部分值
 
 ```rust
 // 填空，让代码工作
@@ -4316,10 +4494,22 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 填空，让代码工作
+fn main() {
+    let numbers = (2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048);
 
+    match numbers {
+        (first, .., last) => {
+            assert_eq!(first, 2);
+            assert_eq!(last, 2048);
+        }
+    }
+}
 ```
 
 ### 问题六
+
+使用模式 &mut V 去匹配一个可变引用时，你需要格外小心，因为匹配出来的 V 是一个值，而不是可变引用
 
 ```rust
 // 修复错误，尽量少地修改代码
@@ -4337,12 +4527,23 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 修复错误，尽量少地修改代码
+// 不要移除任何代码行
+fn main() {
+    let mut v = String::from("hello,");
+    let r = &mut v;
 
+    match r {
+        value => value.push_str(" world!"),
+    }
+}
 ```
 
 # 方法
 
 ## 问题一
+
+方法跟函数类似：都是使用 fn 声明，有参数和返回值。但是与函数不同的是，方法定义在结构体的上下文中(枚举、特征对象也可以定义方法)，而且方法的第一个参数一定是 self 或其变体 &self、&mut self，self 代表了当前调用的结构体实例。
 
 ```rust
 struct Rectangle {
@@ -4365,10 +4566,31 @@ fn main() {
 ### 我的解答
 
 ```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
 
+impl Rectangle {
+    // 完成 area 方法，返回矩形 Rectangle 的面积
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    assert_eq!(rect1.area(), 1500);
+}
 ```
 
 ## 问题二
+
+self 会拿走当前结构体实例(调用对象)的所有权，而 &self 却只会借用一个不可变引用，&mut self 会借用一个可变引用
 
 ```rust
 // 只填空，不要删除任何代码行!
@@ -4396,10 +4618,31 @@ fn main() {
 ### 我的解答
 
 ```rust
+// 只填空，不要删除任何代码行!
+#[derive(Debug)]
+struct TrafficLight {
+    color: String,
+}
 
+impl TrafficLight {
+    pub fn show_state(&self) {
+        println!("the current state is {}", self.color);
+    }
+}
+fn main() {
+    let light = TrafficLight {
+        color: "red".to_owned(),
+    };
+    // 不要拿走 `light` 的所有权
+    light.show_state();
+    // 否则下面代码会报错
+    println!("{:?}", light);
+}
 ```
 
 ## 问题三
+
+&self 实际上是 self: &Self 的缩写或者说语法糖
 
 ```rust
 struct TrafficLight {
@@ -4423,10 +4666,27 @@ fn main() {}
 ### 我的解答
 
 ```rust
+struct TrafficLight {
+    color: String,
+}
 
+impl TrafficLight {
+    // 使用 `Self` 填空
+    pub fn show_state(self: &Self) {
+        println!("the current state is {}", self.color);
+    }
+
+    // 填空，不要使用 `Self` 或其变体
+    pub fn change_state(&mut self) {
+        self.color = "green".to_string()
+    }
+}
+fn main() {}
 ```
 
 ## 问题四
+
+定义在 impl 语句块中的函数被称为关联函数，因为它们跟当前类型关联在一起。关联函数与方法最大的区别就是它第一个参数不是 self，原因是它们不需要使用当前的实例，因此关联函数往往可以用于构造函数：初始化一个实例对象
 
 ```rust
 #[derive(Debug)]
@@ -4454,10 +4714,35 @@ fn main() {
 ### 我的解答
 
 ```rust
+#[derive(Debug)]
+struct TrafficLight {
+    color: String,
+}
 
+impl TrafficLight {
+    // 1. 实现下面的关联函数 `new`,
+    // 2. 该函数返回一个 TrafficLight 实例，包含 `color` "red"
+    // 3. 该函数必须使用 `Self` 作为类型，不能在签名或者函数体中使用 `TrafficLight`
+    pub fn new() -> Self {
+        TrafficLight {
+            color: "red".to_string(),
+        }
+    }
+
+    pub fn get_state(&self) -> &str {
+        &self.color
+    }
+}
+
+fn main() {
+    let light = TrafficLight::new();
+    assert_eq!(light.get_state(), "red");
+}
 ```
 
 ## 问题五
+
+每一个结构体允许拥有多个 impl 语句块
 
 ```rust
 struct Rectangle {
@@ -4476,17 +4761,37 @@ impl Rectangle {
     }
 }
 
-
 fn main() {}
 ```
 
 ### 我的解答
 
 ```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
 
+// 使用多个 `impl` 语句块重写下面的代码
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+// 使用多个 `impl` 语句块重写下面的代码
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+fn main() {}
 ```
 
 ## 问题六
+
+我们还可以为枚举类型定义方法
 
 ```rust
 #[derive(Debug)]
@@ -4513,7 +4818,30 @@ fn main() {
 ### 我的解答
 
 ```rust
+#[derive(Debug)]
+enum TrafficLightColor {
+    Red,
+    Yellow,
+    Green,
+}
 
+// 为 TrafficLightColor 实现所需的方法
+impl TrafficLightColor {
+    fn color(&self) -> &str {
+        match self {
+            TrafficLightColor::Yellow => "yellow",
+            _ => "None",
+        }
+    }
+}
+
+fn main() {
+    let c = TrafficLightColor::Yellow;
+
+    assert_eq!(c.color(), "yellow");
+
+    println!("{:?}", c);
+}
 ```
 
 // TODO https://zh.practice.rs/generics-traits/intro.html
