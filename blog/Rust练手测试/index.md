@@ -4844,4 +4844,507 @@ fn main() {
 }
 ```
 
+# 泛型和特征
+
+## 泛型
+
+### 问题一
+
+```rust
+// 填空
+struct A;          // 具体的类型 `A`.
+struct S(A);       // 具体的类型 `S`.
+struct SGen<T>(T); // 泛型 `SGen`.
+
+fn reg_fn(_s: S) {}
+
+fn gen_spec_t(_s: SGen<A>) {}
+
+fn gen_spec_i32(_s: SGen<i32>) {}
+
+fn generic<T>(_s: SGen<T>) {}
+
+fn main() {
+    // 使用非泛型函数
+    reg_fn(__);          // 具体的类型
+    gen_spec_t(__);   // 隐式地指定类型参数  `A`.
+    gen_spec_i32(__); // 隐式地指定类型参数`i32`.
+
+    // 显式地指定类型参数 `char`
+    generic::<char>(__);
+
+    // 隐式地指定类型参数 `char`.
+    generic(__);
+}
+```
+
+#### 我的解答
+
+```rust
+// 填空
+struct A;          // 具体的类型 `A`.
+struct S(A);       // 具体的类型 `S`.
+struct SGen<T>(T); // 泛型 `SGen`.
+
+fn reg_fn(_s: S) {}
+
+fn gen_spec_t(_s: SGen<A>) {}
+
+fn gen_spec_i32(_s: SGen<i32>) {}
+
+fn generic<T>(_s: SGen<T>) {}
+
+fn main() {
+    // 使用非泛型函数
+    reg_fn(S(A));          // 具体的类型
+    gen_spec_t(SGen(A));   // 隐式地指定类型参数  `A`.
+    gen_spec_i32(SGen(1)); // 隐式地指定类型参数`i32`.
+
+    // 显式地指定类型参数 `char`
+    generic::<char>(SGen('1'));
+
+    // 隐式地指定类型参数 `char`.
+    generic(SGen('1'));
+}
+```
+
+### 问题二
+
+```rust
+// 实现下面的泛型函数 sum
+fn sum
+
+fn main() {
+    assert_eq!(5, sum(2i8, 3i8));
+    assert_eq!(50, sum(20, 30));
+    assert_eq!(2.46, sum(1.23, 1.23));
+}
+```
+
+#### 我的解答
+
+```rust
+// 实现下面的泛型函数 sum
+fn sum<T: std::ops::Add<Output = T>>(a: T, b: T) -> T {
+    a + b
+}
+
+fn main() {
+    assert_eq!(5, sum(2i8, 3i8));
+    assert_eq!(50, sum(20, 30));
+    assert_eq!(2.46, sum(1.23, 1.23));
+}
+```
+
+### 问题三
+
+```rust
+// 实现一个结构体 Point 让代码工作
+
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}
+```
+
+#### 我的解答
+
+```rust
+// 实现一个结构体 Point 让代码工作
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}
+```
+
+### 问题四
+
+```rust
+// 修改以下结构体让代码工作
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    // 不要修改这行代码！
+    let p = Point{x: 5, y : "hello".to_string()};
+}
+```
+
+#### 我的解答
+
+```rust
+// 修改以下结构体让代码工作
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    // 不要修改这行代码！
+    let p = Point{x: 5, y : "hello".to_string()};
+}
+```
+
+### 问题五
+
+```rust
+// 为 Val 增加泛型参数，不要修改 `main` 中的代码
+struct Val {
+    val: f64,
+}
+
+impl Val {
+    fn value(&self) -> &f64 {
+        &self.val
+    }
+}
+
+fn main() {
+    let x = Val{ val: 3.0 };
+    let y = Val{ val: "hello".to_string()};
+    println!("{}, {}", x.value(), y.value());
+}
+```
+
+#### 我的解答
+
+```rust
+// 为 Val 增加泛型参数，不要修改 `main` 中的代码
+struct Val<T> {
+    val: T,
+}
+
+impl<T> Val<T> {
+    fn value(&self) -> &T {
+        &self.val
+    }
+}
+
+fn main() {
+    let x = Val { val: 3.0 };
+    let y = Val {
+        val: "hello".to_string(),
+    };
+    println!("{}, {}", x.value(), y.value());
+}
+```
+
+### 问题六
+
+```rust
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+impl<T, U> Point<T, U> {
+    // 实现 mixup，不要修改其它代码！
+    fn mixup
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10 };
+    let p2 = Point { x: "Hello", y: '中'};
+
+    let p3 = p1.mixup(p2);
+
+    assert_eq!(p3.x, 5);
+    assert_eq!(p3.y, '中');
+}
+```
+
+#### 我的解答
+
+```rust
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+impl<T, U> Point<T, U> {
+    // 实现 mixup，不要修改其它代码！
+    fn mixup<V, W>(self, other: Point<V, W>) -> Point<T, W> {
+        Point {
+            x: self.x,
+            y: other.y,
+        }
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10 };
+    let p2 = Point {
+        x: "Hello",
+        y: '中',
+    };
+
+    let p3 = p1.mixup(p2);
+
+    assert_eq!(p3.x, 5);
+    assert_eq!(p3.y, '中');
+}
+```
+
+### 问题七
+
+```rust
+// 修复错误，让代码工作
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+fn main() {
+    let p = Point{x: 5, y: 10};
+    println!("{}",p.distance_from_origin())
+}
+```
+
+#### 我的解答
+
+```rust
+// 修复错误，让代码工作
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+fn main() {
+    let p = Point{x: 5.0, y: 10.0};
+    println!("{}",p.distance_from_origin())
+}
+```
+
+## Const 泛型
+
+### 问题一
+
+下面的例子同时使用泛型和 const 泛型来实现一个结构体，该结构体的字段中的数组长度是可变的
+
+```rust
+struct ArrayPair<T, const N: usize> {
+    left: [T; N],
+    right: [T; N],
+}
+
+impl<T: Debug, const N: usize> Debug for ArrayPair<T, N> {
+    // ...
+}
+```
+
+### 问题二
+
+目前，const 泛型参数只能使用以下形式的实参:
+
+- 一个单独的 const 泛型参数
+- 一个字面量（i.e. 整数, 布尔值或字符）
+- 一个具体的 const 表达式（表达式中不能包含任何泛型参数）
+
+```rust
+fn foo<const N: usize>() {}
+
+fn bar<T, const M: usize>() {
+    foo::<M>(); // ok: 符合第一种
+    foo::<2021>(); // ok: 符合第二种
+    foo::<{20 * 100 + 20 * 10 + 1}>(); // ok: 符合第三种
+    
+    foo::<{ M + 1 }>(); // error: 违背第三种，const 表达式中不能有泛型参数 M
+    foo::<{ std::mem::size_of::<T>() }>(); // error: 泛型表达式包含了泛型参数 T
+    
+    let _: [u8; M]; // ok: 符合第一种
+    let _: [u8; std::mem::size_of::<T>()]; // error: 泛型表达式包含了泛型参数 T
+}
+
+fn main() {}
+```
+
+### 问题三
+
+const 泛型还能帮我们避免一些运行时检查，提升性能
+
+```rust
+pub struct MinSlice<T, const N: usize> {
+    pub head: [T; N],
+    pub tail: [T],
+}
+
+fn main() {
+    let slice: &[u8] = b"Hello, world";
+    let reference: Option<&u8> = slice.get(6);
+    // 我们知道 `.get` 返回的是 `Some(b' ')`
+    // 但编译器不知道
+    assert!(reference.is_some());
+
+    let slice: &[u8] = b"Hello, world";
+
+    // 当编译构建 MinSlice 时会进行长度检查，也就是在编译期我们就知道它的长度是 12
+    // 在运行期，一旦 `unwrap` 成功，在 `MinSlice` 的作用域内，就再无需任何检查    
+    let minslice = MinSlice::<u8, 12>::from_slice(slice).unwrap();
+    let value: u8 = minslice.head[6];
+    assert_eq!(value, b' ')
+}
+```
+
+### 问题四
+
+`<T, const N: usize>` 是结构体类型的一部分，和数组类型一样，这意味着长度不同会导致类型不同： `Array<i32, 3>` 和 `Array<i32, 4>` 是不同的类型
+
+```rust
+// 修复错误
+struct Array<T, const N: usize> {
+    data : [T; N]
+}
+
+fn main() {
+    let arrays = [
+        Array{
+            data: [1, 2, 3],
+        },
+        Array {
+            data: [1.0, 2.0, 3.0],
+        },
+        Array {
+            data: [1, 2]
+        }
+    ];
+}
+```
+
+#### 我的解答
+
+```rust
+// 修复错误
+struct Array<T, const N: usize> {
+    data : [T; N]
+}
+
+fn main() {
+    let arrays = [
+        Array{
+            data: [1, 2, 3],
+        },
+        Array {
+            data: [1, 2, 3],
+        },
+        Array {
+            data: [1, 2, 3]
+        }
+    ];
+}
+```
+
+### 问题五
+
+```rust
+// 填空
+fn print_array<__>(__) {
+    println!("{:?}", arr);
+}
+fn main() {
+    let arr = [1, 2, 3];
+    print_array(arr);
+
+    let arr = ["hello", "world"];
+    print_array(arr);
+}
+```
+
+#### 我的解答
+
+```rust
+// 填空
+fn print_array<T: std::fmt::Debug, const N: usize>(arr: [T; N]) {
+    println!("{:?}", arr);
+}
+
+fn main() {
+    let arr = [1, 2, 3];
+    print_array(arr);
+
+    let arr = ["hello", "world"];
+    print_array(arr);
+}
+```
+
+### 问题六
+
+有时我们希望能限制一个变量占用内存的大小，例如在嵌入式环境中，此时 const 泛型参数的第三种形式 const 表达式 就非常适合
+
+```rust
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
+fn check_size<T>(val: T)
+where
+    Assert<{ core::mem::size_of::<T>() < 768 }>: IsTrue,
+{
+    //...
+}
+
+// 修复 main 函数中的错误
+fn main() {
+    check_size([0u8; 767]); 
+    check_size([0i32; 191]);
+    check_size(["hello你好"; __]); // size of &str ?
+    check_size([(); __].map(|_| "hello你好".to_string()));  // size of String?
+    check_size(['中'; __]); // size of char ?
+}
+
+
+
+pub enum Assert<const CHECK: bool> {}
+
+pub trait IsTrue {}
+
+impl IsTrue for Assert<true> {}
+```
+
+#### 我的解答
+
+```rust
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
+fn check_size<T>(val: T)
+where
+    Assert<{ core::mem::size_of::<T>() < 768 }>: IsTrue,
+{
+    //...
+}
+
+// 修复 main 函数中的错误
+fn main() {
+    check_size([0u8; 767]); // 1 * 768 = 768
+    check_size([0i32; 191]); // 4 * 192 = 768
+    check_size(["hello你好"; 47]); // 16 * 48 = 768，&str is a string reference, containing a pointer and string length in it, so it takes two word long, in x86-64, 1 word = 8 bytes
+    check_size([(); 31].map(|_| "hello你好".to_string())); // 24 * 32 = 768，String is a smart pointer struct, it has three fields: pointer, length and capacity, each takes 8 bytes
+    check_size(['中'; 191]); // 192 * 4 = 768
+}
+
+pub enum Assert<const CHECK: bool> {}
+
+pub trait IsTrue {}
+
+impl IsTrue for Assert<true> {}
+```
+
 // TODO https://zh.practice.rs/generics-traits/intro.html
