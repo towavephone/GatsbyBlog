@@ -7216,4 +7216,892 @@ fn main() {
 }
 ```
 
+# 集合类型
+
+## 动态字符串 String
+
+### 问题一
+
+std::string::String 是 UTF-8 编码、可增长的动态字符串，它也是我们日常开发中最常用的字符串类型，同时对于它所拥有的内容拥有所有权
+
+```rust
+// 填空并修复错误
+// 1. 不要使用 `to_string()`
+// 2. 不要添加/删除任何代码行
+fn main() {
+    let mut s: String = "hello, ";
+    s.push_str("world".to_string());
+    s.push(__);
+
+    move_ownership(s);
+
+    assert_eq!(s, "hello, world!");
+
+    println!("Success!")
+}
+
+fn move_ownership(s: String) {
+    println!("ownership of \"{}\" is moved here!", s)
+}
+```
+
+#### 我的解答
+
+```rust
+// 填空并修复错误
+// 1. 不要使用 `to_string()`
+// 2. 不要添加/删除任何代码行
+fn main() {
+    let mut s: String = String::from("hello, ");
+    s.push_str(&"world".to_string());
+    s.push('!');
+
+    move_ownership(&s);
+
+    assert_eq!(s, "hello, world!");
+
+    println!("Success!")
+}
+
+fn move_ownership(s: &str) {
+    println!("ownership of \"{}\" is moved here!", s)
+}
+```
+
+### 问题二
+
+虽然 String 的底层是 `Vec<u8>` 也就是字节数组的形式存储的，但是它是基于 UTF-8 编码的字符序列。String 分配在堆上、可增长且不是以 null 结尾
+
+而 &str 是切片引用类型 `&[u8]`，指向一个合法的 UTF-8 字符序列，总之 &str 和 String 的关系类似于 `&[T]` 和 `Vec<T>` 。
+
+参考：[易混淆概念解析 - &str 和 String](https://course.rs/difficulties/string.html)。
+
+```rust
+// 填空
+fn main() {
+   let mut s = String::from("hello, world");
+
+   let slice1: &str = __; // 使用两种方法
+   assert_eq!(slice1, "hello, world");
+
+   let slice2 = __;
+   assert_eq!(slice2, "hello");
+
+   let slice3: __ = __;
+   slice3.push('!');
+   assert_eq!(slice3, "hello, world!");
+
+   println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+// 填空
+fn main() {
+    let mut s = String::from("hello, world");
+
+    let slice1: &str = &s; // 使用两种方法
+    assert_eq!(slice1, "hello, world");
+
+    let slice2 = &s[0..5];
+    assert_eq!(slice2, "hello");
+
+    let mut slice3: String = s;
+    slice3.push('!');
+    assert_eq!(slice3, "hello, world!");
+
+    println!("Success!")
+}
+```
+
+### 问题三
+
+```rust
+// 问题:  我们的代码中发生了多少次堆内存分配？
+// 你的回答:
+fn main() {
+    // 基于 `&str` 类型创建一个 String,
+    // 字符串字面量的类型是 `&str`
+   let s: String = String::from("hello, world!");
+
+   // 创建一个切片引用指向 String `s`
+   let slice: &str = &s;
+
+   // 基于刚创建的切片来创建一个 String
+   let s: String = slice.to_string();
+
+   assert_eq!(s, "hello, world!");
+
+   println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+// 问题:  我们的代码中发生了多少次堆内存分配？
+// 你的回答: 2
+fn main() {
+    // 基于 `&str` 类型创建一个 String,
+    // 字符串字面量的类型是 `&str`
+   let s: String = String::from("hello, world!");
+
+   // 创建一个切片引用指向 String `s`
+   let slice: &str = &s;
+
+   // 基于刚创建的切片来创建一个 String
+   let s: String = slice.to_string();
+
+   assert_eq!(s, "hello, world!");
+
+   println!("Success!")
+}
+```
+
+### 问题四
+
+由于 String 都是 UTF-8 编码的，这会带来几个影响:
+
+- 如果你需要的是非 UTF-8 字符串，可以考虑 [OsString](https://doc.rust-lang.org/stable/std/ffi/struct.OsString.html)
+- 无法通过索引的方式访问一个 String
+
+具体请看 [字符串索引](https://course.rs/basic/compound-type/string-slice.html#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B4%A2%E5%BC%95)
+
+我们无法通过索引的方式访问字符串中的某个字符，但是可以通过切片的方式来获取字符串的某一部分 `&s1[start..end]`
+
+```rust
+// 填空并修复错误
+fn main() {
+    let s = String::from("hello, 世界");
+    let slice1 = s[0]; //提示: `h` 在 UTF-8 编码中只占用 1 个字节
+    assert_eq!(slice1, "h");
+
+    let slice2 = &s[3..5];// 提示: `中` 在 UTF-8 编码中占用 3 个字节
+    assert_eq!(slice2, "世");
+
+    // 迭代 s 中的所有字符
+    for (i, c) in s.__ {
+        if i == 7 {
+            assert_eq!(c, '世')
+        }
+    }
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+// 填空并修复错误
+fn main() {
+    let s = String::from("hello, 世界");
+    let slice1 = &s[0..1]; //提示: `h` 在 UTF-8 编码中只占用 1 个字节
+    assert_eq!(slice1, "h");
+
+    let slice2 = &s[7..10]; // 提示: `中` 在 UTF-8 编码中占用 3 个字节
+    assert_eq!(slice2, "世");
+
+    // 迭代 s 中的所有字符
+    for (i, c) in s.chars().enumerate() {
+        if i == 7 {
+            assert_eq!(c, '世')
+        }
+    }
+
+    println!("Success!")
+}
+```
+
+### 问题五
+
+我们可以使用 [utf8_slice](https://docs.rs/utf8_slice/1.0.0/utf8_slice/fn.slice.html) 来按照字符的自然索引方式对 UTF-8 字符串进行切片访问，与之前的切片方式相比，它索引的是字符，而之前的方式索引的是字节
+
+```rust
+use utf8_slice;
+fn main() {
+   let s = "The 🚀 goes to the 🌑!";
+
+   let rocket = utf8_slice::slice(s, 4, 5);
+   // Will equal "🚀"
+}
+```
+
+```rust
+// 提示: 也许你需要使用 from_utf8 方法
+// 填空
+fn main() {
+    let mut s = String::new();
+    __;
+
+    let v = vec![104, 101, 108, 108, 111];
+
+    // 将字节数组转换成 String
+    let s1 = __;
+
+
+    assert_eq!(s, s1);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+// 提示: 也许你需要使用 from_utf8 方法
+// 填空
+fn main() {
+    let mut s = String::new();
+    s.push_str("hello");
+
+    let v = vec![104, 101, 108, 108, 111];
+
+    // 将字节数组转换成 String
+    let s1 = String::from_utf8(v).unwrap();
+
+    assert_eq!(s, s1);
+
+    println!("Success!")
+}
+```
+
+### 问题六
+
+事实上 String 是一个智能指针，它作为一个结构体存储在栈上，然后指向存储在堆上的字符串底层数据
+
+存储在栈上的智能指针结构体由三部分组成：一个指针只指向堆上的字节数组，已使用的长度以及已分配的容量 capacity (已使用的长度小于等于已分配的容量，当容量不够时，会重新分配内存空间)
+
+如果 String 的当前容量足够，那么添加字符将不会导致新的内存分配
+
+```rust
+// 修改下面的代码以打印如下内容:
+// 25
+// 25
+// 25
+// 循环中不会发生任何内存分配
+fn main() {
+    let mut s = String::new();
+
+    println!("{}", s.capacity());
+
+    for _ in 0..2 {
+        s.push_str("hello");
+        println!("{}", s.capacity());
+    }
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+// 修改下面的代码以打印如下内容:
+// 25
+// 25
+// 25
+// 循环中不会发生任何内存分配
+fn main() {
+    let mut s = String::with_capacity(25);
+
+    println!("{}", s.capacity());
+
+    for _ in 0..2 {
+        s.push_str("hello");
+        println!("{}", s.capacity());
+    }
+
+    println!("Success!")
+}
+```
+
+### 问题七
+
+```rust
+// 填空
+use std::mem;
+
+fn main() {
+    let story = String::from("Rust By Practice");
+
+    // 阻止 String 的数据被自动 drop
+    let mut story = mem::ManuallyDrop::new(story);
+
+    let ptr = story.__();
+    let len = story.__();
+    let capacity = story.__();
+
+    assert_eq!(16, len);
+
+    // 我们可以基于 ptr 指针、长度和容量来重新构建 String.
+    // 这种操作必须标记为 unsafe，因为我们需要自己来确保这里的操作是安全的
+    let s = unsafe { String::from_raw_parts(ptr, len, capacity) };
+
+    assert_eq!(*story, s);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+// 填空
+use std::mem;
+
+fn main() {
+    let story = String::from("Rust By Practice");
+
+    // 阻止 String 的数据被自动 drop
+    let mut story = mem::ManuallyDrop::new(story);
+
+    let ptr = story.as_mut_ptr();
+    let len = story.len();
+    let capacity = story.capacity();
+
+    assert_eq!(16, len);
+
+    // 我们可以基于 ptr 指针、长度和容量来重新构建 String.
+    // 这种操作必须标记为 unsafe，因为我们需要自己来确保这里的操作是安全的
+    let s = unsafe { String::from_raw_parts(ptr, len, capacity) };
+
+    assert_eq!(*story, s);
+
+    println!("Success!")
+}
+```
+
+## 动态数组 Vector
+
+相比 `[T; N]` 形式的数组，Vector 最大的特点就是可以动态调整长度
+
+### 问题一
+
+```rust
+fn main() {
+    let arr: [u8; 3] = [1, 2, 3];
+
+    let v = Vec::from(arr);
+    is_vec(v);
+
+    let v = vec![1, 2, 3];
+    is_vec(v);
+
+    // vec!(..) 和 vec![..] 是同样的宏，宏可以使用 []、()、{}三种形式，因此...
+    let v = vec!(1, 2, 3);
+    is_vec(v);
+
+    // ...在下面的代码中, v 是 Vec<[u8; 3]> , 而不是 Vec<u8>
+    // 使用 Vec::new 和 `for` 来重写下面这段代码
+    let v1 = vec!(arr);
+    is_vec(v1);
+
+    assert_eq!(v, v1);
+
+    println!("Success!")
+}
+
+fn is_vec(v: Vec<u8>) {}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+Vec 可以使用 extend 方法进行扩展
+
+```rust
+// 填空
+fn main() {
+    let mut v1 = Vec::from([1, 2, 4]);
+    v1.pop();
+    v1.push(3);
+
+    let mut v2 = Vec::new();
+    v2.__;
+
+    assert_eq!(v1, v2);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+只要为 Vec 实现了 `From<T>` 特征，那么 T 就可以被转换成 Vec。
+
+```rust
+// 填空
+fn main() {
+   // array -> Vec
+   // impl From<[T; N]> for Vec
+   let arr = [1, 2, 3];
+   let v1 = __(arr);
+   let v2: Vec<i32> = arr.__();
+
+   assert_eq!(v1, v2);
+
+
+   // String -> Vec
+   // impl From<String> for Vec
+   let s = "hello".to_string();
+   let v1: Vec<u8> = s.__();
+
+   let s = "hello".to_string();
+   let v2 = s.into_bytes();
+   assert_eq!(v1, v2);
+
+   // impl<'_> From<&'_ str> for Vec
+   let s = "hello";
+   let v3 = Vec::__(s);
+   assert_eq!(v2, v3);
+
+   // 迭代器 Iterators 可以通过 collect 变成 Vec
+   let v4: Vec<i32> = [0; 10].into_iter().collect();
+   assert_eq!(v4, vec![0; 10]);
+
+   println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题四
+
+```rust
+// 修复错误并实现缺失的代码
+fn main() {
+    let mut v = Vec::from([1, 2, 3]);
+    for i in 0..5 {
+        println!("{:?}", v[i])
+    }
+
+    for i in 0..5 {
+       // 实现这里的代码...
+    }
+
+    assert_eq!(v, vec![2, 3, 4, 5, 6]);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题五
+
+与 String 的切片类似，Vec 也可以使用切片。如果说 Vec 是可变的，那它的切片就是不可变或者说只读的，我们可以通过 & 来获取切片
+
+在 Rust 中，将切片作为参数进行传递是更常见的使用方式，例如当一个函数只需要可读性时，那传递 Vec 或 String 的切片 `&[T]` / `&str` 会更加适合
+
+```rust
+// 修复错误
+fn main() {
+    let mut v = vec![1, 2, 3];
+
+    let slice1 = &v[..];
+    // 越界访问将导致 panic.
+    // 修改时必须使用 `v.len`
+    let slice2 = &v[0..4];
+
+    assert_eq!(slice1, slice2);
+
+    // 切片是只读的
+    // 注意：切片和 `&Vec` 是不同的类型，后者仅仅是 `Vec` 的引用，并可以通过解引用直接获取 `Vec`
+    let vec_ref: &mut Vec<i32> = &mut v;
+    (*vec_ref).push(4);
+    let slice3 = &mut v[0..3];
+    slice3.push(4);
+
+    assert_eq!(slice3, &[1, 2, 3, 4]);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题六
+
+容量 capacity 是已经分配好的内存空间，用于存储未来添加到 Vec 中的元素。而长度 len 则是当前 Vec 中已经存储的元素数量。如果要添加新元素时，长度将要超过已有的容量，那容量会自动进行增长：Rust 会重新分配一块更大的内存空间，然后将之前的 Vec 拷贝过去，因此，这里就会发生新的内存分配（目前 Rust 的容量调整策略是加倍，例如 2 -> 4 -> 8 ..）。
+
+若这段代码会频繁发生，那频繁的内存分配会大幅影响我们系统的性能，最好的办法就是提前分配好足够的容量，尽量减少内存分配。
+
+```rust
+// 修复错误
+fn main() {
+    let mut vec = Vec::with_capacity(10);
+
+    assert_eq!(vec.len(), __);
+    assert_eq!(vec.capacity(), 10);
+
+    // 由于提前设置了足够的容量，这里的循环不会造成任何内存分配...
+    for i in 0..10 {
+        vec.push(i);
+    }
+    assert_eq!(vec.len(), __);
+    assert_eq!(vec.capacity(), __);
+
+    // ...但是下面的代码会造成新的内存分配
+    vec.push(11);
+    assert_eq!(vec.len(), 11);
+    assert!(vec.capacity() >= 11);
+
+
+    // 填写一个合适的值，在 `for` 循环运行的过程中，不会造成任何内存分配
+    let mut vec = Vec::with_capacity(__);
+    for i in 0..100 {
+        vec.push(i);
+    }
+
+    assert_eq!(vec.len(), __);
+    assert_eq!(vec.capacity(), __);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题七
+
+Vec 中的元素必须是相同的类型，例如以下代码会发生错误:
+
+```rust
+fn main() {
+   let v = vec![1, 2.0, 3];
+}
+```
+
+但是我们可以使用枚举或特征对象来存储不同的类型
+
+```rust
+#[derive(Debug)]
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
+fn main() {
+    // 填空
+    let v : Vec<IpAddr>= __;
+
+    // 枚举的比较需要派生 PartialEq 特征
+    assert_eq!(v[0], IpAddr::V4("127.0.0.1".to_string()));
+    assert_eq!(v[1], IpAddr::V6("::1".to_string()));
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题八
+
+```rust
+trait IpAddr {
+    fn display(&self);
+}
+
+struct V4(String);
+impl IpAddr for V4 {
+    fn display(&self) {
+        println!("ipv4: {:?}",self.0)
+    }
+}
+struct V6(String);
+impl IpAddr for V6 {
+    fn display(&self) {
+        println!("ipv6: {:?}",self.0)
+    }
+}
+
+fn main() {
+    // 填空
+    let v: __= vec![
+        Box::new(V4("127.0.0.1".to_string())),
+        Box::new(V6("::1".to_string())),
+    ];
+
+    for ip in v {
+        ip.display();
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+## KV 存储 HashMap
+
+HashMap 默认使用 `SipHash 1-3` 哈希算法，该算法对于抵抗 HashDos 攻击非常有效。在性能方面，如果你的 key 是中型大小的，那该算法非常不错，但是如果是小型的 key（例如整数）亦或是大型的 key（例如字符串），那你需要采用社区提供的其它算法来提高性能
+
+哈希表的算法是基于 Google 的 [SwissTable](https://abseil.io/blog/20180927-swisstables)，你可以在这里找到 C++ 的实现，同时在 [CppCon talk](https://www.youtube.com/watch?v=ncHmEUmJZf4) 上也有关于算法如何工作的演讲
+
+### 问题一
+
+```rust
+// 填空并修复错误
+use std::collections::HashMap;
+fn main() {
+    let mut scores = HashMap::new();
+    scores.insert("Sunface", 98);
+    scores.insert("Daniel", 95);
+    scores.insert("Ashley", 69.0);
+    scores.insert("Katie", "58");
+
+    // get 返回一个 Option<&V> 枚举值
+    let score = scores.get("Sunface");
+    assert_eq!(score, Some(98));
+
+    if scores.contains_key("Daniel") {
+        // 索引返回一个值 V
+        let score = scores["Daniel"];
+        assert_eq!(score, __);
+        scores.remove("Daniel");
+    }
+
+    assert_eq!(scores.len(), __);
+
+    for (name, score) in scores {
+        println!("The score of {} is {}", name, score)
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+```rust
+use std::collections::HashMap;
+fn main() {
+    let teams = [
+        ("Chinese Team", 100),
+        ("American Team", 10),
+        ("France Team", 50),
+    ];
+
+    let mut teams_map1 = HashMap::new();
+    for team in &teams {
+        teams_map1.insert(team.0, team.1);
+    }
+
+    // 使用两种方法实现 team_map2
+    // 提示:其中一种方法是使用 `collect` 方法
+    let teams_map2...
+
+    assert_eq!(teams_map1, teams_map2);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+```rust
+// 填空
+use std::collections::HashMap;
+fn main() {
+    // 编译器可以根据后续的使用情况帮我自动推断出 HashMap 的类型，当然你也可以显式地标注类型：HashMap<&str, u8>
+    let mut player_stats = HashMap::new();
+
+    // 查询指定的 key, 若不存在时，则插入新的 kv 值
+    player_stats.entry("health").or_insert(100);
+
+    assert_eq!(player_stats["health"], __);
+
+    // 通过函数来返回新的值
+    player_stats.entry("health").or_insert_with(random_stat_buff);
+    assert_eq!(player_stats["health"], __);
+
+    let health = player_stats.entry("health").or_insert(50);
+    assert_eq!(health, __);
+    *health -= 50;
+    assert_eq!(*health, __);
+
+    println!("Success!")
+}
+
+fn random_stat_buff() -> u8 {
+    // 为了简单，我们没有使用随机，而是返回一个固定的值
+    42
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题四
+
+任何实现了 Eq 和 Hash 特征的类型都可以用于 HashMap 的 key，包括:
+
+- bool（很少用到，因为它只能表达两种 key）
+- int, uint 以及它们的变体，例如 u8、i32 等
+- String 和 &str（提示: HashMap 的 key 是 String 类型时，你其实可以使用 &str 配合 get 方法进行查询）
+
+需要注意的是，f32 和 f64 并没有实现 Hash，原因是浮点数精度的问题会导致它们无法进行相等比较。
+
+如果一个集合类型的所有字段都实现了 Eq 和 Hash，那该集合类型会自动实现 Eq 和 Hash。例如 `Vect<T>` 要实现 Hash，那么首先需要 T 实现 Hash
+
+```rust
+// 修复错误
+// 提示: `derive` 是实现一些常用特征的好办法
+use std::collections::HashMap;
+
+struct Viking {
+    name: String,
+    country: String,
+}
+
+impl Viking {
+    fn new(name: &str, country: &str) -> Viking {
+        Viking {
+            name: name.to_string(),
+            country: country.to_string(),
+        }
+    }
+}
+
+fn main() {
+    // 使用 HashMap 来存储 viking 的生命值
+    let vikings = HashMap::from([
+        (Viking::new("Einar", "Norway"), 25),
+        (Viking::new("Olaf", "Denmark"), 24),
+        (Viking::new("Harald", "Iceland"), 12),
+    ]);
+
+    // 使用 derive 的方式来打印 viking 的当前状态
+    for (viking, health) in &vikings {
+        println!("{:?} has {} hp", viking, health);
+    }
+}
+```
+
+关于容量，我们在之前的 Vector 中有详细的介绍，而 HashMap 也可以调整容量：你可以通过 `HashMap::with_capacity(uint)` 使用指定的容量来初始化，或者使用 `HashMap::new()`，后者会提供一个默认的初始化容量
+
+```rust
+use std::collections::HashMap;
+fn main() {
+    let mut map: HashMap<i32, i32> = HashMap::with_capacity(100);
+    map.insert(1, 2);
+    map.insert(3, 4);
+    // 事实上，虽然我们使用了 100 容量来初始化，但是 map 的容量很可能会比 100 更多
+    assert!(map.capacity() >= 100);
+
+    // 对容量进行收缩，你提供的值仅仅是一个允许的最小值，实际上，Rust 会根据当前存储的数据量进行自动设置，当然，这个值会尽量靠近你提供的值，同时还可能会预留一些调整空间
+
+    map.shrink_to(50);
+    assert!(map.capacity() >= 50);
+
+    // 让 Rust 自行调整到一个合适的值，剩余策略同上
+    map.shrink_to_fit();
+    assert!(map.capacity() >= 2);
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题五
+
+对于实现了 Copy 特征的类型，例如 i32，那类型的值会被拷贝到 HashMap 中。而对于有所有权的类型，例如 String，它们的值的所有权将被转移到 HashMap 中
+
+```rust
+// 修复错误，尽可能少的去修改代码
+// 不要移除任何代码行！
+use std::collections::HashMap;
+fn main() {
+  let v1 = 10;
+  let mut m1 = HashMap::new();
+  m1.insert(v1, v1);
+  println!("v1 is still usable after inserting to hashmap : {}", v1);
+
+  let v2 = "hello".to_string();
+  let mut m2 = HashMap::new();
+  // 所有权在这里发生了转移
+  m2.insert(v2, v1);
+
+  assert_eq!(v2, "hello");
+
+   println!("Success!")
+}
+```
+
+在开头，我们提到过如果现有的 `SipHash 1-3` 的性能无法满足你的需求，那么可以使用社区提供的替代算法。
+
+例如其中一个社区库的使用方式如下：
+
+```rust
+#![allow(unused)]
+fn main() {
+use std::hash::BuildHasherDefault;
+use std::collections::HashMap;
+// 引入第三方的哈希函数
+use twox_hash::XxHash64;
+
+let mut hash: HashMap<_, _, BuildHasherDefault<XxHash64>> = Default::default();
+hash.insert(42, "the answer");
+assert_eq!(hash.get(&42), Some(&"the answer"));
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
 // TODO https://zh.practice.rs/generics-traits/intro.html
