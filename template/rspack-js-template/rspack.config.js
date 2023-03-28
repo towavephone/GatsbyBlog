@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: {
     main: './src/index.js'
   },
@@ -13,6 +14,7 @@ module.exports = {
     pluginImport: [
       {
         libraryName: 'antd',
+        libraryDirectory: 'es',
         style: true
       }
     ]
@@ -20,12 +22,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /.*\.js$/,
+        test: /\.js$/,
         include: /src/,
         type: 'jsx'
       },
       {
-        test: /.less$/,
+        test: /\.less$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'less-loader',
@@ -35,12 +38,49 @@ module.exports = {
           }
         ],
         type: 'css/module'
+      },
+      {
+        test: /\.less$/,
+        include: /node_modules/,
+        use: [
+          {
+            loader: 'less-loader',
+            options: {
+              lessOptions: { javascriptEnabled: true }
+            }
+          }
+        ],
+        type: 'css'
       }
     ]
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
+    },
+    extensions: ['.js']
+  },
+  devServer: {
+    port: 3000,
+    allowedHosts: 'all'
+  },
+  devtool: 'source-map',
+  snapshot: {
+    resolve: {
+      hash: true,
+      timestamp: false
+    },
+    module: {
+      hash: true,
+      timestamp: false
     }
+  },
+  stats: {
+    preset: 'errors-only',
+    reasons: true,
+    hash: true
+  },
+  experiments: {
+    incrementalRebuild: true
   }
 };
