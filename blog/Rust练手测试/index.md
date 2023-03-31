@@ -8425,16 +8425,15 @@ fn main() {
 ```rust
 /* 为 `i` 和 `borrow2` 标注合适的生命周期范围 */
 
-
 // `i` 拥有最长的生命周期，因为它的作用域完整的包含了 `borrow1` 和 `borrow2` 。
 // 而 `borrow1` 和 `borrow2` 的生命周期并无关联，因为它们的作用域没有重叠
 fn main() {
     let i = 3;
     {
         let borrow1 = &i; // `borrow1` 生命周期开始. ──┐
-        //                                                │
-        println!("borrow1: {}", borrow1); //              │
-    } // `borrow1` 生命周期结束. ──────────────────────────────────┘
+        //                                           │
+        println!("borrow1: {}", borrow1); //         │
+    }   // `borrow1` 生命周期结束. ────────────────────┘
     {
         let borrow2 = &i;
 
@@ -8446,7 +8445,23 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 为 `i` 和 `borrow2` 标注合适的生命周期范围 */
 
+// `i` 拥有最长的生命周期，因为它的作用域完整的包含了 `borrow1` 和 `borrow2` 。
+// 而 `borrow1` 和 `borrow2` 的生命周期并无关联，因为它们的作用域没有重叠
+fn main() {
+    let i = 3;
+    {
+        let borrow1 = &i; // `borrow1` 生命周期开始. ──┐
+        //                                           │
+        println!("borrow1: {}", borrow1); //         │
+    }   // `borrow1` 生命周期结束. ────────────────────┘
+    {
+        let borrow2 = &i; // `borrow2` 生命周期开始. ──┐
+        //                                           │
+        println!("borrow2: {}", borrow2); //         │
+    }   // `borrow2` 生命周期结束. ────────────────────┘
+}
 ```
 
 ### 问题二
@@ -8454,22 +8469,21 @@ fn main() {
 示例
 
 ```rust
-
 #![allow(unused)]
 fn main() {
-{
-    let x = 5;            // ----------+-- 'b
-                          //           |
-    let r = &x;           // --+-- 'a  |
-                          //   |       |
-    println!("r: {}", r); //   |       |
-                          // --+       |
-}                         // ----------+
+    {
+        let x = 5;            // ----------+-- 'b
+                              //           |
+        let r = &x;           // --+-- 'a  |
+                              //   |       |
+        println!("r: {}", r); //   |       |
+                              // --+       |
+    }                         // ----------+
 }
 ```
 
 ```rust
-/* 像上面的示例一样，为 `r` 和 `x` 标准生命周期，然后从生命周期的角度. */
+/* 像上面的示例一样，为 `r` 和 `x` 标准生命周期，然后从生命周期的角度解释一下为什么编译错误 */
 
 fn main() {
     {
@@ -8487,8 +8501,27 @@ fn main() {
 
 #### 我的解答
 
-```rust
+r 变量被赋予了生命周期 'a，x 被赋予了生命周期 'b，从图示上可以明显看出生命周期 'b 比 'a 小很多
 
+在编译期，Rust 会比较两个变量的生命周期，结果发现 r 明明拥有生命周期 'a，但是却引用了一个小得多的生命周期 'b，在这种情况下，编译器会认为我们的程序存在风险，因此拒绝运行。
+
+如果想要编译通过，也很简单，只要 'b 比 'a 大就好。总之，x 变量只要比 r 活得久，那么 r 就能随意引用 x 且不会存在危险：
+
+```rust
+/* 像上面的示例一样，为 `r` 和 `x` 标准生命周期，然后从生命周期的角度解释一下为什么编译错误 */
+
+fn main() {
+    {
+        let r;                // ---------+-- 'a
+                              //          |
+        {                     //          |
+            let x = 5;        // -+-- 'b  |
+            r = &x;           //  |       |
+        }                     // -+       |
+                              //          |
+        println!("r: {}", r); //          |
+    }                         // ---------+
+}
 ```
 
 ### 问题三
@@ -8540,14 +8573,23 @@ fn main() {
 ```
 
 ```rust
+/* 添加合适的生命周期标注，让下面的代码工作 */
+fn longest(x: &str, y: &str) -> &str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
 
+fn main() {}
 ```
 
 #### 我的解答
 
 ```rust
 /* 添加合适的生命周期标注，让下面的代码工作 */
-fn longest(x: &str, y: &str) -> &str {
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if x.len() > y.len() {
         x
     } else {
@@ -8573,7 +8615,13 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 使用三种方法修复下面的错误  */
+fn invalid_output() -> String {
+    String::from("foo")
+}
 
+fn main() {
+}
 ```
 
 ### 问题五
@@ -8610,7 +8658,31 @@ fn main() {
 #### 我的解答
 
 ```rust
+// `print_refs` 有两个引用参数，它们的生命周期 `'a` 和 `'b` 至少得跟函数活得一样久
+fn print_refs<'a, 'b>(x: &'a i32, y: &'b i32) {
+    println!("x is {} and y is {}", x, y);
+}
 
+/* 让下面的代码工作 */
+fn failed_borrow() {
+    let _x = 12;
+
+    // ERROR: `_x` 活得不够久does not live long enough
+    let y = &_x;
+
+    // 在函数内使用 `'a` 将会报错，原因是 `&_x` 的生命周期显然比 `'a` 要小
+    // 你不能将一个小的生命周期强转成大的
+}
+
+fn main() {
+    let (four, nine) = (4, 9);
+
+    print_refs(&four, &nine);
+    // 这里，four 和 nice 的生命周期必须要比函数 print_refs 长
+
+    failed_borrow();
+    // `failed_borrow`  没有传入任何引用去限制生命周期 `'a`，因此，此时的 `'a` 生命周期是没有任何限制的，它默认是 `'static`
+}
 ```
 
 ### 问题六
@@ -8654,7 +8726,39 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 增加合适的生命周期标准，让代码工作 */
 
+// `i32` 的引用必须比 `Borrowed` 活得更久
+#[derive(Debug)]
+struct Borrowed<'a>(&'a i32);
+
+// 类似的，下面两个引用也必须比结构体 `NamedBorrowed` 活得更久
+#[derive(Debug)]
+struct NamedBorrowed<'a, 'b> {
+    x: &'a i32,
+    y: &'b i32,
+}
+
+#[derive(Debug)]
+enum Either<'a> {
+    Num(i32),
+    Ref(&'a i32),
+}
+
+fn main() {
+    let x = 18;
+    let y = 15;
+
+    let single = Borrowed(&x);
+    let double = NamedBorrowed { x: &x, y: &y };
+    let reference = Either::Ref(&x);
+    let number    = Either::Num(y);
+
+    println!("x is borrowed in {:?}", single);
+    println!("x and y are borrowed in {:?}", double);
+    println!("x is borrowed in {:?}", reference);
+    println!("y is *not* borrowed in {:?}", number);
+}
 ```
 
 ### 问题七
@@ -8690,7 +8794,31 @@ fn main()
 #### 我的解答
 
 ```rust
+/* 让代码工作 */
 
+#[derive(Debug)]
+struct NoCopyType {}
+
+#[derive(Debug)]
+struct Example<'a, 'b> {
+    a: &'a u32,
+    b: &'b NoCopyType,
+}
+
+fn main() {
+    let var_a = 35;
+    let example: Example;
+
+    let var_b = NoCopyType {};
+
+    /* 修复错误 */
+    example = Example {
+        a: &var_a,
+        b: &var_b,
+    };
+
+    println!("(Success!) {:?}", example);
+}
 ```
 
 ### 问题八
@@ -8722,7 +8850,27 @@ fn main()
 #### 我的解答
 
 ```rust
+#[derive(Debug)]
+struct NoCopyType {}
 
+#[derive(Debug)]
+#[allow(dead_code)]
+struct Example<'a, 'b> {
+    a: &'a u32,
+    b: &'b NoCopyType,
+}
+
+/* 修复函数的签名 */
+fn fix_me<'a>(foo: &'a Example) -> &'a NoCopyType {
+    foo.b
+}
+
+fn main() {
+    let no_copy = NoCopyType {};
+    let example = Example { a: &1, b: &no_copy };
+    fix_me(&example);
+    println!("Success!")
+}
 ```
 
 ### 问题九
@@ -8750,14 +8898,16 @@ fn main() {
 ```
 
 ```rust
-/* 添加合适的生命周期让下面代码工作 */
-struct ImportantExcerpt {
-    part: &str,
+/* 显式添加生命周期 */
+
+struct ImportantExcerpt<'a> {
+    part: &'a str,
 }
 
-impl ImportantExcerpt {
-    fn level(&'a self) -> i32 {
-        3
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&self, announcement: &str) -> &str {
+        println!("Attention please: {}", announcement);
+        self.part
     }
 }
 
@@ -8767,7 +8917,57 @@ fn main() {}
 #### 我的解答
 
 ```rust
+/* 显式添加生命周期 */
 
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part<'b>(&'a self, announcement: &'b str) -> &'a str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
+fn main() {}
+```
+
+```rust
+/* 显式添加生命周期 */
+
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a: 'b, 'b> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&'a self, announcement: &'b str) -> &'b str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
+fn main() {}
+```
+
+```rust
+/* 显式添加生命周期 */
+
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part<'b>(&'a self, announcement: &'b str) -> &'b str
+    where
+        'a: 'b,
+    {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
+fn main() {}
 ```
 
 ### 问题十
@@ -8814,7 +9014,42 @@ fn main() {}
 #### 我的解答
 
 ```rust
+/* 移除所有可以消除的生命周期标注 */
 
+fn nput(x: &i32) {
+    println!("`annotated_input`: {}", x);
+}
+
+fn pass(x: &i32) -> &i32 {
+    x
+}
+
+fn longest<'a, 'b>(x: &'a str, y: &'b str) -> &'a str {
+    x
+}
+
+struct Owner(i32);
+
+impl Owner {
+    fn add_one(&mut self) {
+        self.0 += 1;
+    }
+    fn prin(&self) {
+        println!("`print`: {}", self.0);
+    }
+}
+
+struct Person<'a> {
+    age: u8,
+    name: &'a str,
+}
+
+enum Either<'a> {
+    Num(i32),
+    Ref(&'a i32),
+}
+
+fn main() {}
 ```
 
 // TODO https://zh.practice.rs/generics-traits/intro.html
