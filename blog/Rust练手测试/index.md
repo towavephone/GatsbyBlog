@@ -9052,4 +9052,591 @@ enum Either<'a> {
 fn main() {}
 ```
 
+## &'static and T: 'static
+
+### 问题一
+
+'static 是一个 Rust 保留的生命周期名称，在之前我们可能已经见过好几次了:
+
+```rust
+#![allow(unused)]
+fn main() {
+   // 引用的生命周期是 'static :
+   let s: &'static str = "hello world";
+
+   // 'static 也可以用于特征约束中:
+   fn generic<T>(x: T) where T: 'static {}
+}
+```
+
+虽然它们都是 'static，但是也稍有不同。
+
+作为一个引用生命周期，&'static 说明该引用指向的数据可以跟程序活得一样久，但是该引用的生命周期依然有可能被强转为一个更短的生命周期。
+
+有好几种方法可以将一个变量标记为 'static 生命周期，其中两种都是和保存在二进制文件中相关（例如字符串字面量就是保存在二进制文件中，它的生命周期是 'static）。
+
+```rust
+/* 使用两种方法填空 */
+fn main() {
+    __;
+    need_static(v);
+
+    println!("Success!")
+}
+
+fn need_static(r : &'static str) {
+    assert_eq!(r, "hello");
+}
+```
+
+#### 我的解答
+
+```rust
+/* 使用两种方法填空 */
+fn main() {
+    let v: &'static str = "hello";
+    need_static(v);
+
+    println!("Success!")
+}
+
+fn need_static(r : &'static str) {
+    assert_eq!(r, "hello");
+}
+```
+
+```rust
+/* 使用两种方法填空 */
+fn main() {
+    let v = "hello";
+    need_static(v);
+
+    println!("Success!")
+}
+
+fn need_static(r : &'static str) {
+    assert_eq!(r, "hello");
+}
+```
+
+### 问题二
+
+使用 Box::leak 也可以产生 'static 生命周期
+
+```rust
+#[derive(Debug)]
+struct Config {
+    a: String,
+    b: String,
+}
+static mut config: Option<&mut Config> = None;
+
+/* 让代码工作，但不要修改函数的签名 */
+fn init() -> Option<&'static mut Config> {
+    Some(&mut Config {
+        a: "A".to_string(),
+        b: "B".to_string(),
+    })
+}
+
+fn main() {
+    unsafe {
+        config = init();
+
+        println!("{:?}",config)
+    }
+}
+```
+
+#### 我的解答
+
+```rust
+#[derive(Debug)]
+struct Config {
+    a: String,
+    b: String,
+}
+static mut config: Option<&mut Config> = None;
+
+/* 让代码工作，但不要修改函数的签名 */
+fn init() -> Option<&'static mut Config> {
+    Some(Box::leak(Box::new(Config {
+        a: "A".to_string(),
+        b: "B".to_string(),
+    })))
+}
+
+fn main() {
+    unsafe {
+        config = init();
+
+        println!("{:?}", config)
+    }
+}
+```
+
+### 问题三
+
+&'static 只能说明引用指向的数据是能一直存活的，但是引用本身依然受限于它的作用域
+
+```rust
+fn main() {
+    {
+        // 字符串字面量能跟程序活得一样久，因此 `static_string` 的生命周期是 `'static`
+        let static_string = "I'm in read-only memory";
+        println!("static_string: {}", static_string);
+
+        // 当 `static_string` 超出作用域时，该引用就无法再被使用，但是引用指向的数据( 字符串字面量 ) 依然保存在二进制 binary 所占用的内存中
+    }
+
+    println!("static_string reference remains alive: {}", static_string);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题四
+
+&'static 可以被强转成一个较短的生命周期
+
+```rust
+// 声明一个 static 常量，它拥有 `'static` 生命周期.
+static NUM: i32 = 18;
+
+// 返回常量 `Num` 的引用，注意，这里的生命周期从 `'static` 强转为 `'a`
+fn coerce_static<'a>(_: &'a i32) -> &'a i32 {
+    &NUM
+}
+
+fn main() {
+    {
+        let lifetime_num = 9;
+
+        let coerced_static = coerce_static(&lifetime_num);
+
+        println!("coerced_static: {}", coerced_static);
+    }
+
+    println!("NUM: {} stays accessible!", NUM);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题五
+
+关于 'static 的特征约束详细解释，请参见 [Rust 语言圣经](https://course.rs/advance/lifetime/static.html#t-static)，这里就不再赘述。
+
+```rust
+/* 让代码工作 */
+use std::fmt::Debug;
+
+fn print_it<T: Debug + 'static>( input: T) {
+    println!( "'static value passed in is: {:?}", input );
+}
+
+fn print_it1( input: impl Debug + 'static ) {
+    println!( "'static value passed in is: {:?}", input );
+}
+
+
+fn print_it2<T: Debug + 'static>( input: &T) {
+    println!( "'static value passed in is: {:?}", input );
+}
+
+fn main() {
+    // i 是有所有权的数据，并没有包含任何引用，因此它是 'static
+    let i = 5;
+    print_it(i);
+
+    // 但是 &i 是一个引用，生命周期受限于作用域，因此它不是 'static
+    print_it(&i);
+
+    print_it1(&i);
+
+    // 但是下面的代码可以正常运行 !
+    print_it2(&i);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题六
+
+```rust
+use std::fmt::Display;
+
+fn main() {
+  let mut string = "First".to_owned();
+
+  string.push_str(string.to_uppercase().as_str());
+  print_a(&string);
+  print_b(&string);
+  print_c(&string); // Compilation error
+  print_d(&string); // Compilation error
+  print_e(&string);
+  print_f(&string);
+  print_g(&string); // Compilation error
+}
+
+fn print_a<T: Display + 'static>(t: &T) {
+  println!("{}", t);
+}
+
+fn print_b<T>(t: &T)
+where
+  T: Display + 'static,
+{
+  println!("{}", t);
+}
+
+fn print_c(t: &'static dyn Display) {
+  println!("{}", t)
+}
+
+fn print_d(t: &'static impl Display) {
+  println!("{}", t)
+}
+
+fn print_e(t: &(dyn Display + 'static)) {
+  println!("{}", t)
+}
+
+fn print_f(t: &(impl Display + 'static)) {
+  println!("{}", t)
+}
+
+fn print_g(t: &'static String) {
+  println!("{}", t);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+## 深入
+
+### 问题一
+
+就像泛型类型可以有约束一样，生命周期也可以有约束 ，如下所示：
+
+- `T: 'a`，所有引用在 T 必须超过生命周期 'a
+- `T: Trait + 'a`: T 必须实现特征 Trait 并且所有引用在 T 必须超过生命周期 'a
+
+示例
+
+```rust
+use std::fmt::Debug; // 特征约束使用
+
+#[derive(Debug)]
+struct Ref<'a, T: 'a>(&'a T);
+// `Ref` 包含对泛型类型 `T` 的引用，该泛型类型具有
+// 未知的生命周期 `'a`. `T` 是约定任何
+// 引用在 `T` 必须大于 `'a` 。此外，在生命周期
+// 里 `Ref` 不能超过 `'a`。
+
+// 使用 `Debug` 特征打印的通用函数。
+fn print<T>(t: T) where
+    T: Debug {
+    println!("`print`: t is {:?}", t);
+}
+
+// 这里引用 `T` 使用 where `T` 实现
+// `Debug` 和所有引用 `T` 都要比 `'a` 长
+// 此外，`'a`必须要比函数声明周期长
+fn print_ref<'a, T>(t: &'a T) where
+    T: Debug + 'a {
+    println!("`print_ref`: t is {:?}", t);
+}
+
+fn main() {
+    let x = 7;
+    let ref_x = Ref(&x);
+
+    print_ref(&ref_x);
+    print(ref_x);
+}
+```
+
+```rust
+/* 使用生命周期注释结构体
+1. `r` 和 `s` 必须是不同生命周期
+2. `s` 的生命周期需要大于 'r'
+*/
+struct DoubleRef<T> {
+    r: &T,
+    s: &T
+}
+fn main() {
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题二
+
+```rust
+/* 添加类型约束使下面代码正常运行 */
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a, 'b> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&'a self, announcement: &'b str) -> &'b str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
+fn main() {
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题三
+
+```rust
+/* 添加类型约束使下面代码正常运行 */
+fn f<'a, 'b>(x: &'a i32, mut y: &'b i32) {
+    y = x;                      
+    let r: &'b &'a i32 = &&0;   
+}
+
+fn main() {
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题四
+
+类型约束可能在生命周期中排名更高。这些约束指定了一个约束对于所有生命周期都为真。例如，诸如此类的约束 `for<'a> &'a T: PartialEq<i32>` 需要如下实现：
+
+```rust
+impl<'a> PartialEq<i32> for &'a T {
+   // ...
+}
+```
+
+然后可以用于将一个 &'a T 与任何生命周期进行比较 i32 。
+
+这里只能使用更高级别的约束，因为引用的生命周期比函数上任何可能的生命周期参数都短。
+
+```rust
+/* 添加 HRTB 使下面代码正常运行！ */
+fn call_on_ref_zero<'a, F>(f: F) where F: Fn(&'a i32) {
+    let zero = 0;
+    f(&zero);
+}
+
+fn main() {
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题五
+
+在解释 NLL 之前，我们先看一段代码：
+
+```rust
+fn main() {
+   let mut s = String::from("hello");
+
+    let r1 = &s;
+    let r2 = &s;
+    println!("{} and {}", r1, r2);
+
+    let r3 = &mut s;
+    println!("{}", r3);
+}
+```
+
+根据我们目前的知识，这段代码会因为违反 Rust 中的借用规则而导致错误。
+
+但是，如果您执行 cargo run ，那么一切都没问题，那么这里发生了什么？
+
+编译器在作用域结束之前判断不再使用引用的能力称为 非词法生命周期（简称 NLL）。
+
+有了这种能力，编译器就知道最后一次使用引用是什么时候，并根据这些知识优化借用规则。
+
+```rust
+let mut u = 0i32;
+let mut v = 1i32;
+let mut w = 2i32;
+
+// lifetime of `a` = α ∪ β ∪ γ
+let mut a = &mut u;     // --+ α. lifetime of `&mut u`  --+ lexical "lifetime" of `&mut u`,`&mut u`, `&mut w` and `a`
+use(a);                 //   |                            |
+*a = 3; // <-----------------+                            |
+...                     //                                |
+a = &mut v;             // --+ β. lifetime of `&mut v`    |
+use(a);                 //   |                            |
+*a = 4; // <-----------------+                            |
+...                     //                                |
+a = &mut w;             // --+ γ. lifetime of `&mut w`    |
+use(a);                 //   |                            |
+*a = 5; // <-----------------+ <--------------------------+
+```
+
+学习了 NLL 之后，我们现在可以很容易地理解再借用了。
+
+示例
+
+```rust
+#[derive(Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+impl Point {
+    fn move_to(&mut self, x: i32, y: i32) {
+        self.x = x;
+        self.y = y;
+    }
+}
+
+fn main() {
+    let mut p = Point { x: 0, y: 0 };
+    let r = &mut p;
+    // 这里是再借用
+    let rr: &Point = &*r;
+
+    println!("{:?}", rr); // 这里结束再借用
+
+    // 再借用结束，现在我们可以继续使用 `r`
+    r.move_to(10, 10);
+    println!("{:?}", r);
+}
+```
+
+```rust
+/* 通过重新排序一些代码使下面代码正常运行 */
+fn main() {
+    let mut data = 10;
+    let ref1 = &mut data;
+    let ref2 = &mut *ref1;
+
+    *ref1 += 1;
+    *ref2 += 2;
+
+    println!("{}", data);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
+### 问题六
+
+未约束的生命周期：在 [Nomicon - Unbounded Lifetimes](https://doc.rust-lang.org/nomicon/unbounded-lifetimes.html) 中查看更多信息。
+
+更多省略规则
+
+```rust
+impl<'a> Reader for BufReader<'a> {
+    // 'a 在以下方法中不使用
+}
+
+// 可以写为：
+impl Reader for BufReader<'_> {
+    
+}
+``
+
+```rust
+// Rust 2015
+struct Ref<'a, T: 'a> {
+    field: &'a T
+}
+
+// Rust 2018
+struct Ref<'a, T> {
+    field: &'a T
+}
+```
+
+```rust
+/* 使下面代码正常运行 */
+struct Interface<'a> {
+    manager: &'a mut Manager<'a>
+}
+
+impl<'a> Interface<'a> {
+    pub fn noop(self) {
+        println!("interface consumed");
+    }
+}
+
+struct Manager<'a> {
+    text: &'a str
+}
+
+struct List<'a> {
+    manager: Manager<'a>,
+}
+
+impl<'a> List<'a> {
+    pub fn get_interface(&'a mut self) -> Interface {
+        Interface {
+            manager: &mut self.manager
+        }
+    }
+}
+
+fn main() {
+    let mut list = List {
+        manager: Manager {
+            text: "hello"
+        }
+    };
+
+    list.get_interface().noop();
+
+    println!("Interface should be dropped here and the borrow released");
+
+    use_list(&list);
+}
+
+fn use_list(list: &List) {
+    println!("{}", list.manager.text);
+}
+```
+
+#### 我的解答
+
+```rust
+```
+
 // TODO https://zh.practice.rs/generics-traits/intro.html
