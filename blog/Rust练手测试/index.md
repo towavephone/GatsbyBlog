@@ -9186,7 +9186,7 @@ fn main() {
         let static_string = "I'm in read-only memory";
         println!("static_string: {}", static_string);
 
-        // 当 `static_string` 超出作用域时，该引用就无法再被使用，但是引用指向的数据( 字符串字面量 ) 依然保存在二进制 binary 所占用的内存中
+        // 当 `static_string` 超出作用域时，该引用就无法再被使用，但是引用指向的数据（字符串字面量）依然保存在二进制 binary 所占用的内存中
     }
 
     println!("static_string reference remains alive: {}", static_string);
@@ -9196,6 +9196,15 @@ fn main() {
 #### 我的解答
 
 ```rust
+fn main() {
+    // 字符串字面量能跟程序活得一样久，因此 `static_string` 的生命周期是 `'static`
+    let static_string = "I'm in read-only memory";
+    println!("static_string: {}", static_string);
+
+    // 当 `static_string` 超出作用域时，该引用就无法再被使用，但是引用指向的数据（字符串字面量）依然保存在二进制 binary 所占用的内存中
+
+    println!("static_string reference remains alive: {}", static_string);
+}
 ```
 
 ### 问题四
@@ -9224,11 +9233,6 @@ fn main() {
 }
 ```
 
-#### 我的解答
-
-```rust
-```
-
 ### 问题五
 
 关于 'static 的特征约束详细解释，请参见 [Rust 语言圣经](https://course.rs/advance/lifetime/static.html#t-static)，这里就不再赘述。
@@ -9237,17 +9241,16 @@ fn main() {
 /* 让代码工作 */
 use std::fmt::Debug;
 
-fn print_it<T: Debug + 'static>( input: T) {
-    println!( "'static value passed in is: {:?}", input );
+fn print_it<T: Debug + 'static>(input: T) {
+    println!("'static value passed in is: {:?}", input);
 }
 
-fn print_it1( input: impl Debug + 'static ) {
-    println!( "'static value passed in is: {:?}", input );
+fn print_it1(input: impl Debug + 'static) {
+    println!("'static value passed in is: {:?}", input);
 }
 
-
-fn print_it2<T: Debug + 'static>( input: &T) {
-    println!( "'static value passed in is: {:?}", input );
+fn print_it2<T: Debug + 'static>(input: &T) {
+    println!("'static value passed in is: {:?}", input);
 }
 
 fn main() {
@@ -9268,6 +9271,35 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 让代码工作 */
+use std::fmt::Debug;
+
+fn print_it<T: Debug + 'static>(input: T) {
+    println!("'static value passed in is: {:?}", input);
+}
+
+fn print_it1(input: impl Debug + 'static) {
+    println!("'static value passed in is: {:?}", input);
+}
+
+fn print_it2<T: Debug + 'static>(input: &T) {
+    println!("'static value passed in is: {:?}", input);
+}
+
+fn main() {
+    // i 是有所有权的数据，并没有包含任何引用，因此它是 'static
+    // static i: i32 = 5;
+    const i: i32 = 5;
+    print_it(i);
+
+    // 但是 &i 是一个引用，生命周期受限于 main 作用域，因此它不是 'static
+    print_it(&i);
+
+    print_it1(&i);
+
+    // 但是下面的代码可以正常运行 !
+    print_it2(&i);
+}
 ```
 
 ### 问题六
@@ -9323,13 +9355,58 @@ fn print_g(t: &'static String) {
 #### 我的解答
 
 ```rust
+use std::fmt::Display;
+
+fn main() {
+    let mut string = "First".to_owned();
+
+    string.push_str(string.to_uppercase().as_str());
+    print_a(&string);
+    print_b(&string);
+    print_c(&string); // Compilation error
+    print_d(&string); // Compilation error
+    print_e(&string);
+    print_f(&string);
+    print_g(&string); // Compilation error
+}
+
+fn print_a<T: Display + 'static>(t: &T) {
+    println!("{}", t);
+}
+
+fn print_b<T>(t: &T)
+where
+    T: Display + 'static,
+{
+    println!("{}", t);
+}
+
+fn print_c<'a>(t: &'a dyn Display) {
+    println!("{}", t)
+}
+
+fn print_d<'a>(t: &'a impl Display) {
+    println!("{}", t)
+}
+
+fn print_e(t: &(dyn Display + 'static)) {
+    println!("{}", t)
+}
+
+fn print_f(t: &(impl Display + 'static)) {
+    println!("{}", t)
+}
+
+fn print_g<'a>(t: &'a String) {
+    println!("{}", t);
+}
 ```
 
 ## 深入
 
 ### 问题一
 
-就像泛型类型可以有约束一样，生命周期也可以有约束 ，如下所示：
+就像泛型类型可以有约束一样，生命周期也可以有约束，如下所示：
 
 - `T: 'a`，所有引用在 T 必须超过生命周期 'a
 - `T: Trait + 'a`: T 必须实现特征 Trait 并且所有引用在 T 必须超过生命周期 'a
@@ -9378,6 +9455,7 @@ struct DoubleRef<T> {
     r: &T,
     s: &T
 }
+
 fn main() {
     println!("Success!")
 }
@@ -9386,6 +9464,18 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 使用生命周期注释结构体
+1. `r` 和 `s` 必须是不同生命周期
+2. `s` 的生命周期需要大于 'r'
+*/
+struct DoubleRef<'a, 'b: 'a, T> {
+    r: &'a T,
+    s: &'b T,
+}
+
+fn main() {
+    println!("Success!")
+}
 ```
 
 ### 问题二
@@ -9411,6 +9501,21 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 添加类型约束使下面代码正常运行 */
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a: 'b, 'b> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&'a self, announcement: &'b str) -> &'b str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
+fn main() {
+    println!("Success!")
+}
 ```
 
 ### 问题三
@@ -9418,8 +9523,8 @@ fn main() {
 ```rust
 /* 添加类型约束使下面代码正常运行 */
 fn f<'a, 'b>(x: &'a i32, mut y: &'b i32) {
-    y = x;                      
-    let r: &'b &'a i32 = &&0;   
+    y = x;
+    let r: &'b &'a i32 = &&0;
 }
 
 fn main() {
@@ -9430,6 +9535,30 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 添加类型约束使下面代码正常运行 */
+fn f<'a: 'b, 'b>(x: &'a i32, mut y: &'b i32) {
+    y = x;
+    let r: &'b &'a i32 = &&0;
+}
+
+fn main() {
+    println!("Success!")
+}
+```
+
+```rust
+/* 添加类型约束使下面代码正常运行 */
+fn f<'a, 'b>(x: &'a i32, mut y: &'b i32)
+where
+    'a: 'b,
+{
+    y = x;
+    let r: &'b &'a i32 = &&0;
+}
+
+fn main() {
+    println!("Success!")
+}
 ```
 
 ### 问题四
@@ -9442,7 +9571,7 @@ impl<'a> PartialEq<i32> for &'a T {
 }
 ```
 
-然后可以用于将一个 &'a T 与任何生命周期进行比较 i32 。
+然后可以用于将一个 `&'a T` 与任何生命周期进行比较 i32。
 
 这里只能使用更高级别的约束，因为引用的生命周期比函数上任何可能的生命周期参数都短。
 
@@ -9461,6 +9590,18 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 添加 HRTB 使下面代码正常运行！ */
+fn call_on_ref_zero<'a, F>(f: F)
+where
+    for<'b> F: Fn(&'b i32),
+{
+    let zero = 0;
+    f(&zero);
+}
+
+fn main() {
+    println!("Success!")
+}
 ```
 
 ### 问题五
@@ -9482,9 +9623,9 @@ fn main() {
 
 根据我们目前的知识，这段代码会因为违反 Rust 中的借用规则而导致错误。
 
-但是，如果您执行 cargo run ，那么一切都没问题，那么这里发生了什么？
+但是，如果您执行 cargo run，那么一切都没问题，那么这里发生了什么？
 
-编译器在作用域结束之前判断不再使用引用的能力称为 非词法生命周期（简称 NLL）。
+编译器在作用域结束之前判断不再使用引用的能力称为非词法生命周期（简称 NLL）。
 
 有了这种能力，编译器就知道最后一次使用引用是什么时候，并根据这些知识优化借用规则。
 
@@ -9556,6 +9697,17 @@ fn main() {
 #### 我的解答
 
 ```rust
+/* 通过重新排序一些代码使下面代码正常运行 */
+fn main() {
+    let mut data = 10;
+    let ref1 = &mut data;
+    let ref2 = &mut *ref1;
+
+    *ref2 += 2;
+    *ref1 += 1;
+
+    println!("{}", data);
+}
 ```
 
 ### 问题六
@@ -9564,14 +9716,14 @@ fn main() {
 
 更多省略规则
 
-```rust
+````rust
 impl<'a> Reader for BufReader<'a> {
     // 'a 在以下方法中不使用
 }
 
 // 可以写为：
 impl Reader for BufReader<'_> {
-    
+
 }
 ``
 
@@ -9585,7 +9737,7 @@ struct Ref<'a, T: 'a> {
 struct Ref<'a, T> {
     field: &'a T
 }
-```
+````
 
 ```rust
 /* 使下面代码正常运行 */
@@ -9637,6 +9789,48 @@ fn use_list(list: &List) {
 #### 我的解答
 
 ```rust
+/* 使下面代码正常运行 */
+struct Interface<'a, 'b> {
+    manager: &'b mut Manager<'a>,
+}
+
+impl<'a, 'b> Interface<'a, 'b> {
+    pub fn noop(self) {
+        println!("interface consumed");
+    }
+}
+
+struct Manager<'a> {
+    text: &'a str,
+}
+
+struct List<'a> {
+    manager: Manager<'a>,
+}
+
+impl<'a> List<'a> {
+    pub fn get_interface<'b>(&'b mut self) -> Interface<'a, 'b> {
+        Interface {
+            manager: &mut self.manager,
+        }
+    }
+}
+
+fn main() {
+    let mut list = List {
+        manager: Manager { text: "hello" },
+    };
+
+    list.get_interface().noop();
+
+    println!("Interface should be dropped here and the borrow released");
+
+    use_list(&list);
+}
+
+fn use_list(list: &List) {
+    println!("{}", list.manager.text);
+}
 ```
 
 // TODO https://zh.practice.rs/generics-traits/intro.html
