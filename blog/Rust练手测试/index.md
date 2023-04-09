@@ -9833,4 +9833,1378 @@ fn use_list(list: &List) {
 }
 ```
 
-// TODO https://zh.practice.rs/generics-traits/intro.html
+# 返回值和错误处理
+
+## panic! 深入剖析
+
+### 问题一
+
+Rust 中最简单的错误处理方式就是使用 panic。它会打印出一条错误信息并打印出栈调用情况，最终结束当前线程:
+
+- 若 panic 发生在 main 线程，那程序会随之退出
+- 如果是在生成的（spawn）子线程中发生 panic, 那么当前的线程会结束，但是程序依然会继续运行
+
+```rust
+
+// 填空
+fn drink(beverage: &str) {
+    if beverage == "lemonade" {
+        println!("Success!");
+        // 实现下面的代码
+        __
+     }
+
+    println!("Exercise Failed if printing out this line!");
+}
+
+fn main() {
+    drink(__);
+
+    println!("Exercise Failed if printing out this line!");
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+```rust
+// 修复所有的 panic，让代码工作
+fn main() {
+    assert_eq!("abc".as_bytes(), [96, 97, 98]);
+
+    let v = vec![1, 2, 3];
+    let ele = v[3];
+    let ele = v.get(3).unwrap();
+
+    // 大部分时候编译器是可以帮我们提前发现溢出错误，并阻止编译通过。但是也有一些时候，这种溢出问题直到运行期才会出现
+    let v = production_rate_per_hour(2);
+
+    divide(15, 0);
+
+    println!("Success!")
+}
+
+fn divide(x:u8, y:u8) {
+    println!("{}", x / y)
+}
+
+fn production_rate_per_hour(speed: u8) -> f64 {
+    let cph: u8 = 221;
+    match speed {
+        1..=4 => (speed * cph) as f64,
+        5..=8 => (speed * cph) as f64 * 0.9,
+        9..=10 => (speed * cph) as f64 * 0.77,
+        _ => 0 as f64,
+    }
+}
+
+pub fn working_items_per_minute(speed: u8) -> u32 {
+    (production_rate_per_hour(speed) / 60 as f64) as u32
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+```rust
+## 填空以打印全部的调用栈
+## 提示: 你可以在之前的默认 panic 信息中找到相关线索
+$ __ cargo run
+thread 'main' panicked at 'assertion failed: `(left == right)`
+  left: `[97, 98, 99]`,
+ right: `[96, 97, 98]`', src/main.rs:3:5
+stack backtrace:
+   0: rust_begin_unwind
+             at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:498:5
+   1: core::panicking::panic_fmt
+             at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/panicking.rs:116:14
+   2: core::panicking::assert_failed_inner
+   3: core::panicking::assert_failed
+             at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/panicking.rs:154:5
+   4: study_cargo::main
+             at ./src/main.rs:3:5
+   5: core::ops::function::FnOnce::call_once
+             at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/ops/function.rs:227:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+## 返回值 Result 和 ?
+
+### 问题一
+
+`Result<T>` 是一个枚举类型用于描述返回的结果或错误，它包含两个成员（变体 variants）:
+
+- Ok(T): 返回一个结果值 T
+- Err(e): 返回一个错误，e 是具体的错误值
+
+简而言之，如果期待一个正确的结果，就返回 Ok，反之则是 Err。
+
+```rust
+// 填空并修复错误
+use std::num::ParseIntError;
+
+fn multiply(n1_str: &str, n2_str: &str) -> __ {
+    let n1 = n1_str.parse::<i32>();
+    let n2 = n2_str.parse::<i32>();
+    Ok(n1.unwrap() * n2.unwrap())
+}
+
+fn main() {
+    let result = multiply("10", "2");
+    assert_eq!(result, __);
+
+    let result = multiply("t", "2");
+    assert_eq!(result.__, 8);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+? 跟 unwrap 非常像，但是 ? 会返回一个错误，而不是直接 panic
+
+```rust
+use std::num::ParseIntError;
+
+// 使用 ? 来实现 multiply
+// 不要使用 unwrap !
+fn multiply(n1_str: &str, n2_str: &str) -> __ {
+}
+
+fn main() {
+    assert_eq!(multiply("3", "4").unwrap(), 12);
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+```rust
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file1() -> Result<String, io::Error> {
+    let f = File::open("hello.txt");
+    let mut f = match f {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+
+    let mut s = String::new();
+    match f.read_to_string(&mut s) {
+        Ok(_) => Ok(s),
+        Err(e) => Err(e),
+    }
+}
+
+// 填空
+// 不要修改其它代码
+fn read_file2() -> Result<String, io::Error> {
+    let mut s = String::new();
+
+    __;
+
+    Ok(s)
+}
+
+fn main() {
+    assert_eq!(read_file1().unwrap_err().to_string(), read_file2().unwrap_err().to_string());
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题四
+
+map and and_then 是两个常用的组合器（combinator），可以用于 `Result<T, E>` (也可用于 `Option<T>`)
+
+```rust
+use std::num::ParseIntError;
+
+// 使用两种方式填空: map, and then
+fn add_two(n_str: &str) -> Result<i32, ParseIntError> {
+   n_str.parse::<i32>().__
+}
+
+fn main() {
+    assert_eq!(add_two("4").unwrap(), 6);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题五
+
+```rust
+use std::num::ParseIntError;
+
+// 使用 Result 重写后，我们使用模式匹配的方式来处理，而无需使用 `unwrap`
+// 但是这种写法实在过于啰嗦..
+fn multiply(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    match n1_str.parse::<i32>() {
+        Ok(n1)  => {
+            match n2_str.parse::<i32>() {
+                Ok(n2)  => {
+                    Ok(n1 * n2)
+                },
+                Err(e) => Err(e),
+            }
+        },
+        Err(e) => Err(e),
+    }
+}
+
+// 重写上面的 `multiply` ，让它尽量简介
+// 提示：使用 `and_then` 和 `map`
+fn multiply1(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    // 实现...
+}
+
+fn print(result: Result<i32, ParseIntError>) {
+    match result {
+        Ok(n)  => println!("n is {}", n),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+fn main() {
+    let twenty = multiply1("10", "2");
+    print(twenty);
+
+    // 下面的调用会提供更有帮助的错误信息
+    let tt = multiply("t", "2");
+    print(tt);
+
+    println!("Success!")
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题六
+
+如果我们要在代码中到处使用 `std::result::Result<T, ParseIntError>`，那毫无疑问，代码将变得特别冗长和啰嗦，对于这种情况，可以使用类型别名来解决。
+
+例如在标准库中，就在大量使用这种方式来简化代码: io::Result
+
+```rust
+use std::num::ParseIntError;
+
+// 填空
+type __;
+
+// 使用上面的别名来引用原来的 `Result` 类型
+fn multiply(first_number_str: &str, second_number_str: &str) -> Res<i32> {
+    first_number_str.parse::<i32>().and_then(|first_number| {
+        second_number_str.parse::<i32>().map(|second_number| first_number * second_number)
+    })
+}
+
+// 同样, 这里也使用了类型别名来简化代码
+fn print(result: Res<i32>) {
+    match result {
+        Ok(n)  => println!("n is {}", n),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+fn main() {
+    print(multiply("10", "2"));
+    print(multiply("t", "2"));
+
+    println!("Success!")
+}
+```
+
+在 fn main 中使用 Result，一个典型的 main 函数长这样:
+
+```rust
+fn main() {
+    println!("Hello World!");
+}
+```
+
+事实上 main 函数还可以返回一个 Result 类型：如果 main 函数内部发生了错误，那该错误会被返回并且打印出一条错误的 debug 信息
+
+```rust
+use std::num::ParseIntError;
+
+fn main() -> Result<(), ParseIntError> {
+    let number_str = "10";
+    let number = match number_str.parse::<i32>() {
+        Ok(number)  => number,
+        Err(e) => return Err(e),
+    };
+    println!("{}", number);
+    Ok(())
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+# 包和模块
+
+## 包 Crate
+
+### 问题一
+
+package 是你通过 Cargo 创建的工程或项目，因此在 package 的根目录下会有一个 Cargo.toml 文件。
+
+创建一个 package1，拥有以下目录结构:
+
+```
+.
+├── Cargo.toml
+└── src
+    └── main.rs
+
+1 directory, 2 files
+```
+
+```toml
+# in Cargo.toml
+[package]
+name = "hello-package"
+version = "0.1.0"
+edition = "2021"
+```
+
+创建一个 package2，拥有以下目录结构
+
+```
+.
+├── Cargo.toml
+└── src
+    └── lib.rs
+
+1 directory, 2 files
+```
+
+```toml
+# in Cargo.toml
+[package]
+name = "hello-package1"
+version = "0.1.0"
+edition = "2021"
+```
+
+```
+/* 使用你的答案填空 */
+
+// Q: package 1# 和 2# 的区别是什么 ?
+// A: __
+```
+
+#### 我的解答
+
+```
+
+```
+
+### 问题二
+
+一个包可以是二进制也可以一个依赖库。每一个包都有一个包根，例如二进制包的包根是 src/main.rs，库包的包根是 src/lib.rs。包根是编译器开始处理源代码文件的地方，同时也是包模块树的根部。
+
+在 package hello-package 中，有一个二进制包，该包与 package 同名: hello-package, 其中 src/main.rs 是该二进制包的包根.
+
+与 hello-package 类似, hello-package1 同样包含一个包，但是与之前的二进制包不同，该 package 包含的是库包，其中 src/lib.rs 是其包根.
+
+```
+/* 填空 */
+
+// Q: package `hello-package1` 中的库包名称是?
+// A: __
+```
+
+#### 我的解答
+
+```
+
+```
+
+### 问题三
+
+为 hello-package 添加一个库包，并且完成以下目录结构的填空:
+
+```
+# 填空
+.
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   ├── __
+│   └── __
+```
+
+在上一个步骤后，我们的 hello-package 中已经存在两个包：一个二进制包和一个库包，两个包的名称都与 package 相同：hello-package。
+
+#### 我的解答
+
+```
+
+```
+
+### 问题四
+
+一个 package 最多只能包含一个库包，但是却可以包含多个二进制包：通过将二进制文件放入到 src/bin 目录下实现: 该目录下的每个文件都是一个独立的二进制包，包名与文件名相同，不再与 package 的名称相同
+
+```
+# 创建一个 a package 包含以下包：
+# 1. 三个二进制包: `hello-package`, `main1` and `main2`
+# 2. 一个库包
+# 并完成以下目录结构的填空
+.
+├── Cargo.toml
+├── Cargo.lock
+├── src
+│   ├── __
+│   ├── __
+│   └── __
+│       └── __
+│       └── __
+├── tests # 存放集成测试文件的目录
+│   └── some_integration_tests.rs
+├── benches # 存放 benchmark 文件的目录dir for benchmark files
+│   └── simple_bench.rs
+└── examples # 存放示例文件的目录
+    └── simple_example.rs
+```
+
+可以看到，上面的 package 结构非常标准，你可以在很多 Rust 项目中看到该结构的身影
+
+#### 我的解答
+
+```
+
+```
+
+## 模块 Module
+
+### 问题一
+
+之前我们创建了一个 package hello-package，它的目录结构在经过多次修改后，变成了以下模样
+
+```
+.
+├── Cargo.toml
+├── src
+│   ├── lib.rs
+│   └── main.rs
+```
+
+下面，我们来为其中的库包创建一些模块，然后在二进制包中使用这些模块
+
+根据以下的模块树描述实现模块 front_of_house
+
+```
+库包的根(src/lib.rs)
+ └── front_of_house
+     ├── hosting
+     │   ├── add_to_waitlist
+     │   └── seat_at_table
+     └── serving
+         ├── take_order
+         ├── serve_order
+         ├── take_payment
+         └── complain
+```
+
+```rust
+// 填空
+// in __.rs
+
+mod front_of_house {
+    // 实现此模块
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+让我们在库包的根中定义一个函数 eat_at_restaurant, 然后在该函数中调用之前创建的函数 eat_at_restaurant
+
+```rust
+#![allow(unused)]
+fn main() {
+   // in lib.rs
+
+   // 填空并修复错误
+
+   // 提示：你需要通过 `pub` 将一些项标记为公有的，这样模块 `front_of_house` 中的项才能被模块外的项访问
+   mod front_of_house {
+      /* ...snip... */
+   }
+
+   pub fn eat_at_restaurant() {
+      // 使用绝对路径调用
+      __.add_to_waitlist();
+
+      // 使用相对路径调用
+      __.add_to_waitlist();
+   }
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+我们还可以使用 super 来导入父模块中的项
+
+```rust
+// in lib.rs
+
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        // 使用三种方式填空
+        //1. 使用关键字 `super`
+        //2. 使用绝对路径
+        __.serve_order();
+    }
+
+    fn cook_order() {}
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题四
+
+将模块分离并放入独立的文件中
+
+```rust
+
+#![allow(unused)]
+fn main() {
+   // in lib.rs
+   pub mod front_of_house {
+      pub mod hosting {
+         pub fn add_to_waitlist() {}
+
+         pub fn seat_at_table() -> String {
+               String::from("sit down please")
+         }
+      }
+
+      pub mod serving {
+         pub fn take_order() {}
+
+         pub fn serve_order() {}
+
+         pub fn take_payment() {}
+
+         // 我猜你不希望顾客听到你在抱怨他们，因此让这个函数私有化吧
+         fn complain() {}
+      }
+   }
+
+   pub fn eat_at_restaurant() -> String {
+      front_of_house::hosting::add_to_waitlist();
+
+      back_of_house::cook_order();
+
+      String::from("yummy yummy!")
+   }
+
+   pub mod back_of_house {
+      pub fn fix_incorrect_order() {
+         cook_order();
+         crate::front_of_house::serving::serve_order();
+      }
+
+      pub fn cook_order() {}
+   }
+}
+```
+
+请将上面的模块和代码分离到以下目录文件中
+
+```
+.
+├── Cargo.toml
+├── src
+│   ├── back_of_house.rs
+│   ├── front_of_house
+│   │   ├── hosting.rs
+│   │   ├── mod.rs
+│   │   └── serving.rs
+│   ├── lib.rs
+│   └── main.rs
+```
+
+```rust
+// in src/lib.rs
+
+// IMPLEMENT...
+```
+
+```rust
+// in src/back_of_house.rs
+
+// IMPLEMENT...
+```
+
+```rust
+// in src/front_of_house/mod.rs
+
+// IMPLEMENT...
+```
+
+```rust
+// in src/front_of_house/hosting.rs
+
+// IMPLEMENT...
+```
+
+```rust
+// in src/front_of_house/serving.rs
+
+// IMPLEMENT...
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题五
+
+从二进制包中访问库包的代码
+
+当到底此处时，你的项目结构应该如下所示
+
+```
+.
+├── Cargo.toml
+├── src
+│   ├── back_of_house.rs
+│   ├── front_of_house
+│   │   ├── hosting.rs
+│   │   ├── mod.rs
+│   │   └── serving.rs
+│   ├── lib.rs
+│   └── main.rs
+```
+
+现在我们可以从二进制包中发起函数调用了
+
+```rust
+// in src/main.rs
+
+// 填空并修复错误
+fn main() {
+    assert_eq!(__, "sit down please");
+    assert_eq!(__,"yummy yummy!");
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+## 使用 use 引入模块及受限可见性
+
+### 问题一
+
+使用 use 可以将两个同名类型引入到当前作用域中，但是别忘了 as 关键字
+
+```rust
+use std::fmt::Result;
+use std::io::Result;
+
+fn main() {}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题二
+
+如果我们在使用来自同一个包或模块中的多个不同项，那么可以通过简单的方式将它们一次性引入进来
+
+```rust
+// 使用两种方式填空
+// 不要添加新的代码行
+use std::collections::__;
+
+fn main() {
+    let _c1:HashMap<&str, i32> = HashMap::new();
+    let mut c2 = BTreeMap::new();
+    c2.insert(1, "a");
+    let _c3: HashSet<i32> = HashSet::new();
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题三
+
+使用 pub use 进行再导出
+
+在之前创建的 hello-package 的库包中, 添加一些代码让下面的代码能够正常工作
+
+```rust
+fn main() {
+   assert_eq!(hello_package::hosting::seat_at_table(), "sit down please");
+   assert_eq!(hello_package::eat_at_restaurant(),"yummy yummy!");
+}
+```
+
+#### 我的解答
+
+```rust
+
+```
+
+### 问题四
+
+pub(in Crate)
+
+有时我们希望某一个项只对特定的包可见，那么就可以使用 pub(in Crate) 语法
+
+```rust
+pub mod a {
+    pub const I: i32 = 3;
+
+    fn semisecret(x: i32) -> i32 {
+        use self::b::c::J;
+        x + J
+    }
+
+    pub fn bar(z: i32) -> i32 {
+        semisecret(I) * z
+    }
+    pub fn foo(y: i32) -> i32 {
+        semisecret(I) + y
+    }
+
+    mod b {
+        pub(in crate::a) mod c {
+            pub(in crate::a) const J: i32 = 4;
+        }
+    }
+}
+```
+
+# 注释和文档
+
+## 问题一
+
+```rust
+/* 只使用注释让下面代码工作! */
+fn main() {
+    todo!();
+    unimplemented!();
+
+    assert_eq!(6, 5 + 3 + 2 + 1 )
+}
+```
+
+文档注释会被解析为 HTML 文件，并支持 Markdown 语法。
+
+在开始之前，我们需要创建一个新的项目用于后面的练习: cargo new --lib doc-comments
+
+行文档注释 ///
+
+为 add_one 函数添加文档
+
+````rust
+#![allow(unused)]
+fn main() {
+   // in lib.rs
+
+   /// Add one to the given value and return the value
+   ///
+   /// # Examples
+   ///
+   /// ```
+   /// let arg = 5;
+   /// let answer = my_crate::add_one(arg);
+   ///
+   /// assert_eq!(6, answer);
+   /// ```
+   pub fn add_one(x: i32) -> i32 {
+      x + 1
+   }
+}
+````
+
+我们可以使用 cargo doc --open 来生成 HTML 文件，并自动在浏览器中打开网页。
+
+块文档注释 /\*_ ... _/，为函数 add_two 添加文档:
+
+```rust
+#![allow(unused)]
+fn main() {
+   /** Add two to the given value and return a new value
+
+   Examples
+
+   let arg = 5;
+   let answer = my_crate::add_two(arg);
+
+   assert_eq!(7, answer);
+
+   */
+   pub fn add_two(x: i32) -> i32 {
+      x + 2
+   }
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题二
+
+为包和模块创建文档注释
+
+我们还可以创建包和模块的注释，用于描述它们的功能。
+
+首先，来为我们的库包添加一些文档注释:
+
+> 注意: 必须要将包、模块注释放置在包根或模块文件的最顶部
+
+```rust
+//! # 文档注释
+//!
+//! 该库用于文档注释的教学
+
+// in lib.rs
+pub mod compute;
+```
+
+同样的，我们还可以使用块注释来达成目的:
+
+```
+/*! # 文档注释
+
+ 该库用于文档注释的教学 */
+```
+
+下一步，创建一个新的模块文件 src/compute.rs, 然后在其中添加以下注释:
+
+```rust
+//! 本模块用于处理一些复杂计算
+
+// in compute.rs
+```
+
+然后运行 cargo doc --open 查看下结果。
+
+文档测试
+
+之前的 add_one 和 add_tow 的文档注释中，包含了两个示例代码块
+
+以上示例不仅仅是作为文档用于演示你的函数该如何使用，它的另一个作用就是用于文档测试 cargo test。
+
+但是在这两个函数的示例中，存在错误，请修复它们并使用 cargo test 获取以下输出结果:
+
+```
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests doc-comments
+
+running 2 tests
+test src/lib.rs - add_one (line 11) ... ok
+test src/lib.rs - add_two (line 26) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.55s
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题三
+
+有时我们会期望示例的结果是一个 panic。将以下代码添加到 src/compute.rs，并且让 cargo test 成功运行
+
+> 你只能修改注释，不要修改 fn div
+
+````rust
+#![allow(unused)]
+fn main() {
+   // in src/compute.rs
+
+   /// # Panics
+   ///
+   /// The function panics if the second argument is zero.
+   ///
+   /// ```rust,should_panic
+   /// // panics on division by zero
+   /// doc_comments::compute::div(10, 0);
+   /// ```
+   pub fn div(a: i32, b: i32) -> i32 {
+      if b == 0 {
+         panic!("Divide-by-zero error");
+      }
+
+      a / b
+   }
+}
+````
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题四
+
+有时我们会想要隐藏文档，但是保留文档测试
+
+将以下代码添加到 src/compute.rs
+
+````rust
+// in src/compute.rs
+
+/// ```
+/// # fn try_main() -> Result<(), String> {
+/// let res = doc_comments::compute::try_div(10, 0)?;
+/// # Ok(()) // returning from try_main
+/// # }
+/// # fn main() {
+/// #    try_main().unwrap();
+/// #
+/// # }
+/// ```
+pub fn try_div(a: i32, b: i32) -> Result<i32, String> {
+    if b == 0 {
+        Err(String::from("Divide-by-zero"))
+    } else {
+        Ok(a / b)
+    }
+}
+````
+
+然后修改以上代码已实现两个目标:
+
+- 文档注释不能出现在 cargo doc --open 生成的网页中
+- 运行测试，并成功看到以下结果:
+
+```
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests doc-comments
+
+running 4 tests
+test src/compute.rs - compute::div (line 7) ... ok
+test src/lib.rs - add_two (line 27) ... ok
+test src/lib.rs - add_one (line 11) ... ok
+test src/compute.rs - compute::try_div (line 20) ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题五
+
+代码跳转
+
+Rust 为我们提供一个非常强大的特性：可以在文档注释中实现代码跳转。
+
+将以下代码添加到 src/lib.rs:
+
+```rust
+// in lib.rs
+
+/// Add one to the given value and return a [`Option`] type
+pub fn add_three(x: i32) -> Option<i32> {
+    Some(x + 3)
+}
+```
+
+除了跳转到标准库中，我们还能跳转到项目中的其它模块。
+
+```rust
+// in lib.rs
+
+mod a {
+    /// Add four to the given value and return a [`Option`] type
+    /// [`crate::MySpecialFormatter`]
+    pub fn add_four(x: i32) -> Option<i32> {
+        Some(x + 4)
+    }
+}
+
+struct MySpecialFormatter;
+```
+
+文档属性
+
+下面是很常用的 `#[doc]` 属性，该属性可以被 rustdoc 所使用。
+
+inline
+
+可以用于内联文档, 而不是链接到一个单独的页面。
+
+```rust
+#[doc(inline)]
+pub use bar::Bar;
+
+/// bar docs
+mod bar {
+    /// the docs for Bar
+    pub struct Bar;
+}
+```
+
+no_inline
+
+用于防止链接到单独的页面或其它地方。
+
+```rust
+// Example from libcore/prelude
+#[doc(no_inline)]
+pub use crate::mem::drop;
+```
+
+hidden
+
+通过这个属性让 rustdoc 不要将下面的项包含在文档中:
+
+```rust
+// Example from the futures-rs library
+#[doc(hidden)]
+pub use self::async_await::*;
+```
+
+对文档来说，rustdoc 被社区广泛采用，大家所看到的标准库文档也是基于此生成的。
+
+# 格式化输出
+
+## 问题一
+
+位置参数
+
+```rust
+/* 填空 */
+fn main() {
+    println!("{0}, this is {1}. {1}, this is {0}", "Alice", "Bob");// => Alice, this is Bob. Bob, this is Alice
+    assert_eq!(format!("{1}{0}", 1, 2), __);
+    assert_eq!(format!(__, 1, 2), "2112");
+    println!("Success!");
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题二
+
+具名参数
+
+```rust
+fn main() {
+    println!("{argument}", argument = "test"); // => "test"
+
+    /* 填空 */
+    assert_eq!(format!("{name}{}", 1, __), "21");
+    assert_eq!(format!(__,a = "a", b = 'b', c = 3 ), "a 3 b");
+
+    /* 修复错误 */
+    // 具名参数必须放在其它参数后面
+    println!("{abc} {1}", abc = "def", 2);
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题三
+
+字符串对齐
+
+默认情况下，通过空格来填充字符串
+
+```rust
+fn main() {
+    // 下面两个都是通过 5 个空格来填充
+    println!("Hello {:5}!", "x"); // =>  "Hello x    !"
+    println!("Hello {:1$}!", "x", 5); // =>  "Hello x    !"
+
+    /* 填空 */
+    assert_eq!(format!("Hello __!", 5, "x"), "Hello x    !");
+    assert_eq!(format!("Hello __!", "x", width = 5), "Hello x    !");
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题四
+
+左对齐, 右对齐, 使用指定的字符填充
+
+```rust
+fn main() {
+    // 左对齐
+    println!("Hello {:<5}!", "x"); // => Hello x    !
+    // 右对齐
+    assert_eq!(format!("Hello __!", "x"), "Hello     x!");
+    // 居中对齐
+    assert_eq!(format!("Hello __!", "x"), "Hello   x  !");
+
+    // 左对齐，并使用 `&` 填充
+    assert_eq!(format!("Hello {:&<5}!", "x"), __);
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题五
+
+我们还能使用 0 来填充数字
+
+```rust
+fn main() {
+    println!("Hello {:5}!", 5); // => Hello     5!
+    println!("Hello {:+}!", 5); // =>  Hello +5!
+    println!("Hello {:05}!", 5); // => Hello 00005!
+    println!("Hello {:05}!", -5); // => Hello -0005!
+
+    /* 填空 */
+    assert!(format!("{number:0>width$}", number=1, width=6) == __);
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题六
+
+浮点数精度
+
+```rust
+/* 填空 */
+fn main() {
+    let v = 3.1415926;
+
+    println!("{:.1$}", v, 4); // same as {:.4} => 3.1416
+
+    assert_eq!(format!("__", v), "3.14");
+    assert_eq!(format!("__", v), "+3.14");
+    assert_eq!(format!("__", v), "3");
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题七
+
+字符串长度
+
+```rust
+fn main() {
+    let s = "Hello, world!";
+
+    println!("{0:.5}", s); // => Hello
+
+    assert_eq!(format!("Hello __!", 3, "abcdefg"), "Hello abc!");
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题八
+
+二进制, 八进制, 十六进制
+
+- format!("{}", foo) -> "3735928559"
+- format!("0x{:X}", foo) -> "0xDEADBEEF"
+- format!("0o{:o}", foo) -> "0o33653337357"
+
+```rust
+fn main() {
+    assert_eq!(format!("__", 27), "0b11011");
+    assert_eq!(format!("__", 27), "0o33");
+    assert_eq!(format!("__", 27), "0x1b");
+    assert_eq!(format!("__", 27), "0x1B");
+
+    println!("{:x}!", 27); // 没有前缀的十六进制 => 1b
+
+    println!("{:#010b}", 27); // 使用 0 来填充二进制，宽度为 10 => 0b00011011
+
+    println!("Success!")
+}
+```
+
+### 我的解答
+
+```rust
+
+```
+
+## 问题九
+
+捕获环境中的值
+
+```rust
+fn get_person() -> String {
+    String::from("sunface")
+}
+
+fn get_format() -> (usize, usize) {
+    (4, 1)
+}
+
+fn main() {
+    let person = get_person();
+    println!("Hello, {person}!");
+
+    let (width, precision) = get_format();
+    let scores = [("sunface", 99.12), ("jack", 60.34)];
+    /* 让下面的代码输出:
+    sunface:   99.1
+    jack:   60.3
+    */
+    for (name, score) in scores {
+        println!("{name}: __");
+    }
+}
+```
+
+```rust
+fn main() {
+    // 指数
+    println!("{:2e}", 1000000000); // => 1e9
+    println!("{:2E}", 1000000000); // => 1E9
+
+    // 指针地址
+    let v= vec![1, 2, 3];
+    println!("{:p}", v.as_ptr()); // => 0x600002324050
+
+    // 转义
+    println!("Hello {{}}"); // => Hello {}
+}
+```
+
+### 我的解答
+
+```rust
+
+```

@@ -23,7 +23,7 @@
     "less": "^4.1.3",
     "less-loader": "^11.1.0",
     "react-app-rewired": "^2.2.1",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "npm:@towavephone/react-scripts@^5.0.2"
   },
   "scripts": {
     "start": "react-app-rewired start",

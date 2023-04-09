@@ -78,7 +78,9 @@ module.exports = {
   stats: {
     preset: 'errors-only',
     reasons: true,
-    hash: true
+    hash: true,
+    builtAt: true,
+    timings: true
   },
   experiments: {
     incrementalRebuild: true
