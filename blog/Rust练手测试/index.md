@@ -9842,10 +9842,9 @@ fn use_list(list: &List) {
 Rust 中最简单的错误处理方式就是使用 panic。它会打印出一条错误信息并打印出栈调用情况，最终结束当前线程:
 
 - 若 panic 发生在 main 线程，那程序会随之退出
-- 如果是在生成的（spawn）子线程中发生 panic, 那么当前的线程会结束，但是程序依然会继续运行
+- 如果是在生成的（spawn）子线程中发生 panic，那么当前的线程会结束，但是程序依然会继续运行
 
 ```rust
-
 // 填空
 fn drink(beverage: &str) {
     if beverage == "lemonade" {
@@ -9867,7 +9866,22 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 填空
+fn drink(beverage: &str) {
+    if beverage == "lemonade" {
+        println!("Success!");
+        // 实现下面的代码
+        panic!("32")
+    }
 
+    println!("Exercise Failed if printing out this line!");
+}
+
+fn main() {
+    drink("lemonade");
+
+    println!("Exercise Failed if printing out this line!");
+}
 ```
 
 ### 问题二
@@ -9911,7 +9925,39 @@ pub fn working_items_per_minute(speed: u8) -> u32 {
 #### 我的解答
 
 ```rust
+// 修复所有的 panic，让代码工作
+fn main() {
+    assert_eq!("abc".as_bytes(), [97, 98, 99]);
 
+    let v = vec![1, 2, 3];
+    let ele = v[2];
+    let ele = v.get(3);
+
+    // 大部分时候编译器是可以帮我们提前发现溢出错误，并阻止编译通过。但是也有一些时候，这种溢出问题直到运行期才会出现
+    let v = production_rate_per_hour(2);
+
+    divide(15, 1);
+
+    println!("Success!")
+}
+
+fn divide(x: u8, y: u8) {
+    println!("{}", x / y)
+}
+
+fn production_rate_per_hour(speed: u8) -> f64 {
+    let cph: u8 = 21;
+    match speed {
+        1..=4 => (speed * cph) as f64,
+        5..=8 => (speed * cph) as f64 * 0.9,
+        9..=10 => (speed * cph) as f64 * 0.77,
+        _ => 0 as f64,
+    }
+}
+
+pub fn working_items_per_minute(speed: u8) -> u32 {
+    (production_rate_per_hour(speed) / 60 as f64) as u32
+}
 ```
 
 ### 问题三
