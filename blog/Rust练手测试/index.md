@@ -9962,7 +9962,16 @@ pub fn working_items_per_minute(speed: u8) -> u32 {
 
 ### 问题三
 
-```rust
+默认情况下，栈调用只会展示最基本的信息
+
+```bash
+thread 'main' panicked at 'index out of bounds: the len is 3 but the index is 99', src/main.rs:4:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+但是有时候，我们还希望获取更详细的信息
+
+```bash
 ## 填空以打印全部的调用栈
 ## 提示: 你可以在之前的默认 panic 信息中找到相关线索
 $ __ cargo run
@@ -9986,8 +9995,8 @@ note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose bac
 
 #### 我的解答
 
-```rust
-
+```bash
+$ RUST_BACKTRACE=full cargo run
 ```
 
 ## 返回值 Result 和 ?
@@ -10025,7 +10034,24 @@ fn main() {
 #### 我的解答
 
 ```rust
+// 填空并修复错误
+use std::num::ParseIntError;
 
+fn multiply(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    let n1 = n1_str.parse::<i32>();
+    let n2 = n2_str.parse::<i32>();
+    Ok(n1.unwrap() * n2.unwrap())
+}
+
+fn main() {
+    let result = multiply("10", "2");
+    assert_eq!(result, Ok(20));
+
+    let result = multiply("4", "2");
+    assert_eq!(result.unwrap(), 8);
+
+    println!("Success!")
+}
 ```
 
 ### 问题二
@@ -10049,7 +10075,20 @@ fn main() {
 #### 我的解答
 
 ```rust
+use std::num::ParseIntError;
 
+// 使用 ? 来实现 multiply
+// 不要使用 unwrap !
+fn multiply(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    let n1 = n1_str.parse::<i32>()?;
+    let n2 = n2_str.parse::<i32>()?;
+    Ok(n1 * n2)
+}
+
+fn main() {
+    assert_eq!(multiply("3", "4").unwrap(), 12);
+    println!("Success!")
+}
 ```
 
 ### 问题三
@@ -10091,12 +10130,45 @@ fn main() {
 #### 我的解答
 
 ```rust
+use std::fs::File;
+use std::io::{self, Read};
 
+fn read_file1() -> Result<String, io::Error> {
+    let f = File::open("hello.txt");
+    let mut f = match f {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+
+    let mut s = String::new();
+    match f.read_to_string(&mut s) {
+        Ok(_) => Ok(s),
+        Err(e) => Err(e),
+    }
+}
+
+// 填空
+// 不要修改其它代码
+fn read_file2() -> Result<String, io::Error> {
+    let mut s = String::new();
+
+    File::open("hello.txt")?.read_to_string(&mut s)?;
+
+    Ok(s)
+}
+
+fn main() {
+    assert_eq!(
+        read_file1().unwrap_err().to_string(),
+        read_file2().unwrap_err().to_string()
+    );
+    println!("Success!")
+}
 ```
 
 ### 问题四
 
-map and and_then 是两个常用的组合器（combinator），可以用于 `Result<T, E>` (也可用于 `Option<T>`)
+map 和 and_then 是两个常用的组合器（combinator），可以用于 `Result<T, E>` (也可用于 `Option<T>`)
 
 ```rust
 use std::num::ParseIntError;
@@ -10116,7 +10188,33 @@ fn main() {
 #### 我的解答
 
 ```rust
+use std::num::ParseIntError;
 
+// 使用两种方式填空: map, and then
+fn add_two(n_str: &str) -> Result<i32, ParseIntError> {
+    n_str.parse::<i32>().map(|x| x + 2)
+}
+
+fn main() {
+    assert_eq!(add_two("4").unwrap(), 6);
+
+    println!("Success!")
+}
+```
+
+```rust
+use std::num::ParseIntError;
+
+// 使用两种方式填空: map, and then
+fn add_two(n_str: &str) -> Result<i32, ParseIntError> {
+    n_str.parse::<i32>().and_then(|x| Ok(x + 2))
+}
+
+fn main() {
+    assert_eq!(add_two("4").unwrap(), 6);
+
+    println!("Success!")
+}
 ```
 
 ### 问题五
@@ -10140,7 +10238,7 @@ fn multiply(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
     }
 }
 
-// 重写上面的 `multiply` ，让它尽量简介
+// 重写上面的 `multiply` ，让它尽量简洁
 // 提示：使用 `and_then` 和 `map`
 fn multiply1(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
     // 实现...
@@ -10168,7 +10266,89 @@ fn main() {
 #### 我的解答
 
 ```rust
+use std::num::ParseIntError;
 
+// 使用 Result 重写后，我们使用模式匹配的方式来处理，而无需使用 `unwrap`
+// 但是这种写法实在过于啰嗦..
+fn multiply(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    match n1_str.parse::<i32>() {
+        Ok(n1) => match n2_str.parse::<i32>() {
+            Ok(n2) => Ok(n1 * n2),
+            Err(e) => Err(e),
+        },
+        Err(e) => Err(e),
+    }
+}
+
+// 重写上面的 `multiply` ，让它尽量简洁
+// 提示：使用 `and_then` 和 `map`
+fn multiply1(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    // 实现...
+    let a = n1_str.parse::<i32>()?;
+    let b = n2_str.parse::<i32>()?;
+    Ok(a + b)
+}
+
+fn print(result: Result<i32, ParseIntError>) {
+    match result {
+        Ok(n) => println!("n is {}", n),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+fn main() {
+    let twenty = multiply1("10", "2");
+    print(twenty);
+
+    // 下面的调用会提供更有帮助的错误信息
+    let tt = multiply("4", "2");
+    print(tt);
+
+    println!("Success!")
+}
+```
+
+```rust
+use std::num::ParseIntError;
+
+// 使用 Result 重写后，我们使用模式匹配的方式来处理，而无需使用 `unwrap`
+// 但是这种写法实在过于啰嗦..
+fn multiply(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    match n1_str.parse::<i32>() {
+        Ok(n1) => match n2_str.parse::<i32>() {
+            Ok(n2) => Ok(n1 * n2),
+            Err(e) => Err(e),
+        },
+        Err(e) => Err(e),
+    }
+}
+
+// 重写上面的 `multiply` ，让它尽量简洁
+// 提示：使用 `and_then` 和 `map`
+fn multiply1(n1_str: &str, n2_str: &str) -> Result<i32, ParseIntError> {
+    // 实现...
+    n1_str
+        .parse::<i32>()
+        .and_then(|x| n2_str.parse::<i32>().map(|y| x * y))
+}
+
+fn print(result: Result<i32, ParseIntError>) {
+    match result {
+        Ok(n) => println!("n is {}", n),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+fn main() {
+    let twenty = multiply1("10", "2");
+    print(twenty);
+
+    // 下面的调用会提供更有帮助的错误信息
+    let tt = multiply("t", "2");
+    print(tt);
+
+    println!("Success!")
+}
 ```
 
 ### 问题六
@@ -10233,7 +10413,34 @@ fn main() -> Result<(), ParseIntError> {
 #### 我的解答
 
 ```rust
+use std::num::ParseIntError;
 
+// 填空
+type Res<T> = Result<T, ParseIntError>;
+
+// 使用上面的别名来引用原来的 `Result` 类型
+fn multiply(first_number_str: &str, second_number_str: &str) -> Res<i32> {
+    first_number_str.parse::<i32>().and_then(|first_number| {
+        second_number_str
+            .parse::<i32>()
+            .map(|second_number| first_number * second_number)
+    })
+}
+
+// 同样, 这里也使用了类型别名来简化代码
+fn print(result: Res<i32>) {
+    match result {
+        Ok(n) => println!("n is {}", n),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+fn main() {
+    print(multiply("10", "2"));
+    print(multiply("t", "2"));
+
+    println!("Success!")
+}
 ```
 
 # 包和模块
