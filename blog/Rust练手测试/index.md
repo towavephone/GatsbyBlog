@@ -10451,7 +10451,7 @@ fn main() {
 
 package 是你通过 Cargo 创建的工程或项目，因此在 package 的根目录下会有一个 Cargo.toml 文件。
 
-创建一个 package1，拥有以下目录结构:
+创建一个 package，拥有以下目录结构:
 
 ```
 .
@@ -10500,7 +10500,7 @@ edition = "2021"
 #### 我的解答
 
 ```bash
-
+cargo new --lib hello-package1
 ```
 
 ### 问题三
@@ -10514,17 +10514,13 @@ edition = "2021"
 
 #### 我的解答
 
-```
-
-```
-
 ### 问题四
 
-一个包可以是二进制也可以一个依赖库。每一个包都有一个包根，例如二进制包的包根是 src/main.rs，库包的包根是 src/lib.rs。包根是编译器开始处理源代码文件的地方，同时也是包模块树的根部。
+一个包可以是二进制也可以一个依赖库。每一个包都有一个包根，例如二进制包的包根是 src/main.rs，库包的包根是 src/lib.rs。包根是编译器开始处理源代码文件的地方，同时也是包模块树的根部
 
-在 package hello-package 中，有一个二进制包，该包与 package 同名: hello-package, 其中 src/main.rs 是该二进制包的包根.
+在 package hello-package 中，有一个二进制包，该包与 package 同名: hello-package, 其中 src/main.rs 是该二进制包的包根
 
-与 hello-package 类似, hello-package1 同样包含一个包，但是与之前的二进制包不同，该 package 包含的是库包，其中 src/lib.rs 是其包根.
+与 hello-package 类似, hello-package1 同样包含一个包，但是与之前的二进制包不同，该 package 包含的是库包，其中 src/lib.rs 是其包根
 
 ```
 /* 填空 */
@@ -10535,9 +10531,7 @@ edition = "2021"
 
 #### 我的解答
 
-```
-
-```
+hello-package1
 
 ### 问题五
 
@@ -10558,7 +10552,13 @@ edition = "2021"
 #### 我的解答
 
 ```
-
+# FILL in the blanks
+.
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   ├── main.rs
+│   └── lib.rs
 ```
 
 ### 问题六
@@ -10566,7 +10566,7 @@ edition = "2021"
 一个 package 最多只能包含一个库包，但是却可以包含多个二进制包：通过将二进制文件放入到 src/bin 目录下实现: 该目录下的每个文件都是一个独立的二进制包，包名与文件名相同，不再与 package 的名称相同
 
 ```
-# 创建一个 a package 包含以下包：
+# 创建一个 package 包含以下包：
 # 1. 三个二进制包: `hello-package`, `main1` and `main2`
 # 2. 一个库包
 # 并完成以下目录结构的填空
@@ -10592,7 +10592,25 @@ edition = "2021"
 #### 我的解答
 
 ```
-
+# Create a package which contains
+# 1. three binary crates: `hello-package`, `main1` and `main2`
+# 2. one library crate
+# describe the directory tree below
+.
+├── Cargo.toml
+├── Cargo.lock
+├── src
+│   ├── main.rs
+│   ├── lib.rs
+│   └── bin
+│       └── main1.rs
+│       └── main2.rs
+├── tests # directory for integrated tests files
+│   └── some_integration_tests.rs
+├── benches # dir for benchmark files
+│   └── simple_bench.rs
+└── examples # dir for example files
+    └── simple_example.rs
 ```
 
 ## 模块 Module
@@ -10638,7 +10656,24 @@ mod front_of_house {
 #### 我的解答
 
 ```rust
+// in lib.rs
+mod front_of_house {
+    mod hosting {
+        fn add_to_waitlist() {}
 
+        fn seat_at_table() {}
+    }
+
+    mod serving {
+        fn take_order() {}
+
+        fn serve_order() {}
+
+        fn take_payment() {}
+
+        fn complain() {} 
+    }
+}
 ```
 
 ### 问题二
@@ -10646,31 +10681,55 @@ mod front_of_house {
 让我们在库包的根中定义一个函数 eat_at_restaurant, 然后在该函数中调用之前创建的函数 eat_at_restaurant
 
 ```rust
-#![allow(unused)]
-fn main() {
-   // in lib.rs
+// in lib.rs
 
-   // 填空并修复错误
+// 填空并修复错误
 
-   // 提示：你需要通过 `pub` 将一些项标记为公有的，这样模块 `front_of_house` 中的项才能被模块外的项访问
-   mod front_of_house {
-      /* ...snip... */
-   }
+// 提示：你需要通过 `pub` 将一些项标记为公有的，这样模块 `front_of_house` 中的项才能被模块外的项访问
+mod front_of_house {
+   /* ...snip... */
+}
 
-   pub fn eat_at_restaurant() {
-      // 使用绝对路径调用
-      __.add_to_waitlist();
+pub fn eat_at_restaurant() {
+   // 使用绝对路径调用
+   __.add_to_waitlist();
 
-      // 使用相对路径调用
-      __.add_to_waitlist();
-   }
+   // 使用相对路径调用
+   __.add_to_waitlist();
 }
 ```
 
 #### 我的解答
 
 ```rust
+// in lib.rs
+pub mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
 
+        pub fn seat_at_table() {}
+    }
+
+    pub mod serving {
+        pub fn take_order() {}
+
+        pub fn serve_order() {}
+
+        pub fn take_payment() {}
+
+        // Maybe you don't want the guest hearing the your complaining about them
+        // So just make it private
+        fn complain() {} 
+    }
+}
+
+pub fn eat_at_restaurant() {
+    // 绝对路径
+    crate::front_of_house::hosting::add_to_waitlist();
+
+    // 相对路径
+    front_of_house::hosting::add_to_waitlist();
+}
 ```
 
 ### 问题三
@@ -10684,8 +10743,8 @@ mod back_of_house {
     fn fix_incorrect_order() {
         cook_order();
         // 使用三种方式填空
-        //1. 使用关键字 `super`
-        //2. 使用绝对路径
+        // 1. 使用关键字 `super`
+        // 2. 使用绝对路径
         __.serve_order();
     }
 
@@ -10696,7 +10755,25 @@ mod back_of_house {
 #### 我的解答
 
 ```rust
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        super::front_of_house::serving::serve_order();
+    }
 
+    fn cook_order() {}
+}
+```
+
+```rust
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        crate::front_of_house::serving::serve_order();
+    }
+
+    fn cook_order() {}
+}
 ```
 
 ### 问题四
@@ -10704,47 +10781,43 @@ mod back_of_house {
 将模块分离并放入独立的文件中
 
 ```rust
+// in lib.rs
+pub mod front_of_house {
+   pub mod hosting {
+      pub fn add_to_waitlist() {}
 
-#![allow(unused)]
-fn main() {
-   // in lib.rs
-   pub mod front_of_house {
-      pub mod hosting {
-         pub fn add_to_waitlist() {}
-
-         pub fn seat_at_table() -> String {
-               String::from("sit down please")
-         }
-      }
-
-      pub mod serving {
-         pub fn take_order() {}
-
-         pub fn serve_order() {}
-
-         pub fn take_payment() {}
-
-         // 我猜你不希望顾客听到你在抱怨他们，因此让这个函数私有化吧
-         fn complain() {}
+      pub fn seat_at_table() -> String {
+            String::from("sit down please")
       }
    }
 
-   pub fn eat_at_restaurant() -> String {
-      front_of_house::hosting::add_to_waitlist();
+   pub mod serving {
+      pub fn take_order() {}
 
-      back_of_house::cook_order();
+      pub fn serve_order() {}
 
-      String::from("yummy yummy!")
+      pub fn take_payment() {}
+
+      // 我猜你不希望顾客听到你在抱怨他们，因此让这个函数私有化吧
+      fn complain() {}
+   }
+}
+
+pub fn eat_at_restaurant() -> String {
+   front_of_house::hosting::add_to_waitlist();
+
+   back_of_house::cook_order();
+
+   String::from("yummy yummy!")
+}
+
+pub mod back_of_house {
+   pub fn fix_incorrect_order() {
+      cook_order();
+      crate::front_of_house::serving::serve_order();
    }
 
-   pub mod back_of_house {
-      pub fn fix_incorrect_order() {
-         cook_order();
-         crate::front_of_house::serving::serve_order();
-      }
-
-      pub fn cook_order() {}
-   }
+   pub fn cook_order() {}
 }
 ```
 
@@ -10796,14 +10869,65 @@ fn main() {
 #### 我的解答
 
 ```rust
+// in src/lib.rs
 
+mod front_of_house;
+mod back_of_house;
+pub fn eat_at_restaurant() -> String {
+    front_of_house::hosting::add_to_waitlist();
+
+    back_of_house::cook_order();
+
+    String::from("yummy yummy!")
+}
+```
+
+```rust
+// in src/back_of_house.rs
+
+use crate::front_of_house;
+pub fn fix_incorrect_order() {
+    cook_order();
+    front_of_house::serving::serve_order();
+}
+
+pub fn cook_order() {}
+```
+
+```rust
+// in src/front_of_house/mod.rs
+
+pub mod hosting;
+pub mod serving;
+```
+
+```rust
+// in src/front_of_house/hosting.rs
+
+pub fn add_to_waitlist() {}
+
+pub fn seat_at_table() -> String {
+    String::from("sit down please")
+}
+```
+
+```rust
+// in src/front_of_house/serving.rs
+
+pub fn take_order() {}
+
+pub fn serve_order() {}
+
+pub fn take_payment() {}
+
+// Maybe you don't want the guest hearing the your complaining about them
+// So just make it private
+fn complain() {} 
 ```
 
 ### 问题五
 
-从二进制包中访问库包的代码
-
-当到底此处时，你的项目结构应该如下所示
+从二进制包中访问库包的代码，此时你的项目结构应该如下所示
 
 ```
 .
@@ -10833,7 +10957,12 @@ fn main() {
 #### 我的解答
 
 ```rust
+mod front_of_house;
 
+fn main() {
+    assert_eq!(front_of_house::hosting::seat_at_table(), "sit down please");
+    assert_eq!(hello_package::eat_at_restaurant(),"yummy yummy!");
+}
 ```
 
 ## 使用 use 引入模块及受限可见性
@@ -10852,7 +10981,10 @@ fn main() {}
 #### 我的解答
 
 ```rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
 
+fn main() {}
 ```
 
 ### 问题二
@@ -10875,14 +11007,32 @@ fn main() {
 #### 我的解答
 
 ```rust
+use std::collections::*;
 
+fn main() {
+    let _c1:HashMap<&str, i32> = HashMap::new();
+    let mut c2 = BTreeMap::new();
+    c2.insert(1, "a");
+    let _c3: HashSet<i32> = HashSet::new();
+}
+```
+
+```rust
+use std::collections::{HashMap, BTreeMap, HashSet};
+
+fn main() {
+    let _c1:HashMap<&str, i32> = HashMap::new();
+    let mut c2 = BTreeMap::new();
+    c2.insert(1, "a");
+    let _c3: HashSet<i32> = HashSet::new();
+}
 ```
 
 ### 问题三
 
 使用 pub use 进行再导出
 
-在之前创建的 hello-package 的库包中, 添加一些代码让下面的代码能够正常工作
+在之前创建的 hello-package 的库包中，添加一些代码让下面的代码能够正常工作
 
 ```rust
 fn main() {
@@ -10894,7 +11044,10 @@ fn main() {
 #### 我的解答
 
 ```rust
+// in lib.rs
 
+// Add this line
+pub use crate::front_of_house::hosting;
 ```
 
 ### 问题四
@@ -10924,6 +11077,113 @@ pub mod a {
             pub(in crate::a) const J: i32 = 4;
         }
     }
+}
+```
+
+```rust
+// 一个名为 `my_mod` 的模块
+mod my_mod {
+    // 模块中的项默认具有私有的可见性
+    fn private_function() {
+        println!("called `my_mod::private_function()`");
+    }
+
+    // 使用 `pub` 修饰语来改变默认可见性。
+    pub fn function() {
+        println!("called `my_mod::function()`");
+    }
+
+    // 在同一模块中，项可以访问其它项，即使它是私有的。
+    pub fn indirect_access() {
+        print!("called `my_mod::indirect_access()`, that\n> ");
+        private_function();
+    }
+
+    // 模块也可以嵌套
+    pub mod nested {
+        pub fn function() {
+            println!("called `my_mod::nested::function()`");
+        }
+
+        #[allow(dead_code)]
+        fn private_function() {
+            println!("called `my_mod::nested::private_function()`");
+        }
+
+        // 使用 `pub(in path)` 语法定义的函数只在给定的路径中可见。
+        // `path` 必须是父模块（parent module）或祖先模块（ancestor module）
+        pub(in crate::my_mod) fn public_function_in_my_mod() {
+            print!("called `my_mod::nested::public_function_in_my_mod()`, that\n > ");
+            public_function_in_nested()
+        }
+
+        // 使用 `pub(self)` 语法定义的函数则只在当前模块中可见。
+        pub(self) fn public_function_in_nested() {
+            println!("called `my_mod::nested::public_function_in_nested");
+        }
+
+        // 使用 `pub(super)` 语法定义的函数只在父模块中可见。
+        pub(super) fn public_function_in_super_mod() {
+            println!("called my_mod::nested::public_function_in_super_mod");
+        }
+    }
+
+    pub fn call_public_function_in_my_mod() {
+        print!("called `my_mod::call_public_funcion_in_my_mod()`, that\n> ");
+        nested::public_function_in_my_mod();
+        print!("> ");
+        nested::public_function_in_super_mod();
+    }
+
+    // `pub(crate)` 使得函数只在当前包中可见
+    pub(crate) fn public_function_in_crate() {
+        println!("called `my_mod::public_function_in_crate()");
+    }
+
+    // 嵌套模块的可见性遵循相同的规则
+    mod private_nested {
+        #[allow(dead_code)]
+        pub fn function() {
+            println!("called `my_mod::private_nested::function()`");
+        }
+    }
+}
+
+fn function() {
+    println!("called `function()`");
+}
+
+fn main() {
+    // 模块机制消除了相同名字的项之间的歧义。
+    function();
+    my_mod::function();
+
+    // 公有项，包括嵌套模块内的，都可以在父模块外部访问。
+    my_mod::indirect_access();
+    my_mod::nested::function();
+    my_mod::call_public_function_in_my_mod();
+
+    // pub(crate) 项可以在同一个 crate 中的任何地方访问
+    my_mod::public_function_in_crate();
+
+    // pub(in path) 项只能在指定的模块中访问
+    // 报错！函数 `public_function_in_my_mod` 是私有的
+    //my_mod::nested::public_function_in_my_mod();
+    // 试一试 ^ 取消该行的注释
+
+    // 模块的私有项不能直接访问，即便它是嵌套在公有模块内部的
+
+    // 报错！`private_function` 是私有的
+    //my_mod::private_function();
+    // 试一试 ^ 取消此行注释
+
+    // 报错！`private_function` 是私有的
+    //my_mod::nested::private_function();
+    // 试一试 ^ 取消此行的注释
+
+    // 报错！ `private_nested` 是私有的
+    //my_mod::private_nested::function();
+    // 试一试 ^ 取消此行的注释
 }
 ```
 
