@@ -10520,7 +10520,7 @@ cargo new --lib hello-package1
 
 在 package hello-package 中，有一个二进制包，该包与 package 同名: hello-package, 其中 src/main.rs 是该二进制包的包根
 
-与 hello-package 类似, hello-package1 同样包含一个包，但是与之前的二进制包不同，该 package 包含的是库包，其中 src/lib.rs 是其包根
+与 hello-package 类似，hello-package1 同样包含一个包，但是与之前的二进制包不同，该 package 包含的是库包，其中 src/lib.rs 是其包根
 
 ```
 /* 填空 */
@@ -10581,7 +10581,7 @@ hello-package1
 │       └── __
 ├── tests # 存放集成测试文件的目录
 │   └── some_integration_tests.rs
-├── benches # 存放 benchmark 文件的目录dir for benchmark files
+├── benches # 存放 benchmark 文件的目录 dir for benchmark files
 │   └── simple_bench.rs
 └── examples # 存放示例文件的目录
     └── simple_example.rs
@@ -10629,7 +10629,7 @@ hello-package1
 
 下面，我们来为其中的库包创建一些模块，然后在二进制包中使用这些模块
 
-根据以下的模块树描述实现模块 front_of_house
+根据以下的模块树描述实现模块 `front_of_house`
 
 ```
 库包的根(src/lib.rs)
@@ -10678,7 +10678,7 @@ mod front_of_house {
 
 ### 问题二
 
-让我们在库包的根中定义一个函数 eat_at_restaurant, 然后在该函数中调用之前创建的函数 eat_at_restaurant
+让我们在库包的根中定义一个函数 `eat_at_restaurant`, 然后在该函数中调用之前创建的函数 `eat_at_restaurant`
 
 ```rust
 // in lib.rs
@@ -11203,7 +11203,7 @@ fn main() {
 
 文档注释会被解析为 HTML 文件，并支持 Markdown 语法。
 
-在开始之前，我们需要创建一个新的项目用于后面的练习: cargo new --lib doc-comments
+在开始之前，我们需要创建一个新的项目用于后面的练习：`cargo new --lib doc-comments`
 
 行文档注释 ///
 
@@ -11230,9 +11230,9 @@ fn main() {
 }
 ````
 
-我们可以使用 cargo doc --open 来生成 HTML 文件，并自动在浏览器中打开网页。
+我们可以使用 `cargo doc --open` 来生成 HTML 文件，并自动在浏览器中打开网页。
 
-块文档注释 /\*_ ... _/，为函数 add_two 添加文档:
+块文档注释 `/** ... */`，为函数 `add_two` 添加文档:
 
 ```rust
 #![allow(unused)]
@@ -11280,13 +11280,13 @@ pub mod compute;
 
 同样的，我们还可以使用块注释来达成目的:
 
-```
+```rust
 /*! # 文档注释
 
  该库用于文档注释的教学 */
 ```
 
-下一步，创建一个新的模块文件 src/compute.rs, 然后在其中添加以下注释:
+下一步，创建一个新的模块文件 src/compute.rs，然后在其中添加以下注释:
 
 ```rust
 //! 本模块用于处理一些复杂计算
@@ -11298,13 +11298,13 @@ pub mod compute;
 
 文档测试
 
-之前的 add_one 和 add_tow 的文档注释中，包含了两个示例代码块
+之前的 `add_one` 和 `add_two` 的文档注释中，包含了两个示例代码块
 
 以上示例不仅仅是作为文档用于演示你的函数该如何使用，它的另一个作用就是用于文档测试 cargo test。
 
 但是在这两个函数的示例中，存在错误，请修复它们并使用 cargo test 获取以下输出结果:
 
-```
+```bash
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
@@ -11321,7 +11321,35 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 ### 我的解答
 
 ```rust
+// in lib.rs
 
+/// Add one to the given value and return the value
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = world_hello::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+pub fn add_one(x: i32) -> i32 {
+    x + 1
+}
+
+/** Add two to the given value and return a new value
+
+// 这里本来有 ```，但和 md 语法冲突，省略不写
+let arg = 5;
+let answer = world_hello::add_two(arg);
+
+assert_eq!(7, answer);
+// 这里本来有 ```，但和 md 语法冲突，省略不写
+
+*/
+pub fn add_two(x: i32) -> i32 {
+    x + 2
+}
 ```
 
 ## 问题三
@@ -11331,25 +11359,22 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 > 你只能修改注释，不要修改 fn div
 
 ````rust
-#![allow(unused)]
-fn main() {
-   // in src/compute.rs
+// in src/compute.rs
 
-   /// # Panics
-   ///
-   /// The function panics if the second argument is zero.
-   ///
-   /// ```rust,should_panic
-   /// // panics on division by zero
-   /// doc_comments::compute::div(10, 0);
-   /// ```
-   pub fn div(a: i32, b: i32) -> i32 {
-      if b == 0 {
-         panic!("Divide-by-zero error");
-      }
-
-      a / b
+/// # Panics
+///
+/// The function panics if the second argument is zero.
+///
+/// ```rust,should_panic
+/// // panics on division by zero
+/// doc_comments::compute::div(10, 0);
+/// ```
+pub fn div(a: i32, b: i32) -> i32 {
+   if b == 0 {
+      panic!("Divide-by-zero error");
    }
+
+   a / b
 }
 ````
 
@@ -11564,7 +11589,7 @@ fn main() {
 
 ## 问题四
 
-左对齐, 右对齐, 使用指定的字符填充
+左对齐，右对齐，使用指定的字符填充
 
 ```rust
 fn main() {
@@ -11661,7 +11686,7 @@ fn main() {
 
 ## 问题八
 
-二进制, 八进制, 十六进制
+二进制，八进制，十六进制
 
 - format!("{}", foo) -> "3735928559"
 - format!("0x{:X}", foo) -> "0xDEADBEEF"
