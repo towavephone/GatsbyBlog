@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>space 和 round 背景平铺效果示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      p {
+        height: 4rem;
+        background: url(/GATSBY_PUBLIC_DIR/images/1.jpg) center / auto 100%;
+        margin-left: auto;
+        margin-right: auto;
+        outline: 1px dotted;
+      }
+
+      .space {
+        background-repeat: space;
+      }
+
+      .round {
+        background-repeat: round;
+        /* 保证兼容 */
+        background-position: left;
+      }
+
+      p:nth-of-type(3n + 1) {
+        width: 280px;
+      }
+
+      p:nth-of-type(3n + 2) {
+        width: 120px;
+      }
+
+      p:nth-of-type(3n + 3) {
+        width: 4rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>space</h4>
+      <p class="space"></p>
+      <p class="space"></p>
+      <p class="space"></p>
+      <h4>round</h4>
+      <p class="round"></p>
+      <p class="round"></p>
+      <p class="round"></p>
+    </div>
+  </body>
+</html>

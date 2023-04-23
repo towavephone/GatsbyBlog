@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>无内在尺寸有内在比例 SVG 效果示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 128px;
+        margin: auto;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .demo h4 {
+        margin-bottom: 0.25em;
+      }
+
+      .svg-nosize {
+        width: 40px;
+        height: 40px;
+        border: solid deepskyblue;
+        background: url(/GATSBY_PUBLIC_DIR/images/triangle.svg);
+      }
+
+      .svg-one-size {
+        width: 40px;
+        height: 40px;
+        border: solid deepskyblue;
+        background: url(/GATSBY_PUBLIC_DIR/images/triangle-one-size.svg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>无内在尺寸有内在比例</h4>
+      <div class="svg-nosize"></div>
+      <h4>一侧内在尺寸有内在比例</h4>
+      <div class="svg-one-size"></div>
+    </div>
+  </body>
+</html>

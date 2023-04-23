@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js - Filter Modes</title>
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <canvas id="c"></canvas>
+      <div class="btn-container">
+        <div class="btn">
+          click to<br />
+          change<br />
+          texture
+        </div>
+      </div>
+      <div class="filter-caption" style="left: 0.5em; top: 0.5em;">
+        nearest
+      </div>
+      <div class="filter-caption" style="width: 100%; text-align: center; top: 0.5em;">
+        linear
+      </div>
+      <div class="filter-caption" style="right: 0.5em; text-align: right; top: 0.5em;">
+        nearest<br />
+        mipmap<br />
+        nearest
+      </div>
+      <div class="filter-caption" style="left: 0.5em; text-align: left; bottom: 0.5em;">
+        nearest<br />
+        mipmap<br />
+        linear
+      </div>
+      <div class="filter-caption" style="width: 100%; text-align: center; bottom: 0.5em;">
+        linear<br />
+        mipmap<br />
+        nearest
+      </div>
+      <div class="filter-caption" style="right: 0.5em; text-align: right; bottom: 0.5em;">
+        linear<br />
+        mipmap<br />
+        linear
+      </div>
+    </div>
+
+    <script async src="./build/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./build/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

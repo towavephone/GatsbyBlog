@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>box-shadow 实现的新手引导效果示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+
+      #guideOverlap {
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <span class="title">box-shadow 实现的新手引导效果示意实例页面</span>
+    <div class="demo">
+      <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" width="256" height="192" />
+    </div>
+    <script src="./js/jquery.js"></script>
+    <script src="./js/jquery.guide.js"></script>
+    <script>
+      // 测试用，为了每次刷新都有效果，实际开发不需要
+      var urlRoot = location.href.split('#')[0].replace(/\W/g, '') + 'Guide';
+      localStorage[urlRoot] = '2';
+
+      $.guide([
+        {
+          selector: '.title',
+          content: '<img src="/GATSBY_PUBLIC_DIR/images/guide-1.png" width="102" height="47">',
+          align: 'left'
+        },
+        {
+          selector: '.demo img',
+          content: '<img src="/GATSBY_PUBLIC_DIR/images/guide-2.png" width="86" height="47">'
+        }
+      ]);
+    </script>
+  </body>
+</html>

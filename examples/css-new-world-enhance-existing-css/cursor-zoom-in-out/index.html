@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>zoom-in 和 zoom-out 手形效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+      }
+
+      .zoom-in {
+        /* 放大 */
+        cursor: zoom-in;
+      }
+
+      .zoom-out {
+        /* 缩小 */
+        cursor: zoom-out;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>点击图片</h4>
+      <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" width="128" class="zoom-in" />
+    </div>
+    <script>
+      var eleImg = document.querySelector('img[width]');
+      if (eleImg) {
+        eleImg.addEventListener('click', function() {
+          var width = this.getAttribute('width');
+          if (width == '128') {
+            this.width = '256';
+            this.className = 'zoom-out';
+          } else {
+            this.width = '128';
+            this.className = 'zoom-in';
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

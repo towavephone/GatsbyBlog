@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo ol {
+        width: -moz-fit-content;
+        width: fit-content;
+        margin: auto;
+        text-align: left;
+      }
+
+      .revert-ol {
+        list-style: none;
+      }
+
+      @supports (padding: revert) {
+        .revert-ol {
+          padding: revert;
+          list-style-type: revert;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <ol class="revert-ol">
+        <li>inherit关键字实用</li>
+        <li>initial关键字可用</li>
+        <li>unset关键字配合all使用</li>
+        <li>revert关键字有用</li>
+      </ol>
+      <p class="remind">// 不支持revert关键字的浏览器看不到数字序号</p>
+    </div>
+  </body>
+</html>

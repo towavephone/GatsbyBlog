@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .item img {
+        width: 128px;
+        height: 96px;
+        vertical-align: bottom;
+      }
+
+      .item {
+        display: inline-block;
+        border: solid deepskyblue;
+        writing-mode: vertical-rl;
+        font-size: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p class="remind">// 已设置 writing-mode: vertical-rl</p>
+      <h4>1. margin-left == margin-block-end</h4>
+      <div class="item">
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-left: 1rem;" />
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-block-end: 1rem;" />
+      </div>
+      <h4>2. margin-top == margin-inline-start</h4>
+      <div class="item">
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-top: 1rem;" />
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-inline-start: 1rem;" />
+      </div>
+      <h4>3. margin-right == margin-block-start</h4>
+      <div class="item">
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-right: 1rem;" />
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-block-start: 1rem;" />
+      </div>
+      <h4>4. margin-bottom == margin-inline-end</h4>
+      <div class="item">
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-bottom: 1rem;" />
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" style="margin-inline-end: 1rem;" />
+      </div>
+    </div>
+  </body>
+</html>

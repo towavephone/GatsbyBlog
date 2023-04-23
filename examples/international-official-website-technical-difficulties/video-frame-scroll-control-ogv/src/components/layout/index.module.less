@@ -1,0 +1,35 @@
+@media screen and (min-width: 960px) and (max-width: 1920px) {
+  html {
+    font-size: calc(12px + 2 * (100vw - 960px) / 960);
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+body {
+  margin: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  iframe {
+    pointer-events: none;
+  }
+}
+
+.fullPage {
+  height: 100vh;
+}
+
+.player {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+
+  canvas {
+    object-fit: cover !important;
+  }
+}

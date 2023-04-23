@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>按钮文字颜色随着背景色自动变化实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        width: -moz-fit-content;
+        width: fit-content;
+        margin: auto;
+        text-align: left;
+      }
+
+      :root {
+        /* 定义RGB变量 */
+        --red: 44;
+        --green: 135;
+        --blue: 255;
+
+        /**
+         * 使用sRGB Luma方法计算灰度（可以看成亮度）
+         * 算法为：
+         * lightness = (red * 0.2126 + green * 0.7152 + blue * 0.0722) / 255
+        */
+        --lightness: calc((var(--red) * 0.2126 + var(--green) * 0.7152 + var(--blue) * 0.0722) / 255);=
+      }
+
+      .btn {
+        font-size: 150%;
+        padding: .5em 2em;
+        border: .2em solid;
+      }
+
+      .btn {
+        /* 按钮背景色就是基本背景色 */
+        background: rgb(var(--red), var(--green), var(--blue));
+        /**
+         * --lightness亮度和0.5对比
+         * 大于，则正数，和-999999%相乘，会得到一个巨大负数，浏览器会按照边界0%渲染，也就是亮度为0，于是颜色是黑色；
+         * 小于，则和-999999%相乘，会得到一个巨大的正数，以最大合法值100%渲染，于是颜色是白色；
+        */
+        color: hsl(0, 0%, calc((var(--lightness) - 0.5) * -999999%));
+        /**
+         * 深色颜色加一点浅一点颜色的阴影
+         */
+        text-shadow: 1px 1px rgba(calc(var(--red) + 50), calc(var(--green) + 50), calc(var(--blue) + 50), calc((var(--lightness) - 0.5) * 9999));
+
+        /**
+         * 确定边框透明度。
+         * 如果亮度比0.8大，在说明按钮背景色比较淡，我们出现一个深色边框；
+         * 如果亮度比较小，说明按钮背景色较深，没有必要出现边框。
+           此时，计算后为负值，透明度小于0的时候，浏览器会按照0渲染，因此，边框透明。
+        */
+        /* 设置边框相关样式 */
+        border-color: rgba(calc(var(--red) - 50), calc(var(--green) - 50), calc(var(--blue) - 50), calc((var(--lightness) - 0.8) * 100));
+      }
+
+      input {
+        vertical-align: middle;
+        margin-right: 10px;
+      }
+
+      .c-r::after {
+        counter-reset: red var(--red);
+        content: counter(red);
+      }
+
+      .c-g::after {
+        counter-reset: green var(--green);
+        content: counter(green);
+      }
+
+      .c-b::after {
+        counter-reset: blue var(--blue);
+        content: counter(blue);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <button class="btn">我是按钮</button>
+      <p class="c-r">R：<input type="range" min="0" max="255" value="44" name="red" /></p>
+      <p class="c-g">G：<input type="range" min="0" max="255" value="135" name="green" /></p>
+      <p class="c-b">B：<input type="range" min="0" max="255" value="255" name="blue" /></p>
+      <p class="remind">拖动滑块，改变 RGB 变量</p>
+    </div>
+    <script>
+      var eleRanges = document.querySelectorAll('input[type="range"]');
+      Array.from(eleRanges).forEach(function(range) {
+        range.addEventListener('input', function() {
+          document.documentElement.style.setProperty('--' + this.name, this.value);
+        });
+      });
+    </script>
+  </body>
+</html>

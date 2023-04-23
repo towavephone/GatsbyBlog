@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>径向渐变与按钮点击光圈效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      button {
+        height: 40px;
+        border: none;
+        padding: 0 20px;
+        background-color: #2a80eb;
+        color: #fff;
+        border-radius: 4px;
+        outline: none;
+      }
+
+      .button-a {
+        background-image: radial-gradient(farthest-side at bottom left, rgba(255, 0, 255, 0.5), transparent),
+          radial-gradient(farthest-corner at bottom right, rgba(255, 255, 50, 0.5), transparent);
+      }
+
+      .button-a:active {
+        box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.1);
+      }
+
+      .button-b {
+        background-image: radial-gradient(160% 100% at 50% 0%, hsla(0, 0%, 100%, 0.3) 50%, hsla(0, 0%, 100%, 0) 52%);
+      }
+
+      .button-b:active {
+        background-image: radial-gradient(160% 100% at 50% 0%, hsla(0, 0%, 100%, 0.2) 50%, hsla(0, 0%, 100%, 0) 52%);
+      }
+
+      .button-c {
+        background-image: radial-gradient(
+          closest-side circle,
+          rgba(255, 70, 70, 0.9),
+          rgba(255, 70, 70, 0.9) 99%,
+          rgba(255, 70, 70, 0) 100%
+        );
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 0% 0%;
+        transition: all 0.2s;
+      }
+
+      .button-c:active {
+        background-size: 250% 250%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p><button class="button-a">炫彩按钮</button></p>
+      <p><button class="button-b">高光按钮</button></p>
+      <p><button class="button-c">点击我</button></p>
+    </div>
+  </body>
+</html>

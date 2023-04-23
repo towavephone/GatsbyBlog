@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>column-count 与 column-width 计算优先级示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo code {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      .container-1,
+      .container-2 {
+        margin: 1em auto;
+        border: solid deepskyblue;
+        padding: 10px;
+        max-width: calc(100% - 26px - 1rem);
+        text-align: left;
+      }
+
+      h4.fill {
+        display: flex;
+        width: 366px;
+        margin: 1.5em auto -0.25em;
+      }
+
+      h4.fill::after {
+        content: '\3000';
+        background-color: #fff;
+        flex: 1;
+        margin: -4px -10px -4px 10px;
+      }
+
+      .container-1 {
+        width: 360px;
+        column-count: 2;
+        column-width: 100px;
+      }
+
+      .container-2 {
+        width: 360px;
+        column-count: 4;
+        column-width: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <h4 class="fill">.container-1</h4>
+      <div class="container-1">
+        <code>column-count</code
+        >与<code>column-width</code>都有可能有更高的优先级，要看具体场景。优先级计算诀窍就是统一转换<code>column-count</code>值，哪个值小就使用哪一个。
+      </div>
+      <h4 class="fill">.container-2</h4>
+      <div class="container-2">
+        <code>column-count</code
+        >与<code>column-width</code>都有可能有更高的优先级，要看具体场景。优先级计算诀窍就是统一转换<code>column-count</code>值，哪个值小就使用哪一个。
+      </div>
+    </div>
+  </body>
+</html>

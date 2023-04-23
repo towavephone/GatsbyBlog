@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .example {
+        margin: auto;
+        width: 80px;
+        height: 80px;
+        border: 40px solid deepskyblue;
+        border-image: url(/GATSBY_PUBLIC_DIR/images/grid-nine.svg) 54;
+      }
+
+      .example2 {
+        border-image-slice: 20;
+      }
+
+      .example3 {
+        border-image-slice: 33.33% fill;
+      }
+
+      .example4 {
+        border-image-slice: initial;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>54 切割</h4>
+      <div class="example"></div>
+
+      <h4>20 切割</h4>
+      <div class="example example2"></div>
+
+      <h4>33.33% fill 切割</h4>
+      <div class="example example3"></div>
+
+      <h4>默认</h4>
+      <div class="example example4"></div>
+    </div>
+  </body>
+</html>

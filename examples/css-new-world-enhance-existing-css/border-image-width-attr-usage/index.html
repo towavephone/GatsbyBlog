@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .example {
+        width: 80px;
+        height: 80px;
+        border: 40px solid deepskyblue;
+        border-image: url(/GATSBY_PUBLIC_DIR/images/grid-nine.svg) 54;
+        margin: auto;
+      }
+
+      .example2 {
+        border-image-width: 60px;
+      }
+
+      .example3 {
+        border-image-width: 50% 25%;
+      }
+
+      .example4 {
+        border-image-width: 0.75;
+      }
+
+      .example5 {
+        border-image-width: auto;
+      }
+
+      .example6 {
+        border-image-width: 4 3 2 1;
+      }
+
+      .example7 {
+        border-image-width: 2.6667 2 1.3333 0.6667;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>初始值</h4>
+      <div class="example"></div>
+
+      <h4>border-image-width: 60px</h4>
+      <div class="example example2"></div>
+
+      <h4>border-image-width: 50% 25%</h4>
+      <div class="example example3"></div>
+
+      <h4>border-image-width: .75</h4>
+      <div class="example example4"></div>
+
+      <h4>border-image-width: auto</h4>
+      <div class="example example5"></div>
+
+      <h4>border-image-width: 4 3 2 1</h4>
+      <div class="example example6"></div>
+
+      <h4>border-image-width: 2.6667 2 1.3333 0.6667</h4>
+      <div class="example example7"></div>
+    </div>
+  </body>
+</html>

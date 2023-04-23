@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>column-fill 几个属性值测试实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo code {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      h4 {
+        max-width: 320px;
+        margin: auto;
+        text-align: left;
+        transform: translateX(calc(50% - 161.5px));
+      }
+
+      .container {
+        margin: -0.5em auto auto;
+        text-align: left;
+      }
+
+      .container {
+        width: 300px;
+        height: 80px;
+        border: solid deepskyblue;
+        padding: 10px;
+        column-count: 2;
+      }
+
+      .auto {
+        column-fill: auto;
+      }
+
+      .balance {
+        column-fill: balance;
+      }
+
+      .balance-all {
+        column-fill: balance-all;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <h4 class="fill">column-fill:auto</h4>
+      <div class="container auto">
+        balance是默认值。auto属性值在Firefox中渲染正确，Chrome中需要固定高度才有效。balance-all没有浏览器支持。
+      </div>
+      <h4 class="fill">column-fill:balance</h4>
+      <div class="container balance">
+        balance是默认值。auto属性值在Firefox中渲染正确，Chrome中需要固定高度才有效。balance-all没有浏览器支持。
+      </div>
+      <h4 class="fill">column-fill:balance-all</h4>
+      <div class="container balance-all">
+        balance是默认值。auto属性值在Firefox中渲染正确，Chrome中需要固定高度才有效。balance-all没有浏览器支持。
+      </div>
+    </div>
+  </body>
+</html>

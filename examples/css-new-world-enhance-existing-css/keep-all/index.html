@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>word-break: keep-all 应用案例实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .demo table {
+        margin-top: -10px;
+      }
+
+      .keep-all th,
+      td.keep-all {
+        word-break: keep-all;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>默认</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>会议时间</th>
+            <th>会议地点</th>
+            <th>会议人员(3)</th>
+            <th>会议内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2021 年 2 月 28 日</td>
+            <td>6 号楼 3 楼伏羲会议室</td>
+            <td>张三 李四 王二麻子</td>
+            <td>讨论字符单元的中断与换行，以及如何组织内容让表达效果最好</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>排版优化</h4>
+      <table class="keep-all">
+        <thead>
+          <tr>
+            <th>会议时间</th>
+            <th>会议地点</th>
+            <th>会议人员(3)</th>
+            <th>会议内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2021 年 2 月 28 日</td>
+            <td>6 号楼 3 楼伏羲会议室</td>
+            <td class="keep-all">张三 李四 王二麻子</td>
+            <td>讨论字符单元的中断与换行，以及如何组织内容让表达效果最好</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

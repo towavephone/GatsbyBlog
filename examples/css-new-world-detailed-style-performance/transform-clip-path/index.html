@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transform 和 clip-path 执行顺序测试实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        padding-top: 60px;
+        padding-bottom: 60px;
+      }
+
+      .demo img {
+        width: 128px;
+        height: 96px;
+        transform: scale(2);
+        -webkit-clip-path: circle(48px at 64px 48px);
+        clip-path: circle(48px at 64px 48px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+    </div>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transform 与绝对定位元素包含块实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        height: 200px;
+        text-align: left;
+        margin: auto;
+      }
+
+      p {
+        border: solid deepskyblue;
+        width: 150px;
+        height: 150px;
+        transform: scale(1);
+      }
+
+      p > img {
+        width: 100%;
+        position: absolute;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p>
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+      </p>
+    </div>
+  </body>
+</html>

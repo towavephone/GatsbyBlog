@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>径向渐变与波纹效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .radial-wave {
+        width: 200px;
+        height: 100px;
+        background: linear-gradient(to top, transparent 10px, red 10px) no-repeat,
+          radial-gradient(20px 15px at left 50% bottom 10px, red 10px, transparent 11px);
+        background-size: auto, 20px 10px;
+        margin: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="radial-wave"></div>
+    </div>
+  </body>
+</html>

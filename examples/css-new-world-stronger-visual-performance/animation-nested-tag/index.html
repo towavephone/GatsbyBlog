@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS3 动画实现的购物车抛物线运动实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .box {
+        width: 625px;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .image-x {
+        position: relative;
+        padding: 52.24% 50%;
+      }
+
+      .image-x > img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+
+      .shop-cart {
+        width: 283px;
+        height: 25px;
+        line-height: 25px;
+        padding-top: 8px;
+        background: url(/GATSBY_PUBLIC_DIR/images/shopping-cart.png);
+        font-family: 'microsoft yahei';
+        font-size: 12px;
+        text-indent: 34px;
+        color: #000;
+        position: fixed;
+        right: 10px;
+        bottom: 0;
+      }
+
+      .btn-cart {
+        position: absolute;
+        width: 22.72%;
+        height: 7.04441%;
+        left: 15.84%;
+        top: 84.8392%;
+        text-indent: -99em;
+        overflow: hidden;
+      }
+
+      .btn-cart:hover {
+        background-color: rgba(221, 46, 59, 0.1);
+      }
+
+      .fly-item,
+      .fly-item > img {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        transition: transform 0.5s;
+      }
+
+      .fly-item {
+        display: none;
+        margin: -25px 0 0 -25px;
+        transition-timing-function: linear;
+        opacity: 0.5;
+      }
+
+      .fly-item > img {
+        transition-timing-function: cubic-bezier(0.55, 0, 0.85, 0.36);
+        outline: 1px solid rgb(221, 46, 59);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="box">
+        <p>下面这个是截图，只有“加入购物车”按钮可以点击：</p>
+        <div class="image-x">
+          <img src="/GATSBY_PUBLIC_DIR/images/shopping.png" width="625" height="653" alt="CSS世界京东详情页截图" />
+          <a href="javascript:" id="btnCart" class="btn-cart" title="加入购物车">
+            加入购物车
+          </a>
+        </div>
+      </div>
+      <div id="shopCart" class="shop-cart">购物车 <span>17</span></div>
+      <div id="flyItem" class="fly-item" style="left: 489px; top: 767px; transform: translateX(0px);">
+        <img src="/GATSBY_PUBLIC_DIR/images/book.jpg" width="50" height="50" style="transform: translateY(0px);" />
+      </div>
+    </div>
+    <script>
+      var eleBtn = document.getElementById('btnCart');
+      var eleFlyItem = document.getElementById('flyItem');
+      var eleFlyImg = eleFlyItem.querySelector('img');
+      var eleCart = document.querySelector('#shopCart');
+
+      var isRunning = false;
+      eleBtn.addEventListener('click', function() {
+        // 现在按钮距离购物车的距离
+        var boundBtn = eleBtn.getBoundingClientRect();
+        var boundCart = eleCart.getBoundingClientRect();
+        // 中心点的水平垂直距离
+        var offsetX = boundCart.left + boundCart.width / 2 - (boundBtn.left + boundBtn.width / 2);
+        var offsetY = boundCart.top + boundCart.height / 2 - (boundBtn.top + boundBtn.height / 2);
+        // 页面滚动尺寸
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
+        var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+        if (isRunning == false) {
+          // 购物车图形出现与初始定位
+          eleFlyItem.style.display = 'block';
+          eleFlyItem.style.left = boundBtn.left + scrollLeft + this.clientWidth / 2 + 'px';
+          eleFlyItem.style.top = boundBtn.top + scrollTop + this.clientHeight / 2 + 'px';
+          // 开始动画
+          eleFlyItem.style.transform = 'translateX(' + offsetX + 'px)';
+          eleFlyImg.style.transform = 'translateY(' + offsetY + 'px)';
+          // 动画标志量
+          isRunning = true;
+          setTimeout(function() {
+            eleFlyItem.style.display = '';
+            eleFlyItem.style.transform = 'translateX(0)';
+            eleFlyImg.style.transform = 'translateY(0)';
+            isRunning = false;
+            eleCart.querySelector('span').innerHTML = eleCart.querySelector('span').innerHTML * 1 + 1;
+          }, 490);
+        }
+      });
+    </script>
+  </body>
+</html>

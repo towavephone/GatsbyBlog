@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS opacity 边界特性与饼图绘制实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 128px;
+        margin: auto;
+      }
+
+      @media screen and (min-width: 640px) {
+        .demo {
+          width: auto;
+          position: relative;
+        }
+
+        h4 {
+          display: inline-block;
+          width: 0;
+          white-space: nowrap;
+          vertical-align: 150px;
+          transform: translateX(calc(64px - 2em));
+        }
+
+        .pie-simple {
+          display: inline-block;
+        }
+      }
+
+      .pie-simple {
+        width: 128px;
+        height: 128px;
+        background-color: #eee;
+        border-radius: 50%;
+        text-align: left;
+        overflow: hidden;
+      }
+
+      .pie-left,
+      .pie-right {
+        width: 50%;
+        height: 100%;
+        float: left;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pie-left::before,
+      .pie-right::before,
+      .pie-right::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: deepskyblue;
+      }
+
+      .pie-left::before {
+        left: 100%;
+        transform-origin: left;
+        transform: rotate(calc(3.6deg * (var(--percent) - 50)));
+        opacity: calc(99999 * (var(--percent) - 50));
+      }
+
+      .pie-right::before {
+        right: 100%;
+        transform-origin: right;
+        transform: rotate(calc(3.6deg * var(--percent)));
+      }
+
+      .pie-right::after {
+        opacity: calc(99999 * (var(--percent) - 50));
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>10% 大小</h4>
+      <div class="pie-simple" style="--percent: 10;">
+        <div class="pie-left"></div>
+        <div class="pie-right"></div>
+      </div>
+      <h4>40% 大小</h4>
+      <div class="pie-simple" style="--percent: 40;">
+        <div class="pie-left"></div>
+        <div class="pie-right"></div>
+      </div>
+      <h4>80% 大小</h4>
+      <div class="pie-simple" style="--percent: 80;">
+        <div class="pie-left"></div>
+        <div class="pie-right"></div>
+      </div>
+      <h4>99% 大小</h4>
+      <div class="pie-simple" style="--percent: 99;">
+        <div class="pie-left"></div>
+        <div class="pie-right"></div>
+      </div>
+    </div>
+  </body>
+</html>

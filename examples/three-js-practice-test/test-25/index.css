@@ -1,0 +1,28 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+.spread {
+  display: flex;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.spread > div {
+  flex: 1 1 100%;
+}
+
+[data-diagram] {
+  margin-bottom: 16px;
+}
+
+#c {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -100;
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transform 导致固定定位失效实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        text-align: left;
+        margin: auto;
+      }
+
+      h4:first-child {
+        margin-top: 0;
+      }
+
+      p {
+        height: 192px;
+      }
+
+      p > img {
+        width: 256px;
+        height: 192px;
+        position: fixed;
+      }
+
+      .transform {
+        transform: scale(1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>默认，图片不会被滚走</h4>
+      <p>
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+      </p>
+
+      <h4>容器设置 transform: scale(1)</h4>
+      <p class="transform">
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+      </p>
+      <div style="height:40px;"></div>
+      <div class="remind">请确保页面可滚动</div>
+      <div style="height:40px;"></div>
+    </div>
+  </body>
+</html>

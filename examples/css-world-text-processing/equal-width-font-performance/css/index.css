@@ -1,0 +1,154 @@
+.demo ul {
+  margin: 0;
+  padding: 0;
+}
+
+select {
+  display: inline-block;
+  height: 40px;
+  margin: 0;
+  border: 1px solid #d0d0d5;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  vertical-align: middle;
+}
+
+select[hidden],
+select[hidden] + .ui-select {
+  display: none;
+}
+
+.ui-select {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+  height: 40px;
+  vertical-align: middle;
+  -webkit-animation: fadeIn 0.2s;
+  animation: fadeIn 0.2s;
+  font-size: 14px;
+  position: relative;
+}
+
+.ui-select ~ .ui-button {
+  vertical-align: middle;
+}
+
+.ui-select.active {
+  z-index: 3;
+}
+
+.ui-select-button {
+  display: block;
+  height: 20px;
+  line-height: 20px;
+  padding: 9px 27px 9px 12px;
+  color: #4c5161;
+  border: 1px solid #d0d0d5;
+  border-radius: 4px;
+  background-color: #fff;
+  -webkit-transition: border-color 0.15s, background-color 0.15s;
+  transition: border-color 0.15s, background-color 0.15s;
+  cursor: pointer;
+}
+
+.ui-select-button:hover {
+  color: #4c5161;
+  border-color: #ababaf;
+}
+
+:not(:disabled) + .ui-select > .ui-select-button:active {
+  background-color: #f7f9fa;
+}
+
+.active > a.ui-select-button {
+  border-color: #00a5e0;
+  border-radius: 4px 4px 0 0;
+}
+
+.reverse > .ui-select-button {
+  border-radius: 0 0 4px 4px;
+}
+
+.ui-select-text {
+  display: block;
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ui-select-icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: url(/GATSBY_PUBLIC_DIR/images/icon-arrow.png) no-repeat center;
+  background: url(/GATSBY_PUBLIC_DIR/images/icon-arrow.svg) no-repeat center, none;
+  background-size: 20px 20px;
+  right: 7px;
+  top: 10px;
+}
+
+.ui-select-datalist {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 39px;
+  display: none;
+  max-height: 304px;
+  padding: 0;
+  border: 1px solid #00a5e0;
+  background-color: #fff;
+  overflow: auto;
+}
+
+.active > .ui-select-datalist {
+  display: block;
+}
+
+.reverse > .ui-select-datalist {
+  top: auto;
+  bottom: 39px;
+}
+
+.ui-select-datalist-li {
+  display: block;
+  line-height: 20px;
+  padding: 9px 12px;
+  background-color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-transition: background-color 0.15s;
+  transition: background-color 0.15s;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ui-select-datalist-li:empty {
+  display: none;
+}
+
+.ui-select-datalist-li:hover {
+  background-color: #f2fcff;
+}
+
+.ui-select-datalist > .selected {
+  background-color: #e0f7ff;
+}
+
+/* 核心代码 */
+.monospaced {
+  width: 110px;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  text-align: left;
+}
+
+.border {
+  width: 120px;
+  height: 40px;
+  border: 10px solid #cd0000;
+  margin: 30px auto 10px;
+}
+/* 核心代码 */

@@ -1,0 +1,26 @@
+.container {
+  color: #232324;
+  font-weight: normal;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: #e3e3e3;
+}
+
+.barClassName {
+  font-size: 12px;
+  fill: #4a4a4f;
+  font-weight: normal;
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>animation-iteration-count 小数作用示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      button {
+        width: 120px;
+        height: 40px;
+      }
+
+      input {
+        padding: 10px;
+      }
+
+      /* 动画相关 */
+      input {
+        opacity: 0;
+        border: 1px solid darkgray;
+      }
+
+      .visible {
+        animation: fadeIn 0.25s both;
+      }
+
+      .visible:disabled {
+        animation: fadeIn 1s 0.25 both;
+      }
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p>
+        <button id="button">
+          输入框显示
+        </button>
+      </p>
+      <p>
+        <input value="可用" class="visible" />
+      </p>
+      <p>
+        <input value="禁用" disabled="" class="visible" />
+      </p>
+    </div>
+    <script>
+      button.onclick = function() {
+        [].slice.call(document.querySelectorAll('input')).forEach(function(input) {
+          input.classList.remove('visible');
+          input.offsetWidth;
+          input.classList.add('visible');
+        });
+      };
+    </script>
+  </body>
+</html>

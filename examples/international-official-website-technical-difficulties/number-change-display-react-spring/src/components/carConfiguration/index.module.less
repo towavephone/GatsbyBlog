@@ -1,0 +1,48 @@
+.configuration {
+  display: flex;
+  text-align: center;
+  justify-content: space-between;
+
+  .configurationItem {
+    .configurationTitle {
+      font-size: 32px;
+      color: #fff;
+      line-height: 38px;
+
+      .unit {
+        margin-left: 6px;
+      }
+
+      sup {
+        font-size: 16px;
+        line-height: 18px;
+        top: -18px;
+        right: -6px;
+      }
+    }
+
+    .configurationHint {
+      margin-top: 4px;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 18px;
+    }
+  }
+
+  .divider {
+    flex: 1;
+    position: relative;
+
+    &::after {
+      content: '';
+      background-color: rgba(255, 255, 255, 0.12);
+      width: 1px;
+      height: 100%;
+      bottom: 0;
+      right: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      position: absolute;
+    }
+  }
+}

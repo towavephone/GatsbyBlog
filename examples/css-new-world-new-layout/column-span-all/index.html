@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>column-span: all 效果示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo code {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      h4 {
+        max-width: 320px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .container {
+        margin: 1em auto;
+        text-align: left;
+      }
+
+      .container {
+        width: 320px;
+        border: solid deepskyblue;
+        padding: 10px;
+        column-count: 3;
+      }
+
+      .container p {
+        background: deepskyblue;
+      }
+
+      .span-all {
+        column-span: all;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <h4>默认</h4>
+      <div class="container">
+        <p>第1段</p>
+        <p>第2段</p>
+        <p>第3段</p>
+        <p>第4段</p>
+        <p>第5段</p>
+      </div>
+      <h4>第4段设置了column-span:all</h4>
+      <div class="container">
+        <p>第1段</p>
+        <p>第2段</p>
+        <p>第3段</p>
+        <p class="span-all">第4段</p>
+        <p>第5段</p>
+      </div>
+    </div>
+  </body>
+</html>

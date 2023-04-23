@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渐变与对角线效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo img {
+        width: 300px;
+        height: 150px;
+        width: min(300px, 15vw);
+      }
+
+      img:not([src]) {
+        background-color: #eee;
+        background-image: linear-gradient(
+            to right bottom,
+            transparent calc(50% - 1px),
+            #ccc calc(50% - 1px),
+            #ccc,
+            transparent calc(50% + 1px)
+          ),
+          linear-gradient(
+            to top right,
+            transparent calc(50% - 1px),
+            #ccc calc(50% - 1px),
+            #ccc,
+            transparent calc(50% + 1px)
+          );
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <img />
+    </div>
+  </body>
+</html>

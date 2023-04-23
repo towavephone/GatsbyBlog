@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+      }
+
+      h4 {
+        text-align: left;
+      }
+
+      .border-gradient {
+        padding: 30px;
+        border-style: solid;
+        border-image: linear-gradient(deepskyblue, deeppink) 20 / 10px;
+      }
+
+      .father {
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .clip-path {
+        -webkit-clip-path: inset(0 round 10px);
+        clip-path: inset(0 round 10px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>1. 父元素圆角</h4>
+      <div class="father">
+        <div class="border-gradient">圆角渐变边框</div>
+      </div>
+
+      <h4>2. clip-path 剪裁</h4>
+      <div class="border-gradient clip-path">圆角渐变边框</div>
+    </div>
+  </body>
+</html>

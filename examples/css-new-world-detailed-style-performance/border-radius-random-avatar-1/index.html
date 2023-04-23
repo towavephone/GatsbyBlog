@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>“蝉原则”下的随机圆角效果实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .constr {
+        width: 920px;
+        margin: 2em auto;
+        text-align: center;
+      }
+
+      .list {
+        margin: 10px;
+        display: inline-block;
+        width: 168px;
+        height: 168px;
+        border: 4px solid #00c7e9;
+        border-radius: 87% 91% 98% 100%;
+        -webkit-transition: all 0.35s;
+        transition: all 0.35s;
+        overflow: hidden;
+      }
+
+      .list img {
+        min-height: 100%;
+        width: -webkit-calc(50% + 50%);
+        height: -webkit-calc(50% + 50%);
+        object-fit: cover;
+      }
+
+      .list:hover {
+        border-radius: 95% 70% 100% 80%;
+        -webkit-transform: rotate(-2deg);
+        -ms-transform: rotate(-2deg);
+        transform: rotate(-2deg);
+      }
+
+      .list:nth-child(2n + 1) {
+        border-radius: 59% 52% 56% 59%;
+        -webkit-transform: rotate(-6deg);
+        -ms-transform: rotate(-6deg);
+        transform: rotate(-6deg);
+      }
+
+      .list:nth-child(2n + 1):hover {
+        border-radius: 51% 67% 56% 64%;
+        -webkit-transform: rotate(-4deg);
+        -ms-transform: rotate(-4deg);
+        transform: rotate(-4deg);
+      }
+
+      .list:nth-child(3n + 2) {
+        border-radius: 84% 94% 83% 72%;
+        -webkit-transform: rotate(5deg);
+        -ms-transform: rotate(5deg);
+        transform: rotate(5deg);
+      }
+
+      .list:nth-child(3n + 2):hover {
+        border-radius: 69% 64% 53% 70%;
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+
+      .list:nth-child(5n + 3) {
+        border-radius: 73% 100% 82% 100%;
+        -webkit-transform: rotate(7deg);
+        -ms-transform: rotate(7deg);
+        transform: rotate(7deg);
+      }
+
+      .list:nth-child(5n + 3):hover {
+        border-radius: 73% 70% 82% 80%;
+        -webkit-transform: rotate(7deg);
+        -ms-transform: rotate(7deg);
+        transform: rotate(7deg);
+      }
+
+      .list:nth-child(7n + 5) {
+        border-radius: 93% 90% 85% 78%;
+        -webkit-transform: rotate(-2deg);
+        -ms-transform: rotate(-2deg);
+        transform: rotate(-2deg);
+      }
+
+      .list:nth-child(7n + 5):hover {
+        border-radius: 53% 70% 85% 68%;
+        -webkit-transform: rotate(-2deg);
+        -ms-transform: rotate(-2deg);
+        transform: rotate(-2deg);
+      }
+
+      .list:nth-child(11n + 7) {
+        border-radius: 68% 68% 83% 53%;
+        -webkit-transform: rotate(-2deg);
+        -ms-transform: rotate(-2deg);
+        transform: rotate(-2deg);
+      }
+
+      .list:nth-child(11n + 7):hover {
+        border-radius: 58% 98% 78% 83%;
+        -webkit-transform: rotate(3deg);
+        -ms-transform: rotate(3deg);
+        transform: rotate(3deg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="constr">
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm1.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm2.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm3.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm4.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm3.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm4.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm2.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm1.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm4.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm2.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm1.jpg" /></div>
+        <div class="list"><img src="/GATSBY_PUBLIC_DIR/images/mm3.jpg" /></div>
+      </div>
+    </div>
+  </body>
+</html>

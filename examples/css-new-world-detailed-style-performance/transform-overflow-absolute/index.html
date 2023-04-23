@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transform 与绝对定位元素的 overflow 隐藏实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        text-align: left;
+        margin: auto;
+      }
+
+      h4:first-child {
+        margin-top: 0;
+      }
+
+      p {
+        border: solid deepskyblue;
+        width: 150px;
+        height: 150px;
+        overflow: hidden;
+      }
+
+      p > img {
+        width: 200px;
+        height: 150px;
+        position: absolute;
+      }
+
+      .transform {
+        transform: scale(1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>默认，图片不会被溢出隐藏</h4>
+      <p>
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+      </p>
+
+      <h4>容器设置 transform: scale(1)</h4>
+      <p class="transform">
+        <img src="/GATSBY_PUBLIC_DIR/images/1.jpg" />
+      </p>
+    </div>
+  </body>
+</html>

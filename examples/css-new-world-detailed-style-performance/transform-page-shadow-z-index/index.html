@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transform 与纸张效果阴影层级控制实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo h4 {
+        width: 300px;
+      }
+
+      h4 {
+        margin: auto;
+        text-align: left;
+      }
+
+      h4:first-child {
+        margin-top: 0;
+      }
+
+      .container {
+        padding: 40px 0;
+        background-color: #666;
+      }
+
+      .page {
+        width: 300px;
+        height: 200px;
+        margin: 0 auto;
+        padding: 1em 0 2em;
+        background-color: #f4f39e;
+        box-shadow: 0 2px 10px 1px rgba(0, 0, 0, 0.2);
+        text-shadow: 0 1px 0 #f6ef97;
+        border-bottom-right-radius: 50% 10px;
+        position: relative;
+      }
+
+      .page::before {
+        transform: skew(-15deg) rotate(-5deg);
+        left: 15px;
+        bottom: 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .page::after {
+        transform: skew(15deg) rotate(8deg);
+        right: 15px;
+        bottom: 25px;
+        box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.4);
+      }
+
+      .page:before,
+      .page:after {
+        content: '';
+        width: 90%;
+        height: 30%;
+        position: absolute;
+        z-index: -1;
+      }
+
+      .transform {
+        transform: scale(1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>默认（纸张底角阴影不可见）</h4>
+      <div class="container">
+        <div class="page"></div>
+      </div>
+
+      <h4>容器设置 transform: scale(1)</h4>
+      <div class="container transform">
+        <div class="page"></div>
+      </div>
+    </div>
+  </body>
+</html>

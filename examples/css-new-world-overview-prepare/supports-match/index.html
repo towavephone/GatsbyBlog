@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .supports-match {
+        padding: 5px;
+        border: 1px solid;
+      }
+
+      @supports (display: flex) and (not (display: grid)) {
+        .supports-match {
+          background-color: #333;
+          color: #fff;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <span class="supports-match">如果有背景色，则是匹配</span>
+      <p class="remind" style="margin-top: 50px;">// Edge12-Edge15 匹配</p>
+    </div>
+  </body>
+</html>

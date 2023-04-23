@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .background-pattern {
+        width: 480px;
+        height: 200px;
+        max-width: 100%;
+        margin: auto;
+        background: floralwhite url(/GATSBY_PUBLIC_DIR/images/pattern.png) 10px 10px;
+        background: repeating-linear-gradient(
+            floralwhite,
+            floralwhite 10px,
+            lightcoral 10px,
+            lightcoral 15px,
+            floralwhite 15px,
+            floralwhite 20px,
+            lightcoral 15px,
+            lightcoral 40px,
+            floralwhite 40px,
+            floralwhite 45px,
+            lightcoral 45px,
+            lightcoral 50px,
+            floralwhite 50px,
+            floralwhite 80px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            floralwhite,
+            floralwhite 10px,
+            lightcoral 10px,
+            lightcoral 15px,
+            floralwhite 15px,
+            floralwhite 20px,
+            lightcoral 15px,
+            lightcoral 40px,
+            floralwhite 40px,
+            floralwhite 45px,
+            lightcoral 45px,
+            lightcoral 50px,
+            floralwhite 50px,
+            floralwhite 80px
+          ),
+          #00000000;
+        background-blend-mode: multiply;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="background-pattern"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      nav {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+      }
+
+      nav h3 {
+        display: table-cell;
+        outline: 1px solid #fff;
+        background-color: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        text-align: center;
+        padding: 10px;
+      }
+
+      .stretch {
+        width: 2em;
+        width: min-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <nav>
+        <h3>导航 A</h3>
+        <h3>导航 B</h3>
+        <h3>导航 C</h3>
+      </nav>
+      <p class="stretch">
+        我是一段文字，我没什么用，就是用来撑开高度用的，这样页面就会出现滚动条，就可以测试上面黑色的导航元素是否有粘性效果了。
+      </p>
+    </div>
+  </body>
+</html>

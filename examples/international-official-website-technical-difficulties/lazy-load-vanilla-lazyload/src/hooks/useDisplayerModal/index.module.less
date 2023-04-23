@@ -1,0 +1,51 @@
+@media screen and (min-width: 961px) {
+  .modal {
+    top: 0 !important;
+    min-width: 100vw;
+    height: 100vh;
+    padding-bottom: 0 !important;
+
+    :global {
+      .ant-modal-content {
+        height: 100%;
+
+        .ant-modal-body {
+          height: 100%;
+          padding: 0;
+        }
+      }
+    }
+  }
+
+  .wrapClassName {
+    overflow: hidden !important;
+  }
+}
+
+@media screen and (max-width: 960px) {
+  .modal {
+    top: 0 !important;
+    min-width: 100vw;
+    height: 100%;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+
+    :global {
+      .ant-modal-content {
+        height: 100%;
+
+        .ant-modal-body {
+          height: 100%;
+          overflow: auto;
+          padding: 0;
+        }
+      }
+    }
+  }
+
+  .wrapClassName {
+    overflow: hidden !important;
+    // 这里不能设置为 100vh，因为移动端浏览器是经过特殊处理的
+    // height: 100vh;
+  }
+}

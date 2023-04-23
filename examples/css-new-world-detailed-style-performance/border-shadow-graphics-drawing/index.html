@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>多阴影特性与图形绘制 » CSS新世界demo演示</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo {
+        width: 300px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .multi-border,
+      .gradient-border {
+        margin: 30px 16px 40px;
+        border-radius: 10px;
+      }
+
+      .multi-border {
+        height: 100px;
+        background-color: deepskyblue;
+        box-shadow: 0 0 0 4px #fff, 0 0 0 8px deeppink, 0 0 0 12px yellow, 0 0 0 16px purple;
+      }
+
+      .gradient-border {
+        height: 100px;
+        background-color: deepskyblue;
+        box-shadow: 0 0 0 1px #07b9fb, 0 0 0 2px #17aef4, 0 0 0 3px #27a4ee, 0 0 0 4px #3799e7, 0 0 0 5px #478ee0,
+          0 0 0 6px #5784d9, 0 0 0 7px #6779d3, 0 0 0 8px #776ecc, 0 0 0 9px #8764c5, 0 0 0 10px #9759be,
+          0 0 0 11px #a74eb8, 0 0 0 12px #b744b1, 0 0 0 13px #c739aa, 0 0 0 14px #d72ea3, 0 0 0 15px #e7249d,
+          0 0 0 16px #f71996;
+      }
+
+      .loading {
+        width: 40px;
+        height: 40px;
+        margin: auto;
+        position: relative;
+      }
+
+      .loading::before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        border-radius: 100%;
+        color: rgba(0, 0, 0, 0.4);
+        box-shadow: 0 -10px rgba(0, 0, 0, 0.9), /* top */ 10px 0px, /* right */ 0 10px,
+          /* bottom */ -10px 0 rgba(0, 0, 0, 0.7), /* left */ -7px -7px rgba(0, 0, 0, 0.8),
+          /* left-top */ 7px -7px rgba(0, 0, 0, 1), /* right-top */ 7px 7px, /* right-bottom */ -7px 7px; /* left-bottom */
+        animation: spin 1s steps(8) infinite;
+        /* center */
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .cloud-x {
+        height: 150px;
+        background-color: deepskyblue;
+        overflow: hidden;
+      }
+
+      .cloud {
+        width: 60px;
+        height: 50px;
+        margin: 60px 0 0 70px;
+        color: white;
+        background-color: currentColor;
+        border-radius: 50%;
+        box-shadow: 100px 0px 0 -10px, 40px 0px, 70px 15px, 30px 20px 0 -10px, 70px -15px, 30px -30px;
+      }
+
+      .shadow-3d button {
+        width: 100px;
+        height: 36px;
+        border: 1px solid #a0b3d6;
+        background-color: #f0f3f9;
+        color: #333;
+        overflow: visible;
+        cursor: pointer;
+        box-shadow: 1px 1px #afc4ea, 2px 2px #afc4ea, 3px 3px #afc4ea;
+        outline: 0;
+      }
+
+      .shadow-3d button:active {
+        transform: translate(1px, 1px);
+        box-shadow: 1px 1px #afc4ea, 2px 2px #afc4ea;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4>多边框，渐变边框</h4>
+      <div class="multi-border"></div>
+      <div class="gradient-border"></div>
+
+      <h4>Loading</h4>
+      <div class="loading"></div>
+
+      <h4>云朵</h4>
+      <div class="cloud-x">
+        <div class="cloud"></div>
+      </div>
+
+      <h4>立体投影</h4>
+      <div class="shadow-3d">
+        <button>按钮</button>
+      </div>
+    </div>
+  </body>
+</html>

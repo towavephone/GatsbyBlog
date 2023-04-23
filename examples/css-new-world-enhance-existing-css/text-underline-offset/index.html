@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>text-underline-offset 属性实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .demo p {
+        text-decoration: underline;
+        font-size: 1.5rem;
+      }
+
+      .offset {
+        text-underline-offset: 1em;
+      }
+
+      .demo h4 {
+        width: 18rem;
+        white-space: nowrap;
+        margin: auto;
+        margin-bottom: -1em;
+        text-align: left;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <h4 class="fill">默认</h4>
+      <p>看看下划线的位置在哪里？</p>
+
+      <h4 class="fill">text-underline-offset:1em</h4>
+      <p class="offset">看看下划线的位置在哪里？</p>
+    </div>
+  </body>
+</html>

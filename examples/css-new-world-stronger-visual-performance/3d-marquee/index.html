@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D transform 变换实现的跑马灯效果</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      body {
+        width: auto;
+      }
+
+      .stage {
+        perspective: 800px;
+        padding: 50px 0;
+      }
+
+      .container {
+        width: 128px;
+        height: 90px;
+        margin: auto;
+        transform: rotateY(0deg);
+        transform-style: preserve-3d;
+        transition: transform 1s;
+      }
+
+      .piece {
+        width: inherit;
+        height: inherit;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        transform: rotateY(calc(var(--index) * 40deg)) translateZ(195.839px);
+        /* Chrome bug fix 需要 */
+        box-shadow: 0 0 transparent;
+      }
+
+      @media screen and (max-width: 480px) {
+        .container {
+          zoom: 0.875;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="stage">
+        <div id="container" class="container" style="transform: rotateY(880deg);">
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-1.jpg" style="--index:0;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-2.jpg" style="--index:1;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-3.jpg" style="--index:2;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-4.jpg" style="--index:3;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-5.jpg" style="--index:4;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-6.jpg" style="--index:5;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-7.jpg" style="--index:6;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-8.jpg" style="--index:7;" />
+          <img class="piece" src="/GATSBY_PUBLIC_DIR/images/nature-9.jpg" style="--index:8;" />
+        </div>
+      </div>
+      <p class="remind">// 点击任意图片浏览</p>
+    </div>
+    <script>
+      container.onclick = function() {
+        var index = (this.index || 0) + 1;
+        this.style.transform = 'rotateY(' + index * 40 + 'deg)';
+        this.index = index;
+      };
+    </script>
+  </body>
+</html>

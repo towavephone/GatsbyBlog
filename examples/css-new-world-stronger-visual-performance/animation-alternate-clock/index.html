@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>alternate 关键字与钟摆运动示意实例页面</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      .clock-pendulum {
+        width: 20px;
+        height: 100px;
+        background: radial-gradient(10px at left 50% bottom 10px, deepskyblue 100%, transparent 0) no-repeat center,
+          radial-gradient(4px at 50% 4px, deepskyblue 100%, transparent 0) no-repeat center,
+          linear-gradient(to right, currentColor, currentColor) no-repeat center;
+        background-size: 100%, 100%, 2px 100%;
+        margin: auto;
+      }
+
+      /* 动画相关 */
+      .clock-pendulum {
+        transform-origin: center 4px;
+        animation: pendulum 1s infinite alternate ease-in-out;
+      }
+
+      @keyframes pendulum {
+        0% {
+          transform: rotate(-10deg);
+        }
+
+        100% {
+          transform: rotate(10deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="demo">
+      <div class="clock-pendulum"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="./resources/webgl-tutorials.css" rel="stylesheet" />
+  <link href="./index.css" rel="stylesheet" />
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="uiContainer">
+    <div id="ui">
+      <div id="x"></div>
+      <div id="y"></div>
+      <div id="angle"></div>
+      <div id="scaleX"></div>
+      <div id="scaleY"></div>
+    </div>
+  </div>
+  <!-- vertex shader -->
+  <script id="vertex-shader-2d" type="x-shader/x-vertex">
+    attribute vec2 a_position;
+
+    uniform mat3 u_matrix;
+
+    varying vec4 v_color;
+
+    void main() {
+      // Multiply the position by the matrix.
+      gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
+
+      // Convert from clipspace to colorspace.
+      // Clipspace goes -1.0 to +1.0
+      // Colorspace goes from 0.0 to 1.0
+      v_color = gl_Position * 0.5 + 0.5;
+    }
+  </script>
+  <!-- fragment shader -->
+  <script id="fragment-shader-2d" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec4 v_color;
+
+    void main() {
+      gl_FragColor = v_color;
+    }
+  </script>
+  <!--
+  for most samples webgl-utils only provides shader compiling/linking and
+  canvas resizing because why clutter the examples with code that's the same in every sample.
+  See https://webglfundamentals.org/webgl/lessons/webgl-boilerplate.html
+  and https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
+  for webgl-utils, m3, m4, and webgl-lessons-ui.
+  -->
+  <script src="./resources/webgl-utils.js"></script>
+  <script src="./resources/webgl-lessons-ui.js"></script>
+  <script src="./resources/m3.js"></script>
+  <script src="./index.js"></script>
+
+</body>
+
+</html>

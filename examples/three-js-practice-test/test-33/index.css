@@ -1,0 +1,14 @@
+.spread {
+  display: flex;
+  font-size: x-small;
+  text-align: center;
+}
+
+canvas {
+  margin: 5px;
+  background: pink;
+}
+
+#c3:focus {
+  outline: none;
+}

@@ -1,0 +1,35 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  color: white;
+}
+
+#c {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#ui {
+  position: absolute;
+  left: 1em;
+  top: 1em;
+}
+
+#ui > div {
+  font-size: 20pt;
+  padding: 1em;
+  display: inline-block;
+}
+
+#ui > div.selected {
+  color: red;
+}
+
+@media (max-width: 700px) {
+  #ui > div {
+    display: block;
+    padding: 0.25em;
+  }
+}
