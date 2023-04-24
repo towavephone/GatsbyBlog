@@ -62,8 +62,8 @@ jobs:
       run: yarn install --pure-lockfile && yarn build
     # 构建部署代码
     - name: Build and Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@releases/v2
-      env:
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BRANCH: gh-pages
         FOLDER: public
