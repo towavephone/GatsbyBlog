@@ -304,11 +304,10 @@ draft: true
    print('result', result)
    ```
 
-8. umi 新架构配置，docker 缓存之路
+8. umi 新架构配置
 9. https://www.cyberciti.biz/faq/vim-vi-text-editor-save-file-without-root-permission/ vim 保存文件在 root 下
-10. docker 构建过程优化：buildkit、忽略文件夹
-11. 解压 zip 文件中文乱码，需要使用这个命令 `unzip -O CP936 ./tmp.zip`
-12. policy 聚合 mongodb 写法
-13. python 时间转换过滤
-14. 汇总 sql 优化过程
-15. 深入浅出：如何正确使用 protobuf https://zhuanlan.zhihu.com/p/406832315
+10. 解压 zip 文件中文乱码，需要使用这个命令 `unzip -O CP936 ./tmp.zip`
+11. policy 聚合 mongodb 写法
+12. python 时间转换过滤
+13. 汇总 sql 优化过程
+14. 深入浅出：如何正确使用 protobuf https://zhuanlan.zhihu.com/p/406832315

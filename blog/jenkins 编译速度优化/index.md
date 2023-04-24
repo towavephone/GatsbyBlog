@@ -959,9 +959,10 @@ pipeline {
 
 ## 版本四
 
-1. 生成时间戳优化，因为现有的时间戳是精确到秒的，还是有产生冲突的概率，改成毫秒（更好的方式是生成唯一性的 id）
+1. 生成时间戳优化：因为现有的时间戳是精确到秒的，还是有产生冲突的概率，改成毫秒（更好的方式是生成唯一性的 id）
+2. 修复增量缓存同步策略：由于增量缓存（对远程端的文件不做删除）的问题，比如在同一目录下有 test.js，`test/index.js` 文件，此时引入代码为 `import './test'`，由于 webpack 有类似 [nodejs 路径解析优先级](https://juejin.cn/post/7221551421833314360) 的问题，此时实际引入的代码为 test.js，但实际上是想用 `test/index.js` 文件，需要修改 rsync 的同步策略
 
-```groovy{25-26}
+```groovy{25-26,172}
 gitlab_repo = "${params.gitlab_repo}"
 def split = gitlab_repo.split("/")
 def repo_name = split[1]
@@ -1133,7 +1134,7 @@ pipeline {
                 cd /data/xmotors_ai_shared/sre/sre-workspace/workspace/项目名称
                 # pwd
                 # 这里的 -c 选项比较重要，比较校验和
-                rsync -Lrzvc -R ${work_dir}/前端目录名称/ jenkins@${build_node_ip}:/home/jenkins/workspace/apps/项目名称/
+                rsync -Lrzvc --delete -R ${work_dir}/前端目录名称/ jenkins@${build_node_ip}:/home/jenkins/workspace/apps/项目名称/
                 if [ \$? -ne 0 ]
                 then
                     echo "Found some error when copy the repo"

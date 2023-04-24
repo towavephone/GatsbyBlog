@@ -11,20 +11,13 @@ path: /cra-project-build-speed-optimize/
 
 由于公司老项目采用 cra 来构建前端项目，在 jenkins 上的平均打包时长在 10 分钟以上，需要优化线上的打包时间，同时优化本地的开发体验
 
-# 核心功能
+# 一期优化
 
-1. cra 配置优化（webpack 配置优化）
-2. Dockerfile 配置缓存优化
-3. npm 切换到 pnpm
-4. npm install 校验命令
-5. 针对线上使用的 `hard-source-webpack-plugin` 硬缓存插件报错的修复过程
-6. preload-webpack-plugin 失效处理
-7. 分包失效问题
-8. 修复 fastRefresh 在 worker 报错
+主要针对 cra + webpack3/4 进行的优化
 
-# 具体功能
+## 具体功能
 
-## cra 配置优化
+### cra 配置优化
 
 核心：thread-loader 加快首次编译速度，hard-source-webpack-plugin 加快二次编译速度
 
@@ -308,17 +301,17 @@ module.exports = {
 };
 ```
 
-## Dockerfile 配置缓存优化
+### Dockerfile 配置缓存优化
 
-### 需求背景
+#### 需求背景
 
 为了充分利用缓存，采用 docker 的缓存策略
 
-### 背景知识
+#### 背景知识
 
 [Docker 入门学习](/docker-introduce-learning/)
 
-### 第一版
+#### 第一版
 
 这里的主要问题在于一旦改了源码需要编译的时候，缓存失效了
 
@@ -351,7 +344,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
 ```
 
-### 第二版
+#### 第二版
 
 由于第一版的问题，所以需要想办法在 build 过程中也要尽可能的使用缓存
 
@@ -428,7 +421,7 @@ EXPOSE 3000
 !nginx.conf
 ```
 
-### 调用
+#### 调用
 
 1. `BUILDKIT_CACHE_MOUNT_NS` 就类似于缓存版本的概念
 2. 可以传入 `--no-cache` 来控制不使用缓存，默认使用（这里的 docker 18 版本的 `--no-cache` 不对 `type=cache` 生效，20 版本的反而生效）
@@ -447,32 +440,32 @@ package.json
 }
 ```
 
-## npm 切换到 pnpm
+### npm 切换到 pnpm
 
-### 需求背景
+#### 需求背景
 
 在公司的 jenkins 平台上打包时发现 npm install 的过程特别慢，主要是老项目的依赖库太多，故考虑转向安装速度更快的 pnpm
 
-### 实现方式
+#### 实现方式
 
 1. 因为老项目里面已有 package-lock.json，所以通过 `pnpm import` 可以实现一键迁移，当然有些三方库使用错误导致白屏，这些库需要特殊处理
 2. 配合上面的 dockerfile 可实现深度缓存
 3. 由于上面提到的是否使用缓存一部分是由 package.json 里面的 dependencies 决定，所以需要规范 dependencies 的用法
 
-## npm install 校验命令
+### npm install 校验命令
 
-### 需求背景
+#### 需求背景
 
 为了统一库的安装工具，防止团队成员使用别的库安装工具
 
-### 实现方式
+#### 实现方式
 
 1. 通过 volta 限制只能使用 pnpm（截止 2022-11-21 11:21:42 [不支持 pnpm](https://github.com/volta-cli/volta/issues/737)）
 2. 手动写 hook 脚本
 
 最终 2 种方式都采用
 
-### volta
+#### volta
 
 安装过程见 [volta](/frontend-devlopment-environment-setting/#volta)
 
@@ -487,7 +480,7 @@ package.json
 }
 ```
 
-### hook 脚本
+#### hook 脚本
 
 scripts/node-check-version.js
 
@@ -560,16 +553,16 @@ package.json
 
 以上就可以限制只能通过 pnpm 来进行 install（以上脚本还限制了版本）
 
-## hard-source-webpack-plugin 的线上修复
+### hard-source-webpack-plugin 的线上修复
 
-### 需求背景
+#### 需求背景
 
 在使用了 hard-source-webpack-plugin 作缓存加速时，有以下比较明显的问题
 
 1. 二次编译有时不能正常停止
 2. 二次编译会出现各种编译报错，清空缓存后重新编译却正常
 
-### 实现方式
+#### 实现方式
 
 针对以上问题，有以下解决方式
 
@@ -687,21 +680,21 @@ class FixHardSourceWebpackPlugin {
 module.exports = FixHardSourceWebpackPlugin;
 ```
 
-### 后续问题
+#### 后续问题
 
 在代码变动之后，如果通过缓存生成，查看编译后的代码还是之前的老代码，需要暂时关闭缓存待以后解决
 
-## preload-webpack-plugin 失效处理
+### preload-webpack-plugin 失效处理
 
-### 需求背景
+#### 需求背景
 
 此插件在 pnpm 下不生效，在 npm 下反而生效
 
-### 原因
+#### 原因
 
 require 指向的 html-webpack-plugin 不是同一个，导致 hook 不能被调用，具体见 [issue](https://github.com/jantimon/html-webpack-plugin/issues/1091#issuecomment-434708455)
 
-### 解决方案
+#### 解决方案
 
 升级到 3.0.0-beta.4 即可，对比可知源码做了以上处理
 
@@ -726,9 +719,9 @@ if (!hook) {
 }
 ```
 
-## 分包失效问题
+### 分包失效问题
 
-### 需求背景
+#### 需求背景
 
 发现分包结果和原来的不一致，比原来大很多，比如看下面的三方库
 
@@ -740,11 +733,11 @@ if (!hook) {
 
 ![](res/2023-02-10-11-52-53.png)
 
-### 原因
+#### 原因
 
 经分析 treeShaking 失效，说明 main 没有识别到 es6 的语法
 
-### 解决方案
+#### 解决方案
 
 需要注释掉 mainFields 这一行，默认 cra 已做了 es6 语法的处理
 
@@ -752,19 +745,19 @@ if (!hook) {
 // localConfig.resolve.mainFields = ['jsnext:main', 'main'];
 ```
 
-## 修复 fastRefresh 在 worker 报错
+### 修复 fastRefresh 在 worker 报错
 
-### 需求背景
+#### 需求背景
 
 如果一个文件导出函数时被前端代码和 worker 同时使用时报错
 
 ![](res/2023-02-10-11-58-09.png)
 
-### 原因
+#### 原因
 
 在 development 模式下，如果一个文件里面的 function 同时被 worker 和前端文件使用（即被前端的 `babel-loader/react-refresh` 处理过，此时就有了 fastRefresh 的插件代码），而 fastRefresh 里面没有针对 worker 运行环境的处理，此时会报错
 
-### 方案
+#### 方案
 
 需要对 `$RefreshReg$` 做兼容处理，即确保只在开发环境的 worker 添加以下代码（注意这里的代码必须写成单独的文件并使用 import 放在 worker 的第一行，否则会因为执行时机的问题不起作用）
 
@@ -778,13 +771,13 @@ global.$RefreshSig$ = () => {};
    1. 找现成的插入代码的 loader
    2. 自己写 loader
 
-## 懒编译
+### 懒编译
 
-### 需求背景
+#### 需求背景
 
 目前老项目在开发模式下全量编译过慢，而有时只需要开发少数几个页面
 
-### 选型过程
+#### 选型过程
 
 因老项目使用的是 webpack4，历史代码太多不好升级，所以需要通过模仿 webpack5 的懒编译实现，有以下几个选型
 
@@ -795,7 +788,7 @@ global.$RefreshSig$ = () => {};
 5. [lazy-build-webpack-plugin](https://github.com/devtreehouse/lazy-build-webpack-plugin) 修复以上问题，但在老项目里面运行会出现循环依赖的报错
 6. [towavephone/lazy-build-webpack-plugin](https://github.com/towavephone/lazy-build-webpack-plugin) 修复循环依赖问题
 
-### 具体实现
+#### 具体实现
 
 config-overrides.js
 
@@ -824,18 +817,22 @@ if (module.hot) {
 }
 ```
 
-### 编译效果
+#### 编译效果
 
 1. 懒编译开启前，即全量编译．时长在 3 分钟左右
 2. 懒编译开启后，即单页面编译，随机挑选一个页面，时长在 20 秒左右
 
-### 源码解析
+#### 源码解析
 
-// TODO 懒编译插件源码解析
+[lazy-build-webpack-plugin](https://github.com/towavephone/lazy-build-webpack-plugin)
 
-# 效果展示
+### jenkins 编译速度优化
 
-## 生产环境
+[原文链接](/jenkins-build-speed-optimize/)
+
+## 效果展示
+
+### 生产环境
 
 只算前端编译过程，原来的正在用的前端编译时间 9 分钟
 
@@ -845,14 +842,30 @@ if (module.hot) {
 
 ![](res/2022-12-16-19-28-35.png)
 
-## 开发环境
+### 开发环境
 
 看自己电脑配置来定，目前本人电脑上前端初次编译 5 分钟，二次编译 2 分钟（不过不建议开启缓存插件，会影响热更新速度且时间长会报错，可通过上面提到的 `DISABLE_HARD_SOURCE_PLUGIN` 关闭）
 
-# 后期优化
+## 后期优化
 
 后期优化偏向页面加载性能方面，有以下几点可以考虑：
 
 1. 页面分包优化
 2. worker.js loader 优化
 3. 不必要的三方库优化
+
+# 二期优化
+
+## 具体功能
+
+### cra + webpack5
+
+### rspack
+
+### vite
+
+### dockerfile pnpm 缓存不生效
+
+## 效果展示
+
+## 后期优化
