@@ -856,16 +856,635 @@ if (module.hot) {
 
 # 二期优化
 
+主要升级 cra + webpack5 以及对其他编译工具的调研
+
 ## 具体功能
 
 ### cra + webpack5
 
+#### 环境变量
+
+.env
+
+```bash
+DISABLE_ESLINT_PLUGIN=true
+GENERATE_SOURCEMAP=false
+PORT=3000
+BROWSER=none
+
+# LAZY_BUILD=true
+# DISABLE_CACHE=true
+# DEBUG_CACHE=true
+```
+
+.env.production
+
+```bash
+DISABLE_ESLINT_PLUGIN=true
+GENERATE_SOURCEMAP=false
+
+# DISABLE_CACHE=true
+DEBUG_CACHE=true
+# BUNDLE_ANALYZER=true
+```
+
+#### 核心配置
+
+config-overrides.js
+
+```js
+const {
+   override,
+   addBabelPlugins,
+   fixBabelImports,
+   addLessLoader,
+   removeModuleScopePlugin,
+   setWebpackOptimizationSplitChunks,
+   addWebpackPlugin,
+   addWebpackAlias,
+   adjustStyleLoaders
+} = require('customize-cra');
+const fs = require('fs');
+const webpack = require('webpack');
+const PreloadWebpackPlugin = require('preload-webpack-plugin');
+const path = require('path');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const WebpackBarPlugin = require('webpackbar');
+const { get, pick } = require('lodash');
+const threadLoader = require('thread-loader');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+const { LAZY_BUILD, DISABLE_CACHE, DEBUG_CACHE, BUNDLE_ANALYZER } = process.env;
+
+threadLoader.warmup(
+   {
+      // pool options, like passed to loader options
+      // must match loader options to boot the correct pool
+   },
+   [
+      // modules to load
+      // can be any module, i. e.
+      'babel-loader'
+   ]
+);
+
+const craDir = path.join(process.cwd() + '/.cra');
+
+if (!fs.existsSync(craDir)) {
+   fs.mkdirSync(craDir);
+}
+
+const addBeforeLoaders = (webpackConfig, matchLoader, newLoader = []) => {
+   const matchLoaders = get(webpackConfig, 'module.rules.0.oneOf', []).filter((item) =>
+      get(item, 'loader', '').includes(matchLoader)
+   );
+   if (matchLoaders.length > 0) {
+      matchLoaders.forEach((item) => {
+         const props = ['loader', 'options'];
+         item.use = [...newLoader, pick(item, props)];
+         props.forEach((item2) => {
+            delete item[item2];
+         });
+      });
+   }
+};
+
+const formatConfig = (config) =>
+   JSON.stringify(
+      config,
+      (key, value) => {
+         if (typeof value === 'function') {
+            return value.toString();
+         }
+         return value;
+      },
+      2
+   );
+
+module.exports = {
+   webpack: (config, env) => {
+      const isProd = env === 'production';
+
+      const localConfig = override(
+         addBabelPlugins(
+            ['@babel/plugin-proposal-nullish-coalescing-operator'],
+            ['@babel/plugin-syntax-optional-chaining']
+         ),
+         fixBabelImports('import', {
+            libraryName: 'antd',
+            libraryDirectory: 'es',
+            style: true
+         }),
+         addLessLoader({
+            lessOptions: { javascriptEnabled: true }
+         }),
+         // 适配 cra 下 less-loader 的兼容性问题
+         adjustStyleLoaders(({ use: [, , postcss] }) => {
+            const postcssOptions = postcss.options;
+            postcss.options = { postcssOptions };
+         }),
+         addWebpackAlias({
+            '@': path.resolve(__dirname, 'src')
+         }),
+         removeModuleScopePlugin(),
+         isProd &&
+            setWebpackOptimizationSplitChunks({
+               cacheGroups: {
+                  vendors: {
+                     minChunks: 2,
+                     test: /[\\/]node_modules[\\/]\.pnpm[\\/](?!google-protobuf|@antv|highcharts|mathjs|two\.js|konva|victory-core)/,
+                     priority: -10,
+                     reuseExistingChunk: true,
+                     name: 'vendors'
+                  },
+                  default: {
+                     minChunks: 2,
+                     priority: -20,
+                     reuseExistingChunk: true
+                  }
+               }
+            }),
+         isProd &&
+            addWebpackPlugin(
+               new PreloadWebpackPlugin({
+                  rel: 'prefetch',
+                  as: 'script',
+                  fileBlacklist: [
+                     /\d{1,2}\.(\d?[a-z]?)+\.chunk\.js$/,
+                     /main\..+\.js$/,
+                     /\.css$/,
+                     /\.txt$/,
+                     /\.png$/,
+                     /.jpeg$/,
+                     /.cjs$/,
+                     /.svg$/,
+                     /.ttf$/
+                  ],
+                  include: 'allAssets'
+               })
+            ),
+         addWebpackPlugin(
+            new MonacoWebpackPlugin({
+               languages: ['json']
+            })
+         ),
+         addWebpackPlugin(
+            new webpack.DefinePlugin({
+               'process.env.BUILD_TOOL': "'webpack'"
+            })
+         ),
+         // 处理 buffer 缺失问题，因为 webpack5 现在默认不导入 nodejs 相关库，需要自行导入
+         addWebpackPlugin(
+            new webpack.ProvidePlugin({
+               Buffer: ['buffer', 'Buffer']
+            })
+         ),
+         BUNDLE_ANALYZER &&
+            addWebpackPlugin(
+               new BundleAnalyzerPlugin({
+                  analyzerPort: 8080,
+                  generateStatsFile: true
+               })
+            ),
+         addWebpackPlugin(new WebpackBarPlugin())
+      )(config);
+
+      addBeforeLoaders(localConfig, 'babel-loader', ['thread-loader']);
+
+      localConfig.resolve.extensions = ['.js'];
+      localConfig.resolve.modules = ['node_modules'];
+      // 兼容处理
+      localConfig.resolve.fallback = {
+         buffer: require.resolve('buffer')
+      };
+
+      // 懒编译功能，默认关闭
+      if (LAZY_BUILD) {
+         localConfig.experiments = {
+            lazyCompilation: {
+               // disable lazy compilation for dynamic imports
+               imports: true,
+
+               // disable lazy compilation for entries
+               entries: false
+
+               // do not lazily compile moduleB
+               // test: module => !/moduleB/.test(module.nameForCondition())
+            }
+         };
+      } // 开启缓存调试日志，默认关闭，配合环境变量使用
+
+      if (DEBUG_CACHE) {
+         localConfig.infrastructureLogging = {
+            debug: /webpack\.cache/
+         };
+      } // 是否关闭缓存，默认开启
+
+      if (DISABLE_CACHE) {
+         localConfig.cache = false;
+      }
+
+      if (!isProd) {
+         localConfig.stats = {
+            errors: true,
+            children: false,
+            warnings: false,
+            colors: true,
+            assets: false,
+            modules: false,
+            entrypoints: false,
+            timings: true,
+            builtAt: true,
+            hash: true
+         };
+      } else {
+         const instanceOfMiniCssExtractPlugin = localConfig.plugins.find(
+            (plugin) => plugin.constructor.name === 'MiniCssExtractPlugin'
+         );
+
+         // 忽略样式导入顺序报错
+         // https://github.com/facebook/create-react-app/issues/5372
+         if (instanceOfMiniCssExtractPlugin) {
+            instanceOfMiniCssExtractPlugin.options.ignoreOrder = true;
+         }
+      }
+
+      fs.writeFileSync(path.join(craDir, `webpack.${env}.json`), formatConfig(localConfig));
+
+      return localConfig;
+   },
+   devServer: (configFunction) => (proxy, allowedHost) => {
+      const config = configFunction(proxy, allowedHost);
+
+      config.allowedHosts = 'all';
+
+      fs.writeFileSync(path.join(craDir, 'webpack-dev-server.json'), formatConfig(config));
+
+      return config;
+   }
+};
+```
+
+package.json 只显示增加部分
+
+```json
+{
+   "dependencies": {
+      "html-webpack-plugin": "^5.5.0",
+      "less-loader": "^11.1.0",
+      "react-scripts": "npm:@towavephone/react-scripts@^5.0.3",
+      "webpack": "5.78.0",
+      "webpack-bundle-analyzer": "^4.7.0",
+      "webpack-dev-server": "4.13.2",
+      "buffer": "^6.0.3"
+   }
+}
+```
+
+#### worker-loader 的兼容处理
+
+去掉 worker-loader，使用 `new Worker(new URL('worker文件路径', import.meta.url))` 代替
+
+#### 修复 react-scripts 生产环境缓存
+
+[仓库地址](https://github.com/yicheny/create-react-app/compare/main...towavephone:create-react-app:main)
+
+生产环境下 cra 不能正常生成文件缓存，原因是没有调用 webpack5 的 `compiler.close`，同时需要注意 close 之后需要正常终止
+
+```js
+compiler.close((err) => {
+   if (err && err.message) {
+      console.log(err.message);
+      process.exit(1);
+   }
+
+   process.exit(0);
+});
+```
+
+#### 运行模板
+
+[仓库地址](https://github.com/towavephone/GatsbyBlog/tree/master/template/cra-js-template)
+
+#### 优缺点
+
+相比于一期优化的本地和生产模式编译时间都为 2~3 分钟，优缺点如下
+
+- 优点：二次编译速度快，开发模式在 18 秒左右，生产模式在 40 秒左右
+- 缺点：首次编译速度慢，需要 3~4 分钟
+
 ### rspack
+
+#### 核心配置
+
+rspack.config.js
+
+```js
+const path = require('path');
+// const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+// const NodePolyfill = require('@rspack/plugin-node-polyfill')
+
+module.exports = {
+   mode: 'development',
+   entry: {
+      main: './src/index.js'
+   },
+   builtins: {
+      html: [
+         {
+            template: './public/index.html'
+         }
+      ],
+      pluginImport: [
+         {
+            libraryName: 'antd',
+            libraryDirectory: 'es',
+            style: true
+         }
+      ],
+      define: {
+         // 'process.env.NODE_ENV': "'development'",
+         'import.meta.env': "'development'",
+         'import.meta.env.MODE': "'development'",
+         'process.env.NODE_DEBUG': false,
+         'process.env.BUILD_TOOL': "'rspack'"
+      }
+   },
+   module: {
+      rules: [
+         {
+            test: /\.js$/,
+            include: /src/,
+            type: 'jsx'
+         },
+         {
+            test: /(StreamDataWorker|MapDataWorker|FrameProcessWorker)\.js/,
+            // use: [
+            //   {
+            //     loader: 'worker-loader',
+            //     options: {
+            //       filename: '[name].[hash].worker.js'
+            //     }
+            //   }
+            // ]
+            type: 'asset/resource'
+         },
+         {
+            test: /\.less$/,
+            exclude: /node_modules/,
+            use: [
+               {
+                  loader: 'less-loader',
+                  options: {
+                     lessOptions: { javascriptEnabled: true }
+                  }
+               }
+            ],
+            type: 'css/module'
+         },
+         {
+            test: /\.less$/,
+            include: /node_modules/,
+            use: [
+               {
+                  loader: 'less-loader',
+                  options: {
+                     lessOptions: { javascriptEnabled: true }
+                  }
+               }
+            ],
+            type: 'css'
+         },
+         // {
+         //   test: /\.css$/,
+         //   type: 'css'
+         // },
+         {
+            test: /\.(png|svg|jpg|jpeg|ttf)$/,
+            type: 'asset'
+         }
+      ]
+   },
+   resolve: {
+      alias: {
+         '@': path.resolve(__dirname, './src'),
+         'antd/es/theme': false // 修复因 @ant-design/pro-components 导致的编译报错问题
+      },
+      extensions: ['.js'],
+      mainFields: ['main']
+   },
+   // plugins: [
+   //   new MonacoWebpackPlugin({
+   //     languages: ['json']
+   //   })
+   //   // new NodePolyfill()
+   // ],
+   devServer: {
+      port: 3000,
+      allowedHosts: 'all'
+   },
+   devtool: 'source-map',
+   snapshot: {
+      resolve: {
+         hash: true,
+         timestamp: false
+      },
+      module: {
+         hash: true,
+         timestamp: false
+      }
+   },
+   stats: {
+      preset: 'errors-only',
+      reasons: true,
+      hash: true,
+      builtAt: true,
+      timings: true
+   },
+   experiments: {
+      incrementalRebuild: true
+   }
+};
+```
+
+#### 运行模板
+
+[仓库地址](https://github.com/towavephone/GatsbyBlog/tree/master/template/rspack-js-template)
+
+#### 优缺点
+
+- 优点：首次编译，hmr 速度快
+- 缺点：目前只适用于开发环境，主要是还不支持 `worker-loader` 的用法
+
+由于以上原因，暂时只在开发模式下使用
 
 ### vite
 
+#### 核心配置
+
+1. index.html 下的 script 脚本需要改成 module 类型
+2. worker-loader 替换为 `import Worker from '文件路径?worker'`
+3. 所有使用 require 的地方替换为 import
+
+package.json
+
+```json
+{
+   "devDependencies": {
+      "@vitejs/plugin-react": "^3.1.0",
+      "vite": "^4.3.1",
+      "vite-plugin-imp": "^2.3.1"
+   }
+}
+```
+
+vite.config.js
+
+```js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import fs from 'fs/promises';
+import path from 'path';
+import vitePluginImp from 'vite-plugin-imp';
+
+export default defineConfig({
+   plugins: [react(), vitePluginImp()],
+   css: {
+      preprocessorOptions: {
+         less: {
+            javascriptEnabled: true
+         }
+      }
+   },
+   esbuild: {
+      loader: 'jsx',
+      include: /src\/.*\.js?$/,
+      exclude: []
+   },
+   resolve: {
+      alias: [
+         {
+            // 处理 @import '~antd/es/style/themes/default.less' 报错
+            find: /^~/,
+            replacement: ''
+         },
+         {
+            find: '@',
+            replacement: path.resolve(__dirname, './src')
+         }
+      ]
+   },
+   define: {
+      'import.meta.env': "'development'",
+      'process.env.NODE_DEBUG': false,
+      'module.hot': false
+   },
+   server: {
+      port: 3000
+   },
+   optimizeDeps: {
+      esbuildOptions: {
+         plugins: [
+            {
+               name: 'load-js-files-as-jsx',
+               // 把 js 文件当成 jsx 处理
+               setup(build) {
+                  build.onLoad({ filter: /src\/.*\.js$/ }, async (args) => ({
+                     loader: 'jsx',
+                     contents: await fs.readFile(args.path, 'utf8')
+                  }));
+               }
+            }
+         ]
+      }
+   }
+});
+```
+
+#### 优缺点
+
+- 优点：首次编译速度快
+- 缺点：此方案初次页面跳转编译速度较慢，而且编译问题较多，同时不太适合生产环境使用
+
+由于以上原因，不采用此方案
+
 ### dockerfile pnpm 缓存不生效
+
+#### 需求背景
+
+在 jenkins 下运行 docker，缓存不能被使用，因为是跨磁盘（home 目录与 root 目录不在一个磁盘上）的，即 pnpm 不支持硬连接操作，同时 pnpm@7.14.1 也没有对这种情况进行处理，详见 [资料](https://github.com/pnpm/pnpm/releases/tag/v7.14.2)
+
+#### 解决方案
+
+1. 升级到 pnpm@7 下的最新版本
+2. 设置缓存路径
+
+Dockerfile-client-buildkit
+
+```dockerfile{8,16,24}
+# syntax = docker/dockerfile:experimental
+
+FROM node:14-alpine as builder
+
+ARG registry=https://registry.npmmirror.com
+
+# 全局安装依赖，尽量写在一行防止加了新库之后还是使用原来的镜像
+RUN npm config set registry ${registry} -g && npm i -g pnpm@7.32.1
+
+WORKDIR /home/
+
+# 缓存 pnpm-lock.yaml
+COPY pnpm-lock.yaml ./
+
+# 下载依赖到全局位置
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store/v3,id=pnpm_cache \
+    pnpm fetch --prod
+
+# 复制剩余文件
+COPY . .
+
+# 安装依赖
+RUN --mount=type=cache,target=node_modules,id=frontend_node_modules,sharing=locked \
+    --mount=type=cache,target=/root/.local/share/pnpm/store/v3,id=pnpm_cache \
+    pnpm i --ignore-scripts=true --prod --offline --registry=$registry
+
+RUN --mount=type=cache,target=node_modules,id=frontend_node_modules,sharing=locked \
+    pnpm build
+
+FROM nginx:alpine
+
+RUN --mount=type=bind,target=/tmp/build,from=builder,source=/home/build \
+    cp -r /tmp/build/* /usr/share/nginx/html/
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 3000
+```
 
 ## 效果展示
 
+以下都是在二次缓存下的展示，首次编译性能并没有一期优化的性能好
+
+### 本地环境
+
+```bash
+Compiled successfully!
+
+You can now view sim_ui in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://ip:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+2023-04-25 16:54:30: webpack 5.78.0 compiled successfully in 18559 ms (c2255578550bc936f958)
+```
+
+### 生产环境
+
+![](res/2023-04-25-16-58-25.png)
+
 ## 后期优化
+
+待 rspack 生产环境可用且性能较好的时候考虑迁移
