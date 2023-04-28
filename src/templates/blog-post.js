@@ -67,6 +67,7 @@ export default class Template extends Component {
     events.on(window, 'scroll', this.handleSaveScrollTop);
     events.on(window, 'hashchange', this.handleHashChange);
     events.on(window, 'resize', () => this.dealWithCategory(this._handleScroll));
+    events.on(window, 'keydown', this.handleKeyDown);
     const hash = decodeURIComponent(window.location.hash);
     if (hash) this.props.scrollTo(hash);
     this.dealWithCategory(this._handleScroll);
@@ -81,8 +82,30 @@ export default class Template extends Component {
     events.off(window, 'scroll', this.handleSaveScrollTop);
     events.off(window, 'hashchange', this.handleHashChange);
     events.off(window, 'resize', () => this.dealWithCategory(this._handleScroll));
-
+    events.off(window, 'keydown', this.handleKeyDown);
     this.props.enableHideHeader(true);
+  }
+
+  handleKeyDown = (event) => {
+    const { code } = event
+    const { history, data } = this.props
+    const { prePost, nextPost } = data
+
+    const handlePreNext = (post) => {
+      if (!post) {
+        return
+      }
+
+      history.push(get(post, 'frontmatter.path'));
+    }
+
+    const funcMap = {
+      ArrowLeft: () => handlePreNext(prePost),
+      ArrowRight: () => handlePreNext(nextPost),
+      Backslash: this.handleToggleCollapse
+    }
+
+    funcMap[code] && funcMap[code]()
   }
 
   handleHashChange = () => {
