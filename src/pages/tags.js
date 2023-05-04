@@ -70,13 +70,6 @@ export const tagsPageQuery = graphql`
         siteUrl
       }
     }
-    file(relativePath: { eq: "avatar.png" }) {
-      childImageSharp {
-        sizes {
-          ...GatsbyImageSharpSizes_withWebp
-        }
-      }
-    }
     allMarkdownRemark(
       sort: { order: DESC, fields: [frontmatter___date] }
       limit: 1000

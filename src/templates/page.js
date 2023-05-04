@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import events from 'dom-helpers/events';
+import { get } from 'lodash';
 
 import Pagination from '../components/Pagination';
 import Posts from '../components/Posts';
 import Separator from '../components/Separator';
 import MetaTags from '../components/MetaTags';
+
+const MAX_POSTS = 5;
 
 export default class Pages extends Component {
   componentDidMount() {
@@ -17,9 +20,13 @@ export default class Pages extends Component {
   }
 
   handleKeyDown = (event) => {
-    const { code } = event
+    const { code, ctrlKey, shiftKey } = event
+    if (!ctrlKey || !shiftKey) {
+      return
+    }
+
     const { history, pathContext } = this.props
-    const { prevPath, nextPath } = pathContext
+    const { prevPath, nextPath, page, posts } = pathContext
 
     const handlePreNext = (path) => {
       if (!path) {
@@ -29,9 +36,32 @@ export default class Pages extends Component {
       history.push(path)
     }
 
+    const handlePre = (path) => {
+      if (page === 1) {
+        const pathname = get(history, 'location.pathname', '')
+
+        if (pathname.startsWith('/drafts/page')) {
+          history.push('/drafts')
+        } else {
+          history.push('/')
+        }
+
+        return
+      }
+
+      handlePreNext(path)
+    }
+
     const funcMap = {
-      ArrowLeft: () => handlePreNext(prevPath),
+      ArrowLeft: () => handlePre(prevPath),
       ArrowRight: () => handlePreNext(nextPath)
+    }
+
+    const jumpToPost = (index) => history.push(get(posts, `${index}.frontmatter.path`))
+
+    for (let i = 0; i < MAX_POSTS; i++) {
+      funcMap[`Digit${i + 1}`] = () => jumpToPost(i)
+      funcMap[`Numpad${i + 1}`] = () => jumpToPost(i)
     }
 
     funcMap[code] && funcMap[code]()

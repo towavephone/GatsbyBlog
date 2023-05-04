@@ -49,12 +49,5 @@ export const searchPageQuery = graphql`
         }
       }
     }
-    file(relativePath: { eq: "avatar.png" }) {
-      childImageSharp {
-        sizes {
-          ...GatsbyImageSharpSizes_withWebp
-        }
-      }
-    }
   }
 `;

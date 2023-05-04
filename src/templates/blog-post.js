@@ -87,7 +87,12 @@ export default class Template extends Component {
   }
 
   handleKeyDown = (event) => {
-    const { code } = event
+    const { code, ctrlKey, shiftKey } = event
+
+    if (!ctrlKey || !shiftKey) {
+      return
+    }
+
     const { history, data } = this.props
     const { prePost, nextPost } = data
 
@@ -306,9 +311,6 @@ export default class Template extends Component {
                 <div className='medium-6 small-12'>
                   <ul className='list-inline'>
                     <li>
-                      <GatsbyLink to='/' className='author-avatar' itemProp='name'>
-                        <Img sizes={data.file.childImageSharp.sizes} />
-                      </GatsbyLink>
                     </li>
                     <li>
                       <div className='author-name'>女王控</div>
@@ -468,13 +470,6 @@ Template.propTypes = {
 
 export const pageQuery = graphql`
   query BlogPostByPath($mainPostPath: String!, $nextPostPath: String!, $prePostPath: String!) {
-    file(relativePath: { eq: "avatar.png" }) {
-      childImageSharp {
-        sizes {
-          ...GatsbyImageSharpSizes_withWebp
-        }
-      }
-    }
     site {
       siteMetadata {
         title
