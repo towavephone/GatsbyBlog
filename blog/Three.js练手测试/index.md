@@ -1,6 +1,6 @@
 ---
 title: Three.js练手测试
-date: 2022-12-19 17:29:39
+date: 2023-05-15 18:53:49
 categories:
    - 前端
 tags: 前端, three.js, WebGL, 练手测试
@@ -276,5 +276,19 @@ canvas 获取键盘输入
 等距矩形贴图实现天空盒
 
 [test-41-2](embedded-codesandbox://three-js-practice-test/test-41-2?module=index.js)
+
+# 测试四十二
+
+绘制透明立方体
+
+[test-42](embedded-codesandbox://three-js-practice-test/test-42?module=index.js)
+
+绘制透明相交平面
+
+[test-42-2](embedded-codesandbox://three-js-practice-test/test-42-2?module=index.js)
+
+绘制草地
+
+[test-42-3](embedded-codesandbox://three-js-practice-test/test-42-3?module=index.js)
 
 // TODO threejs 练手测试
