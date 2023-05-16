@@ -291,4 +291,14 @@ canvas 获取键盘输入
 
 [test-42-3](embedded-codesandbox://three-js-practice-test/test-42-3?module=index.js)
 
+# 测试四十三
+
+单画布多场景渲染
+
+[test-43](embedded-codesandbox://three-js-practice-test/test-43?module=index.js)
+
+单画布多场景屏幕外渲染
+
+[test-43-2](embedded-codesandbox://three-js-practice-test/test-43-2?module=index.js)
+
 // TODO threejs 练手测试
