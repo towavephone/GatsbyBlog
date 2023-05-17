@@ -301,4 +301,14 @@ canvas 获取键盘输入
 
 [test-43-2](embedded-codesandbox://three-js-practice-test/test-43-2?module=index.js)
 
+# 测试四十四
+
+射线追踪法拾取
+
+[test-44](embedded-codesandbox://three-js-practice-test/test-44?module=index.js)
+
+基于 GPU 的拾取
+
+[test-44-2](embedded-codesandbox://three-js-practice-test/test-44-2?module=index.js)
+
 // TODO threejs 练手测试
