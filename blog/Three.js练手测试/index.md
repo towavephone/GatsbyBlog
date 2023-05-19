@@ -311,4 +311,22 @@ canvas 获取键盘输入
 
 [test-44-2](embedded-codesandbox://three-js-practice-test/test-44-2?module=index.js)
 
+# 测试四十五
+
+后期处理
+
+# 测试四十六
+
+写一个基础的 shadertoy 容器
+
+[test-46](embedded-codesandbox://three-js-practice-test/test-46?module=index.js)
+
+在上面的基础上支持从图片中读取纹理
+
+[test-46-2](embedded-codesandbox://three-js-practice-test/test-46-2?module=index.js)
+
+使用上面的 shadertoy 纹理画立方体
+
+[test-46-3](embedded-codesandbox://three-js-practice-test/test-46-3?module=index.js)
+
 // TODO threejs 练手测试
