@@ -329,4 +329,14 @@ canvas 获取键盘输入
 
 [test-46-3](embedded-codesandbox://three-js-practice-test/test-46-3?module=index.js)
 
+# 测试四十七
+
+对齐 HTML 元素到 3D 对象
+
+[test-47](embedded-codesandbox://three-js-practice-test/test-47?module=index.js)
+
+在上面的基础上实现给谷歌地图添加标签
+
+[test-47-2](embedded-codesandbox://three-js-practice-test/test-47-2?module=index.js)
+
 // TODO threejs 练手测试

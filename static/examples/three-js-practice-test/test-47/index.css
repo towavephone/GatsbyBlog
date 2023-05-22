@@ -1,0 +1,42 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#c {
+  width: 100%; /* let our container decide our size */
+  height: 100%;
+  display: block;
+}
+
+#container {
+  position: relative; /* makes this the origin of its children */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#labels {
+  position: absolute; /* let us position ourself inside the container */
+  z-index: 0; /* make a new stacking context so children don't sort with rest of page */
+  left: 0; /* make our position the top left of the container */
+  top: 0;
+  color: white;
+}
+
+#labels > div {
+  white-space: nowrap;
+  position: absolute; /* let us position them inside the container */
+  left: 0; /* make their default position the top left of the container */
+  top: 0;
+  cursor: pointer; /* change the cursor to a hand when over us */
+  font-size: large;
+  user-select: none; /* don't let the text get selected */
+  text-shadow:         /* create a black outline */ -1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000,
+    1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000;
+}
+
+#labels > div:hover {
+  color: red;
+}
