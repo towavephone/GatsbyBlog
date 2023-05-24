@@ -339,4 +339,10 @@ canvas 获取键盘输入
 
 [test-47-2](embedded-codesandbox://three-js-practice-test/test-47-2?module=index.js)
 
+# 测试四十八
+
+使用纹理索引来拾取和着色
+
+[test-48](embedded-codesandbox://three-js-practice-test/test-48?module=index.js)
+
 // TODO threejs 练手测试
