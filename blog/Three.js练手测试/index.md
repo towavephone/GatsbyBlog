@@ -345,4 +345,14 @@ canvas 获取键盘输入
 
 [test-48](embedded-codesandbox://three-js-practice-test/test-48?module=index.js)
 
+# 测试四十九
+
+用 canvas 动态纹理绘制立方体
+
+[test-49](embedded-codesandbox://three-js-practice-test/test-49?module=index.js)
+
+利用以上方式绘制文本标签
+
+[test-49-2](embedded-codesandbox://three-js-practice-test/test-49-2?module=index.js)
+
 // TODO threejs 练手测试
