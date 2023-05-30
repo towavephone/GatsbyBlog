@@ -355,4 +355,28 @@ canvas 获取键盘输入
 
 [test-49-2](embedded-codesandbox://three-js-practice-test/test-49-2?module=index.js)
 
+# 测试五十
+
+实现一个广告牌形式的文本标签（即这个文本标签始终面向用户）
+
+[test-50](embedded-codesandbox://three-js-practice-test/test-50?module=index.js)
+
+绘制树木网络
+
+[test-50-2](embedded-codesandbox://three-js-practice-test/test-50-2?module=index.js)
+
+绘制树木网络的立面
+
+[test-50-3](embedded-codesandbox://three-js-practice-test/test-50-3?module=index.js)
+
+# 测试五十一
+
+手动释放资源（需要明确指定）
+
+[test-51](embedded-codesandbox://three-js-practice-test/test-51?module=index.js)
+
+自动释放资源
+
+[test-51-2](embedded-codesandbox://three-js-practice-test/test-51-2?module=index.js)
+
 // TODO threejs 练手测试
