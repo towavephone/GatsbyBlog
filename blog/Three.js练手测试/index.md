@@ -379,4 +379,10 @@ canvas 获取键盘输入
 
 [test-51-2](embedded-codesandbox://three-js-practice-test/test-51-2?module=index.js)
 
+# 测试五十二
+
+写一个简易版我的世界
+
+[test-52](embedded-codesandbox://three-js-practice-test/test-52?module=index.js)
+
 // TODO threejs 练手测试
