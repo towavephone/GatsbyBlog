@@ -7182,4 +7182,66 @@ collections.abc 模块要求子类必须实现某些特殊方法，另外，Pyth
 2. 如果想让定制的容器类型能像标准的 Python 容器那样使用，那么有可能要编写许多特殊方法。
 3. 可以从 collections.abc 模块里的抽象基类之中派生自己的容器类型，这样可以让容器自动具备相关的功能，同时又可以保证没有把实现这些功能所必备的方法给漏掉。
 
+# 元类与属性
+
+## 用纯属性与修饰器取代旧式的 setter 与 getter 方法
+
+从其他编程语言转入 Python 的开发者，可能想在类里面明确地实现 getter 与 setter 方法。
+
+```py
+class OldResistor:
+    def __init__(self, ohms):
+        self._ohms = ohms
+
+    def get_ohms(self):
+        return self._ohms
+
+    def set_ohms(self, ohms):
+        self._ohms = ohms
+```
+
+虽然这些 setter 与 getter 用起来很简单，但这并不符合 Python 的风格。
+
+```py
+r0 = OldResistor(50e3)
+print('Before:', r0.get_ohms())
+r0.set_ohms(10e3)
+print('After: ', r0.get_ohms())
+
+>>>
+Before: 50000.0
+After:  10000.0
+```
+
+例如，想让属性值变大或者变小，采用这些方法来写会特别麻烦。
+
+```py
+r0.set_ohms(r0.get_ohms() - 4e3)
+assert r0.get_ohms() == 6e3
+```
+
+这种工具方法确实有助于将类的接口定义得更加清晰，并方便开发者封装功能、验证用法、划定界限。这些都是在设计类时应该考虑的目标，实现这些目标可以确保我们在完善这个类的过程中不影响已经写好的调用代码。
+
+可是，在 Python 中实现这些目标时，没必要明确定义 setter 与 getter 方法。而是应该从最简单的 public 属性开始写起，例如像下面这样：
+
+```py
+class Resistor:
+    def __init__(self, ohms):
+        self.ohms = ohms
+        self.voltage = 0
+        self.current = 0
+
+
+r1 = Resistor(50e3)
+r1.ohms = 10e3
+```
+
+按照这种写法，很容易就能实现原地增减属性值。
+
+```py
+r1.ohms += 5e3
+```
+
+将来如果想在设置属性时，实现特别的功能，那么可以先通过 @property 修饰器来封装获取属性的那个方法，并在封装出来的修饰器上面通过 setter 属性来封装设置属性的那个方法（参见第 26 条）。下面这个新类继承自刚才的 Resistor 类，它允许我们通过设置 voltage（电压）属性来改变 current（电流）。为了正确实现这项功能，必须保证设置属性与获取属性所用的那两个方法都跟属性同名。
+
 // TODO 编写高质量 Python 待完成
