@@ -1,6 +1,6 @@
 ---
 title: 编写高质量Python
-date: 2022-10-12 14:46:04
+date: 2023-06-13 12:00:28
 path: /writing-high-quality-python/
 tags: 后端, python, 读书笔记
 ---
@@ -7243,5 +7243,164 @@ r1.ohms += 5e3
 ```
 
 将来如果想在设置属性时，实现特别的功能，那么可以先通过 @property 修饰器来封装获取属性的那个方法，并在封装出来的修饰器上面通过 setter 属性来封装设置属性的那个方法（参见第 26 条）。下面这个新类继承自刚才的 Resistor 类，它允许我们通过设置 voltage（电压）属性来改变 current（电流）。为了正确实现这项功能，必须保证设置属性与获取属性所用的那两个方法都跟属性同名。
+
+按照这种写法，给 voltage 属性赋值会触发同名的 setter 方法，该方法会根据新的 voltage 计算本对象的 current 属性。
+
+```py
+class Resistor:
+    def __init__(self, ohms):
+        self.ohms = ohms
+        self.voltage = 0
+        self.current = 0
+
+
+class VoltageResistance(Resistor):
+    def __init__(self, ohms):
+        super().__init__(ohms)
+        self._voltage = 0
+
+    @property
+    def voltage(self):
+        return self._voltage
+
+    @voltage.setter
+    def voltage(self, voltage):
+        self._voltage = voltage
+        self.current = self._voltage / self.ohms
+
+
+r2 = VoltageResistance(1e3)
+print(f'Before: {r2.current: .2f} amps')
+r2.voltage = 10
+print(f'After:  {r2.current: .2f} amps')
+
+>>>
+Before:  0.00 amps
+After:   0.01 amps
+```
+
+为属性指定 setter 方法还可以用来检查调用方所传入的值在类型与范围上是否符合要求。例如，下面这个 Resistor 子类可以确保用户设置的电阻值总是大于 0 的。
+
+```py
+class Resistor:
+    def __init__(self, ohms):
+        self.ohms = ohms
+        self.voltage = 0
+        self.current = 0
+
+
+class BoundedResistance(Resistor):
+    def __init__(self, ohms):
+        super().__init__(ohms)
+
+    @property
+    def ohms(self):
+        return self._ohms
+
+    @ohms.setter
+    def ohms(self, ohms):
+        if ohms <= 0:
+            raise ValueError(f'ohms must be > 0; got {ohms}')
+        self._ohms = ohms
+
+
+r3 = BoundedResistance(1e3)
+r3.ohms = 0
+
+>>>
+Traceback ...
+ValueError: ohms must be > 0; got 0
+```
+
+如果构造时所用的值无效，那么同样会触发异常。
+
+```py
+BoundedResistance(-5)
+
+>>>
+ValueError: ohms must be > 0; got -5
+```
+
+之所以会出现这种效果，是因为子类的构造器（`BoundedResistance.__init__`）会调用超类的构造器（`Resistor.__init__`），而超类的构造器会把 self.ohms 设置成 -5。于是，就会触发 BoundedResistance 里面的 `@ohms.setter` 方法，该方法立刻发现属性值无效，所以程序在对象还没有构造完之前，就会抛出异常。
+
+我们还可以利用 @property 阻止用户修改超类中的属性。
+
+```py
+class Resistor:
+    def __init__(self, ohms):
+        self.ohms = ohms
+        self.voltage = 0
+        self.current = 0
+
+
+class FixedResistance(Resistor):
+    def __init__(self, ohms):
+        super().__init__(ohms)
+
+    @property
+    def ohms(self):
+        return self._ohms
+
+    @ohms.setter
+    def ohms(self, ohms):
+        if hasattr(self, '_ohms'):
+            raise AttributeError("Ohms is immutable")
+        self._ohms = ohms
+
+
+r4 = FixedResistance(1e3)
+r4.ohms = 2e3
+
+>>>
+Traceback ...
+AttributeError: Ohms is immutable
+```
+
+构造好对象之后，如果试图给属性赋值，那么程序就会抛出异常。
+
+用 @property 实现 setter 与 getter 时，还应该注意不要让对象产生反常的行为。例如，不要在某属性的 getter 方法里面设置其他属性的值。
+
+假如在获取属性的 getter 方法里面修改了其他属性的值，那么用户查询这个属性时，就会觉得相当奇怪，他可能不理解为什么另外一个属性会在我查询这个属性时发生变化。
+
+```py
+class Resistor:
+    def __init__(self, ohms):
+        self.ohms = ohms
+        self.voltage = 0
+        self.current = 0
+
+
+class MysteriousResistor(Resistor):
+    @property
+    def ohms(self):
+        self.voltage = self._ohms * self.current
+        return self._ohms
+
+    @ohms.setter
+    def ohms(self, ohms):
+        self._ohms = ohms
+
+
+r7 = MysteriousResistor(10)
+r7.current = 0.01
+print(f'Before: {r7.voltage:.2f}')
+r7.ohms
+print(f'After: {r7.voltage: .2f}')
+
+>>>
+Before: 0.00
+After:  0.10
+```
+
+最好的办法是，只在 @property.setter 方法里面修改状态，而且只应该修改对象之中与当前属性有关的状态。同时还得注意不要产生让调用者感到意外的其他一些副作用，例如，不要动态地引入模块，不要运行速度较慢的辅助函数，不要做 I/O，不要执行开销较大的数据库查询操作等。类的属性用起来应该跟其他的 Python 对象一样方便而快捷。如果确实要执行比较复杂或比较缓慢的操作，那么应该用普通的方法来做，而不应该把这些操作放在获取及设置属性的这两个方法里面。
+
+@property 最大的缺点是，通过它而编写的属性获取及属性设置方法只能由子类共享。与此无关的类不能共用这份逻辑。但是没关系，Python 还支持描述符（descriptor，参见第 46 条），我们可以利用这种机制把早前编写的属性获取与属性设置逻辑复用到其他许多地方。
+
+### 总结
+
+1. 给新类定义接口时，应该先从简单的 public 属性写起，避免定义 setter 与 getter 方法。
+2. 如果在访问属性时确实有必要做特殊的处理，那就通过 @property 来定义获取属性与设置属性的方法。
+3. 实现 @property 方法时，应该遵循最小惊讶原则，不要引发奇怪的副作用。
+4. @property 方法必须执行得很快。复杂或缓慢的任务，尤其是涉及 I/O 或者会引发副作用的那些任务，还是用普通的方法来实现比较好。
 
 // TODO 编写高质量 Python 待完成
