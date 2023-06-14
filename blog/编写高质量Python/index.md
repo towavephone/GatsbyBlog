@@ -7184,7 +7184,7 @@ collections.abc 模块要求子类必须实现某些特殊方法，另外，Pyth
 
 # 元类与属性
 
-## 用纯属性与修饰器取代旧式的 setter 与 getter 方法
+## 第 44 条：用纯属性与修饰器取代旧式的 setter 与 getter 方法
 
 从其他编程语言转入 Python 的开发者，可能想在类里面明确地实现 getter 与 setter 方法。
 
@@ -7402,5 +7402,164 @@ After:  0.10
 2. 如果在访问属性时确实有必要做特殊的处理，那就通过 @property 来定义获取属性与设置属性的方法。
 3. 实现 @property 方法时，应该遵循最小惊讶原则，不要引发奇怪的副作用。
 4. @property 方法必须执行得很快。复杂或缓慢的任务，尤其是涉及 I/O 或者会引发副作用的那些任务，还是用普通的方法来实现比较好。
+
+## 第 45 条：考虑用 @property 实现新的属性访问逻辑，不要急着重构原有的代码
+
+Python 内置的 @property 修饰器使开发者很容易就能实现出灵活的逻辑，使得程序在获取或设置相关属性时，触发这些逻辑（参见第 44 条）。@property 还有一种更为高级的用法，其实也很常见，这就是把简单的数值属性迁移成那种实时计算的属性。这个用法的意义特别大，因为它可以确保，按照旧写法来访问属性的那些代码依然有效，而且会自动按照新逻辑执行，也不需要重写原来那些访问代码（这一点相当关键，因为那些代码未必都在你控制之下）。@property 可以说是一种重要的缓冲机制，使开发者能够逐渐改善接口而不影响已经写好的代码。
+
+例如，下面我们用普通的 Python 对象实现带有配额（quota）的漏桶（leaky bucket）。这个类可以记录当前的配额以及这份配额在多长时间内有效。
+
+漏桶算法要求在添加配额时，不能把已有的额度带到下一个时段。如果想使用额度，那么首先必须确保漏桶当前所剩的配额足够使用。
+
+现在我们来使用这个类。首先填充额度，然后根据自己的需要使用额度，这样用下去，最终会遇到额度不够的情况。从这时开始，额度就不会再变了。
+
+```py
+from datetime import datetime, timedelta
+
+
+class Bucket:
+    def __init__(self, period):
+        self.period_delta = timedelta(seconds=period)
+        self.reset_time = datetime.now()
+        self.quota = 0
+
+    def __repr__(self):
+        return f'Bucket (quota={self.quota})'
+
+
+def fill(bucket, amount):
+    now = datetime.now()
+    if (now - bucket.reset_time) > bucket.period_delta:
+        bucket.quota = 0
+        bucket.reset_time = now
+    bucket.quota += amount
+
+
+def deduct(bucket, amount):
+    now = datetime.now()
+    if (now - bucket.reset_time) > bucket.period_delta:
+        return False  # Bucket hasn't been filled this period
+    if bucket.quota - amount < 0:
+        return False  # Bucket was filled, but not enough
+    bucket.quota -= amount
+    return True  # Bucket had enough, quota consumed
+
+
+bucket = Bucket(60)
+fill(bucket, 100)
+print(bucket)
+
+if deduct(bucket, 99):
+    print('Had 99 quota')
+else:
+    print('Not enough for 99 quota')
+print(bucket)
+
+if deduct(bucket, 3):
+    print('Had 3 quota')
+else:
+    print('Not enough for 3 quota')
+print(bucket)
+
+>>>
+Bucket (quota=100)
+Had 99 quota
+Bucket (quota=1)
+Not enough for 3 quota
+Bucket (quota=1)
+```
+
+这种实现方式有个问题，就是没办法知道第一次填充漏桶时，给它分配的额度。我们只知道额度会越用越少直到不够用为止。如果当前这段时间内的额度已经降到 0，那么不管你想使用多少额度，deduct 函数都会返回 False，除非通过 fill 函数再往里面补充额度。所以，当 deduct 函数返回 False 时，了解这究竟是因为 Bucket 没有足够的额度可以扣减，还是说它一开始根本就没分配到任何额度，这一点很重要。
+
+为了解决这个问题，可以修改这个类，把当前时间段内的初始额度（max_quota）与已经使用的额度（quota_consumed）明确记录下来。
+
+```py
+from datetime import datetime, timedelta
+
+
+class NewBucket:
+    def __init__(self, period):
+        self.period_delta = timedelta(seconds=period)
+        self.reset_time = datetime.now()
+        self.max_quota = 0
+        self.quota_consumed = 0
+
+    def __repr__(self):
+        return f'NewBucket (max_quota={self.max_quota}, quota_consumed={self.quota_consumed})'
+
+    @property
+    def quota(self):
+        return self.max_quota - self.quota_consumed
+
+    @quota.setter
+    def quota(self, amount):
+        delta = self.max_quota - amount
+        if amount == 0:
+            # Quota being reset for a new period
+            self.quota_consumed = 0
+            self.max_quota = 0
+        elif delta < 0:
+            # Quota being filled for the new period
+            assert self.quota_consumed == 0
+            self.max_quota = amount
+        else:
+            # Quota being consumed during the period
+            assert amount > 0
+            self.quota_consumed = delta
+
+
+def fill(bucket, amount):
+    now = datetime.now()
+    if (now - bucket.reset_time) > bucket.period_delta:
+        bucket.quota = 0
+        bucket.reset_time = now
+    bucket.quota += amount
+
+
+def deduct(bucket, amount):
+    now = datetime.now()
+    if (now - bucket.reset_time) > bucket.period_delta:
+        return False  # Bucket hasn't been filled this period
+    if bucket.quota - amount < 0:
+        return False  # Bucket was filled, but not enough
+    bucket.quota -= amount
+    return True  # Bucket had enough, quota consumed
+
+
+bucket = NewBucket(60)
+fill(bucket, 100)
+print(bucket)
+
+if deduct(bucket, 99):
+    print('Had 99 quota')
+else:
+    print('Not enough for 99 quota')
+print(bucket)
+
+if deduct(bucket, 3):
+    print('Had 3 quota')
+else:
+    print('Not enough for 3 quota')
+print(bucket)
+
+>>>
+NewBucket (max_quota=100, quota_consumed=0)
+Had 99 quota
+NewBucket (max_quota=100, quota_consumed=99)
+Not enough for 3 quota
+NewBucket (max_quota=100, quota_consumed=99)
+```
+
+这个方案最大的好处是，原来根据 Bucket.quota 所写的那些代码可以继续沿用，而且无须考虑 Bucket 现在已经换成了新的 NewBucket。至于以后的代码，则可以直接操纵漏桶的额度（quota），因为可以通过访问 `max_quota` 与 `quota_consumed` 字段正确地获取及设置该额度。
+
+笔者特别喜欢 @property 属性的地方在于，它让我们能够逐渐完善数据模型而不影响已经写好的代码。观看刚才那个 Bucket 范例时，有人可能会想，为什么不把 fill 与 deduct 直接设计成实例方法呢？嗯，这样想确实有道理（参见第 37 条），但实际上，我们不可能每次都想得这么周到，还是会遇到很多相当糟糕的接口，或者遇到那种纯粹当成数据容器来写的类。之所以出现那样的情况，可能有许多原因，例如代码不断膨胀，项目的范围也越来越广，而给同一个项目提交程序的开发者又全都没有考虑到以后的维护工作。
+
+@property 可以帮助解决实际工作中的许多问题，但不应该遭到滥用。如果你发现自己总是在扩充 @property 方法，那可能说明这个类确实应该重构了。在这种情况下，就不要再沿着糟糕的方案继续往下写了。
+
+### 总结
+
+1. 可以利用 @property 给已有的实例属性增加新的功能。
+2. 可以利用 @property 逐渐改善数据模型而不影响已经写好的代码。
+3. 如果发现 @property 使用太过频繁，那可能就该考虑重构这个类了，同时按照旧办法使用这个类的那些代码可能也要重构。
 
 // TODO 编写高质量 Python 待完成
