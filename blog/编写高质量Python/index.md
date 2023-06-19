@@ -7562,4 +7562,236 @@ NewBucket (max_quota=100, quota_consumed=99)
 2. 可以利用 @property 逐渐改善数据模型而不影响已经写好的代码。
 3. 如果发现 @property 使用太过频繁，那可能就该考虑重构这个类了，同时按照旧办法使用这个类的那些代码可能也要重构。
 
+## 第 46 条：用描述符来改写需要复用的 @property 方法
+
+Python 内置的 @property 机制的最大的缺点就是不方便复用（参见第 44 条与第 45 条）。我们不能把它修饰的方法所使用的逻辑，套用在同一个类的其他属性上面，也不能在无关的类里面复用。
+
+例如，我们要编写一个类来记录学生的家庭作业成绩，而且要确保设置的成绩位于 0 到 100 之间，受 @property 修饰的属性用起来很简单。
+
+```py
+class Homework:
+    def __init__(self):
+        self._grade = 0
+
+    @property
+    def grade(self):
+        return self._grade
+
+    @grade.setter
+    def grade(self, value):
+        if not (0 <= value <= 100):
+            raise ValueError('Grade must be between 0 and 100')
+        self._grade = value
+
+
+galileo = Homework()
+galileo.grade = 95
+```
+
+假设，我们还需要写一个类记录学生的考试成绩，而且要把每科的成绩分别记录下来。
+
+```py
+class Exam:
+    def __init__(self):
+        self._writing_grade = 0
+        self._math_grade = 0
+
+    @staticmethod
+    def _check_grade(value):
+        if not (0 <= value <= 100):
+            raise ValueError('Grade must be between 0 and 100')
+```
+
+这样写很费事，因为每科的成绩都需要一套 @property 方法，而且其中设置属性值的那个方法还必须调用 `_check_grade` 验证新值是否位于合理的范围内。
+
+```py
+@property
+def writing_grade(self):
+    return self._writing_grade
+
+
+@writing_grade.setter
+def writing_grade(self, value):
+    self._check_grade(value)
+    self._writing_grade = value
+
+
+@property
+def math_grade(self):
+    return self._math_grade
+
+
+@math_grade.setter
+def math_grade(self, value):
+    self._check_grade(value)
+    self._math_grade = value
+```
+
+这种写法不仅烦琐，而且无法复用。如果想把这个百分制验证逻辑运用到 Homework 与 Exam 以外的类，那么必须反复编写例行的 @property 方法与 `_check_grade` 逻辑。
+
+在 Python 里，这样的功能最好通过描述符（descriptor）实现。描述符协议（descriptor protocol）规定了程序应该如何处理属性访问操作。充当描述符的那个类能够实现 `__get__` 与 `__set__` 方法，这样其他类就可以共用这个描述符所实现的逻辑而无须把这套逻辑分别重写一遍。在这一点上，描述符要比 `mix-in` 好（参见第 41 条），因为即便在同一个类里，我们也可以反复使用这个描述符来设计不同的属性。
+
+下面重新定义 Exam 类，这次我们采用类级别的属性来实现每科成绩的访问功能，这些属性指向下面这个 Grade 类的实例，而这个 Grade 类则实现刚才提到的描述符协议。
+
+```py
+class Grade:
+    def __get__(self, instance, instance_type):
+        return ()
+
+    def __set__(self, instance, value):
+        return ()
+
+
+class Exam:
+    # Class attributes
+    math_grade = Grade()
+    writing_grade = Grade()
+    science_grade = Grade()
+```
+
+在解释 Grade 类的工作原理之前，我们首先要知道，当程序访问 Exam 实例的某个属性时，Python 如何将访问操作派发到 Exam 类的描述符属性上面。例如，如果要给 Exam 实例的 `writing_grade` 属性赋值：
+
+```py
+exam = Exam()
+exam.writing_grade = 40
+```
+
+那么 Python 会把这次赋值操作转译为：
+
+```py
+Exam.__dict__['writing_grade'].__set__(exam, 40)
+```
+
+获取这个属性时也一样：
+
+```py
+exam.writing_grade
+```
+
+Python 会把它相应地转译为：
+
+```py
+Exam.__dict__['writing_grade'].__get__(exam, Exam)
+```
+
+这样的转译效果是由 object 的 `__getattribute__` 方法促成的（参见第 47 条）。简单地说，就是当 Exam 实例里面没有名为 `writing_grade` 的属性时，Python 会转而在类的层面查找，查询 Exam 类里面有没有这样一个属性。如果有，而且还是个实现了 `__get__` 与 `__set__` 方法的对象，那么系统就认定你想通过描述符协议定义这个属性的访问行为。
+
+知道了这条规则之后，我们来尝试把 Homework 类早前用 `@property` 实现的成绩验证逻辑搬到 Grade 描述符里面。
+
+```py
+class Grade:
+    def __init__(self):
+        self._value = 0
+
+    def __get__(self, instance, instance_type):
+        return self._value
+
+    def __set__(self, instance, value):
+        if not (0 <= value <= 100):
+            raise ValueError('Grade must be between 0 and 100')
+        self._value = value
+```
+
+这样写其实不对，而且会让程序出现混乱。但在同一个 Exam 实例上面访问不同的属性是没有问题的。
+
+```py
+class Exam:
+    math_grade = Grade()
+    writing_grade = Grade()
+    science_grade = Grade()
+
+
+first_exam = Exam()
+first_exam.writing_grade = 82
+first_exam.science_grade = 99
+print('Writing', first_exam.writing_grade)
+print('Science', first_exam.science_grade)
+
+>>>
+Writing 82
+Science 99
+```
+
+但是，在不同的 Exam 实例上分别访问同一个属性却会看到奇怪的结果。
+
+```py
+second_exam = Exam()
+second_exam.writing_grade = 75
+print(f'Second {second_exam.writing_grade} is right')
+print(f'First {first_exam.writing_grade} is wrong; should be 82')
+
+>>>
+Second 75 is right
+First 75 is wrong; should be 82
+```
+
+出现这种问题的原因在于，这些 Exam 实例之中的 `writing_grade` 属性实际上是在共享同一个 Grade 实例。在整个程序的运行过程中，这个 Grade 只会于定义 Exam 类时构造一次，而不是每创建一个 Exam 实例都有一个新的 Grade 来与 `writing_grade` 属性相搭配。
+
+为解决此问题，我们必须把每个 Exam 实例在这个属性上面的取值都记录下来。可以通过字典实现每个实例的状态保存。
+
+```py
+class Grade:
+    def __init__(self):
+        self._values = {}
+
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+        return self._values.get(instance, 0)
+
+    def __set__(self, instance, value):
+        if not (0 <= value <= 100):
+            raise ValueError('Grade must be between 0 and 100')
+        self._values[instance] = value
+```
+
+这种实现方案很简单，而且能得到正确结果，但仍然有一个缺陷，就是会泄漏内存。在程序运行过程中，传给 `__set__` 方法的那些 Exam 实例全都会被 Grade 之中的 `_values` 字典所引用。于是，指向那些实例的引用数量就永远不会降到 0，这导致垃圾回收器没办法把那些实例清理掉（第 81 条会介绍怎样才能发现这种问题）。
+
+为了解决这个问题，我们可以求助于 Python 内置的 weakref 模块。该模块里有一种特殊的字典，名为 WeakKeyDictionary，它可以取代刚才实现 `_values` 时所用的普通字典。这个字典的特殊之处在于：如果运行时系统发现，指向 Exam 实例的引用只剩一个，而这个引用又是由 WeakKeyDictionary 的键所发起的，那么系统会将该引用从这个特殊的字典里删掉，于是指向那个 Exam 实例的引用数量就会降为 0。总之，改用这种字典来实现 `_values` 会让 Python 系统自动把内存泄漏问题处理好，如果所有的 Exam 实例都不再使用了，那么 `_values` 字典肯定是空的。
+
+用这种字典改写 Grade 描述符之后，Exam 就能够正常运作了。
+
+```py
+from weakref import WeakKeyDictionary
+
+
+class Grade:
+    def __init__(self):
+        self._values = WeakKeyDictionary()
+
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+        return self._values.get(instance, 0)
+
+    def __set__(self, instance, value):
+        if not (0 <= value <= 100):
+            raise ValueError('Grade must be between 0 and 100')
+        self._values[instance] = value
+
+
+class Exam:
+    math_grade = Grade()
+    writing_grade = Grade()
+    science_grade = Grade()
+
+
+first_exam = Exam()
+first_exam.writing_grade = 82
+second_exam = Exam()
+second_exam.writing_grade = 75
+print(f'First {first_exam.writing_grade} is right')
+print(f'Second {second_exam.writing_grade} is right')
+
+>>>
+First 82 is right
+Second 75 is right
+```
+
+### 总结
+
+1. 如果想复用 @property 方法所实现的行为与验证逻辑，则可以考虑自己定义描述符类。
+2. 为了防止内存泄漏，可以在描述符类中用 WeakKeyDictionary 取代普通的字典。
+3. 不要太纠结于 `__getattribute__` 是怎么通过描述符协议来获取并设置属性的。
+
 // TODO 编写高质量 Python 待完成
