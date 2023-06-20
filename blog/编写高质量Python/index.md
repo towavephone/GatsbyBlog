@@ -7794,4 +7794,284 @@ Second 75 is right
 2. 为了防止内存泄漏，可以在描述符类中用 WeakKeyDictionary 取代普通的字典。
 3. 不要太纠结于 `__getattribute__` 是怎么通过描述符协议来获取并设置属性的。
 
+## 第 47 条：针对惰性属性使用 `__getattr__`、`__getattribute__` 及 `__setattr__`
+
+Python 的 object 提供了一套挂钩，使开发者很容易就能写出通用的代码，将不同的系统粘合到一起。例如，我们想把数据库中的记录表示为 Python 对象。数据库当然有它自己的模式（schema），而程序在把记录表示成对象时，必须知道数据库是按照什么样的 schema 来组织这些记录的。同时，我们又要注意，连接 Python 对象与数据库的代码应该写得通用一些，而不应该明确限定这些记录必须使用哪种 schema。
+
+这个功能如何实现才好呢？普通的实例属性、经过 `@property` 修饰的方法以及上一条里提到的描述符，都做不到这一点，因为它们都必须得提前定义好。在 Python 中，这种动态的行为可以通过名为 `__getattr__` 的特殊方法来实现。如果类中定义了 `__getattr__`，那么每当访问该类对象的属性，而且实例字典里又找不到这个属性时，系统就会触发 `__getattr__` 方法。
+
+下面我们试着访问 foo 属性。data 实例中并没有这样一个属性，因此 Python 会触发上面定义的 `__getattr__` 方法，而该方法又会通过 setattr 修改本实例的 `__dict__` 字典。
+
+```py
+class LazyRecord:
+    def __init__(self):
+        self.exists = 5
+
+    def __getattr__(self, name):
+        value = f'Value for {name}'
+        setattr(self, name, value)
+        return value
+
+
+data = LazyRecord()
+print('Before:', data.__dict__)
+print('foo:   ', data.foo)
+print('After: ', data.__dict__)
+
+>>>
+Before: {'exists': 5}
+foo:    Value for foo
+After:  {'exists': 5, 'foo': 'Value for foo'}
+```
+
+下面，我们通过子类给 LazyRecord 增加日志功能，用来观察程序在什么样的情况下才会调用 `__getattr__` 方法。我们先写入第一条日志，然后通过 super() 调用超类所实现的 `__getattr__` 方法，并把那个方法返回的结果记录到第二条日志里面。假如不加 super()，那么程序就会无限递归，因为那样调用的是本类所写的 `__getattr__` 方法（参见第 40 条）。
+
+```py
+class LazyRecord:
+    def __init__(self):
+        self.exists = 5
+
+    def __getattr__(self, name):
+        value = f'Value for {name}'
+        setattr(self, name, value)
+        return value
+
+
+class LoggingLazyRecord(LazyRecord):
+    def __getattr__(self, name):
+        print(
+            f'* Called __getattr__({name!r}), populating instance dictionary')
+        result = super() .__getattr__(name)
+        print(f'* Returning {result!r}')
+        return result
+
+
+data = LoggingLazyRecord()
+print('exists:    ', data.exists)
+print('First foo: ', data.foo)
+print('Second foo:', data.foo)
+
+>>>
+exists:     5
+* Called __getattr__('foo'), populating instance dictionary
+* Returning 'Value for foo'
+First foo:  Value for foo
+Second foo: Value for foo
+```
+
+exists 属性本来就在实例字典里，所以访问 data.exists 时不会触发 `__getattr__`。接下来，开始访问 data.foo。foo 属性不在实例字典中，因此系统会触发 `__getattr__` 方法，这个方法会通过 setattr 把 foo 属性添加到实例字典。然后，我们第二次访问 data.foo，这次 data 实例的 `__dict__` 字典已经包含这个属性，所以不会触发 `__getattr__`。
+
+如果要实现惰性的（lazy，也指按需的）数据访问机制，而这份数据又没有 schema，那么通过 `__getattr__` 来做就相当合适。它只需要把属性加载一次即可，以后再访问这个属性时，系统会直接从实例字典中获取。
+
+假设我们现在还需要验证数据库系统的事务状态。也就是说，用户每次访问某属性时，我们都要确保数据库里面的那条记录依然有效，而且相应的事务也处在开启状态。这个需求没办法通过 `__getattr__` 实现，因为一旦对象的实例字典里包含了这个属性，那么程序就会直接从字典获取，而不会再触发 `__getattr__`。
+
+为了应对这种比较高级的用法，Python 的 object 还提供了另一个挂钩，叫作 `__getattribute__`。只要访问对象中的属性，就会触发这个特殊方法，即便这项属性已经在 `__dict__` 字典里，系统也还是会执行 `__getattribute__` 方法。于是，我们可以在这个方法里面检测全局的事务状态，这样就能对每一次属性访问操作都进行验证了。同时，我们必须注意这种写法开销很大，而且会降低程序的效率，但有的时候确实值得这么做。下面就定义 ValidatingRecord 类，让它实现 `__getattribute__` 方法，并在系统每次调用这个方法时，打印相关的日志消息。
+
+```py
+class ValidatingRecord:
+    def __init__(self):
+        self.exists = 5
+
+    def __getattribute__(self, name):
+        print(f'* Called __getattribute__({name!r})')
+        try:
+            value = super().__getattribute__(name)
+            print(f'* Found {name!r}, returning {value!r}')
+            return value
+        except AttributeError:
+            value = f'Value for {name}'
+            print(f'* Setting {name!r} to {value!r}')
+            setattr(self, name, value)
+            return value
+
+
+data = ValidatingRecord()
+print('exists:    ', data.exists)
+print('First foo: ', data.foo)
+print('Second foo:', data.foo)
+
+>>>
+* Called __getattribute__('exists')
+* Found 'exists', returning 5
+exists:     5
+* Called __getattribute__('foo')
+* Setting 'foo' to 'Value for foo'
+First foo:  Value for foo
+* Called __getattribute__('foo')
+* Found 'foo', returning 'Value for foo'
+Second foo: Value for foo
+```
+
+如果要访问的属性根本就不应该存在，那么可以在 `__getattr__` 方法里面拦截。无论是 `__getattr__` 还是 `__getattribute__`，都应该抛出标准的 AttributeError 来表示属性不存在或不适合存在的情况。
+
+```py
+class MissingPropertyRecord:
+    def __getattr__(self, name):
+        if name == 'bad_name':
+            raise AttributeError(f'{name} is missing')
+        return ()
+
+
+data = MissingPropertyRecord()
+data.bad_name
+
+>>>
+Traceback ...
+AttributeError: bad_name is missing
+```
+
+在编写通用的 Python 代码时，我们经常要依靠内置的 hasattr 函数判断属性是否存在，并且通过内置的 getattr 函数获取属性值。这些函数也会先在实例的 `__dict__` 字典里面查找，如果找不到，则会触发 `__getattr__`。
+
+```py
+class LazyRecord:
+    def __init__(self):
+        self.exists = 5
+
+    def __getattr__(self, name):
+        value = f'Value for {name}'
+        setattr(self, name, value)
+        return value
+
+
+class LoggingLazyRecord(LazyRecord):
+    def __getattr__(self, name):
+        print(
+            f'* Called __getattr__({name!r}), populating instance dictionary')
+        result = super() .__getattr__(name)
+        print(f'* Returning {result!r}')
+        return result
+
+
+data = LoggingLazyRecord()  # Implements __getattr__
+print('Before:        ', data.__dict__)
+print('Has first foo: ', hasattr(data, 'foo'))
+print('After:         ', data.__dict__)
+print('Has second foo:', hasattr(data, 'foo'))
+
+>>>
+Before:         {'exists': 5}
+* Called __getattr__('foo'), populating instance dictionary
+* Returning 'Value for foo'
+Has first foo:  True
+After:          {'exists': 5, 'foo': 'Value for foo'}
+Has second foo: True
+```
+
+在运行上面那段代码的过程中，`__getattr__` 只触发了一次。假如 data 所属的类实现的不是 `__getattr__`，而是 `__getattribute__` 方法，那么效果就不一样了，程序每次对实例做 hasattr 与 getattr 操作时，都会触发这个方法。
+
+```py
+class ValidatingRecord:
+    def __init__(self):
+        self.exists = 5
+
+    def __getattribute__(self, name):
+        print(f'* Called __getattribute__({name!r})')
+        try:
+            value = super().__getattribute__(name)
+            print(f'* Found {name!r}, returning {value!r}')
+            return value
+        except AttributeError:
+            value = f'Value for {name}'
+            print(f'* Setting {name!r} to {value!r}')
+            setattr(self, name, value)
+            return value
+
+
+data = ValidatingRecord()  # Implements __getattribute__
+print('Has first foo: ', hasattr(data, 'foo'))
+print('Has second foo:', hasattr(data, 'foo'))
+
+>>>
+* Called __getattribute__('foo')
+* Setting 'foo' to 'Value for foo'
+Has first foo:  True
+* Called __getattribute__('foo')
+* Found 'foo', returning 'Value for foo'
+Has second foo: True
+```
+
+假设程序给 Python 对象赋值时，我们不想立刻更新数据库，而是打算稍后再推送回去。这个功能可以通过 `__setattr__` 实现，而它也是 object 提供的挂钩，可以拦截所有的属性赋值操作。属性的获取操作分别通过 `__getattr__` 与 `__getattribute__` 挂钩拦截，但设置操作只需要这一个挂钩就行。只要给实例中的属性赋值（不论是直接赋值，还是通过内置的 setattr 函数赋值），系统就触发 `__setattr__` 方法。
+
+下面我们从 SavingRecord 中派生一个子类，让它的 `__setattr__` 方法把每一次属性赋值操作都记录下来。
+
+```py
+class SavingRecord:
+    def __setattr__(self, name, value):
+        # Save some data for the record
+        super().__setattr__(name, value)
+
+
+class LoggingSavingRecord(SavingRecord):
+    def __setattr__(self, name, value):
+        print(f'* Called setattr__({name!r}, {value!r})')
+        super().__setattr__(name, value)
+
+
+data = LoggingSavingRecord()
+print('Before: ', data.__dict__)
+data.foo = 5
+print('After:  ', data.__dict__)
+data.foo = 7
+print('Finally:', data.__dict__)
+
+>>>
+Before:  {}
+* Called setattr__('foo', 5)
+After:   {'foo': 5}
+* Called setattr__('foo', 7)
+Finally: {'foo': 7}
+```
+
+`__getattribute__` 与 `__setattr__` 这样的方法有个问题，就是只要访问对象的属性，系统就会触发该方法。但有时候，我们其实并不希望出现这种效果。例如，我们想实现这样一个类，让它通过自制的字典而不是标准的 `__dict__` 来保存属性，当在这个类的实例上面访问属性时，那么该实例会从自己的 `_data` 字典里面查找。
+
+可是，这样就导致 `__getattribute__` 方法必须访问 `self._data` 才行。如果直接访问，那么程序就会一直递归下去，直到因为超过最大的递归层数而崩溃为止。
+
+```py
+class BrokenDictionaryRecord:
+    def __init__(self, data):
+        self._data = data
+
+    def __getattribute__(self, name):
+        print(f'* Called __getattribute__({name!r})')
+        return self._data[name]
+
+
+data = BrokenDictionaryRecord({'foo': 3})
+data.foo
+
+>>>
+* Called __getattribute__('foo')
+* Called __getattribute__('_data')
+...
+RecursionError: maximum recursion depth exceeded while calling a Python object
+```
+
+为什么会这样呢？因为在 `__getattribute__` 访问 `self._data` 时，由于 `_data` 是自身的一项属性，程序会触发 `__getattribute__` 来获取这项属性，这又会访问到 `self._data`，于是程序就一直递归下去。为解决这个问题，我们可以改用 `super().__getattribute__` 方法获取 `_data` 属性，由于超类的 `__getattribute__` 是直接从实例的属性字典获取的，不会继续触发 `__getattribute__`，这样就避开了递归。
+
+```py
+class DictionaryRecord:
+    def __init__(self, data):
+        self._data = data
+
+    def __getattribute__(self, name):
+        print(f'* Called __getattribute__({name!r})')
+        return super().__getattribute__('_data')[name]
+
+
+data = DictionaryRecord({'foo': 3})
+print('foo', data.foo)
+
+>>>
+* Called __getattribute__('foo')
+foo 3
+```
+
+在 `__setattr__` 里面为这种对象实现属性修改逻辑时，也需要通过 `super().__setattr__` 来获取 `_data` 字典。
+
+### 总结
+
+1. 如果想用自己的方式（例如惰性地或者按需地）加载并保存对象属性，那么可以在该对象所属的类里实现 `__getattr__` 与 `__setattr__` 特殊方法。
+2. `__getattr__` 只会在属性缺失时触发，而 `__getattribute__` 则在每次访问属性时都要触发。
+3. 在实现 `__getattribute__` 与 `__setattr__` 的过程中，如果要使用本对象的普通属性，那么应该通过 `super()`（也就是 object 类）来使用，而不要直接使用，以避免无限递归。
+
 // TODO 编写高质量 Python 待完成
