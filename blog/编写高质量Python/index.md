@@ -8074,4 +8074,282 @@ foo 3
 2. `__getattr__` 只会在属性缺失时触发，而 `__getattribute__` 则在每次访问属性时都要触发。
 3. 在实现 `__getattribute__` 与 `__setattr__` 的过程中，如果要使用本对象的普通属性，那么应该通过 `super()`（也就是 object 类）来使用，而不要直接使用，以避免无限递归。
 
+## 第 48 条：用 `__init_subclass__` 验证子类写得是否正确
+
+元类最简单的一种用法是验证某个类定义得是否正确。如果要构建一套比较复杂的类体系，那我们可能得确保这套体系中的类采用的都是同一种风格，为此我们可能需要判断这些类有没有重写必要的方法，或者判断类属性之间的关系是否合理。元类提供了一种可靠的手段，只要根据这个元类来定义新类，就能用元类中的验证逻辑核查新类的代码写得是否正确。
+
+一般来说，我们会在类的 `__init__` 方法里面检查新对象构造得是否正确（参见第 44 条）。但有的时候，整个类的写法可能都是错的，而不单单是该类的某个对象构造得有问题，所以我们想尽早拦住这种错误。例如，当程序刚刚启动并把包含这个类的模块加载进来时，我们就想验证这个类写得对不对，此时便可利用元类来实现。
+
+在讲解如何用自定义的元类验证子类之前，我们首先必须明白元类的标准用法。元类应该从 type 之中继承。在默认情况下，系统会把通过这个元类所定义的其他类发送给元类的 `__new__` 方法，让该方法知道那个类的 class 语句是怎么写的。下面就定义这样一个元类，如果用户通过这个元类来定义其他类，那么在那个类真正构造出来之前，我们可以先在 `__new__` 里面观察到它的写法并做出修改。
+
+```py
+class Meta(type):
+    def __new__(meta, name, bases, class_dict):
+        print(f'* Running {meta}.__new__ for {name}')
+        print('Bases:', bases)
+        print(class_dict)
+        return type.__new__(meta, name, bases, class_dict)
+
+
+class MyClass(metaclass=Meta):
+    stuff = 123
+
+    def foo(self):
+        pass
+
+
+class MySubclass(MyClass):
+    other = 567
+
+    def bar(self):
+        pass
+
+>>>
+* Running <class '__main__.Meta'>.__new__ for MyClass
+Bases: ()
+{'__module__': '__main__', '__qualname__': 'MyClass', 'stuff': 123, 'foo': <function MyClass.foo at 0x7f7b6c15b9d0>}
+* Running <class '__main__.Meta'>.__new__ for MySubclass
+Bases: (<class '__main__.MyClass'>,)
+{'__module__': '__main__', '__qualname__': 'MySubclass', 'other': 567, 'bar': <function MySubclass.bar at 0x7f7b6c15ba60>}
+```
+
+元类可以获知那个类的名称（name）、那个类的所有超类（bases）以及 class 语句体中定义的所有类属性（`class_dict`）。因为每个类最终都要继承 object，所以这个 object 名字不会体现在罗列超类名称的 bases 元组之中。
+
+我们可以在元类的 `__new__` 方法里面添加一些代码，用来判断根据这个元类所定义的类的各项参数是否合理。例如，要用不同的类来表示边数不同的多边形（polygon）。如果把这些类都纳入同一套体系，那么可以定义这样一个元类，让该体系内的所有类都受它约束。我们在这个元类的 `__new__` 里面检查那些类的边数（sides）是否有效。注意，不要把检查逻辑运用到类体系的顶端，也就是基类 Polygon 上面。
+
+```py
+class ValidatePolygon(type):
+    def __new__(meta, name, bases, class_dict):
+        # Only validate subclasses of the Polygon class
+        if bases:
+            if class_dict['sides'] < 3:
+                raise ValueError('Polygons need 3+ sides')
+        return type.__new__(meta, name, bases, class_dict)
+
+
+class Polygon(metaclass=ValidatePolygon):
+    sides = None  # Must be specified by subclasses
+
+    @classmethod
+    def interior_angles(cls):
+        return (cls.sides - 2) * 180
+
+
+class Triangle(Polygon):
+    sides = 3
+
+
+class Rectangle(Polygon):
+    sides = 4
+
+
+class Nonagon(Polygon):
+    sides = 9
+
+
+assert Triangle.interior_angles() == 180
+assert Rectangle.interior_angles() == 360
+assert Nonagon.interior_angles() == 1260
+```
+
+如果我们试着定义边数小于 3 的多边形子类，那么刚把那个子类的 class 语句体写完，元类就会通过 `__new__` 方法察觉到这个问题。这意味着，只要定义了无效的多边形子类，程序就无法正常启动，除非那个类是在动态引入的模块里面定义的（参见第 88 条）。
+
+```py
+class Line(Polygon):
+    sides = 2
+
+>>>
+Traceback ...
+ValueError: Polygons need 3+ sides
+```
+
+这样一项基本的任务竟然要写这么多代码才能实现。好在 Python 3.6 引入了一种简化的写法，能够直接通过 `__init_subclass__` 这个特殊的类方法实现相同的功能，这样就不用专门定义元类了。下面我们改用这个机制来实现与刚才相同的验证逻辑。
+
+```py
+class BetterPolygon:
+    sides = None  # Must be specified by subclasses
+
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        if cls.sides < 3:
+            raise ValueError('Polygons need 3+ sides')
+
+    @classmethod
+    def interior_angles(cls):
+        return (cls.sides - 2) * 180
+
+
+class Hexagon(BetterPolygon):
+    sides = 6
+
+
+assert Hexagon.interior_angles() == 720
+```
+
+现在的代码简短多了，完全不需要定义 ValidatePolygon 这样一个元类。在 `__init_subclass__` 方法里面，我们可以直接通过 cls 实例来访问类级别的 sides 属性，而不用像原来那样，在存放类属性的 `class_dict` 里面查询 sides 键。现在的多边形子类应该继承刚写的 BetterPolygon 基类。如果子类定义的边数无效，那么程序会抛出同样的异常。
+
+用标准的 Python 元类机制来实现验证还有个缺点，就是每个类只能定义一个元类。例如，这里还有一个元类，可以验证某个区域的填充色是否有效（这个区域有可能是多边形区域，也有可能不是）。
+
+如果想同时利用 Filled 的元类与 Polygon 的元类做验证，那么程序就会给出奇怪的错误消息。
+
+```py
+class ValidatePolygon(type):
+    def __new__(meta, name, bases, class_dict):
+        # Only validate subclasses of the Polygon class
+        if bases:
+            if class_dict['sides'] < 3:
+                raise ValueError('Polygons need 3+ sides')
+        return type.__new__(meta, name, bases, class_dict)
+
+
+class Polygon(metaclass=ValidatePolygon):
+    sides = None  # Must be specified by subclasses
+
+    @classmethod
+    def interior_angles(cls):
+        return (cls.sides - 2) * 180
+
+
+class ValidateFilled(type):
+    def __new__(meta, name, bases, class_dict):
+        # Only validate subclasses of the Filled class
+        if bases:
+            if class_dict['color'] not in ('red', 'green'):
+                raise ValueError('Fill color must be supported')
+        return type.__new__(meta, name, bases, class_dict)
+
+
+class Filled (metaclass=ValidateFilled):
+    color = None  # Must be specified by subclasses
+
+
+class RedPentagon(Filled, Polygon):
+    color = 'red'
+    sides = 5
+
+>>>
+Traceback ...
+TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict) subclass of the metaclasses of all its bases
+```
+
+要解决这个问题，我们可以创建一套元类体系，让不同层面上的元类分别完成各自的验证逻辑（也就是先在下层元类里面验证填充色，如果验证无误，那么再去上层元类里面验证边数）。
+
+同时，这也要求我们必须设计一个支持填充色的多边形类（FilledPolygon），让它在多边形类（Polygon）的基础上增加填充色逻辑，而不能像刚才那样，把填充色与边数分别放在 Filled 与 Polygon 两个类中。现在，带有具体填充色与边数的多边形需要从这个 FilledPolygon 里面继承。
+
+```py
+class ValidatePolygon(type):
+    def __new__(meta, name, bases, class_dict):
+        # Only validate non-root classes
+        if not class_dict.get('is_root'):
+            if class_dict['sides'] < 3:
+                raise ValueError('Polygons need 3+ sides')
+        return type.__new__(meta, name, bases, class_dict)
+
+
+class Polygon(metaclass=ValidatePolygon):
+    is_root = True
+    sides = None  # Must be specified by subclasses
+
+
+class ValidateFilledPolygon(ValidatePolygon):
+    def __new__(meta, name, bases, class_dict):
+        # Only validate non-root classes
+        if not class_dict.get('is_root'):
+            if class_dict['color'] not in ('red', 'green'):
+                raise ValueError('Fill color must be supported')
+        return super().__new__(meta, name, bases, class_dict)
+
+
+class FilledPolygon(Polygon, metaclass=ValidateFilledPolygon):
+    is_root = True
+    color = None  # Must be specified by subclasses
+
+
+class GreenPentagon(FilledPolygon):
+    color = 'green'
+    sides = 5
+
+
+greenie = GreenPentagon()
+assert isinstance(greenie, Polygon)
+```
+
+这样写虽然能实现验证，但却没办法组合。我们当时之所以把验证逻辑分别写在 ValidatePolygon 与 ValidateFilled 里面，就是想要让这些逻辑可以自由组合（类似 mix-in，参见第 41 条）。但是按照现在这种写法，如果想把颜色的验证逻辑施加在多边形之外的另一套类体系中，那么必须按照刚才的样板重复编写许多代码才行，而没办法很方便地复用已有的代码。
+
+这个问题，同样可以通过 `__init_subclass__` 这个特殊的类方法来解决。在多层的类体系中，只要通过内置的 super() 函数来调用 `__init_subclass__` 方法，系统就会按照适当的解析顺序触发超类或平级类的 `__init_subclass__` 方法，以保证那些类在各自的 `__init_subclass__` 里面所实现的验证逻辑也能够正确地执行（类似案例参见第 40 条）。这种写法可以正确应对多重继承。例如，下面这个 Filled 类就通过 `__init_subclass__` 来验证填充色，这样的话，子类可以同时继承该类以及刚才的 BetterPolygon 类，从而把这两个类所实现的验证逻辑组合起来。
+
+```py
+class Filled:
+    color = None  # Must be specified by subclasses
+
+    def __init_subclass__(cls):
+        super().__init_subclass__() # 调用下一个超类的方法
+        if cls.color not in ('red', 'green', 'blue'):
+            raise ValueError('Fills need a valid color')
+
+
+class BetterPolygon:
+    sides = None  # Must be specified by subclasses
+
+    def __init_subclass__(cls):
+        super().__init_subclass__() # 调用下一个超类的方法
+        if cls.sides < 3:
+            raise ValueError('Polygons need 3+ sides')
+
+    @classmethod
+    def interior_angles(cls):
+        return (cls.sides - 2) * 180
+
+
+class RedTriangle(Filled, BetterPolygon):
+    color = 'red'
+    sides = 3
+
+
+ruddy = RedTriangle()
+assert isinstance(ruddy, Filled)
+assert isinstance(ruddy, BetterPolygon)
+```
+
+```py
+class Top:
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        print(f'Top for {cls}')
+
+
+class Left(Top):
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        print(f'Left for {cls}')
+
+
+class Right(Top):
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        print(f'Right for {cls}')
+
+
+class Bottom(Left, Right):
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        print(f'Bottom for {cls}')
+
+>>>
+Top for <class '__main__.Left'>
+Top for <class '__main__.Right'>
+Top for <class '__main__.Bottom'>
+Right for <class '__main__.Bottom'>
+Left for <class '__main__.Bottom'>
+```
+
+可以看到，解决了菱形继承问题，体系底部的 Bottom 类通过 Left 与 Right 两条路径重复继承了体系顶端的 Top 类。然而，由于是通过 super() 触发 `__init_subclass__`，系统在处理 Bottom 类的定义时，只会把 Top 类的 `__init_subclass__` 执行一遍。
+
+### 总结
+
+1. 如果某个类是根据元类所定义的，那么当系统把该类的 class 语句体全部处理完之后，就会将这个类的写法告诉元类的 `__new__` 方法。
+2. 可以利用元类在类创建完成前检视或修改开发者根据这个元类所定义的其他类，但这种机制通常显得有点笨重。
+3. `__init_subclass__` 能够用来检查子类定义得是否合理，如果不合理，那么可以提前报错，让程序无法创建出这种子类的对象。
+4. 在分层的或者涉及多重继承的类体系里面，一定别忘了在你写的这些类的`__init_subclass__` 内通过 super() 来调用超类的 `__init_subclass__` 方法，以便按照正确的顺序触发各类的验证逻辑。
+
 // TODO 编写高质量 Python 待完成
