@@ -1488,3 +1488,438 @@ To create a production build, use npm run build.
 ## 后期优化
 
 待 rspack 生产环境可用且性能较好的时候考虑迁移
+
+# 三期优化
+
+## 具体功能
+
+### 格式化
+
+需要对老项目的 js 代码格式化，分为 eslint/prettier
+
+如下可实现 git commit 前只对暂存到 git 的代码进行格式化修复及校验
+
+package.json
+
+```json
+"scripts": {
+   "eslint": "npm run eslint:files -- src",
+   "eslint:files": "eslint --cache --cache-location node_modules/.cache/.eslintcache --cache-strategy content --ext .js --max-warnings 0",
+   "fix": "npm run fix:js",
+   "fix:js": "npm run prettier -- --write",
+   "fl": "npm run fix && npm run lint",
+   "lint": "npm run lint:js",
+   "lint:js": "npm run prettier -- --check && npm run eslint",
+   "lint:js:log2file": "npm run prettier -- --check && npm run eslint -- -o .cra/eslint-error.log --no-color",
+   "lint:log2file": "npm run lint:js:log2file",
+   "prettier": "npm run prettier:files -- 'src/**/*.js'",
+   "prettier:files": "prettier --cache --cache-strategy content"
+},
+"husky": {
+   "hooks": {
+      "pre-commit": "node scripts/pre-commit.js"
+   }
+},
+"dependencies": {
+   "eslint-config-prettier": "^8.8.0",
+   "eslint-plugin-eslint-comments": "^3.2.0",
+   "prettier": "^2.8.8",
+   "confusing-browser-globals": "^1.0.11"
+},
+"devDependencies": {
+   "husky": "^1.0.0-rc.2",
+   "lint-staged": "^13.2.2"
+}
+```
+
+scripts/pre-commit.js
+
+```js
+const child_process = require('child_process');
+
+function spawn(mainModule) {
+   const worker = child_process.spawn('lint-staged', mainModule, {
+      stdio: 'inherit'
+   });
+
+   worker.on('exit', function(code) {
+      if (code !== 0) {
+         process.exit(1);
+      }
+   });
+}
+
+spawn(['--no-stash']);
+```
+
+.eslintrc.js
+
+```js
+const restrictedGlobals = require('confusing-browser-globals');
+
+const excludeRestrictedGlobals = restrictedGlobals.filter((item) => !['self'].includes(item));
+
+// console.log('excludeRestrictedGlobals', excludeRestrictedGlobals)
+
+module.exports = {
+   extends: ['react-app', 'prettier', 'plugin:eslint-comments/recommended'],
+   // plugins: ['prettier'],
+   rules: {
+      // 'prettier/prettier': 2,
+      'no-unused-vars': 2,
+      'no-restricted-globals': ['error'].concat(excludeRestrictedGlobals),
+      'no-debugger': 2,
+      'eslint-comments/no-use': ['error', { allow: ['eslint-disable-next-line'] }]
+   }
+};
+```
+
+.prettierrc.js
+
+```js
+module.exports = {
+   arrowParens: 'avoid',
+   bracketSpacing: true,
+   printWidth: 200,
+   semi: false,
+   singleQuote: true,
+   tabWidth: 2,
+   trailingComma: 'none',
+   useTabs: false
+};
+```
+
+.lintstagedrc.mjs
+
+```js
+import { ESLint } from 'eslint';
+
+const removeIgnoredFiles = async (files) => {
+   const eslint = new ESLint();
+   const isIgnored = await Promise.all(
+      files.map((file) => {
+         return eslint.isPathIgnored(file);
+      })
+   );
+   const filteredFiles = files.filter((_, i) => !isIgnored[i]);
+   return filteredFiles;
+};
+
+export default {
+   'src/**/*.js': async (files) => {
+      let filteredFiles = await removeIgnoredFiles(files);
+
+      if (filteredFiles.length === 0) {
+         return [];
+      }
+
+      // 提交文件超过 20 个的强制检测全部文件
+      if (filteredFiles.length > 20) {
+         filteredFiles = ['src/**/*.js'];
+      }
+
+      // console.log('filteredFiles', filteredFiles)
+
+      const filesToLint = filteredFiles.join(' ');
+      const cmds = [
+         `npm run prettier:files -- --write ${filesToLint}`,
+         `npm run prettier:files -- --check ${filesToLint}`,
+         `npm run eslint:files -- ${filesToLint}`
+      ];
+      // console.log('cmds', cmds)
+      return cmds;
+   }
+};
+```
+
+### 分包策略
+
+config-overrides.js
+
+```js{121-169,253-259}
+const {
+   override,
+   addBabelPlugins,
+   fixBabelImports,
+   addLessLoader,
+   removeModuleScopePlugin,
+   setWebpackOptimizationSplitChunks,
+   addWebpackPlugin,
+   addWebpackAlias,
+   adjustStyleLoaders
+} = require('customize-cra');
+const fs = require('fs');
+const webpack = require('webpack');
+const path = require('path');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const WebpackBarPlugin = require('webpackbar');
+const { get, pick } = require('lodash');
+const threadLoader = require('thread-loader');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+const { LAZY_BUILD, DISABLE_CACHE, DEBUG_CACHE, BUNDLE_ANALYZER } = process.env;
+
+threadLoader.warmup(
+   {
+      // pool options, like passed to loader options
+      // must match loader options to boot the correct pool
+   },
+   [
+      // modules to load
+      // can be any module, i. e.
+      'babel-loader'
+   ]
+);
+
+const craDir = path.join(process.cwd() + '/.cra');
+
+if (!fs.existsSync(craDir)) {
+   fs.mkdirSync(craDir);
+}
+
+const getLoaders = (webpackConfig, matcher) => {
+   const matchLoaders = get(webpackConfig, 'module.rules.0.oneOf', []).filter((item) =>
+      get(item, 'loader', '').includes(matcher)
+   );
+   return matchLoaders;
+};
+
+const getAssetModules = (webpackConfig, matcher) => {
+   const matchLoaders = get(webpackConfig, 'module.rules.0.oneOf', []).filter((item) =>
+      get(item, 'type', '').includes(matcher)
+   );
+   return matchLoaders;
+};
+
+const addBeforeLoaders = (webpackConfig, matcher, newLoader = []) => {
+   const matchLoaders = getLoaders(webpackConfig, matcher);
+   if (matchLoaders.length === 0) {
+      return;
+   }
+
+   matchLoaders.forEach((item) => {
+      const props = ['loader', 'options'];
+      item.use = [...newLoader, pick(item, props)];
+      props.forEach((item2) => {
+         delete item[item2];
+      });
+   });
+};
+
+const removeAssetDataUrlCondition = (webpackConfig) => {
+   const matchLoaders = getAssetModules(webpackConfig, 'asset');
+   if (matchLoaders.length === 0) {
+      return;
+   }
+
+   matchLoaders.forEach((item) => {
+      if (!item.parser) {
+         return;
+      }
+      delete item.parser;
+   });
+};
+
+const formatConfig = (config) =>
+   JSON.stringify(
+      config,
+      (key, value) => {
+         if (typeof value === 'function') {
+            return value.toString();
+         }
+         return value;
+      },
+      2
+   );
+
+module.exports = {
+   webpack: (config, env) => {
+      const isProd = env === 'production';
+
+      const localConfig = override(
+         addBabelPlugins(
+            ['@babel/plugin-proposal-nullish-coalescing-operator'],
+            ['@babel/plugin-syntax-optional-chaining']
+         ),
+         fixBabelImports('import', {
+            libraryName: 'antd',
+            libraryDirectory: 'es',
+            style: true
+         }),
+         addLessLoader({
+            lessOptions: { javascriptEnabled: true }
+         }),
+         adjustStyleLoaders(({ use: [, , postcss] }) => {
+            const postcssOptions = postcss.options;
+            postcss.options = { postcssOptions };
+         }),
+         addWebpackAlias({
+            '@': path.resolve(__dirname, 'src')
+         }),
+         removeModuleScopePlugin(),
+         isProd &&
+            // 分包原则：首先提取 node_modules 下的所有三方库，然后提取出 src 目录下引用超过 2 次的 chunk，对所有同步、异步包都生效
+            setWebpackOptimizationSplitChunks({
+               chunks: 'all',
+               maxInitialRequests: 10,
+               minSize: 0,
+               cacheGroups: {
+                  defaultVendors: {
+                     // 抽取三方库
+                     test: (module) => {
+                        return /[\\/]node_modules[\\/]/.test(module.context);
+                     },
+                     name: (module) => {
+                        // 从后往前匹配 node_modules 后的包名
+                        //
+                        // /frontend/node_modules/.pnpm/@antv+g2plot@2.4.20/node_modules/@antv/g2plot/esm/plots/tiny-column/
+                        // 结果为 @antv
+                        //
+                        // /frontend/node_modules/@antv+g2plot@2.4.20/323
+                        // 结果为 @antv+g2plot@2.4.20
+                        //
+                        // /frontend/node_modules/@antv+g2plot@2.4.20
+                        // 结果为 @antv+g2plot@2.4.20
+                        const matchResult = module.context.match(/(?<=[\\/]node_modules[\\/])(.*?)(?=([\\/]|$))/g);
+                        const packageName = matchResult[matchResult.length - 1];
+                        // console.log(`packageName: ${packageName}`, module.context)
+                        return `pnpm.${packageName.replace(/@|\./g, '')}`;
+                     },
+                     priority: -10,
+                     reuseExistingChunk: true
+                  },
+                  default: {
+                     // 抽取页面的公共部分
+                     test: (module) => {
+                        // console.log('test module.context---------- ', module.context)
+                        return new RegExp(`${process.cwd()}[\\/](src|public)[\\/]`).test(module.context);
+                     },
+                     name: (module) => {
+                        // console.log('name module.context---------- ', module.resourceResolveData.relativePath)
+                        const relativePath = module.resourceResolveData.relativePath
+                           .split('/')
+                           .slice(1)
+                           .join('~');
+                        return relativePath;
+                     },
+                     minChunks: 2,
+                     priority: -20,
+                     reuseExistingChunk: true
+                  }
+               }
+            }),
+         addWebpackPlugin(
+            new MonacoWebpackPlugin({
+               languages: ['json']
+            })
+         ),
+         addWebpackPlugin(
+            new webpack.DefinePlugin({
+               'process.env.BUILD_TOOL': "'webpack'"
+            })
+         ),
+         addWebpackPlugin(
+            new webpack.ProvidePlugin({
+               Buffer: ['buffer', 'Buffer']
+            })
+         ),
+         BUNDLE_ANALYZER &&
+            addWebpackPlugin(
+               new BundleAnalyzerPlugin({
+                  analyzerPort: 8080,
+                  generateStatsFile: true
+               })
+            ),
+         addWebpackPlugin(new WebpackBarPlugin())
+      )(config);
+
+      addBeforeLoaders(localConfig, 'babel-loader', ['thread-loader']);
+      removeAssetDataUrlCondition(localConfig);
+
+      localConfig.resolve.extensions = ['.js'];
+      localConfig.resolve.modules = ['node_modules'];
+      localConfig.resolve.fallback = {
+         buffer: require.resolve('buffer')
+      };
+
+      if (LAZY_BUILD) {
+         localConfig.experiments = {
+            lazyCompilation: {
+               // disable lazy compilation for dynamic imports
+               imports: true,
+
+               // disable lazy compilation for entries
+               entries: false
+
+               // do not lazily compile moduleB
+               // test: module => !/moduleB/.test(module.nameForCondition())
+            }
+         };
+      }
+
+      if (DEBUG_CACHE) {
+         localConfig.infrastructureLogging = {
+            debug: /webpack\.cache/
+         };
+      }
+
+      if (DISABLE_CACHE) {
+         localConfig.cache = false;
+      }
+
+      if (!isProd) {
+         localConfig.stats = {
+            errors: true,
+            children: false,
+            warnings: false,
+            colors: true,
+            assets: false,
+            modules: false,
+            entrypoints: false,
+            timings: true,
+            builtAt: true,
+            hash: true
+         };
+      } else {
+         const instanceOfMiniCssExtractPlugin = localConfig.plugins.find(
+            (plugin) => plugin.constructor.name === 'MiniCssExtractPlugin'
+         );
+
+         // 忽略样式导入顺序报错
+         // https://github.com/facebook/create-react-app/issues/5372
+         if (instanceOfMiniCssExtractPlugin) {
+            instanceOfMiniCssExtractPlugin.options.ignoreOrder = true;
+         }
+
+         localConfig.optimization = {
+            ...localConfig.optimization,
+            nodeEnv: 'production',
+            sideEffects: true,
+            concatenateModules: true,
+            runtimeChunk: 'single'
+         };
+      }
+
+      fs.writeFileSync(path.join(craDir, `webpack.${env}.json`), formatConfig(localConfig));
+
+      return localConfig;
+   },
+   devServer: (configFunction) => (proxy, allowedHost) => {
+      const config = configFunction(proxy, allowedHost);
+
+      config.allowedHosts = 'all';
+
+      fs.writeFileSync(path.join(craDir, 'webpack-dev-server.json'), formatConfig(config));
+
+      return config;
+   }
+};
+```
+
+## 效果展示
+
+![](res/2023-07-04-15-05-15.png)
+
+![](res/2023-07-04-15-08-47.png)
+
+![](res/2023-07-04-15-09-21.png)
