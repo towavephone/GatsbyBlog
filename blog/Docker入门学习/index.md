@@ -1340,18 +1340,19 @@ RUN lll ; ls
 
 当 `ENTRYPOINT CMD` 以 shell 格式指定时，SHELL 指令所指定的 shell 也会成为这两个指令的 shell
 
-````dockerfile
+```dockerfile
 SHELL ["/bin/sh", "-cex"]
 
 # /bin/sh -cex "nginx"
 ENTRYPOINT nginx
+```
 
 ```dockerfile
 SHELL ["/bin/sh", "-cex"]
 
 # /bin/sh -cex "nginx"
 CMD nginx
-````
+```
 
 ## ONBUILD 为他人做嫁衣裳
 

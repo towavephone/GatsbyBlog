@@ -1636,7 +1636,7 @@ export default {
 
 config-overrides.js
 
-```js{121-169,253-259}
+```js{121-171,255-261}
 const {
    override,
    addBabelPlugins,
