@@ -9716,7 +9716,7 @@ fn main() {
 
 更多省略规则
 
-````rust
+```rust
 impl<'a> Reader for BufReader<'a> {
     // 'a 在以下方法中不使用
 }
@@ -9725,7 +9725,7 @@ impl<'a> Reader for BufReader<'a> {
 impl Reader for BufReader<'_> {
 
 }
-``
+```
 
 ```rust
 // Rust 2015
@@ -9737,7 +9737,7 @@ struct Ref<'a, T: 'a> {
 struct Ref<'a, T> {
     field: &'a T
 }
-````
+```
 
 ```rust
 /* 使下面代码正常运行 */
@@ -11209,7 +11209,7 @@ fn main() {
 
 为 add_one 函数添加文档
 
-````rust
+```rust
 #![allow(unused)]
 fn main() {
    // in lib.rs
@@ -11228,7 +11228,7 @@ fn main() {
       x + 1
    }
 }
-````
+```
 
 我们可以使用 `cargo doc --open` 来生成 HTML 文件，并自动在浏览器中打开网页。
 
@@ -11358,7 +11358,7 @@ pub fn add_two(x: i32) -> i32 {
 
 > 你只能修改注释，不要修改 fn div
 
-````rust
+```rust
 // in src/compute.rs
 
 /// # Panics
@@ -11376,7 +11376,7 @@ pub fn div(a: i32, b: i32) -> i32 {
 
    a / b
 }
-````
+```
 
 ### 我的解答
 
@@ -11390,7 +11390,7 @@ pub fn div(a: i32, b: i32) -> i32 {
 
 将以下代码添加到 src/compute.rs
 
-````rust
+```rust
 // in src/compute.rs
 
 /// ```
@@ -11410,7 +11410,7 @@ pub fn try_div(a: i32, b: i32) -> Result<i32, String> {
         Ok(a / b)
     }
 }
-````
+```
 
 然后修改以上代码已实现两个目标:
 

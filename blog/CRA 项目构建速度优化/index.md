@@ -1470,7 +1470,7 @@ EXPOSE 3000
 ```bash
 Compiled successfully!
 
-You can now view sim_ui in the browser.
+You can now view in the browser.
 
   Local:            http://localhost:3000
   On Your Network:  http://ip:3000
@@ -1914,6 +1914,48 @@ module.exports = {
       return config;
    }
 };
+```
+
+### 快速脚本启动
+
+由于前端项目在子目录下面，所以需要在根目录执行的命令，方便快速启动本地开发，使用举例：
+
+```bash
+pnpm r # 等价于 pnpm r start:rspack 或 cd 前端项目文件夹 && pnpm start:rspack，这里默认使用 rspack，推荐使用，相比 webpack 它的热更新速度很快
+pnpm r start # 等价于 cd 前端项目文件夹 && pnpm start
+pnpm r i # 等价于 cd 前端项目文件夹 && pnpm i
+```
+
+相关改动如下：
+
+package.json
+
+```json
+{
+   "scripts": {
+      "r": "node sim_ui/scripts/run.js"
+   }
+}
+```
+
+sim_ui/scripts/run.js
+
+```js
+const shelljs = require('shelljs');
+const child_process = require('child_process');
+const argv = require('yargs').argv;
+const SCRIPT = argv['_'].length > 0 ? argv['_'] : ['start:rspack'];
+
+shelljs.cd('sim_ui');
+
+const worker = child_process.spawn('pnpm', SCRIPT, {
+   stdio: 'inherit'
+});
+
+// 当接收到终止信号时，终止子进程
+process.on('SIGINT', () => {
+   worker.kill('SIGINT');
+});
 ```
 
 ## 效果展示

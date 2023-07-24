@@ -484,7 +484,7 @@ function useRef<T>(initialValue: T | null): RefObject<T>;
 
 先来看看类型声明文件中对 useCallback 的定义：
 
-````ts
+```ts
 function useCallback<T extends (...args: any[]) => any>(callback: T, deps: DependencyList): T;
 /**
  * `useMemo` will only recompute the memoized value when one of the `deps` has changed.
@@ -504,7 +504,7 @@ function useCallback<T extends (...args: any[]) => any>(callback: T, deps: Depen
  * @version 16.8.0
  * @see https://reactjs.org/docs/hooks-reference.html#usememo
  */
-````
+```
 
 useCallback 接收一个回调函数和一个依赖数组，只有当依赖数组中的值发生变化时才会重新执行回调函数。来看一个例子：
 
