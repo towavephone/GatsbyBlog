@@ -9,6 +9,8 @@ import Pagination from '../components/TagsPagination';
 import Separator from '../components/Separator';
 import MetaTags from '../components/MetaTags';
 
+const MAX_POSTS = 5;
+
 export default class Tags extends Component {
   componentDidMount() {
     events.on(window, 'keydown', this.handleKeyDown);
