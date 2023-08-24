@@ -28,11 +28,15 @@ export default class Tags extends Component {
     }
 
     const { history, pathContext } = this.props;
-    const { page, posts, tag } = pathContext;
+    const { page, posts, tag, pagesSum } = pathContext;
 
     const getPagePath = (current) => current === 1 ? `/tag/${tag}/` : `/tag/${tag}/page/${current}/`
 
-    const handlePreNext = (path) => {
+    const handleNext = (path) => {
+      if (page === pagesSum) {
+        return;
+      }
+
       if (!path) {
         return;
       }
@@ -42,16 +46,19 @@ export default class Tags extends Component {
 
     const handlePre = (path) => {
       if (page === 1) {
-        history.push('/');
         return;
       }
 
-      handlePreNext(path);
+      if (!path) {
+        return;
+      }
+
+      history.push(path);
     };
 
     const funcMap = {
       ArrowLeft: () => handlePre(getPagePath(page - 1)),
-      ArrowRight: () => handlePreNext(getPagePath(page + 1))
+      ArrowRight: () => handleNext(getPagePath(page + 1))
     };
 
     const jumpToPost = (index) => history.push(get(posts, `${index}.frontmatter.path`));
