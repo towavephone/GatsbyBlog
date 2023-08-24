@@ -28,7 +28,9 @@ export default class Tags extends Component {
     }
 
     const { history, pathContext } = this.props;
-    const { prevPath, nextPath, page, posts } = pathContext;
+    const { page, posts } = pathContext;
+
+    const getPagePath = (current) => current === 1 ? `/tag/${tagName.toLowerCase()}` : `/tag/${tagName.toLowerCase()}/page/${current}`
 
     const handlePreNext = (path) => {
       if (!path) {
@@ -40,14 +42,7 @@ export default class Tags extends Component {
 
     const handlePre = (path) => {
       if (page === 1) {
-        const pathname = get(history, 'location.pathname', '');
-
-        if (pathname.startsWith('/drafts/page')) {
-          history.push('/drafts');
-        } else {
-          history.push('/');
-        }
-
+        history.push('/');
         return;
       }
 
@@ -55,8 +50,8 @@ export default class Tags extends Component {
     };
 
     const funcMap = {
-      ArrowLeft: () => handlePre(prevPath),
-      ArrowRight: () => handlePreNext(nextPath)
+      ArrowLeft: () => handlePre(getPagePath(page - 1)),
+      ArrowRight: () => handlePreNext(getPagePath(page + 1))
     };
 
     const jumpToPost = (index) => history.push(get(posts, `${index}.frontmatter.path`));
