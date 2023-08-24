@@ -28,9 +28,9 @@ export default class Tags extends Component {
     }
 
     const { history, pathContext } = this.props;
-    const { page, posts } = pathContext;
+    const { page, posts, tag } = pathContext;
 
-    const getPagePath = (current) => current === 1 ? `/tag/${tagName.toLowerCase()}` : `/tag/${tagName.toLowerCase()}/page/${current}`
+    const getPagePath = (current) => current === 1 ? `/tag/${tag}/` : `/tag/${tag}/page/${current}/`
 
     const handlePreNext = (path) => {
       if (!path) {
