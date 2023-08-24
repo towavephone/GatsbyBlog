@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import events from 'dom-helpers/events';
+import { get } from 'lodash';
 
 import Posts from '../components/Posts';
 import Pagination from '../components/TagsPagination';

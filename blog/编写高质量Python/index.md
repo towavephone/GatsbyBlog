@@ -7937,7 +7937,7 @@ class LoggingLazyRecord(LazyRecord):
     def __getattr__(self, name):
         print(
             f'* Called __getattr__({name!r}), populating instance dictionary')
-        result = super() .__getattr__(name)
+        result = super().__getattr__(name)
         print(f'* Returning {result!r}')
         return result
 
