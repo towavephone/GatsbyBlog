@@ -8352,4 +8352,449 @@ Left for <class '__main__.Bottom'>
 3. `__init_subclass__` 能够用来检查子类定义得是否合理，如果不合理，那么可以提前报错，让程序无法创建出这种子类的对象。
 4. 在分层的或者涉及多重继承的类体系里面，一定别忘了在你写的这些类的`__init_subclass__` 内通过 super() 来调用超类的 `__init_subclass__` 方法，以便按照正确的顺序触发各类的验证逻辑。
 
+## 第 49 条：用 `__init_subclass__` 记录现有的子类
+
+元类还有个常见的用途，是可以自动记录（或者说注册）程序之中的类型。利用这项功能，我们就能根据某个标识符反向查出它所对应的类。
+
+例如，笔者想按照自己的办法给 Python 对象做序列化处理，并将其表示成 JSON 格式的数据。要实现这个功能，首先得想办法把对象转换成 JSON 字符串。笔者在这里设计一套通用的方案，让那些想要支持这种序列化功能的类都来继承下面这个 Serializable 基类，并把构造时所用的参数上报给它，这样的话，它就可以把这些参数转换成一份 JSON 字典。
+
+```py
+import json
+
+
+class Serializable:
+    def __init__(self, *args):
+        self.args = args
+
+    def serialize(self):
+        return json.dumps({'args': self.args})
+```
+
+有了这个类，我们很容易就能把 Point2D 这样简单而不可变的数据转化成 JSON 字符串。
+
+```py
+import json
+
+
+class Serializable:
+    def __init__(self, *args):
+        self.args = args
+
+    def serialize(self):
+        return json.dumps({'args': self.args})
+
+
+class Point2D(Serializable):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f'Point2D({self.x}, {self.y})'
+
+
+point = Point2D(5, 3)
+print('Object:    ', point)
+print('Serialized:', point.serialize())
+
+>>>
+Object:     Point2D(5, 3)
+Serialized: {"args": [5, 3]}
+```
+
+假设还需要实现反序列化的功能，也就是把 JSON 格式的字符串还原成它所表示的那个 Point2D 对象。下面，我们定义这样一个类，让它继承自 Serializable，从而获得序列化的功能，并把反序列化的功能留给自己或自己的子类去实现，这样它就成了一个既支持序列化又支持反序列化的类。
+
+```py
+class Deserializable(Serializable):
+    @classmethod
+    def deserialize(cls, json_data):
+        params = json.loads(json_data)
+        return cls(*params['args'])
+```
+
+我们可以通过这样一套通用的方式，让比较简单的不可变数据同时具备序列化与反序列化的功能。
+
+```py
+import json
+
+
+class Serializable:
+    def __init__(self, *args):
+        self.args = args
+
+    def serialize(self):
+        return json.dumps({'args': self.args})
+
+
+class Deserializable(Serializable):
+    @classmethod
+    def deserialize(cls, json_data):
+        params = json.loads(json_data)
+        return cls(*params['args'])
+
+
+class BetterPoint2D(Deserializable):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f'Point2D({self.x}, {self.y})'
+
+
+before = BetterPoint2D(5, 3)
+print('Before:    ',  before)
+data = before.serialize()
+print('Serialized:', data)
+after = BetterPoint2D.deserialize(data)
+print('After:     ', after)
+
+>>>
+Before:     Point2D(5, 3)
+Serialized: {"args": [5, 3]}
+After:      Point2D(5, 3)
+```
+
+这个方案的缺点是，我们必须提前知道 JSON 字符串所表示的类型（例如 Point2D 或 BetterPoint2D），然后才能把它还原成对象。如果只用一个函数就能把各种 JSON 字符串分别还原成对应类型的 Python 对象，那就更好了。
+
+为了实现这项功能，我们把对象所属的类名也添加到序列化之后的 JSON 数据里面。
+
+然后，我们用一份字典把支持序列化与反序列化的类记录下来，字典的键为类的名称，与还原这种对象时所要用到的构造函数相对应。这样的话，凡是经由 `register_class` 注册的类，其 JSON 数据都可以通过 deserialize 函数还原成相应的对象。
+
+为确保 deserialize 函数能够正确还原 JSON 数据，我们必须把想要支持反序列化功能的类通过 `register_class` 注册进去。
+
+这样就可以把任意的 JSON 字符串都还原为相应的对象，而不需要明确指出类名，因为 deserialize 函数会从注册字典里面查询。
+
+```py
+import json
+
+
+class BetterSerializable:
+    def __init__(self, *args):
+        self.args = args
+
+    def serialize(self):
+        return json.dumps({
+            'class': self.__class__.__name__,
+            'args': self.args,
+        })
+
+    def __repr__(self):
+        name = self.__class__.__name__
+        args_str = ', '.join(str(x) for x in self.args)
+        return f'{name}({args_str})'
+
+
+registry = {}
+
+
+def register_class(target_class):
+    registry[target_class.__name__] = target_class
+
+
+def deserialize(data):
+    params = json.loads(data)
+    name = params['class']
+    target_class = registry[name]
+    return target_class(*params['args'])
+
+
+class EvenBetterPoint2D(BetterSerializable):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.x = x
+        self.y = y
+
+
+register_class(EvenBetterPoint2D)
+
+
+before = EvenBetterPoint2D(5, 3)
+print('Before:    ', before)
+data = before.serialize()
+print('Serialized:', data)
+after = deserialize(data)
+print('After:     ', after)
+
+>>>
+Before:     EvenBetterPoint2D(5, 3)
+Serialized: {"class": "EvenBetterPoint2D", "args": [5, 3]}
+After:      EvenBetterPoint2D(5, 3)
+```
+
+当然这个方案也有不好的地方，那就是开发者可能会忘记调用 `register_class`。
+
+如果没有注册就想还原数据，那么程序会在通过 deserialize 函数反序列化这份数据时出错。
+
+可以看到，尽管 Point3D 已经继承了 BetterSerializable，但这只能让它享有序列化的功能，至于反序列化，则必须得在定义完 class 语句体之后，手工调用 `register_class` 函数进行注册后才能享有。所以，这个方案很容易出错，编程新手用起来尤其困难。类修饰器（class decorator）也会有这种问题（适用场合参见第 51 条）。
+
+那么，怎样才能让子类只需继承 BetterSerializable，就能同时获得序列化与反序列化功能，而不用专门手动通过 `register_class` 注册呢？这可以利用元类实现，也就是让元类把子类的 class 定义拦截下来，然后自动调用 `register_class` 去注册（参见第 48 条）。下面，我们就写这样一个元类，让它在得知开发者定义了 RegisteredSerializable 的某个子类之后，立刻通过 `register_class` 注册。
+
+用户只要把 RegisteredSerializable 的子类定义完，就可以确信程序已经通过 `register_class` 将这个子类注册过了，所以它肯定支持反序列化。
+
+```py
+import json
+
+
+class BetterSerializable:
+    def __init__(self, *args):
+        self.args = args
+
+    def serialize(self):
+        return json.dumps({
+            'class': self.__class__.__name__,
+            'args': self.args,
+        })
+
+    def __repr__(self):
+        name = self.__class__.__name__
+        args_str = ', '.join(str(x) for x in self.args)
+        return f'{name}({args_str})'
+
+
+registry = {}
+
+
+def register_class(target_class):
+    registry[target_class.__name__] = target_class
+
+
+def deserialize(data):
+    params = json.loads(data)
+    name = params['class']
+    target_class = registry[name]
+    return target_class(*params['args'])
+
+
+class Meta(type):
+    def __new__(meta, name, bases, class_dict):
+        cls = type.__new__(meta, name, bases, class_dict)
+        register_class(cls)
+        return cls
+
+
+class RegisteredSerializable(BetterSerializable,
+                             metaclass=Meta):
+    pass
+
+
+class Vector3D(RegisteredSerializable):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z)
+        self.x, self.y, self.z = x, y, z
+
+
+before = Vector3D(10, -7, 3)
+print('Before:    ', before)
+data = before.serialize()
+print('Serialized:', data)
+print('After:     ', deserialize(data))
+
+>>>
+Before:     Vector3D(10, -7, 3)
+Serialized: {"class": "Vector3D", "args": [10, -7, 3]}
+After:      Vector3D(10, -7, 3)
+```
+
+还有一种办法比上面的实现方式更简单，那就是通过名为 `__init_subclass__` 的特殊类方法来实现。这是 Python 3.6 引入的新写法，我们只需要编很少的代码，就可以把自己的逻辑运用到子类上面。有些编程新手可能不太熟悉元类那种比较复杂的写法，但如果改用下面这种方案，他们应该很容易就能看懂。
+
+```py
+import json
+
+
+class BetterSerializable:
+    def __init__(self, *args):
+        self.args = args
+
+    def serialize(self):
+        return json.dumps({
+            'class': self.__class__.__name__,
+            'args': self.args,
+        })
+
+    def __repr__(self):
+        name = self.__class__.__name__
+        args_str = ', '.join(str(x) for x in self.args)
+        return f'{name}({args_str})'
+
+
+registry = {}
+
+
+def register_class(target_class):
+    registry[target_class.__name__] = target_class
+
+
+def deserialize(data):
+    params = json.loads(data)
+    name = params['class']
+    target_class = registry[name]
+    return target_class(*params['args'])
+
+
+class BetterRegisteredSerializable(BetterSerializable):
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        register_class(cls)
+
+
+class Vector1D(BetterRegisteredSerializable):
+    def __init__(self, magnitude):
+        super().__init__(magnitude)
+        self.magnitude = magnitude
+
+
+before = Vector1D(6)
+print('Before:    ', before)
+data = before.serialize()
+print('Serialized:', data)
+print('After:     ', deserialize(data))
+
+>>>
+Before:     Vector1D(6)
+Serialized: {"class": "Vector1D", "args": [6]}
+After:      Vector1D(6)
+```
+
+在类体系正确无误的前提下，通过 `__init_subclass__`（或元类）自动注册子类可以避免程序由于用户忘记注册而引发问题。这不仅适用于上述序列化与反序列化功能的实现，而且还可以用在数据库的对象关系映射（object-relational mapping，ORM）、可扩展的插件系统以及回调挂钩上面。
+
+### 总结
+
+1. 类注册（Class registration）是个相当有用的模式，可以用来构建模块式的 Python 程序。
+2. 我们可以通过基类的元类把用户从这个基类派生出来的子类自动注册给系统。
+3. 利用元类实现类注册可以防止由于用户忘记注册而导致程序出现问题。
+4. 优先考虑通过 `__init_subclass__` 实现自动注册，而不要用标准的元类机制来实现，因为 `__init_subclass__` 更清晰，更便于初学者理解。
+
+## 第 50 条：用 `__set_name__` 给类属性加注解
+
+元类还有一个更有用的功能，那就是可以在某个类真正投入使用之前，率先修改或注解这个类所定义的属性。这通常需要与描述符（descriptor）搭配使用（参见第 46 条），这样可以让我们更详细地了解这些属性在定义它们的那个类里是如何使用的。
+
+例如，我们要定义一个新的类，来表示客户数据库中的每一行数据。这个类需要定义一些属性，与数据表中的各列相对应，每个属性都分别表示这行数据在这一列的取值。下面用描述符类来实现这些属性，把它们和数据表中同名的列联系起来。
+
+```py
+class Field:
+    def __init__(self, name):
+        self.name = name
+        self.internal_name = '_' + self.name
+
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+        return getattr(instance, self.internal_name, '')
+
+    def __set__(self, instance, value):
+        setattr(instance, self.internal_name, value)
+```
+
+Field 描述符的 name 属性指的就是数据表中那一列的列名，所以，我们可以通过内置的 setattr 函数把每行数据在这个属性上面的取值保存到那行数据自己的状态字典里面去，只不过属性名应该稍加调整，我们给它前面加个下划线表示它是受到保护的属性。另外，我们通过 getattr 函数实现属性加载功能。这种写法，看上去似乎要比把每个实例在这项属性上面的取值都保存到 weakref 字典里面更简单（那种字典是 weakref 模块所提供的特殊字典，用以防止内存泄漏）。
+
+下面定义 Customer 类，每个 Customer 都表示数据表中的一行数据，其中的四个属性分别对应于这行数据在那四列上面的取值。
+
+这个类用起来很简单。可以看到，早前定义的 Field 描述符能够正确地修改 cust 实例中的 `__dict__` 字典。
+
+```py
+class Field:
+    def __init__(self, name):
+        self.name = name
+        self.internal_name = '_' + self.name
+
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+        return getattr(instance, self.internal_name, '')
+
+    def __set__(self, instance, value):
+        setattr(instance, self.internal_name, value)
+
+
+class Customer:
+    # Class attributes
+    first_name = Field('first_name')
+    last_name = Field('last_name')
+    prefix = Field('prefix')
+    suffix = Field('suffix')
+
+
+cust = Customer()
+print(f'Before: {cust.first_name!r} {cust.__dict__}')
+cust.first_name = 'Euclid'
+print(f'After:  {cust.first_name!r} {cust.__dict__}')
+
+>>>
+Before: '' {}
+After:  'Euclid' {'_first_name': 'Euclid'}
+```
+
+这样写虽然没错，但是类的定义似乎有点重复。在给 Customer 类定义字段时，既然等号左边已经写出了字段的名称（例如 `first_name`），那为什么等号右边的 Field 构造函数里，还要再写一次呢？
+
+```py
+class Customer:
+    # Left side is redundant with right side
+    first_name = Field('first_name')
+    ...
+```
+
+这是因为，Customer 类在定义字段时，要按照从右到左的顺序解读，而不是像阅读代码时那样，从左到右阅读。所以，程序必须首先处理等号右边的部分，也就是 `Field('first_name')`，然后才能把这个 Field 构造函数所返回的值赋给左边的 `first_name`。等号右边的 Field 实例没办法提前知道，它将被赋给类的哪一个属性。
+
+这样的重复代码，可以利用元类来消除。元类可以当作 class 语句的挂钩，只要 class 语句体定义完毕，元类就会看到它的写法并尽快做出应对（具体原理参见第 48 条）。在本例中，我们可以让元类自动给每个 Field 描述符的 name 与 `internal_name` 赋值，而不用再像原来那样，需要开发者把字段名称重复书写一遍并手动传给 Field 的构造函数。
+
+```py
+class Meta(type):
+    def __new__(meta, name, bases, class_dict):
+        for key, value in class_dict.items():
+            if isinstance(value, Field):
+                value.name = key
+                value.internal_name = '_' + key
+        cls = type.__new__(meta, name, bases, class_dict)
+        return cls
+```
+
+下面定义一个基类，让该基类把刚才定义好的 Meta 当成元类。凡是表示数据库某行的类都继承自该基类，以确保它们可以利用元类所提供的功能。
+
+```py
+class DatabaseRow(metaclass=Meta):
+    pass
+```
+
+为了跟元类配合，Field 描述符需要稍加调整。它的大部分代码都可以沿用，只是现在已经不用再要求调用者把名称传给构造函数了，因为这次，元类的 `__new__` 方法会自动设置名称。
+
+```py
+
+```
+
+有了元类、DatabaseRow 基类以及修改过的 Field 描述符，我们在给客户类定义字段时，就不用手工传入字段名了，代码也不像之前那样冗余了。
+
+这个新类的效果与早前那个类一样。
+
+```py
+
+```
+
+这个办法的缺点是，要想在类中声明 Field 字段，这个类必须从 DatabaseRow 继承。假如忘了继承，或者所面对的类体系在结构上不方便这样继承，那么代码就无法正常运行。
+
+```py
+
+```
+
+这个问题可以通过给描述符定义 `__set_name__` 特殊方法来解决。这是 Python 3.6 引入的新功能：如果某个类用这种描述符的实例来定义字段，那么系统就会在描述符上面触发这个特殊方法。系统会把采用这个描述符实例作字段的那个类以及字段的名称，当成参数传给 `__set_name__`。下面我们将 `Meta.__new__` 之中的逻辑移动到 Field 描述符的 `__set_name__` 里面，这样一来，就不用定义元类了。
+
+```py
+
+```
+
+现在，我们可以直接在类里通过 Field 描述符来定义字段，而不用再让这个类继承某个基类，还能把元类给省掉。
+
+```py
+
+```
+
+### 总结
+
+1. 我们可以通过元类把利用这个元类所定义的其他类拦截下来，从而在程序开始使用那些类之前，先对其中定义的属性做出修改。
+2. 描述符与元类搭配起来，可以形成一套强大的机制，让我们既能采用声明式的写法来定义行为，又能在程序运行时检视这个行为的具体执行情况。
+3. 你可以给描述符定义 `__set_name__` 方法，让系统把使用这个描述符做属性的那个类以及它在类里的属性名通过方法的参数告诉你。
+4. 用描述符直接操纵每个实例的属性字典，要比把所有实例的属性都放到一份字典里更好，因为后者要求我们必须使用 weakref 内置模块之中的特殊字典来记录每个实例的属性值以防止内存泄漏。
+
 // TODO 编写高质量 Python 待完成
