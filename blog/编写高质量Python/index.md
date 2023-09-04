@@ -2981,7 +2981,7 @@ My numbers are: 1, 2
 Hi there
 ```
 
-即便没有值需要填充到信息里面，也必须专门传一个空白的列表进去，这样显得多余，而且让代码看起来比较乱。最好是能允许调用者把第二个参数留空。在 Python 里，可以给最后一个位置参数加前缀 \*，这样调用者就只需要提供不带星号的那些参数，然后可以不再指其他参数，也可以继续指定任意数量的位置参数。函数的主体代码不用改，只修改调用代码即可。
+即便没有值需要填充到信息里面，也必须专门传一个空白的列表进去，这样显得多余，而且让代码看起来比较乱。最好是能允许调用者把第二个参数留空。在 Python 里，可以给最后一个位置参数加前缀 `*`，这样调用者就只需要提供不带星号的那些参数，然后可以不再指其他参数，也可以继续指定任意数量的位置参数。函数的主体代码不用改，只修改调用代码即可。
 
 ```py
 def log(message, *values):  # The only difference
@@ -3002,7 +3002,7 @@ Hi there
 
 这种写法与拆解数据时用在赋值语句左边带星号的 unpacking 操作非常类似（参见第 13 条）。
 
-如果想把已有序列（例如某列表）里面的元素当成参数传给像 log 这样的参数个数可变的函数（variadic function），那么可以在传递序列的时采用 \* 操作符。这会让 Python 把序列中的元素都当成位置参数传给这个函数。
+如果想把已有序列（例如某列表）里面的元素当成参数传给像 log 这样的参数个数可变的函数（variadic function），那么可以在传递序列的时采用 `*` 操作符。这会让 Python 把序列中的元素都当成位置参数传给这个函数。
 
 ```py
 favorites = [7, 33, 99]
@@ -3014,7 +3014,7 @@ Favorite colors: 7, 33, 99
 
 令函数接受数量可变的位置参数，可能导致两个问题。
 
-1. 程序总是必须先把这些参数转化成一个元组，然后才能把它们当成可选的位置参数传给函数。这意味着，如果调用函数时，把带 \* 操作符的生成器传了过去，那么程序必须先把这个生成器里的所有元素迭代完（以便形成元组），然后才能继续往下执行（相关知识，参见第 30 条）。这个元组包含生成器所给出的每个值，这可能耗费大量内存，甚至会让程序崩溃。
+1. 程序总是必须先把这些参数转化成一个元组，然后才能把它们当成可选的位置参数传给函数。这意味着，如果调用函数时，把带 `*` 操作符的生成器传了过去，那么程序必须先把这个生成器里的所有元素迭代完（以便形成元组），然后才能继续往下执行（相关知识，参见第 30 条）。这个元组包含生成器所给出的每个值，这可能耗费大量内存，甚至会让程序崩溃。
 
    ```py
    def my_generator():
@@ -3160,7 +3160,7 @@ gamma = 4
 
    ```py
    def flow_rate(weight_diff, time_diff):
-    return weight_diff / time_diff
+       return weight_diff / time_diff
 
    weight_diff = 0.5
    time_diff = 3
@@ -3375,7 +3375,7 @@ def log_typed(message: str, when: Optional[datetime] = None) -> None:
 
 ### 总结
 
-1. 参数的默认值只会计算一次，也就是在系统把定义函数的那个模块加载进来的时候。所以，如果默认值将来可能由调用方修改（例如{}、[]）或者要随着调用时的情况变化（例如 datetime.now()），那么程序就会出现奇怪的效果。
+1. 参数的默认值只会计算一次，也就是在系统把定义函数的那个模块加载进来的时候。所以，如果默认值将来可能由调用方修改（例如 {}、[]）或者要随着调用时的情况变化（例如 datetime.now()），那么程序就会出现奇怪的效果。
 2. 如果关键字参数的默认值属于这种会发生变化的值，那就应该写成 None，并且要在 docstring 里面描述函数此时的默认行为。
 3. 默认值为 None 的关键字参数，也可以添加类型注解。
 
@@ -8894,5 +8894,405 @@ After : 'Mersenne' {'_first_name': 'Mersenne'}
 2. 描述符与元类搭配起来，可以形成一套强大的机制，让我们既能采用声明式的写法来定义行为，又能在程序运行时检视这个行为的具体执行情况。
 3. 你可以给描述符定义 `__set_name__` 方法，让系统把使用这个描述符做属性的那个类以及它在类里的属性名通过方法的参数告诉你。
 4. 用描述符直接操纵每个实例的属性字典，要比把所有实例的属性都放到一份字典里更好，因为后者要求我们必须使用 weakref 内置模块之中的特殊字典来记录每个实例的属性值以防止内存泄漏。
+
+## 第 51 条：优先考虑通过类修饰器来提供可组合的扩充功能，不要使用元类
+
+尽管元类（参见第 48 条与第 49 条）允许我们用各种方式来定制其他类的创建逻辑，但有些情况它未必能够处理得很好。
+
+例如，要写一个辅助函数来修饰类中的每个方法，把这些方法在执行时所用的参数、所返回的值以及所抛出的异常都打印出来，以便调试。这样的辅助函数可以定义成修饰器（参见第 26 条）。
+
+如果我们从标准的 dict 里面派生了下面这个子类（参见第 43 条），那就可以把刚才的 `trace_func` 修饰器运用到这个子类所提供的那几个特殊方法上面。
+
+下面，通过 TraceDict 类的实例来验证刚才写的那几个特殊方法确实受到了修饰。
+
+```py
+from functools import wraps
+
+
+def trace_func(func):
+    if hasattr(func, 'tracing'):  # Only decorate once
+        return func
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = None
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            result = e
+            raise
+        finally:
+            print(f'{func.__name__}({args!r}, {kwargs!r}) -> '
+                  f'{result!r}')
+
+    wrapper.tracing = True
+    return wrapper
+
+
+class TraceDict(dict):
+    @trace_func
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @trace_func
+    def __setitem__(self, *args, **kwargs):
+        return super().__setitem__(*args, **kwargs)
+
+    @trace_func
+    def __getitem__(self, *args, **kwargs):
+        return super().__getitem__(*args, **kwargs)
+
+
+trace_dict = TraceDict([('hi', 1)])
+trace_dict['there'] = 2
+trace_dict['hi']
+try:
+    trace_dict['does not exist']
+except KeyError:
+    pass  # Expected
+
+>>>
+__init__(({'hi': 1}, [('hi', 1)]), {}) -> None
+__setitem__(({'hi': 1, 'there': 2}, 'there', 2), {}) -> None
+__getitem__(({'hi': 1, 'there': 2}, 'hi'), {}) -> 1
+__getitem__(({'hi': 1, 'there': 2}, 'does not exist'), {}) -> KeyError('does not exist')
+```
+
+这样写有个缺点，就是必须在子类之中把需要受 `@trace_func` 修饰的方法全都重写一遍，即便子类只想沿用超类的实现方式，也还是得这样做才行。这导致子类里面出现大量的样板代码，让程序变得难以阅读，而且比较容易出错。另外，如果 dict 超类以后添加了新方法，那必须在 TraceDict 子类里面明确重写这个方法，否则它就不会为 `@trace_func` 所修饰。
+
+要想解决这个问题，其中一个办法是通过元类自动修饰那个类的所有方法。例如，下面的就是这样一个元类，它可以拦截利用本类所写的新类型，并把那个类型里面的每个函数或方法都分别封装到 `trace_func` 修饰器之中。
+
+现在，我们只需要让子类继承 dict，并把刚写的 TraceMeta 当作子类的 metaclass 就行了。
+
+```py
+import types
+from functools import wraps
+
+
+def trace_func(func):
+    if hasattr(func, 'tracing'):  # Only decorate once
+        return func
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = None
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            result = e
+            raise
+        finally:
+            print(f'{func.__name__}({args!r}, {kwargs!r}) -> '
+                  f'{result!r}')
+
+    wrapper.tracing = True
+    return wrapper
+
+
+trace_types = (
+    types.MethodType,
+    types.FunctionType,
+    types.BuiltinFunctionType,
+    types.BuiltinMethodType,
+    types.MethodDescriptorType,
+    types.ClassMethodDescriptorType
+)
+
+
+class TraceMeta(type):
+    def __new__(meta, name, bases, class_dict):
+        klass = super().__new__(meta, name, bases, class_dict)
+        for key in dir(klass):
+            value = getattr(klass, key)
+            if isinstance(value, trace_types):
+                wrapped = trace_func(value)
+                setattr(klass, key, wrapped)
+
+        return klass
+
+
+class TraceDict(dict, metaclass=TraceMeta):
+    pass
+
+
+trace_dict = TraceDict([('hi', 1)])
+trace_dict['there'] = 2
+trace_dict['hi']
+try:
+    trace_dict['does not exist']
+except KeyError:
+    pass  # Expected
+
+>>>
+__new__((<class '__main__.TraceDict'>, [('hi', 1)]), {}) -> {}
+__getitem__(({'hi': 1, 'there': 2}, 'hi'), {}) -> 1
+__getitem__(({'hi': 1, 'there': 2}, 'does not exist'), {}) -> KeyError('does not exist')
+```
+
+这种办法确实有效，而且还把前面的实现方案中忘记修饰的 `__new__` 方法也自动修饰了。但如果子类所继承的那个超类本身已经指定了它自己的 metaclass，那会如何呢？
+
+```py
+class OtherMeta(type):
+    pass
+
+
+class SimpleDict(dict, metaclass=OtherMeta):
+    pass
+
+
+class TraceDict(SimpleDict, metaclass=TraceMeta):
+    pass
+
+>>>
+Traceback ...
+TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict) subclass of the metaclasses of all its bases
+```
+
+这次程序无法运行，因为子类的 metaclass 是 TraceMeta，而超类的 metaclass 是 OtherMeta，但 TraceMeta 并不是从 OtherMeta 里面继承来的。从理论上讲，我们可以让 TraceMeta 继承 OtherMeta，从而解决这个问题。
+
+```py
+import types
+from functools import wraps
+
+
+def trace_func(func):
+    if hasattr(func, 'tracing'):  # Only decorate once
+        return func
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = None
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            result = e
+            raise
+        finally:
+            print(f'{func.__name__}({args!r}, {kwargs!r}) -> '
+                  f'{result!r}')
+
+    wrapper.tracing = True
+    return wrapper
+
+
+trace_types = (
+    types.MethodType,
+    types.FunctionType,
+    types.BuiltinFunctionType,
+    types.BuiltinMethodType,
+    types.MethodDescriptorType,
+    types.ClassMethodDescriptorType
+)
+
+
+class OtherMeta(type):
+    pass
+
+
+class TraceMeta(OtherMeta):
+    def __new__(meta, name, bases, class_dict):
+        klass = super().__new__(meta, name, bases, class_dict)
+        for key in dir(klass):
+            value = getattr(klass, key)
+            if isinstance(value, trace_types):
+                wrapped = trace_func(value)
+                setattr(klass, key, wrapped)
+
+        return klass
+
+
+class SimpleDict(dict, metaclass=OtherMeta):
+    pass
+
+
+class TraceDict(SimpleDict, metaclass=TraceMeta):
+    pass
+
+
+trace_dict = TraceDict([('hi', 1)])
+trace_dict['there'] = 2
+trace_dict['hi']
+try:
+    trace_dict['does not exist']
+except KeyError:
+    pass  # Expected
+
+>>>
+__new__((<class '__main__.TraceDict'>, [('hi', 1)]), {}) -> {}
+__getitem__(({'hi': 1, 'there': 2}, 'hi'), {}) -> 1
+__getitem__(({'hi': 1, 'there': 2}, 'does not exist'), {}) -> KeyError('does not exist')
+```
+
+然而，如果 TraceMeta 不是我们自己写的，而是来自某个程序库，那就没办法手工修改它了。另外，如果想同时使用多个像 TraceMeta 这样的元类所提供的逻辑，那么这套方案无法满足需求，因为在定义类的时候，metaclass 后面只能写一个元类。总之，这个方案对受元类控制的子类提出了过多的要求。
+
+为此，我们可以换一种方案，也就是改用类修饰器（class decorator）来实现。这种修饰器与函数修饰器相似，都通过 @ 符号来施加，但它并不施加在函数上面，而是施加在类的上面。编写类修饰器时，我们可以修改或重建它所修饰的类，并通过 return 语句返回处理结果。
+
+```py
+def my_class_decorator(klass):
+    klass.extra_param = 'hello'
+    return klass
+
+
+@my_class_decorator
+class MyClass:
+    pass
+
+
+print(MyClass)
+print(MyClass.extra_param)
+
+>>>
+<class '__main__.MyClass'>
+hello
+```
+
+现在就来实现这样一个类修饰器，它可以施加在类上面，让该类的所有方法与函数都能自动封装在 trace_func 之中。这个类修饰器本身是个独立的函数，它的代码基本上可以沿用早前所写的 `TraceMeta.__new__`。这套方案要比采用元类实现的方案简单得多。
+
+我们把类修饰器运用到自定义的 dict 子类上面，这样它就有了与刚才那套元类方案相同的功能。
+
+```py
+import types
+from functools import wraps
+
+
+def trace_func(func):
+    if hasattr(func, 'tracing'):  # Only decorate once
+        return func
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = None
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            result = e
+            raise
+        finally:
+            print(f'{func.__name__}({args!r}, {kwargs!r}) -> '
+                  f'{result!r}')
+
+    wrapper.tracing = True
+    return wrapper
+
+
+trace_types = (
+    types.MethodType,
+    types.FunctionType,
+    types.BuiltinFunctionType,
+    types.BuiltinMethodType,
+    types.MethodDescriptorType,
+    types.ClassMethodDescriptorType
+)
+
+
+def trace(klass):
+    for key in dir(klass):
+        value = getattr(klass, key)
+        if isinstance(value, trace_types):
+            wrapped = trace_func(value)
+            setattr(klass, key, wrapped)
+    return klass
+
+
+@trace
+class TraceDict(dict):
+    pass
+
+
+trace_dict = TraceDict([('hi', 1)])
+trace_dict['there'] = 2
+trace_dict['hi']
+try:
+    trace_dict['does not exist']
+except KeyError:
+    pass  # Expected
+
+>>>
+__new__((<class '__main__.TraceDict'>, [('hi', 1)]), {}) -> {}
+__getitem__(({'hi': 1, 'there': 2}, 'hi'), {}) -> 1
+__getitem__(({'hi': 1, 'there': 2}, 'does not exist'), {}) -> KeyError('does not exist')
+```
+
+另外，类修饰器也能施加到那种已经有 metaclass 的类上面。
+
+```py
+import types
+from functools import wraps
+
+
+def trace_func(func):
+    if hasattr(func, 'tracing'):  # Only decorate once
+        return func
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = None
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            result = e
+            raise
+        finally:
+            print(f'{func.__name__}({args!r}, {kwargs!r}) -> '
+                  f'{result!r}')
+
+    wrapper.tracing = True
+    return wrapper
+
+
+trace_types = (
+    types.MethodType,
+    types.FunctionType,
+    types.BuiltinFunctionType,
+    types.BuiltinMethodType,
+    types.MethodDescriptorType,
+    types.ClassMethodDescriptorType
+)
+
+
+def trace(klass):
+    for key in dir(klass):
+        value = getattr(klass, key)
+        if isinstance(value, trace_types):
+            wrapped = trace_func(value)
+            setattr(klass, key, wrapped)
+    return klass
+
+
+class OtherMeta(type):
+    pass
+
+
+@trace
+class TraceDict(dict, metaclass=OtherMeta):
+    pass
+
+
+trace_dict = TraceDict([('hi', 1)])
+trace_dict['there'] = 2
+trace_dict['hi']
+try:
+    trace_dict['does not exist']
+except KeyError:
+    pass  # Expected
+
+>>>
+__new__((<class '__main__.TraceDict'>, [('hi', 1)]), {}) -> {}
+__getitem__(({'hi': 1, 'there': 2}, 'hi'), {}) -> 1
+__getitem__(({'hi': 1, 'there': 2}, 'does not exist'), {}) -> KeyError('does not exist')
+```
+
+总之，如果想用一套可组合的机制来扩充类的功能，那么最好是通过类修饰器实现（第 73 条会讲到一种很有用的类修饰器，名为 `functools.total_ordering`）。
+
+### 总结
+
+1. 类修饰器其实就是个函数，只不过它可以通过参数获知自己所修饰的类，从而重建或调整这个类并返回修改结果。
+2. 如果要给类中的每个方法或属性都施加一套逻辑，而且还想尽量少写一些例行代码，那么类修饰器是个很值得考虑的方案。
+3. 元类之间很难组合，而类修饰器则比较灵活，它们可以施加在同一个类上，并且不会发生冲突。
 
 // TODO 编写高质量 Python 待完成
