@@ -8758,10 +8758,23 @@ class DatabaseRow(metaclass=Meta):
     pass
 ```
 
-为了跟元类配合，Field 描述符需要稍加调整。它的大部分代码都可以沿用，只是现在已经不用再要求调用者把名称传给构造函数了，因为这次，元类的 `__new__` 方法会自动设置名称。
+为了跟元类配合，Field 描述符需要稍加调整。它的大部分代码都可以沿用，只是现在已经不用再要求调用者把名称传给构造函数了，因为这次元类的 `__new__` 方法会自动设置名称。
 
 ```py
+class Field:
+    def __init__(self):
+        # These will be assigned by the metaclass.
+        self.name = None
+        self.internal_name = None
 
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+
+        return getattr(instance, self.internal_name, '')
+
+    def __set__(self, instance, value):
+        setattr(instance, self.internal_name, value)
 ```
 
 有了元类、DatabaseRow 基类以及修改过的 Field 描述符，我们在给客户类定义字段时，就不用手工传入字段名了，代码也不像之前那样冗余了。
@@ -8769,25 +8782,110 @@ class DatabaseRow(metaclass=Meta):
 这个新类的效果与早前那个类一样。
 
 ```py
+class Field:
+    def __init__(self):
+        # These will be assigned by the metaclass.
+        self.name = None
+        self.internal_name = None
 
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+        return getattr(instance, self.internal_name, '')
+
+    def __set__(self, instance, value):
+        setattr(instance, self.internal_name, value)
+
+
+class Meta(type):
+    def __new__(meta, name, bases, class_dict):
+        for key, value in class_dict.items():
+            if isinstance(value, Field):
+                value.name = key
+                value.internal_name = '_' + key
+        cls = type.__new__(meta, name, bases, class_dict)
+        return cls
+
+
+class DatabaseRow(metaclass=Meta):
+    pass
+
+
+class BetterCustomer(DatabaseRow):
+    # Class attributes
+    first_name = Field()
+    last_name = Field()
+    prefix = Field()
+    suffix = Field()
+
+
+cust = BetterCustomer()
+print(f'Before: {cust.first_name!r} {cust.__dict__}')
+cust.first_name = 'Euler'
+print(f'After : {cust.first_name!r} {cust.__dict__}')
+
+>>>
+Before: '' {}
+After : 'Euler' {'_first_name': 'Euler'}
 ```
 
 这个办法的缺点是，要想在类中声明 Field 字段，这个类必须从 DatabaseRow 继承。假如忘了继承，或者所面对的类体系在结构上不方便这样继承，那么代码就无法正常运行。
 
 ```py
+class BrokenCustomer:
+    first_name = Field()
+    last_name = Field()
+    prefix = Field()
+    suffix = Field()
 
+
+cust = BrokenCustomer()
+cust.first_name = 'Mersenne'
+
+>>>
+Traceback ...
+TypeError: attribute name must be string, not 'NoneType'
 ```
 
 这个问题可以通过给描述符定义 `__set_name__` 特殊方法来解决。这是 Python 3.6 引入的新功能：如果某个类用这种描述符的实例来定义字段，那么系统就会在描述符上面触发这个特殊方法。系统会把采用这个描述符实例作字段的那个类以及字段的名称，当成参数传给 `__set_name__`。下面我们将 `Meta.__new__` 之中的逻辑移动到 Field 描述符的 `__set_name__` 里面，这样一来，就不用定义元类了。
 
-```py
-
-```
-
 现在，我们可以直接在类里通过 Field 描述符来定义字段，而不用再让这个类继承某个基类，还能把元类给省掉。
 
 ```py
+class Field:
+    def __init__(self):
+        self.name = None
+        self.internal_name = None
 
+    def __set_name__(self, owner, name):
+        # Called on class creation for each descriptor
+        self.name = name
+        self.internal_name = '_' + name
+
+    def __get__(self, instance, instance_type):
+        if instance is None:
+            return self
+        return getattr(instance, self.internal_name, '')
+
+    def __set__(self, instance, value):
+        setattr(instance, self.internal_name, value)
+
+
+class FixedCustomer:
+    first_name = Field()
+    last_name = Field()
+    prefix = Field()
+    suffix = Field()
+
+
+cust = FixedCustomer()
+print(f'Before: {cust.first_name!r} {cust.__dict__}')
+cust.first_name = 'Mersenne'
+print(f'After : {cust.first_name!r} {cust.__dict__}')
+
+>>>
+Before: '' {}
+After : 'Mersenne' {'_first_name': 'Mersenne'}
 ```
 
 ### 总结
@@ -8797,4 +8895,4 @@ class DatabaseRow(metaclass=Meta):
 3. 你可以给描述符定义 `__set_name__` 方法，让系统把使用这个描述符做属性的那个类以及它在类里的属性名通过方法的参数告诉你。
 4. 用描述符直接操纵每个实例的属性字典，要比把所有实例的属性都放到一份字典里更好，因为后者要求我们必须使用 weakref 内置模块之中的特殊字典来记录每个实例的属性值以防止内存泄漏。
 
-// TODO 编写高质量 Python 待完成，测试
+// TODO 编写高质量 Python 待完成
