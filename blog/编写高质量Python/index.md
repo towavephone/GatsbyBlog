@@ -9295,4 +9295,191 @@ __getitem__(({'hi': 1, 'there': 2}, 'does not exist'), {}) -> KeyError('does not
 2. 如果要给类中的每个方法或属性都施加一套逻辑，而且还想尽量少写一些例行代码，那么类修饰器是个很值得考虑的方案。
 3. 元类之间很难组合，而类修饰器则比较灵活，它们可以施加在同一个类上，并且不会发生冲突。
 
+# 并发与并行
+
+## 第 52 条：用 subprocess 管理子进程
+
+```py
+import subprocess
+
+result = subprocess.run(
+    ['echo', 'Hello from the child!'],
+    capture_output=True,
+    encoding='utf-8')
+
+result.check_returncode()
+print(result.stdout)
+# No exception means clean exit
+
+>>>
+Hello from the child!
+```
+
+子进程可以独立于父进程而运行，这里的父进程指 Python 解释器所在的那条进程。假如刚才那条子进程不是通过 run 函数启动，而是由 Popen 类启动的，那么我们就可以在它启动之后，让 Python 程序去做别的任务，每做一段时间就来查询一次子进程的状态以决定要不要继续执行任务
+
+```py
+import subprocess
+
+proc = subprocess.Popen(['sleep', '1'])
+while proc.poll() is None:
+    print('Working...')
+# Some time-consuming work here
+print('Exit status', proc.poll())
+
+>>>
+Working...
+Working...
+Working...
+Exit status 0
+```
+
+把子进程从父进程中剥离，可以让程序平行地运行多条子进程。例如，我们可以像下面这样，先把需要运行的这些子进程用 Popen 启动起来。
+
+```py
+import subprocess
+import time
+
+start = time.time()
+sleep_procs = []
+for _ in range(10):
+    proc = subprocess.Popen(['sleep', '1'])
+    sleep_procs.append(proc)
+
+for proc in sleep_procs:
+    proc.communicate()
+
+end = time.time()
+delta = end - start
+print(f'Finished in {delta:.3} seconds')
+
+>>>
+Finished in 1.01 seconds
+```
+
+从统计结果可以看出，这 10 条子进程确实表现出了平行的效果。假如它们是按顺序执行的，那么程序耗费的总时长至少应该是 10 秒，而不是现在看到的 1 秒左右。
+
+我们还可以在 Python 程序里面把数据通过管道发送给子进程所运行的外部命令，然后将那条命令的输出结果获取到 Python 程序之中。而且，在执行外部命令的这个环节中，可以平行地运行多条命令。例如，要用 oepnssl 这样的命令行工具来加密数据。首先以适当的命令行参数构建一批子进程，并配置好相应的 I/O 管道，这在 Python 里很容易就能做到。
+
+```py
+import subprocess
+import os
+
+
+def run_encrypt(data):
+    env = os.environ.copy()
+    env['password'] = '2f7ShyBhZOraQDdE/FiZpm/m/8f9X+MI'
+    proc = subprocess.Popen(
+        ['openssl', 'enc', '-des3', '-pass', 'env:password'],
+        env=env,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE
+    ) # 平行运行
+    proc.stdin.write(data)
+    proc.stdin.flush()  # Ensure that the child gets input
+    return proc
+
+
+procs = []
+for _ in range(3):
+    data = os.urandom(10)
+    proc = run_encrypt(data)
+    procs.append(proc)
+
+for proc in procs:
+    out, _ = proc.communicate()
+    print(out[-10:])
+
+>>>
+b'\xc4G\x01\xf1\x90Q\xae\xff\x86\xe1'
+b'>T~~R\xbd\xc3n\x87\xcc'
+b'\xe9\x02\x18sE\xa1W\xcet\xae'
+```
+
+这些平行运行的子进程还可以分别与另一套平行的子进程对接，形成许多条平行的管道（pipe）。这种管道与 UNIX 管道类似，能够把一条子进程的输出端同另一条子进程的输入端连接起来。下面，我们写这样一个函数，让它开启一条子进程来运行 openssl 命令，这条命令会根据输入端所发来的数据在输出端生成 Whirlpool 哈希。
+
+现在，我们可以先启动一批进程来加密数据，然后启动另一批进程根据前面那些进程的加密结果生成哈希码。请注意，前面那批进程（也就是上游进程）的 stdout 实例必须谨慎地处理，用它把相应的哈希进程（也就是下游进程）启动之后，就应该及时关闭（close）并将其设为 None。
+
+只要上、下游的子进程都启动起来，两者之间的 I/O 管道就会自动打通。我们所要做的仅仅是等待这两批子进程完工并把最终结果打印出来。
+
+```py
+import subprocess
+import os
+
+
+def run_hash(input_stdin):
+    return subprocess.Popen(
+        ['openssl', 'dgst', '-whirlpool', '-binary'],
+        stdin=input_stdin,
+        stdout=subprocess.PIPE)
+
+
+def run_encrypt(data):
+    env = os.environ.copy()
+    env['password'] = '2f7ShyBhZOraQDdE/FiZpm/m/8f9X+MI'
+    proc = subprocess.Popen(
+        ['openssl', 'enc', '-des3', '-pass', 'env:password'],
+        env=env,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE
+    )  # 平行运行
+    proc.stdin.write(data)
+    proc.stdin.flush()  # Ensure that the child gets input
+    return proc
+
+
+encrypt_procs = []
+hash_procs = []
+for _ in range(3):
+    data = os.urandom(100)
+    encrypt_proc = run_encrypt(data)
+    encrypt_procs.append(encrypt_proc)
+    hash_proc = run_hash(encrypt_proc.stdout)
+    hash_procs.append(hash_proc)
+    # Ensure that the child consumes the input stream and
+    # the communicate method doesn't inadvertently steal
+    # input from the child. Also lets SIGPIPE propagate to
+    # the upstream process if the downstream process dies.
+    encrypt_proc.stdout.close()
+    encrypt_proc.stdout = None
+
+for proc in encrypt_procs:
+    proc.communicate()
+    assert proc.returncode == 0
+
+for proc in hash_procs:
+    out, _ = proc.communicate()
+    print(out[-10:])
+    assert proc.returncode == 0
+
+>>>
+b'\xa7{\xc8q\xf9n#i\x0b7'
+b'\xb3\x9aP\x7f\xa6N\xc9\x8b-Z'
+b'\xe8F\x94\x1fQ\x83L\xf7\xb3p'
+```
+
+如果子进程有可能一直不结束，或者由于某种原因卡在输入端或输出端，那么可以在调用 communicate 方法时指定 timeout 参数。这样的话，子进程若是没能在指定时间内结束，程序就会抛出异常，让我们有机会把这条不正常的子进程停掉。
+
+```py
+import subprocess
+
+proc = subprocess.Popen(['sleep', '10'])
+try:
+    proc.communicate(timeout=0.1)
+except subprocess.TimeoutExpired:
+    proc.terminate()
+    proc.wait()
+
+print('Exit status', proc.poll())
+
+>>>
+Exit status -15
+```
+
+### 总结
+
+1. subprocess 模块可以运行子进程并管理它们的输入流与输出流。
+2. 子进程能够跟 Python 解释器所在的进程并行，从而充分利用各 CPU 核心。
+3. 要开启子进程，最简单的办法就是调用 run 函数，另外也可以通过 Popen 类实现类似 UNIX 管道的高级用法。
+4. 调用 communicate 方法时可以指定 timeout 参数，让我们有机会把陷入死锁或已经卡住的子进程关掉。
+
 // TODO 编写高质量 Python 待完成
