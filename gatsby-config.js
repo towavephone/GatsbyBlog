@@ -149,6 +149,9 @@ module.exports = {
           {
             resolve: 'gatsby-remark-embedded-codesandbox-towavephone',
             options: {
+              maxRequestRetryCount: 3,
+              maxRequestCount: 10,
+              isLoggingRequest: true,
               // Required:
 
               // Example code folders are relative to this dir.

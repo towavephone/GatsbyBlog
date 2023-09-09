@@ -439,11 +439,15 @@ export default AnimationTitle
 
 #### react-spring
 
-[line-by-line-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-spring?view=preview)
+<iframe src="https://codesandbox.io/embed/b03lty?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [line-by-line-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-spring?view=preview) -->
 
 #### react-gsap
 
-[line-by-line-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-gsap?view=preview)
+<iframe src="https://codesandbox.io/embed/yibidu?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [line-by-line-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/line-by-line-display-react-gsap?view=preview) -->
 
 ## 数字滚动展示
 
@@ -618,7 +622,9 @@ export default CarConfiguration;
 
 ### 运行效果
 
-[number-change-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/number-change-display-react-spring?view=preview)
+<iframe src="https://codesandbox.io/embed/ocnfxs?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [number-change-display-react-spring](embedded-codesandbox://international-official-website-technical-difficulties/number-change-display-react-spring?view=preview) -->
 
 ## 固定页面滚动控制
 
@@ -959,11 +965,15 @@ export default ReactScrollMagic;
 
 #### react-scrollmagic
 
-[fix-page-scroll-display-react-scrollmagic](embedded-codesandbox://international-official-website-technical-difficulties/fix-page-scroll-display-react-scrollmagic?view=preview)
+<iframe src="https://codesandbox.io/embed/6t81il?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [fix-page-scroll-display-react-scrollmagic](embedded-codesandbox://international-official-website-technical-difficulties/fix-page-scroll-display-react-scrollmagic?view=preview) -->
 
 #### react-gsap
 
-[fix-page-scroll-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/fix-page-scroll-display-react-gsap?view=preview)
+<iframe src="https://codesandbox.io/embed/jhqw77?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [fix-page-scroll-display-react-gsap](embedded-codesandbox://international-official-website-technical-difficulties/fix-page-scroll-display-react-gsap?view=preview) -->
 
 ## 视频进度同步 / 缩放动效
 
@@ -1430,7 +1440,9 @@ export const evaluateCalc = (expression: string, container = getDocument()?.body
 
 ### 运行效果
 
-[video-sync-scale-play](embedded-codesandbox://international-official-website-technical-difficulties/video-sync-scale-play?view=preview)
+<iframe src="https://codesandbox.io/embed/2h37rw?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [video-sync-scale-play](embedded-codesandbox://international-official-website-technical-difficulties/video-sync-scale-play?view=preview) -->
 
 ## 序列帧滚动控制
 
@@ -1956,21 +1968,29 @@ export default Index
 
 #### pixi-apngAndGif
 
-[video-frame-scroll-control-pixi](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-pixi?view=preview)
+<iframe src="https://codesandbox.io/embed/fzmi7s?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [video-frame-scroll-control-pixi](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-pixi?view=preview) -->
 
 #### ogv.js
 
-[video-frame-scroll-control-ogv](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-ogv?view=preview)
+<iframe src="https://codesandbox.io/embed/dv2njm?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [video-frame-scroll-control-ogv](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-ogv?view=preview) -->
 
 #### video
 
 利用 `懒加载` 功能写出的进度控制如下：
 
-[video-frame-scroll-control-video](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-video?view=preview)
+<iframe src="https://codesandbox.io/embed/16i1lw?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [video-frame-scroll-control-video](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-video?view=preview) -->
 
 #### jsmpeg
 
-[video-frame-scroll-control-jsmpeg](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-jsmpeg?view=preview)
+<iframe src="https://codesandbox.io/embed/0ywivn?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [video-frame-scroll-control-jsmpeg](embedded-codesandbox://international-official-website-technical-difficulties/video-frame-scroll-control-jsmpeg?view=preview) -->
 
 ### 优化
 
@@ -2591,7 +2611,9 @@ return (
 
 ### 延迟滚动
 
-[swiper-delay-scroll](embedded-codesandbox://international-official-website-technical-difficulties/swiper-delay-scroll?view=preview)
+<iframe src="https://codesandbox.io/embed/n67jtt?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [swiper-delay-scroll](embedded-codesandbox://international-official-website-technical-difficulties/swiper-delay-scroll?view=preview) -->
 
 # 懒加载
 
@@ -2764,7 +2786,9 @@ return (
 
 ## 运行效果
 
-[lazy-load-vanilla-lazyload](embedded-codesandbox://international-official-website-technical-difficulties/lazy-load-vanilla-lazyload?view=preview)
+<iframe src="https://codesandbox.io/embed/etwmhs?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [lazy-load-vanilla-lazyload](embedded-codesandbox://international-official-website-technical-difficulties/lazy-load-vanilla-lazyload?view=preview) -->
 
 ## 优化方向
 
@@ -2883,7 +2907,9 @@ export default useDisplayerModal;
 
 ## 运行效果
 
-[use-antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-antd-modal-hook?view=preview)
+<iframe src="https://codesandbox.io/embed/9pxwy5?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [use-antd-modal-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-antd-modal-hook?view=preview) -->
 
 # 其他
 
@@ -3022,7 +3048,9 @@ export default useScrollDirection
 
 ### 运行效果
 
-[use-scroll-direction-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-scroll-direction-hook?view=preview)
+<iframe src="https://codesandbox.io/embed/sb4gnr?codemirror=1&hidenavigation=1&theme=light&view=preview" class="embedded-codesandbox" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+
+<!-- [use-scroll-direction-hook](embedded-codesandbox://international-official-website-technical-difficulties/use-scroll-direction-hook?view=preview) -->
 
 ## set-cookie 失效
 
