@@ -1,1 +1,1 @@
-webpackJsonp([0xe7884ae5879b],{1413:function(e,a){e.exports={data:{site:{siteMetadata:{siteUrl:"https://blog.towavephone.com",algolia:{appId:"VD8TEQP1WL",searchOnlyApiKey:"f9a2ecb9a973690ee826c9e114e9d09a",indexName:"gatsby"}}}},pathContext:{}}}});
+webpackJsonp([0xe7884ae5879b],{1415:function(e,a){e.exports={data:{site:{siteMetadata:{siteUrl:"https://blog.towavephone.com",algolia:{appId:"VD8TEQP1WL",searchOnlyApiKey:"f9a2ecb9a973690ee826c9e114e9d09a",indexName:"gatsby"}}}},pathContext:{}}}});
