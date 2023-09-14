@@ -9482,4 +9482,165 @@ Exit status -15
 3. 要开启子进程，最简单的办法就是调用 run 函数，另外也可以通过 Popen 类实现类似 UNIX 管道的高级用法。
 4. 调用 communicate 方法时可以指定 timeout 参数，让我们有机会把陷入死锁或已经卡住的子进程关掉。
 
+## 第 53 条：可以用线程执行阻塞式 I/O，但不要用它做并行计算
+
+Python 语言的标准实现叫作 CPython，，它分两步来运行 Python 程序。首先解析源代码文本，并将其编译成字节码（bytecode）。字节码是一种底层代码，可以把程序表示成 8 位的指令（从 Python 3.6 开始，这种底层代码实际上已经变成 16 位了，所以应该叫作 wordcode 才对，但基本原理依然相同）。然后，CPython 采用基于栈的解释器来运行字节码。这种字节码解释器在执行 Python 程序的过程中，必须确保相关的状态不受干扰，所以 CPython 会用一种叫作全局解释器锁（global interpreter lock，GIL）的机制来保证这一点。
+
+GIL 实际上就是一种互斥锁（mutual-exclusion lock，mutex），用来防止 CPython 的状态在抢占式的多线程环境（preemptive multithreading）之中受到干扰，因为在这种环境下，一条线程有可能突然打断另一条线程抢占程序的控制权。如果这种抢占行为来得不是时候，那么解释器的状态（例如为垃圾回收工作而设立的引用计数等）就会遭到破坏。所以，CPython 要通过 GIL 阻止这样的动作，以确保它自身以及它的那些 C 扩展模块能够正确地执行每一条字节码指令。
+
+但是，GIL 会产生一个很不好的影响。在 C++ 与 Java 这样的语言里面，如果程序之中有多个线程能够分头执行任务，那么就可以把 CPU 的各个核心充分地利用起来。尽管 Python 也支持多线程，但这些线程受 GIL 约束，所以每次或许只能有一条线程向前推进，而无法实现多头并进。所以，想通过多线程做并行计算或是给程序提速的开发者，恐怕要失望了。
+
+例如，我们要用 Python 程序执行一批计算量很大的任务。以最原始的办法实现这样一个因数分解算法，以模拟这种任务。
+
+我们试着分解几个数。如果必须把上一个数分解完才能开始分解下一个数，那么程序花的时间就比较长。
+
+```py
+import time
+
+
+def factorize(number):
+    for i in range(1, number + 1):
+        if number % i == 0:
+            yield i
+
+
+numbers = [2139079, 1214759, 1516637, 1852285]
+start = time.time()
+for number in numbers:
+    list(factorize(number))
+
+end = time.time()
+delta = end - start
+print(f'Took {delta:.3f} seconds')
+
+>>>
+Took 0.428 seconds
+```
+
+让每条线程各自分解一个数或许可以把计算机中的多个 CPU 核心充分利用起来。这种想法对于其他语言来说，可能有些道理，但是在 Python 中效果如何呢？我们试着定义这样一种 Python 线程，让它完成与刚才相同的因数分解任务。
+
+然后，针对每个待分解的数字都启动这样一条线程，让它们平行地运行下去。
+
+最后，等待所有线程执行完毕。
+
+```py
+import time
+
+from threading import Thread
+
+
+class FactorizeThread(Thread):
+    def __init__(self, number):
+        super().__init__()
+        self.number = number
+
+    def run(self):
+        self.factors = list(factorize(self.number))
+
+
+def factorize(number):
+    for i in range(1, number + 1):
+        if number % i == 0:
+            yield i
+
+
+numbers = [2139079, 1214759, 1516637, 1852285]
+
+start = time.time()
+threads = []
+for number in numbers:
+    thread = FactorizeThread(number)
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()
+
+end = time.time()
+delta = end - start
+print(f'Took {delta:.3f} seconds')
+
+>>>
+Took 0.528 seconds
+```
+
+奇怪的是，这样做竟然比一个一个去分解还要慢。在其他语言中，像这样令 4 条线程分别执行各自的任务，应该比一条线程连续执行 4 份任务要快得多，考虑到创建线程与协调这些线程的开销，新程序的速度可能会比旧程序的 4 倍稍微低一点。即便 CPU 的核心数量不足 4 个，新程序也还是应该比原来更快才对（例如笔者的电脑是双核的，所以应该接近原来的 2 倍），但为什么它没有把多核心的优势发挥出来？这是因为，这种多线程的程序在标准的 CPython 解释器之中会受 GIL 牵制（例如 CPython 要通过 GIL 防止这些线程争抢全局锁，而且要花一些时间来协调）。
+
+若要 CPython 把多个核心充分利用起来，还是有一些办法的，但那些办法都不采用标准的 Thread 类（参见第 64 条），而且实现起来也需要大量的精力。既然有这么多限制，那 Python 还支持多线程干什么？这其实有两个原因。
+
+首先，这种机制让我们很容易就能实现出一种效果，也就是令人感觉程序似乎能在同一时间做许多件事。这样的效果采用手工方式很难编写（案例参见第 56 条），而通过线程来实现，则可以让 Python 自动替我们把这些问题处理好，让多项任务能够并发地执行。由于 GIL 机制，虽然每次还是只能有一个线程向前执行，但 CPython 会确保这些 Python 线程之间能够公平地轮换执行。
+
+其次，我们可以通过 Python 的多线程机制处理阻塞式的 I/O 任务，因为线程在执行某些系统调用的过程中会发生阻塞，假如只支持一条线程，那么整个程序就会卡在这里不动。Python 程序需要通过系统调用与外部环境交互，其中有一些调用属于阻塞式的 I/O 操作，例如读取文件、写入文件、联网以及与显示器等设备交互。多线程机制可以让程序中的其他线程继续执行各自的工作，只有发起调用请求的那条线程才需要卡在那里等待操作系统给出结果。
+
+例如，要通过串口（serial port）向遥控直升机发送信号。笔者以 select 这个系统调用来模拟这项操作。通过 select 函数让操作系统阻塞 0.1 秒，然后把控制权返还给本程序，这样就模拟出了使用串口通信的效果。
+
+通过这种方式依次执行系统调用，程序的执行时间会随着调用次数而上升。
+
+```py
+import time
+
+
+def slow_systemcall():
+    time.sleep(0.1)
+
+
+start = time.time()
+for _ in range(5):
+    slow_systemcall()
+end = time.time()
+delta = end - start
+print(f'Took {delta:.3f} seconds')
+
+>>>
+Took 0.501 seconds
+```
+
+这样写有个问题，就是程序在执行 `slow_systemcall` 函数的过程中会彻底卡住，因为它的主线程会阻塞在 select 这里。在实际的程序里面，这是个相当糟糕的现象，因为我们向直升机发送信号的同时，还需要计算接下来的移动方式，不然直升机就会坠毁。所以，如果在执行阻塞式 I/O 的过程中还需要做计算，那么应该把系统调用放到另一条线程执行。
+
+下面把 `slow_systemcall` 放在单独的线程里调用，这样能同时触发多项操作，于是我们可以在与多个串口（乃至多个直升机）通信的同时，在主线程里做其他必要的运算。
+
+```py
+import time
+from threading import Thread
+
+
+def slow_systemcall():
+    time.sleep(0.1)
+
+
+def compute_helicopter_location(i):
+    pass
+
+
+start = time.time()
+threads = []
+for _ in range(5):
+    thread = Thread(target=slow_systemcall)
+    thread.start()
+    threads.append(thread)
+
+for i in range(5):
+    compute_helicopter_location(i)
+
+
+for thread in threads:
+    thread.join()
+end = time.time()
+delta = end - start
+print(f'Took {delta:.3f} seconds')
+
+>>>
+Took 0.101 seconds
+```
+
+与依次执行系统调用的那种写法相比，这种写法的速度几乎能达到原来的 5 倍。这说明，尽管那 5 条线程依然受 GIL 制约，但它们所发起的系统调用是可以各自向前执行的。GIL 只不过是让 Python 内部的代码无法平行推进而已，至于系统调用，则不会受到影响，因为 Python 线程在即将执行系统调用时，会释放 GIL，待完成调用之后，才会重新获取它。
+
+除了线程，还有很多办法也能处理阻塞式的 I/O（例如采用内置的 asyncio 模块等）。那些办法都很好，但你可能得花时间去重构代码适应它们所要求的执行模式（参见第 60 条与第 62 条）。与那些办法相比，用多线程处理阻塞式 I/O 是最简单的，而且只需要稍微调整代码就行。
+
+### 总结
+
+1. 即便计算机具备多核的 CPU，Python 线程也无法真正实现并行，因为它们会受全局解释器锁（GIL）牵制。
+2. 虽然 Python 的多线程机制受 GIL 影响，但还是非常有用的，因为我们很容易就能通过多线程模拟同时执行多项任务的效果。
+3. 多条 Python 线程可以并行地执行多个系统调用，这样就能让程序在执行阻塞式的 I/O 任务时，继续做其他运算。
+
 // TODO 编写高质量 Python 待完成
