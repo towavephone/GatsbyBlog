@@ -201,7 +201,6 @@
 <url> <loc>https://blog.towavephone.com/sql-must-know/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/database-principle/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/object-oriented-thinking/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/database-commonly-used-statements/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/linux-introduce/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/os-principle/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/http-reading-notes/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -220,15 +219,6 @@
 <url> <loc>https://blog.towavephone.com/front-end-performance-optimization/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/front-end-interview/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/commit-message/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/webpack-code-split/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/optimize-react/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/react-usage-part-3/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/docker-origin-guonei/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/docker-know/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/docker-install/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/react-usage-part-2/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/react-usage-part-1/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/windows-port/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/githook-usage/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/css-center/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/gitignore-invalid/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -237,7 +227,6 @@
 <url> <loc>https://blog.towavephone.com/tag/后端/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/后端/page/3</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/后端/page/4</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/后端/page/5</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/系统设计</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -289,7 +278,6 @@
 <url> <loc>https://blog.towavephone.com/tag/前端/page/31</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/前端/page/32</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/前端/page/33</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/前端/page/34</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/three.js</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/webgl</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/webgl/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -340,7 +328,6 @@
 <url> <loc>https://blog.towavephone.com/tag/人月神话</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/前端构建工具</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/前端构建工具/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/前端构建工具/page/3</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/babel</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/前端模块化</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/浏览器</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -458,11 +445,6 @@
 <url> <loc>https://blog.towavephone.com/tag/算法</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/算法/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/git规范化</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/react 性能</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/docker源</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/docker初级入门</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/docker安装</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/windows</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/githook</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/居中</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/gitignore</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -511,8 +493,6 @@
 <url> <loc>https://blog.towavephone.com/page/43</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/page/44</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/page/45</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/page/46</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/page/47</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/english-words-review/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/blog-summary/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/ui-learn-note/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
