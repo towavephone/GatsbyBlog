@@ -445,3 +445,4 @@ print("主线程结束，花费时间为：", end - start)
 ```
 
 16. 线宽问题解决，需要使用 threejs 的 line2 组件以及对应的 [降级策略](https://registry.khronos.org/webgl/sdk/tests/conformance/limits/gl-line-width.html)，即识别 `gl.ALIASED_LINE_WIDTH_RANGE` 的 `MAX_LINE_WIDTH` 是否大于 1，大于 1 的情况下才需要使用 line2
+17. python schedule 任务并行执行：https://zhuanlan.zhihu.com/p/537722631

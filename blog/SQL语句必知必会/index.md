@@ -13,7 +13,7 @@ date: 2018-04-03 15:23:56
 
 主键的值不允许修改，也不允许复用（不能使用已经删除的主键值赋给新数据行的主键）。
 
-SQL（Structured Query Language)，标准 SQL 由 ANSI 标准委员会管理，从而称为 ANSI SQL。各个 DBMS 都有自己的实现，如 PL/SQL、Transact-SQL 等。
+SQL（Structured Query Language），标准 SQL 由 ANSI 标准委员会管理，从而称为 ANSI SQL。各个 DBMS 都有自己的实现，如 PL/SQL、Transact-SQL 等。
 
 SQL 语句不区分大小写，但是数据库表名、列名和值是否区分依赖于具体的 DBMS 以及配置。
 
