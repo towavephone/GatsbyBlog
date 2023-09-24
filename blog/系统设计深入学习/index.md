@@ -2533,11 +2533,11 @@ graph TB
    A["系统 A"]
    B["系统 A"]
    C["系统 A"]
-   B --> D((redis master))
-   B ~~~ E((redis master))
-   B --> F((redis master))
-   B ~~~ G((redis master))
-   B --> H((redis master))
+   B --> D(("redis master"))
+   B ~~~ E(("redis master"))
+   B --> F(("redis master"))
+   B ~~~ G(("redis master"))
+   B --> H(("redis master"))
 ```
 
 Redis 官方给出了以上两种基于 Redis 实现分布式锁的方法，详细说明可以查看：https://redis.io/topics/distlock。

@@ -80,11 +80,12 @@ module.exports = {
             }
           },
           {
-            resolve: 'gatsby-remark-graph',
+            resolve: 'gatsby-remark-graph-towavephone',
             options: {
               // this is the language in your code-block that triggers mermaid parsing
               language: 'mermaid', // default
-              theme: 'default' // could also be dark, forest, or neutral
+              theme: 'default', // could also be dark, forest, or neutral,
+              version: '10.4.0'
             }
           },
           'gatsby-remark-static-images',

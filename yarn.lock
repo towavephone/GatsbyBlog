@@ -5938,10 +5938,10 @@ gatsby-remark-external-links@^0.0.4:
     unist-util-find "^1.0.1"
     unist-util-visit "^1.1.3"
 
-gatsby-remark-graph@0.2.2:
-  version "0.2.2"
-  resolved "https://registry.npmmirror.com/gatsby-remark-graph/-/gatsby-remark-graph-0.2.2.tgz#c18b956d85d5fe1db223dd287b5888a4a8e95fab"
-  integrity sha512-kugn+Gt++B+E5UWHx5/pT/SlwjIXPZR7sNrARjTuYD8GX9op5X04KtSNd7/PMKmRrZwzzuiRg19qf60aOElFsQ==
+gatsby-remark-graph-towavephone@0.2.9:
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/gatsby-remark-graph-towavephone/-/gatsby-remark-graph-towavephone-0.2.9.tgz#11be9c9d20ab63d6cfcc5115a6d18c60ae4b4a64"
+  integrity sha512-MYtf2SnQyJzQzZck416X+9cHf+Ql522D+JMZpOmpKZs7NvmtFZxN5ZNxq31yS0/l/rMoJnRiRymYFOZkyjkRSQ==
   dependencies:
     unist-util-visit "^1.1.3"
 
