@@ -406,10 +406,10 @@ Master 节点挂了怎么办？Master 节点挂了之后 DLedger 登场
                msgs.get(0).getProperty(Message.PROPERTY_MAX_OFFSET);
       long diff = Long.parseLong(maxOffset) - offset;
       if (diff > 100000) {
-         // TODO 消息堆积情况的特殊处理
+         // 消息堆积情况的特殊处理
          return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
       }
-      // TODO 正常消费过程
+      // 正常消费过程
       return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
    }
    ```
@@ -1064,7 +1064,16 @@ Redis replication -> 主从架构 -> 读写分离 -> 水平扩容支撑读高并
 
 如果这是 slave node 初次连接到 master node，那么会触发一次 full resynchronization 全量复制。此时 master 会启动一个后台线程，开始生成一份 RDB 快照文件，同时还会将从客户端 client 新收到的所有写命令缓存在内存中。RDB 文件生成完毕后，master 会将这个 RDB 发送给 slave，slave 会先写入本地磁盘，然后再从本地磁盘加载到内存中，接着 master 会将内存中缓存的写命令发送到 slave，slave 也会同步这些数据。slave node 如果跟 master node 有网络故障，断开了连接，会自动重连，连接之后 master node 仅会复制给 slave 部分缺少的数据。
 
-![](res/2023-09-20-00-11-15.png)
+```mermaid
+flowchart LR
+    RDB --> slave
+    master --> RDB
+    master --> |"初次连接：全量复制"| slave
+    master --> |"重新连接：部分数据复制"| slave
+    slave --> |ping| master
+    slave --> |写入| 磁盘["磁盘（RDB持久化）"]
+    磁盘 --> |加载到内存| slave
+```
 
 ##### 主从复制的断点续传
 
@@ -1095,7 +1104,13 @@ slave node 启动时，会在自己本地保存 master node 的信息，包括 m
 
 slave node 内部有个定时任务，每秒检查是否有新的 master node 要连接和复制，如果发现，就跟 master node 建立 socket 网络连接。然后 slave node 发送 ping 命令给 master node。如果 master 设置了 requirepass，那么 slave node 必须发送 masterauth 的口令过去进行认证。master node 第一次执行全量复制，将所有数据发给 slave node。而在后续，master node 持续将写命令，异步复制给 slave node。
 
-![](res/2023-09-20-00-15-19.png)
+```mermaid
+flowchart LR
+    client --> master["master\n5. 每次 master 接收到新的数据，都异步发送给 slave node"]
+    master -- "4. master 启动全量复制，\n将自己的所有数据都发送给 slave，\n实现数据的同步" --> slave
+    slave -- "socket 网络连接\n3. 如果 master 配置了 require pass，\n那么 slave node 会发送 master auth 口令去认证" --> master
+    slave["slave\n1. slave 启动，在本地保存 master node 的 host 和 ip\n2. slave 内部有定时任务，每秒会 check 是否有 master 要连接，\n如果有就跟 master 建立 socket 网络来连接"]
+```
 
 ##### 全量复制
 
@@ -2197,5 +2212,909 @@ provider 启动的时候，就会加载到我们 jar 包里的 `my=com.bingo.MyP
 dubbo 里面提供了大量的类似上面的扩展点，就是说，你如果要扩展一个东西，只要自己写个 jar，让你的 consumer 或者是 provider 工程，依赖你的那个 jar，在你的 jar 里指定目录下配置好接口名称对应的文件，里面通过 key = 实现类 。
 
 然后对于对应的组件，类似 `<dubbo:protocol>` 用你的那个 key 对应的实现类来实现某个接口，你可以自己去扩展 dubbo 的各种功能，提供你自己的实现。
+
+### 如何基于 Dubbo 进行服务治理？
+
+服务治理，这个问题如果问你，其实就是看看你有没有服务治理的思想，因为这个是做过复杂微服务的人肯定会遇到的一个问题。
+
+服务降级，这个是涉及到复杂分布式系统中必备的一个话题，因为分布式系统互相来回调用，任何一个系统故障了，你不降级，直接就全盘崩溃？那就太坑爹了吧。
+
+失败重试，分布式系统中网络请求如此频繁，要是因为网络问题不小心失败了一次，是不是要重试？
+
+超时重试，跟上面一样，如果不小心网络慢一点，超时了，如何重试？
+
+#### 服务治理
+
+##### 调用链路自动生成
+
+一个大型的分布式系统，或者说是用现在流行的微服务架构来说吧，分布式系统由大量的服务组成。那么这些服务之间互相是如何调用的？调用链路是啥？说实话，几乎到后面没人搞的清楚了，因为服务实在太多了，可能几百个甚至几千个服务。
+
+那就需要基于 dubbo 做的分布式系统中，对各个服务之间的调用自动记录下来，然后自动将各个服务之间的依赖关系和调用链路生成出来，做成一张图，显示出来，大家才可以看到对吧。
+
+```mermaid
+---
+title: 服务间调用链路
+---
+flowchart LR
+    A[服务 A] --> B[服务 B]
+    A[服务 A] --> C[服务 C]
+    A[服务 A] --> D[服务 D]
+    B[服务 B] --> E[服务 E]
+    B[服务 B] --> F[服务 F]
+    C[服务 C] --> G[服务 G]
+    D[服务 D] --> G[服务 G]
+```
+
+##### 服务访问压力以及时长统计
+
+需要自动统计各个接口和服务之间的调用次数以及访问延时，而且要分成两个级别。
+
+- 一个级别是接口粒度，就是每个服务的每个接口每天被调用多少次，TP50/TP90/TP99，三个档次的请求延时分别是多少；
+- 第二个级别是从源头入口开始，一个完整的请求链路经过几十个服务之后，完成一次请求，每天全链路走多少次，全链路请求延时的 TP50/TP90/TP99，分别是多少。
+
+这些东西都搞定了之后，后面才可以来看当前系统的压力主要在哪里，如何来扩容和优化。
+
+##### 其它
+
+- 服务分层（避免循环依赖）
+- 调用链路失败监控和报警
+- 服务鉴权
+- 每个服务的可用性的监控（接口调用成功率？几个 9？99.99%，99.9%，99%）
+
+#### 服务降级
+
+比如说服务 A 调用服务 B，结果服务 B 挂掉了，服务 A 重试几次调用服务 B，还是不行，那么直接降级，走一个备用的逻辑，给用户返回响应。
+
+举个栗子，我们有接口 HelloService。HelloServiceImpl 有该接口的具体实现。
+
+```java
+public interface HelloService {
+   void sayHello();
+}
+
+public class HelloServiceImpl implements HelloService {
+    public void sayHello() {
+        System.out.println("hello world......");
+    }
+}
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans.xsd        http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="dubbo-provider" />
+    <dubbo:registry address="zookeeper://127.0.0.1:2181" />
+    <dubbo:protocol name="dubbo" port="20880" />
+    <dubbo:service interface="com.zhss.service.HelloService" ref="helloServiceImpl" timeout="10000" />
+    <bean id="helloServiceImpl" class="com.zhss.service.HelloServiceImpl" />
+
+</beans>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans.xsd        http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="dubbo-consumer"  />
+
+    <dubbo:registry address="zookeeper://127.0.0.1:2181" />
+
+    <dubbo:reference id="fooService" interface="com.test.service.FooService"  timeout="10000" check="false" mock="return null">
+    </dubbo:reference>
+
+</beans>
+```
+
+我们调用接口失败的时候，可以通过 mock 统一返回 null。
+
+mock 的值也可以修改为 true，然后再跟接口同一个路径下实现一个 Mock 类，命名规则是 `接口名称 + Mock` 后缀。然后在 Mock 类里实现自己的降级逻辑。
+
+```java
+public class HelloServiceMock implements HelloService {
+    public void sayHello() {
+        // 降级逻辑
+    }
+}
+```
+
+#### 失败重试和超时重试
+
+所谓失败重试，就是 consumer 调用 provider 要是失败了，比如抛异常了，此时应该是可以重试的，或者调用超时了也可以重试。配置如下：
+
+```xml
+<dubbo:reference id="xxxx" interface="xx" check="true" async="false" retries="3" timeout="2000"/>
+```
+
+举个栗子。
+
+某个服务的接口，要耗费 5s，你这边不能干等着，你这边配置了 timeout 之后，我等待 2s，还没返回，我直接就撤了，不能干等你。
+
+可以结合你们公司具体的场景来说说你是怎么设置这些参数的：
+
+- timeout：一般设置为 200ms，我们认为不能超过 200ms 还没返回。
+- retries：设置 retries，一般是在读请求的时候，比如你要查询个数据，你可以设置个 retries，如果第一次没读到，报错，重试指定的次数，尝试再次读取。
+
+### 分布式服务接口的幂等性如何设计？
+
+一个分布式系统中的某个接口，该如何保证幂等性？这个事儿其实是你做分布式系统的时候必须要考虑的一个生产环境的技术问题。啥意思呢？
+
+假如你有个服务提供一些接口供外部调用，这个服务部署在了 5 台机器上，接着有个接口就是付款接口。然后人家用户在前端上操作的时候，不知道为啥，总之就是一个订单不小心发起了两次支付请求，然后这俩请求分散在了这个服务部署的不同的机器上，好了，结果一个订单扣款扣两次。
+
+或者是订单系统调用支付系统进行支付，结果不小心因为网络超时了，然后订单系统走了前面我们看到的那个重试机制，咔嚓给你重试了一把，好，支付系统收到一个支付请求两次，而且因为负载均衡算法落在了不同的机器上，尴尬了。。。
+
+所以你肯定得知道这事儿，否则你做出来的分布式系统恐怕容易埋坑。
+
+这个不是技术问题，这个没有通用的一个方法，这个应该结合业务来保证幂等性。
+
+所谓幂等性，就是说一个接口，多次发起同一个请求，你这个接口得保证结果是准确的，比如不能多扣款、不能多插入一条数据、不能将统计值多加了 1。这就是幂等性。
+
+其实保证幂等性主要是三点：
+
+- 对于每个请求必须有一个唯一的标识，举个栗子：订单支付请求，肯定得包含订单 id，一个订单 id 最多支付一次，对吧。
+- 每次处理完请求之后，必须有一个记录标识这个请求处理过了。常见的方案是在 mysql 中记录个状态啥的，比如支付之前记录一条这个订单的支付流水。
+- 每次接收请求需要进行判断，判断之前是否处理过。比如说，如果有一个订单已经支付了，就已经有了一条支付流水，那么如果重复发送这个请求，则此时先插入支付流水，orderId 已经存在了，唯一键约束生效，报错插入不进去的。然后你就不用再扣款了。
+
+实际运作过程中，你要结合自己的业务来，比如说利用 Redis，用 orderId 作为唯一键。只有成功插入这个支付流水，才可以执行实际的支付扣款。
+
+要求是支付一个订单，必须插入一条支付流水，`order_id` 建一个唯一键 unique key。你在支付一个订单之前，先插入一条支付流水，`order_id` 就已经进去了。你就可以写一个标识到 Redis 里面去，set `order_id` payed ，下一次重复请求过来了，先查 Redis 的 `order_id` 对应的 value，如果是 payed 就说明已经支付过了，你就别重复支付了。
+
+### 分布式服务接口请求的顺序性如何保证？
+
+其实分布式系统接口的调用顺序，也是个问题，一般来说是不用保证顺序的。但是有时候可能确实是需要严格的顺序保证。给大家举个例子，你服务 A 调用服务 B，先插入再删除。好，结果俩请求过去了，落在不同机器上，可能插入请求因为某些原因执行慢了一些，导致删除请求先执行了，此时因为没数据所以啥效果也没有；结果这个时候插入请求过来了，好，数据插入进去了，那就尴尬了。
+
+本来应该是 “先插入 -> 再删除”，这条数据应该没了，结果现在 “先删除 -> 再插入”，数据还存在，最后你死都想不明白是怎么回事。
+
+所以这都是分布式系统一些很常见的问题。
+
+首先，一般来说，个人建议是，你们从业务逻辑上设计的这个系统最好是不需要这种顺序性的保证，因为一旦引入顺序性保障，比如使用分布式锁，会导致系统复杂度上升，而且会带来效率低下，热点数据压力过大等问题。
+
+下面我给个我们用过的方案吧，简单来说，首先你得用 Dubbo 的一致性 hash 负载均衡策略，将比如某一个订单 id 对应的请求都给分发到某个机器上去，接着就是在那个机器上，因为可能还是多线程并发执行的，你可能得立即将某个订单 id 对应的请求扔一个内存队列里去，强制排队，这样来确保他们的顺序性。
+
+![](res/2023-09-24-19-39-21.png)
+
+但是这样引发的后续问题就很多，比如说要是某个订单对应的请求特别多，造成某台机器成热点怎么办？解决这些问题又要开启后续一连串的复杂技术方案，曾经这类问题弄的我们头疼不已，所以，还是建议什么呢？
+
+最好是比如说刚才那种，一个订单的插入和删除操作，能不能合并成一个操作，就是一个删除，或者是其它什么，避免这种问题的产生。
+
+### 如何自己设计一个类似 Dubbo 的 RPC 框架？
+
+- 上来你的服务就得去注册中心注册吧，你是不是得有个注册中心，保留各个服务的信息，可以用 zookeeper 来做，对吧。
+- 然后你的消费者需要去注册中心拿对应的服务信息吧，对吧，而且每个服务可能会存在于多台机器上。
+- 接着你就该发起一次请求了，咋发起？当然是基于动态代理了，你面向接口获取到一个动态代理，这个动态代理就是接口在本地的一个代理，然后这个代理会找到服务对应的机器地址。
+- 然后找哪个机器发送请求？那肯定得有个负载均衡算法了，比如最简单的可以随机轮询是不是。
+- 接着找到一台机器，就可以跟它发送请求了，第一个问题咋发送？你可以说用 netty 了，nio 方式；第二个问题发送啥格式数据？你可以说用 hessian 序列化协议了，或者是别的，对吧。然后请求过去了。
+- 服务器那边一样的，需要针对你自己的服务生成一个动态代理，监听某个网络端口了，然后代理你本地的服务代码。接收到请求的时候，就调用对应的服务代码，对吧。
+
+### CAP 定理的 P 是什么？
+
+#### 什么是 CAP 定理（CAP theorem）
+
+在理论计算机科学中，CAP 定理（CAP theorem），又被称作布鲁尔定理（Brewer's theorem），它指出对于一个分布式计算系统来说，不可能同时满足以下三点：
+
+- 一致性（Consistency）（等同于所有节点访问同一份最新的数据副本）
+- 可用性（Availability）（每次请求都能获取到非错的响应——但是不保证获取的数据为最新数据）
+- 分区容错性（Partition tolerance）（以实际效果而言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在 C 和 A 之间做出选择。）
+
+#### 分区容错性（Partition tolerance）
+
+理解 CAP 理论的最简单方式是想象两个节点分处分区两侧。允许至少一个节点更新状态会导致数据不一致，即丧失了 C 性质。如果为了保证数据一致性，将分区一侧的节点设置为不可用，那么又丧失了 A 性质。除非两个节点可以互相通信，才能既保证 C 又保证 A，这又会导致丧失 P 性质。
+
+- P 指的是分区容错性，分区现象产生后需要容错，容错是指在 A 与 C 之间选择。如果分布式系统没有分区现象（没有出现不一致不可用情况）本身就没有分区，既然没有分区则就更没有分区容错性 P。
+- 无论我设计的系统是 AP 还是 CP 系统如果没有出现不一致不可用。则该系统就处于 CA 状态
+- P 的体现前提是得有分区情况存在
+
+#### 常用的 CAP 框架对比
+
+| 框架      | 所属 |
+| --------- | ---- |
+| Eureka    | AP   |
+| Zookeeper | CP   |
+| Consul    | CP   |
+
+##### Eureka
+
+> Eureka 保证了可用性，实现最终一致性。
+
+Eureka 所有节点都是平等的所有数据都是相同的，且 Eureka 可以相互交叉注册。
+
+Eureka client 使用内置轮询负载均衡器去注册，有一个检测间隔时间，如果在一定时间内没有收到心跳，才会移除该节点注册信息；如果客户端发现当前 Eureka 不可用，会切换到其他的节点，如果所有的 Eureka 都跪了，Eureka client 会使用最后一次数据作为本地缓存；所以以上的每种设计都是他不具备一致性的特性。
+
+注意：因为 Eureka AP 的特性和请求间隔同步机制，在服务更新时候一般会手动通过 Eureka 的 api 把当前服务状态设置为 offline，并等待 2 个同步间隔后重新启动，这样就能保证服务更新节点对整体系统的影响
+
+##### Zookeeper
+
+> 强一致性
+
+Zookeeper 在选举 leader 时会停止服务，只有选举 leader 成功后才能提供服务，选举时间较长；内部使用 paxos 选举投票机制，只有获取半数以上的投票才能成为 leader，否则重新投票，所以部署的时候最好集群节点不小于 3 的奇数个（但是谁能保证跪掉后节点也是奇数个呢）；Zookeeper 健康检查一般是使用 tcp 长链接，在内部网络抖动时或者对应节点阻塞时候都会变成不可用，这里还是比较危险的；
+
+##### Consul
+
+和 Zookeeper 一样数据 CP
+
+Consul 注册时候只有过半的节点都写入成功才认为注册成功；leader 挂掉时，重新选举期间整个 Consul 不可用，保证了强一致性但牺牲了可用性
+
+有很多 blog 说 Consul 属于 ap，官方已经确认他为 CP 机制，原文地址：https://www.consul.io/docs/intro/vs/serf
+
+## 分布式锁
+
+### Zookeeper 都有哪些应用场景？
+
+大致来说，zookeeper 的使用场景如下，我就举几个简单的，大家能说几个就好了：
+
+- 分布式协调
+- 分布式锁
+- 元数据/配置信息管理
+- HA 高可用性
+
+#### 分布式协调
+
+这个其实是 zookeeper 很经典的一个用法，简单来说，就好比，你 A 系统发送个请求到 mq，然后 B 系统消息消费之后处理了。那 A 系统如何知道 B 系统的处理结果？用 zookeeper 就可以实现分布式系统之间的协调工作。A 系统发送请求之后可以在 zookeeper 上对某个节点的值注册个监听器，一旦 B 系统处理完了就修改 zookeeper 那个节点的值，A 系统立马就可以收到通知，完美解决。
+
+![](res/2023-09-24-19-47-25.png)
+
+#### 分布式锁
+
+举个栗子。对某一个数据连续发出两个修改操作，两台机器同时收到了请求，但是只能一台机器先执行完另外一个机器再执行。那么此时就可以使用 zookeeper 分布式锁，一个机器接收到了请求之后先获取 zookeeper 上的一把分布式锁，就是可以去创建一个 znode，接着执行操作；然后另外一个机器也尝试去创建那个 znode，结果发现自己创建不了，因为被别人创建了，那只能等着，等第一个机器执行完了自己再执行。
+
+![](res/2023-09-24-19-47-54.png)
+
+#### 元数据/配置信息管理
+
+zookeeper 可以用作很多系统的配置信息的管理，比如 kafka、storm 等等很多分布式系统都会选用 zookeeper 来做一些元数据、配置信息的管理，包括 dubbo 注册中心不也支持 zookeeper 么？
+
+![](res/2023-09-24-19-48-32.png)
+
+#### HA 高可用性
+
+这个应该是很常见的，比如 hadoop、hdfs、yarn 等很多大数据系统，都选择基于 zookeeper 来开发 HA 高可用机制，就是一个重要进程一般会做主备两个，主进程挂了立马通过 zookeeper 感知到并切换到备用进程。
+
+![](res/2023-09-24-19-49-05.png)
+
+### 分布式锁如何设计？
+
+其实一般问问题，都是这么问的，先问问你 zk，然后其实是要过渡到 zk 相关的一些问题里去，比如分布式锁。因为在分布式系统开发中，分布式锁的使用场景还是很常见的。
+
+#### Redis 分布式锁
+
+官方叫做 RedLock 算法，是 Redis 官方支持的分布式锁算法。
+
+这个分布式锁有 3 个重要的考量点：
+
+- 互斥（只能有一个客户端获取锁）
+- 不能死锁
+- 容错（只要大部分 Redis 节点创建了这把锁就可以）
+
+##### Redis 最普通的分布式锁
+
+第一个最普通的实现方式，就是在 Redis 里使用 `SET key value [EX seconds] [PX milliseconds] NX` 创建一个 key，这样就算加锁。其中：
+
+- NX：表示只有 key 不存在的时候才会设置成功，如果此时 redis 中存在这个 key，那么设置失败，返回 nil。
+- EX seconds：设置 key 的过期时间，精确到秒级。意思是 seconds 秒后锁自动释放，别人创建的时候如果发现已经有了就不能加锁了。
+- PX milliseconds：同样是设置 key 的过期时间，精确到毫秒级。
+
+比如执行以下命令：
+
+```bash
+SET resource_name my_random_value PX 30000 NX
+```
+
+释放锁就是删除 key，但是一般可以用 lua 脚本删除，判断 value 一样才删除：
+
+```lua
+-- 删除锁的时候，找到 key 对应的 value，跟自己传过去的 value 做比较，如果是一样的才删除。
+if redis.call("get", KEYS[1]) == ARGV[1] then
+    return redis.call("del", KEYS[1])
+else
+    return 0
+end
+```
+
+为啥要用 `random_value` 随机值呢？因为如果某个客户端获取到了锁，但是阻塞了很长时间才执行完，比如说超过了 30s，此时可能已经自动释放锁了，此时可能别的客户端已经获取到了这个锁，要是你这个时候直接删除 key 的话会有问题，所以得用随机值加上面的 lua 脚本来释放锁。
+
+但是这样是肯定不行的。因为如果是普通的 Redis 单实例，那就是单点故障。或者是 Redis 普通主从，那 Redis 主从异步复制，如果主节点挂了（key 就没有了），key 还没同步到从节点，此时从节点切换为主节点，别人就可以 set key，从而拿到锁。
+
+##### RedLock 算法
+
+这个场景是假设有一个 Redis cluster，有 5 个 Redis master 实例。然后执行如下步骤获取一把锁：
+
+1. 获取当前时间戳，单位是毫秒；
+2. 跟上面类似，轮流尝试在每个 master 节点上创建锁，超时时间较短，一般就几十毫秒（客户端为了获取锁而使用的超时时间比自动释放锁的总时间要小。例如，如果自动释放时间是 10 秒，那么超时时间可能在 5~50 毫秒范围内）；
+3. 尝试在大多数节点上建立一个锁，比如 5 个节点就要求是 3 个节点 n / 2 + 1 ；
+4. 客户端计算建立好锁的时间，如果建立锁的时间小于超时时间，就算建立成功了；
+5. 要是锁建立失败了，那么就依次把之前建立过的锁删除；
+6. 只要别人建立了一把分布式锁，你就得不断轮询去尝试获取锁。
+
+```mermaid
+graph TB
+   A["系统 A"]
+   B["系统 A"]
+   C["系统 A"]
+   B --> D((redis master))
+   B ~~~ E((redis master))
+   B --> F((redis master))
+   B ~~~ G((redis master))
+   B --> H((redis master))
+```
+
+Redis 官方给出了以上两种基于 Redis 实现分布式锁的方法，详细说明可以查看：https://redis.io/topics/distlock。
+
+#### zk 分布式锁
+
+zk 分布式锁，其实可以做的比较简单，就是某个节点尝试创建临时 znode，此时创建成功了就获取了这个锁；这个时候别的客户端来创建锁会失败，只能注册个监听器监听这个锁。释放锁就是删除这个 znode，一旦释放掉就会通知客户端，然后有一个等待着的客户端就可以再次重新加锁。
+
+```java
+/**
+ * ZooKeeperSession
+ */
+public class ZooKeeperSession {
+
+    private static CountDownLatch connectedSemaphore = new CountDownLatch(1);
+
+    private ZooKeeper zookeeper;
+    private CountDownLatch latch;
+
+    public ZooKeeperSession() {
+        try {
+            this.zookeeper = new ZooKeeper("192.168.31.187:2181,192.168.31.19:2181,192.168.31.227:2181", 50000, new ZooKeeperWatcher());
+            try {
+                connectedSemaphore.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("ZooKeeper session established......");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取分布式锁
+     *
+     * @param productId
+     */
+    public Boolean acquireDistributedLock(Long productId) {
+        String path = "/product-lock-" + productId;
+
+        try {
+            zookeeper.create(path, "".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            return true;
+        } catch (Exception e) {
+            while (true) {
+                try {
+                    // 相当于是给 node 注册一个监听器，去看看这个监听器是否存在
+                    Stat stat = zk.exists(path, true);
+
+                    if (stat != null) {
+                        this.latch = new CountDownLatch(1);
+                        this.latch.await(waitTime, TimeUnit.MILLISECONDS);
+                        this.latch = null;
+                    }
+                    zookeeper.create(path, "".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                    return true;
+                } catch (Exception ee) {
+                    continue;
+                }
+            }
+
+        }
+        return true;
+    }
+
+    /**
+     * 释放掉一个分布式锁
+     *
+     * @param productId
+     */
+    public void releaseDistributedLock(Long productId) {
+        String path = "/product-lock-" + productId;
+        try {
+            zookeeper.delete(path, -1);
+            System.out.println("release the lock for product[id=" + productId + "]......");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 建立 zk session 的 watcher
+     */
+    private class ZooKeeperWatcher implements Watcher {
+
+        public void process(WatchedEvent event) {
+            System.out.println("Receive watched event: " + event.getState());
+
+            if (KeeperState.SyncConnected == event.getState()) {
+                connectedSemaphore.countDown();
+            }
+
+            if (this.latch != null) {
+                this.latch.countDown();
+            }
+        }
+
+    }
+
+    /**
+     * 封装单例的静态内部类
+     */
+    private static class Singleton {
+
+        private static ZooKeeperSession instance;
+
+        static {
+            instance = new ZooKeeperSession();
+        }
+
+        public static ZooKeeperSession getInstance() {
+            return instance;
+        }
+
+    }
+
+    /**
+     * 获取单例
+     *
+     * @return
+     */
+    public static ZooKeeperSession getInstance() {
+        return Singleton.getInstance();
+    }
+
+    /**
+     * 初始化单例的便捷方法
+     */
+    public static void init() {
+        getInstance();
+    }
+
+}
+```
+
+也可以采用另一种方式，创建临时顺序节点：
+
+如果有一把锁，被多个人给竞争，此时多个人会排队，第一个拿到锁的人会执行，然后释放锁；后面的每个人都会去监听排在自己前面的那个人创建的 node 上，一旦某个人释放了锁，排在自己后面的人就会被 ZooKeeper 给通知，一旦被通知了之后，就 ok 了，自己就获取到了锁，就可以执行代码了。
+
+```java
+public class ZooKeeperDistributedLock implements Watcher {
+
+    private ZooKeeper zk;
+    private String locksRoot = "/locks";
+    private String productId;
+    private String waitNode;
+    private String lockNode;
+    private CountDownLatch latch;
+    private CountDownLatch connectedLatch = new CountDownLatch(1);
+    private int sessionTimeout = 30000;
+
+    public ZooKeeperDistributedLock(String productId) {
+        this.productId = productId;
+        try {
+            String address = "192.168.31.187:2181,192.168.31.19:2181,192.168.31.227:2181";
+            zk = new ZooKeeper(address, sessionTimeout, this);
+            connectedLatch.await();
+        } catch (IOException e) {
+            throw new LockException(e);
+        } catch (KeeperException e) {
+            throw new LockException(e);
+        } catch (InterruptedException e) {
+            throw new LockException(e);
+        }
+    }
+
+    public void process(WatchedEvent event) {
+        if (event.getState() == KeeperState.SyncConnected) {
+            connectedLatch.countDown();
+            return;
+        }
+
+        if (this.latch != null) {
+            this.latch.countDown();
+        }
+    }
+
+    public void acquireDistributedLock() {
+        try {
+            if (this.tryLock()) {
+                return;
+            } else {
+                waitForLock(waitNode, sessionTimeout);
+            }
+        } catch (KeeperException e) {
+            throw new LockException(e);
+        } catch (InterruptedException e) {
+            throw new LockException(e);
+        }
+    }
+
+    public boolean tryLock() {
+        try {
+            // 传入进去的 locksRoot + "/" + productId
+            // 假设 productId 代表了一个商品 id，比如说 1
+            // locksRoot = locks
+            // /locks/10000000000，/locks/10000000001，/locks/10000000002
+            lockNode = zk.create(locksRoot + "/" + productId, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+
+            // 看看刚创建的节点是不是最小的节点
+            // locks：10000000000，10000000001，10000000002
+            List<String> locks = zk.getChildren(locksRoot, false);
+            Collections.sort(locks);
+
+            if (lockNode.equals(locksRoot + "/" + locks.get(0))) {
+                // 如果是最小的节点，则表示取得锁
+                return true;
+            }
+
+            // 如果不是最小的节点，找到比自己小 1 的节点
+            int previousLockIndex = -1;
+            for (int i = 0; i < locks.size(); i++) {
+                if (lockNode.equals(locksRoot + "/" +locks.get(i))){
+                    previousLockIndex = i - 1;
+                    break;
+                }
+            }
+
+            this.waitNode = locks.get(previousLockIndex);
+        } catch (KeeperException e) {
+            throw new LockException(e);
+        } catch (InterruptedException e) {
+            throw new LockException(e);
+        }
+        return false;
+    }
+
+    private boolean waitForLock(String waitNode, long waitTime) throws InterruptedException, KeeperException {
+        Stat stat = zk.exists(locksRoot + "/" + waitNode, true);
+        if (stat != null) {
+            this.latch = new CountDownLatch(1);
+            this.latch.await(waitTime, TimeUnit.MILLISECONDS);
+            this.latch = null;
+        }
+        return true;
+    }
+
+    public void unlock() {
+        try {
+            // 删除 /locks/10000000000 节点
+            // 删除 /locks/10000000001 节点
+            System.out.println("unlock " + lockNode);
+            zk.delete(lockNode, -1);
+            lockNode = null;
+            zk.close();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public class LockException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public LockException(String e) {
+            super(e);
+        }
+
+        public LockException(Exception e) {
+            super(e);
+        }
+    }
+}
+```
+
+但是，使用 zk 临时节点会存在另一个问题：由于 zk 依靠 session 定期的心跳来维持客户端，如果客户端进入长时间的 GC，可能会导致 zk 认为客户端宕机而释放锁，让其他的客户端获取锁，但是客户端在 GC 恢复后，会认为自己还持有锁，从而可能出现多个客户端同时获取到锁的情形。
+
+针对这种情况，可以通过 JVM 调优，尽量避免长时间 GC 的情况发生。
+
+#### redis 分布式锁和 zk 分布式锁的对比
+
+- redis 分布式锁，其实需要自己不断去尝试获取锁，比较消耗性能。
+- zk 分布式锁，获取不到锁，注册个监听器即可，不需要不断主动尝试获取锁，性能开销较小。
+
+另外一点就是，如果是 Redis 获取锁的那个客户端 出现 bug 挂了，那么只能等待超时时间之后才能释放锁；而 zk 的话，因为创建的是临时 znode，只要客户端挂了，znode 就没了，此时就自动释放锁。
+
+Redis 分布式锁大家没发现好麻烦吗？遍历上锁，计算时间等等，zk 的分布式锁语义清晰实现简单。
+
+所以先不分析太多的东西，就说这两点，我个人实践认为 zk 的分布式锁比 Redis 的分布式锁牢靠、而且模型简单易用。
+
+## 分布式事务
+
+### 分布式事务了解吗？
+
+只要聊到你做了分布式系统，必问分布式事务，你对分布式事务一无所知的话，确实会很坑，你起码得知道有哪些方案，一般怎么来做，每个方案的优缺点是什么。
+
+现在面试，分布式系统成了标配，而分布式系统带来的分布式事务也成了标配了。因为你做系统肯定要用事务吧，如果是分布式系统，肯定要用分布式事务吧。先不说你搞过没有，起码你得明白有哪几种方案，每种方案可能有啥坑？比如 TCC 方案的网络问题、XA 方案的一致性问题。
+
+分布式事务的实现主要有以下 6 种方案：
+
+- XA 方案
+- TCC 方案
+- SAGA 方案
+- 本地消息表
+- 可靠消息最终一致性方案
+- 最大努力通知方案
+
+#### 两阶段提交方案/XA 方案
+
+所谓的 XA 方案，即：两阶段提交，有一个事务管理器的概念，负责协调多个数据库（资源管理器）的事务，事务管理器先问问各个数据库你准备好了吗？如果每个数据库都回复 ok，那么就正式提交事务，在各个数据库上执行操作；如果任何其中一个数据库回答不 ok，那么就回滚事务。
+
+这种分布式事务方案，比较适合单块应用里，跨多个库的分布式事务，而且因为严重依赖于数据库层面来搞定复杂的事务，效率很低，绝对不适合高并发的场景。如果要玩儿，那么基于 Spring + JTA 就可以搞定，自己随便搜个 demo 看看就知道了。
+
+这个方案，我们很少用，一般来说某个系统内部如果出现跨多个库的这么一个操作，是不合规的。我可以给大家介绍一下，现在微服务，一个大的系统分成几十个甚至几百个服务。一般来说，我们的规定和规范，是要求每个服务只能操作自己对应的一个数据库。
+
+如果你要操作别的服务对应的库，不允许直连别的服务的库，违反微服务架构的规范，你随便交叉胡乱访问，几百个服务的话，全体乱套，这样的一套服务是没法管理的，没法治理的，可能会出现数据被别人改错，自己的库被别人写挂等情况。
+
+如果你要操作别人的服务的库，你必须是通过调用别的服务的接口来实现，绝对不允许交叉访问别人的数据库。
+
+- 第一阶段，询问
+- 第二阶段，执行
+
+```mermaid
+graph LR
+   subgraph 系统
+      事务管理器
+   end
+   事务管理器 --> 数据库1
+   事务管理器 --> 数据库2
+   事务管理器 --> 数据库3
+```
+
+#### TCC 方案
+
+TCC 的全称是：Try、Confirm、Cancel。
+
+- Try 阶段：这个阶段说的是对各个服务的资源做检测以及对资源进行锁定或者预留。
+- Confirm 阶段：这个阶段说的是在各个服务中执行实际的操作。
+- Cancel 阶段：如果任何一个服务的业务方法执行出错，那么这里就需要进行补偿，就是执行已经执行成功的业务逻辑的回滚操作。（把那些执行成功的回滚）
+
+这种方案说实话几乎很少人使用，我们用的也比较少，但是也有使用的场景。因为这个事务回滚实际上是严重依赖于你自己写代码来回滚和补偿了，会造成补偿代码巨大，非常之恶心。
+
+比如说我们，一般来说跟钱相关的，跟钱打交道的，支付、交易相关的场景，我们会用 TCC，严格保证分布式事务要么全部成功，要么全部自动回滚，严格保证资金的正确性，保证在资金上不会出现问题。
+
+而且最好是你的各个业务执行的时间都比较短。
+
+但是说实话，一般尽量别这么搞，自己手写回滚逻辑，或者是补偿逻辑，实在太恶心了，那个业务代码是很难维护的。
+
+```
+Try 阶段：冻结银行资金
+
+Confirm 阶段
+
+1. 在自己的库里插入数据
+2. 调用银行 B 的接囗，扣款
+3. 调用银行 C 的接口，转账
+
+Cancel 阶段：回滚
+
+将银行 B 的扣款给他加回去
+```
+
+```mermaid
+graph TB
+   用户 --> 系统A
+   系统A --> 数据库
+   系统A --> 银行B --> A[数据库]
+   系统A --> 银行C --> B[数据库]
+```
+
+#### Saga 方案
+
+金融核心等业务可能会选择 TCC 方案，以追求强一致性和更高的并发量，而对于更多的金融核心以上的业务系统 往往会选择补偿事务，补偿事务处理在 30 多年前就提出了 Saga 理论，随着微服务的发展，近些年才逐步受到大家的关注。目前业界比较公认的是采用 Saga 作为长事务的解决方案。
+
+##### 基本原理
+
+业务流程中每个参与者都提交本地事务，若某一个参与者失败，则补偿前面已经成功的参与者。下图左侧是正常的事务流程，当执行到 T3 时发生了错误，则开始执行右边的事务补偿流程，反向执行 T3、T2、T1 的补偿服务 C3、C2、C1，将 T3、T2、T1 已经修改的数据补偿掉。
+
+![](res/2023-09-24-20-20-26.png)
+
+##### 使用场景
+
+对于一致性要求高、短流程、并发高的场景，如：金融核心系统，会优先考虑 TCC 方案。而在另外一些场景下，我们并不需要这么强的一致性，只需要保证最终一致性即可。
+
+比如很多金融核心以上的业务（渠道层、产品层、系统集成层），这些系统的特点是最终一致即可、流程多、流程长、还可能要调用其它公司的服务。这种情况如果选择 TCC 方案开发的话，一来成本高，二来无法要求其它公司的服务也遵循 TCC 模式。同时流程长，事务边界太长，加锁时间长，也会影响并发性能。
+
+所以 Saga 模式的适用场景是：
+
+- 业务流程长、业务流程多；
+- 参与者包含其它公司或遗留系统服务，无法提供 TCC 模式要求的三个接口。
+
+##### 优点
+
+- 一阶段提交本地事务，无锁，高性能；
+- 参与者可异步执行，高吞吐；
+- 补偿服务易于实现，因为一个更新操作的反向操作是比较容易理解的。
+
+##### 缺点
+
+不保证事务的隔离性。
+
+#### 本地消息表
+
+本地消息表其实是国外的 ebay 搞出来的这么一套思想。
+
+这个大概意思是这样的：
+
+1. A 系统在自己本地一个事务里操作同时，插入一条数据到消息表；
+2. 接着 A 系统将这个消息发送到 MQ 中去；
+3. B 系统接收到消息之后，在一个事务里，往自己本地消息表里插入一条数据，同时执行其他的业务操作，如果这个消息已经被处理过了，那么此时这个事务会回滚，这样保证不会重复处理消息；
+4. B 系统执行成功之后，就会更新自己本地消息表的状态以及 A 系统消息表的状态；
+5. 如果 B 系统处理失败了，那么就不会更新消息表状态，那么此时 A 系统会定时扫描自己的消息表，如果有未处理的消息，会再次发送到 MQ 中去，让 B 再次处理；
+6. 这个方案保证了最终一致性，哪怕 B 事务失败了，但是 A 会不断重发消息，直到 B 那边成功为止。
+
+这个方案说实话最大的问题就在于严重依赖于数据库的消息表来管理事务啥的，如果是高并发场景咋办呢？咋扩展呢？所以一般确实很少用。
+
+![](res/2023-09-24-20-22-38.png)
+
+#### 可靠消息最终一致性方案
+
+这个的意思，就是干脆不要用本地的消息表了，直接基于 MQ 来实现事务。比如阿里的 RocketMQ 就支持消息事务。
+
+大概的意思就是：
+
+1. A 系统先发送一个 prepared 消息到 mq，如果这个 prepared 消息发送失败那么就直接取消操作别执行了；
+2. 如果这个消息发送成功过了，那么接着执行本地事务，如果成功就告诉 mq 发送确认消息，如果失败就告诉 mq 回滚消息；
+3. 如果发送了确认消息，那么此时 B 系统会接收到确认消息，然后执行本地的事务；
+4. mq 会自动定时轮询所有 prepared 消息回调你的接口，问你，这个消息是不是本地事务处理失败了，所有没发送确认的消息，是继续重试还是回滚？一般来说这里你就可以查下数据库看之前本地事务是否执行，如果回滚了，那么这里也回滚吧。这个就是避免可能本地事务执行成功了，而确认消息却发送失败了。
+5. 这个方案里，要是系统 B 的事务失败了咋办？重试咯，自动不断重试直到成功，如果实在是不行，要么就是针对重要的资金类业务进行回滚，比如 B 系统本地回滚后，想办法通知系统 A 也回滚；或者是发送报警由人工来手工回滚和补偿。
+6. 这个还是比较合适的，目前国内互联网公司大都是这么玩儿的，要不你就用 RocketMQ 支持的，要不你就自己基于类似 ActiveMQ？RabbitMQ？自己封装一套类似的逻辑出来，总之思路就是这样子的。
+
+![](res/2023-09-24-20-23-59.png)
+
+#### 最大努力通知方案
+
+这个方案的大致意思就是：
+
+1. 系统 A 本地事务执行完之后，发送个消息到 MQ；
+2. 这里会有个专门消费 MQ 的最大努力通知服务，这个服务会消费 MQ 然后写入数据库中记录下来，或者是放入个内存队列也可以，接着调用系统 B 的接口；
+3. 要是系统 B 执行成功就 ok 了；要是系统 B 执行失败了，那么最大努力通知服务就定时尝试重新调用系统 B，反复 N 次，最后还是不行就放弃。
+
+#### 你们公司是如何处理分布式事务的？
+
+如果你真的被问到，可以这么说，我们某某特别严格的场景，用的是 TCC 来保证强一致性；然后其他的一些场景基于阿里的 RocketMQ 来实现分布式事务。
+
+你找一个严格资金要求绝对不能错的场景，你可以说你是用的 TCC 方案；如果是一般的分布式事务场景，订单插入之后要调用库存服务更新库存，库存数据没有资金那么的敏感，可以用可靠消息最终一致性方案。
+
+友情提示一下，RocketMQ 3.2.6 之前的版本，是可以按照上面的思路来的，但是之后接口做了一些改变，我这里不再赘述了。
+
+当然如果你愿意，你可以参考可靠消息最终一致性方案来自己实现一套分布式事务，比如基于 RocketMQ 来玩儿。
+
+## 分布式会话
+
+### 集群分布式 Session 如何实现？
+
+面试官问了你一堆 Dubbo 是怎么玩儿的，你会玩儿 Dubbo 就可以把单块系统弄成分布式系统，然后分布式之后接踵而来的就是一堆问题，最大的问题就是分布式事务、接口幂等性、分布式锁，还有最后一个就是分布式 Session。
+
+当然了，分布式系统中的问题何止这么一点，非常之多，复杂度很高，这里只是说一下常见的几个问题，也是面试的时候常问的几个。
+
+Session 是啥？浏览器有个 Cookie，在一段时间内这个 Cookie 都存在，然后每次发请求过来都带上一个特殊的 `jsessionid cookie`，就根据这个东西，在服务端可以维护一个对应的 Session 域，里面可以放点数据。
+
+一般的话只要你没关掉浏览器，Cookie 还在，那么对应的那个 Session 就在，但是如果 Cookie 没了，Session 也就没了。常见于什么购物车之类的东西，还有登录状态保存之类的。
+
+这个不多说了，懂 Java 的都该知道这个。
+
+单块系统的时候这么玩儿 Session 没问题，但是你要是分布式系统呢，那么多的服务，Session 状态在哪儿维护啊？
+
+其实方法很多，但是常见常用的是以下几种：
+
+#### 完全不用 Session
+
+使用 JWT Token 储存用户身份，然后再从数据库或者 cache 中获取其他的信息。这样无论请求分配到哪个服务器都无所谓。
+
+#### Tomcat + Redis
+
+这个其实还挺方便的，就是使用 Session 的代码，跟以前一样，还是基于 Tomcat 原生的 Session 支持即可，然后就是用一个叫做 Tomcat RedisSessionManager 的东西，让所有我们部署的 Tomcat 都将 Session 数据存储到 Redis 即可。
+
+在 Tomcat 的配置文件中配置：
+
+```xml
+<Valve className="com.orangefunction.tomcat.redissessions.RedisSessionHandlerValve" />
+
+<Manager className="com.orangefunction.tomcat.redissessions.RedisSessionManager"
+         host="{redis.host}"
+         port="{redis.port}"
+         database="{redis.dbnum}"
+         maxInactiveInterval="60"/>
+```
+
+然后指定 Redis 的 host 和 port 就 ok 了。
+
+```xml
+<Valve className="com.orangefunction.tomcat.redissessions.RedisSessionHandlerValve" />
+<Manager className="com.orangefunction.tomcat.redissessions.RedisSessionManager"
+     sentinelMaster="mymaster"
+     sentinels="<sentinel1-ip>:26379,<sentinel2-ip>:26379,<sentinel3-ip>:26379"
+     maxInactiveInterval="60"/>
+```
+
+还可以用上面这种方式基于 Redis 哨兵支持的 Redis 高可用集群来保存 Session 数据，都是 ok 的。
+
+#### Spring Session + Redis
+
+上面所说的第二种方式会与 Tomcat 容器重耦合，如果我要将 Web 容器迁移成 Jetty，难道还要重新把 Jetty 都配置一遍？
+
+因为上面那种 Tomcat + Redis 的方式好用，但是会严重依赖于 Web 容器，不好将代码移植到其他 Web 容器上去，尤其是你要是换了技术栈咋整？比如换成了 Spring Cloud 或者是 Spring Boot 之类的呢？
+
+所以现在比较好的还是基于 Java 一站式解决方案，也就是 Spring。人家 Spring 基本上承包了大部分我们需要使用的框架，Spirng Cloud 做微服务，Spring Boot 做脚手架，所以用 Spring Session 是一个很好的选择。
+
+在 pom.xml 中配置：
+
+```xml
+<dependency>
+  <groupId>org.springframework.session</groupId>
+  <artifactId>spring-session-data-redis</artifactId>
+  <version>1.2.1.RELEASE</version>
+</dependency>
+<dependency>
+  <groupId>redis.clients</groupId>
+  <artifactId>jedis</artifactId>
+  <version>2.8.1</version>
+</dependency>
+```
+
+在 Spring 配置文件中配置：
+
+```xml
+<bean id="redisHttpSessionConfiguration"
+     class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
+    <property name="maxInactiveIntervalInSeconds" value="600"/>
+</bean>
+
+<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+    <property name="maxTotal" value="100" />
+    <property name="maxIdle" value="10" />
+</bean>
+
+<bean id="jedisConnectionFactory"
+      class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" destroy-method="destroy">
+    <property name="hostName" value="${redis_hostname}"/>
+    <property name="port" value="${redis_port}"/>
+    <property name="password" value="${redis_pwd}" />
+    <property name="timeout" value="3000"/>
+    <property name="usePool" value="true"/>
+    <property name="poolConfig" ref="jedisPoolConfig"/>
+</bean>
+```
+
+在 web.xml 中配置：
+
+```xml
+<filter>
+    <filter-name>springSessionRepositoryFilter</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>springSessionRepositoryFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+示例代码：
+
+```java
+@RestController
+@RequestMapping("/test")
+public class TestController {
+
+    @RequestMapping("/putIntoSession")
+    public String putIntoSession(HttpServletRequest request, String username) {
+        request.getSession().setAttribute("name",  "leo");
+        return "ok";
+    }
+
+    @RequestMapping("/getFromSession")
+    public String getFromSession(HttpServletRequest request, Model model){
+        String name = request.getSession().getAttribute("name");
+        return name;
+    }
+}
+```
+
+上面的代码就是 ok 的，给 Spring Session 配置基于 Redis 来存储 Session 数据，然后配置了一个 Spring Session 的过滤器，这样的话，Session 相关操作都会交给 Spring Session 来管了。接着在代码中，就用原生的 Session 操作，就是直接基于 Spring Session 从 Redis 中获取数据了。
+
+实现分布式的会话有很多种方式，我说的只不过是比较常见的几种方式，Tomcat + Redis 早期比较常用，但是会重耦合到 Tomcat 中；近些年，通过 Spring Session 来实现。
 
 // TODO https://doocs.github.io/advanced-java/#/docs/distributed-system/dubbo-service-management
