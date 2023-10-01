@@ -6047,10 +6047,454 @@ public class RunTest {
 
 ### 你所知道的微服务技术栈都有哪些？
 
+#### 微服务开发
+
+作用：快速开发服务。
+
+- Spring
+- Spring MVC
+- Spring Boot
+
+[Spring](https://spring.io/) 目前是 JavaWeb 开发人员必不可少的一个框架，SpringBoot 简化了 Spring 开发的配置目前也是业内主流开发框架。
+
+#### 微服务注册发现
+
+作用：发现服务，注册服务，集中管理服务。
+
+- Eureka
+
+   - Eureka Server: 提供服务、注册服务, 各个节点启动后，会在 Eureka Server 中进行注册。
+   - Eureka Client: 简化与 Eureka Server 的交互操作。
+   - Spring Cloud Netflix: [GitHub](https://github.com/spring-cloud/spring-cloud-netflix)，[文档](https://cloud.spring.io/spring-cloud-netflix/reference/html/)
+
+- Zookeeper
+
+   > ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
+
+   [Zookeeper](https://github.com/apache/zookeeper) 是一个集中的服务，用于维护配置信息、命名、提供分布式同步和提供组服务。
+
+Zookeeper 和 Eureka 区别
+
+Zookeeper 保证 CP，Eureka 保证 AP：
+
+- C：数据一致性；
+- A：服务可用性；
+- P：服务对网络分区故障的容错性
+
+这三个特性在任何分布式系统中不能同时满足，最多同时满足两个。
+
+#### 微服务配置管理
+
+作用：统一管理一个或多个服务的配置信息, 集中管理。
+
+- [Disconf](https://github.com/knightliao/disconf)
+
+   Distributed Configuration Management Platform（分布式配置管理平台），它是专注于各种分布式系统配置管理的通用组件、通用平台，提供统一的配置管理服务，是一套完整的基于 zookeeper 的分布式配置统一解决方案。
+
+- [SpringCloudConfig](https://github.com/spring-cloud/spring-cloud-config)
+- [Apollo](https://github.com/ctripcorp/apollo)
+
+   Apollo（阿波罗）是携程框架部门研发的分布式配置中心，能够集中化管理应用不同环境、不同集群的配置，配置修改后能够实时推送到应用端，并且具备规范的权限、流程治理等特性，用于微服务配置管理场景。
+
+#### 权限认证
+
+作用：根据系统设置的安全规则或者安全策略, 用户可以访问而且只能访问自己被授权的资源，不多不少。
+
+- [Spring Security](https://spring.io/projects/spring-security)
+- [Apache Shiro](http://shiro.apache.org/)
+
+   > Apache Shiro™ is a powerful and easy-to-use Java security framework that performs authentication, authorization, cryptography, and session management. With Shiro’s easy-to-understand API, you can quickly and easily secure any application – from the smallest mobile applications to the largest web and enterprise applications.
+
+#### 批处理
+
+作用: 批量处理同类型数据或事务
+
+[Spring Batch](https://spring.io/projects/spring-batch)
+
+#### 定时任务
+
+作用: 定时做什么。
+
+[Quartz](http://www.quartz-scheduler.org/)
+
+#### 微服务调用 (协议)
+
+通讯协议
+
+- Rest
+   - 通过 HTTP / HTTPS 发送 Rest 请求进行数据交互
+- RPC
+   - Remote Procedure Call
+   - 它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议，RPC 不依赖于具体的网络传输协议，tcp、udp 等都可以。
+- [gRPC](https://www.grpc.io/)
+
+   > A high-performance, open-source universal RPC framework
+
+   所谓 RPC（remote procedure call 远程过程调用）框架实际是提供了一套机制，使得应用程序之间可以进行通信，而且也遵从 server/client 模型。使用的时候客户端调用 server 端提供的接口就像是调用本地的函数一样。
+
+- RMI
+   - Remote Method Invocation
+   - 纯 Java 调用
+
+#### 服务接口调用
+
+作用：多个服务之间的通讯
+
+[Feign(HTTP)](https://github.com/OpenFeign/feign)
+
+Spring Cloud Netflix 的微服务都是以 HTTP 接口的形式暴露的，所以可以用 Apache 的 HttpClient 或 Spring 的 RestTemplate 去调用，而 Feign 是一个使用起来更加方便的 HTTP 客户端，使用起来就像是调用自身工程的方法，而感觉不到是调用远程方法。
+
+#### 服务熔断
+
+作用: 当请求到达一定阈值时不让请求继续
+
+- [Hystrix](https://github.com/Netflix/Hystrix)
+
+   > Hystrix is a latency and fault tolerance library designed to isolate points of access to remote systems, services and 3rd party libraries, stop cascading failure and enable resilience in complex distributed systems where failure is inevitable.
+
+- [Sentinel](https://github.com/alibaba/Sentinel)
+
+   > A lightweight powerful flow control component enabling reliability and monitoring for microservices.（轻量级的流量控制、熔断降级 Java 库）
+
+#### 服务的负载均衡
+
+作用：降低服务压力, 增加吞吐量
+
+- [Ribbon](https://github.com/Netflix/ribbon)
+
+   Spring Cloud Ribbon 是一个基于 HTTP 和 TCP 的客户端负载均衡工具, 它基于 Netflix Ribbon 实现
+
+- [Nginx](https://github.com/nginx/nginx)
+
+   Nginx (engine x) 是一个高性能的 HTTP 和反向代理 web 服务器, 同时也提供了 IMAP / POP3 / SMTP 服务
+
+Nginx 与 Ribbon 区别
+
+Nginx 属于服务端负载均衡，Ribbon 属于客户端负载均衡。Nginx 作用与 Tomcat，Ribbon 作用与各个服务之间的调用 (RPC)。
+
+#### 消息队列
+
+作用: 解耦业务, 异步化处理数据
+
+- [Kafka](http://kafka.apache.org/)
+- [RabbitMQ](https://www.rabbitmq.com/)
+- [RocketMQ](http://rocketmq.apache.org/)
+- [activeMQ](http://activemq.apache.org/)
+
+#### 日志采集 (elk)
+
+作用: 收集各服务日志提供日志分析、用户画像等
+
+- [Elasticsearch](https://github.com/elastic/elasticsearch)
+- [Logstash](https://github.com/elastic/logstash)
+- [Kibana](https://github.com/elastic/kibana)
+
+#### API 网关
+
+作用: 外部请求通过 API 网关进行拦截处理，再转发到真正的服务
+
+[Zuul](https://github.com/Netflix/zuul)
+
+Zuul is a gateway service that provides dynamic routing, monitoring, resiliency, security, and more.
+
+#### 服务监控
+
+作用: 以可视化或非可视化的形式展示出各个服务的运行情况（CPU、内存、访问量等）
+
+- [Zabbix](https://github.com/jjmartres/Zabbix)
+- [Nagios](https://www.nagios.org/)
+- [Metrics](https://metrics.dropwizard.io/)
+
+#### 服务链路追踪
+
+作用: 明确服务之间的调用关系
+
+- [Zipkin](https://github.com/openzipkin/zipkin)
+- [Brave](https://github.com/openzipkin/brave)
+
+#### 数据存储
+
+作用: 存储数据
+
+##### 关系型数据库
+
+- [MySql](https://www.mysql.com/)
+- [Oracle](https://www.oracle.com/index.html)
+- [MsSQL](https://docs.microsoft.com/zh-cn/sql/?view=sql-server-ver15)
+- [PostgreSql](https://www.postgresql.org/)
+
+##### 非关系型数据库
+
+- [Mongodb](https://www.mongodb.com/)
+- [Elasticsearch](https://github.com/elastic/elasticsearch)
+
+#### 缓存
+
+作用: 存储数据
+
+[redis](https://redis.io/)
+
+#### 分库分表
+
+作用: 数据库分库分表方案
+
+- [ShardingSphere](http://shardingsphere.apache.org/)
+- [Mycat](http://www.mycat.io/)
+
+#### 服务部署
+
+作用: 将项目快速部署、上线、持续集成
+
+- [Docker](http://www.docker.com/)
+- [Jenkins](https://jenkins.io/zh/)
+- [Kubernetes(K8s)](https://kubernetes.io/)
+- [Mesos](http://mesos.apache.org/)
+
 ### 微服务治理策略
+
+#### 服务的注册和发现
+
+解决问题：集中管理服务
+
+解决方法：
+
+- Eureka
+- Zookeeper
+
+#### 负载均衡
+
+解决问题：降低服务器硬件压力
+
+解决方法：
+
+- Nginx
+- Ribbon
+
+#### 通讯
+
+解决问题：各个服务之间的沟通桥梁
+
+解决方法：
+
+- REST（同步）
+- RPC（同步）
+- MQ（异步）
+
+#### 配置管理
+
+解决问题：随着服务的增加配置也在增加，如何管理各个服务的配置。
+
+解决方法：
+
+- Nacos
+- Spring Cloud Config
+- Apollo
+
+#### 容错和服务降级
+
+解决问题：在微服务当中，一个请求经常会涉及到调用几个服务，如果其中某个服务不可以，没有做服务容错的话，极有可能会造成一连串的服务不可用，这就是雪崩效应。
+
+解决方法：
+
+- Hystrix
+
+#### 服务依赖关系
+
+解决问题：多个服务之间来回依赖，启动关系的不明确。
+
+解决方法：应用分层。
+
+#### 服务文档
+
+解决问题：降低沟通成本
+
+解决方法：
+
+- Swagger
+- Java doc
+
+#### 服务安全问题
+
+解决问题：敏感数据的安全性
+
+解决方法：
+
+- Oauth
+- Shiro
+- Spring Security
+
+#### 流量控制
+
+解决问题：避免一个服务上的流量过大拖垮整个服务体系
+
+解决方法：
+
+- Hystrix
+
+#### 自动化测试
+
+解决问题：提前预知异常，确定服务是否可用
+
+解决方法：
+
+- junit
+
+#### 服务上线，下线的流程
+
+解决问题：避免服务随意的上线下线
+
+解决方法：新服务上线需要经过管理人员审核，服务下线需要告知各个调用方进行修改，直到没有调用该服务才可以进行下线。
+
+#### 兼容性
+
+解决问题：服务开发持续进行如何做到兼容。
+
+解决方法：通过版本号的形式进行管理，修改完成进行回归测试。
+
+#### 服务编排
+
+解决问题：解决服务依赖问题的一种方式
+
+解决方法：
+
+- Docker
+- K8s
+
+#### 资源调度
+
+解决问题：每个服务的资源占用量不同，如何分配
+
+解决方法：
+
+- JVM 隔离
+- Classload 隔离
+- 硬件隔离
+
+#### 容量规划
+
+解决问题：随着时间增长，调用逐步增加，什么时候追加机器。
+
+解决方法：统计每日调用量和响应时间，根据机器情况设置阈值，超过阈值就可以追加机器。
 
 ### Eureka 和 Zookeeper 都可以提供服务注册与发现的功能，它们有什么区别？
 
 ### 服务发现组件 Eureka 的几个主要调用过程
+
+#### 前言
+
+现在流行的微服务体系结构正在改变我们构建应用程序的方式，从单一的单体服务转变为越来越小的可单独部署的服务（称为微服务），共同构成了我们的应用程序。当进行一个业务时不可避免就会存在多个服务之间调用，假如一个服务 A 要访问在另一台服务器部署的服务 B，那么前提是服务 A 要知道服务 B 所在机器的 IP 地址和服务对应的端口，最简单的方式就是让服务 A 自己去维护一份服务 B 的配置（包含 IP 地址和端口等信息），但是这种方式有几个明显的缺点：随着我们调用服务数量的增加，配置文件该如何维护；缺乏灵活性，如果服务 B 改变 IP 地址或者端口，服务 A 也要修改相应的文件配置；还有一个就是进行服务的动态扩容或缩小不方便。 一个比较好的解决方案就是服务发现（Service Discovery）。它抽象出来了一个注册中心，当一个新的服务上线时，它会将自己的 IP 和端口注册到注册中心去，会对注册的服务进行定期的心跳检测，当发现服务状态异常时将其从注册中心剔除下线。服务 A 只要从注册中心中获取服务 B 的信息即可，即使当服务 B 的 IP 或者端口变更了，服务 A 也无需修改，从一定程度上解耦了服务。服务发现目前业界有很多开源的实现，比如 apache 的 zookeeper、Netflix 的 eureka、hashicorp 的 consul、CoreOS 的 etcd。
+
+#### Eureka 是什么
+
+Eureka 在 GitHub 上对其的定义为
+
+> Eureka is a REST (Representational State Transfer) based service that is primarily used in the AWS cloud for locating services for the purpose of load balancing and failover of middle-tier servers.
+
+At Netflix, Eureka is used for the following purposes apart from playing a critical part in mid-tier load balancing.
+
+Eureka 是由 Netflix 公司开源，采用的是 Client / Server 模式进行设计，基于 http 协议和使用 Restful Api 开发的服务注册与发现组件，提供了完整的服务注册和服务发现，可以和 Spring Cloud 无缝集成。其中 Server 端扮演着服务注册中心的角色，主要是为 Client 端提供服务注册和发现等功能，维护着 Client 端的服务注册信息，同时定期心跳检测已注册的服务，当不可用时将服务剔除下线，Client 端可以通过 Server 端获取自身所依赖服务的注册信息，从而完成服务间的调用。遗憾的是从其官方的 github wiki 可以发现，2.0 版本已经不再开源。但是不影响我们对其进行深入了解，毕竟服务注册、服务发现相对来说还是比较基础和通用的，其它开源实现框架的思想也是想通的。
+
+#### 服务注册中心（Eureka Server）
+
+我们在项目中引入 Eureka Server 的相关依赖，然后在启动类加上注解 @EnableEurekaServer，就可以将其作为注册中心，启动服务后访问页面如下：
+
+![](res/eureka-server-homepage.png)
+
+我们继续添加两个模块 service-provider，service-consumer，然后在启动类加上注解 @EnableEurekaClient 并指定注册中心地址为我们刚刚启动的 Eureka Server，再次访问可以看到两个服务都已经注册进来了。
+
+![](res/eureka-instance-registered-currently.png)
+
+可以看到 Eureka 的使用非常简单，只需要添加几个注解和配置就实现了服务注册和服务发现，接下来我们看看它是如何实现这些功能的。
+
+##### 服务注册（Register）
+
+注册中心提供了服务注册接口，用于当有新的服务启动后进行调用来实现服务注册，或者心跳检测到服务状态异常时，变更对应服务的状态。服务注册就是发送一个 POST 请求带上当前实例信息到类 ApplicationResource 的 addInstance 方法进行服务注册。
+
+![](res/eureka-server-applicationresource-addinstance.png)
+
+可以看到方法调用了类 PeerAwareInstanceRegistryImpl 的 register 方法，该方法主要分为两步：
+
+1. 调用父类 AbstractInstanceRegistry 的 register 方法把当前服务注册到注册中心
+2. 调用 replicateToPeers 方法使用异步的方式向其它的 Eureka Server 节点同步服务注册信息
+
+服务注册信息保存在一个嵌套的 map 中，它的结构如下：
+
+![](res/eureka-server-registry-structure.png)
+
+第一层 map 的 key 是应用名称（对应 Demo 里的 SERVICE-PROVIDER），第二层 map 的 key 是应用对应的实例名称（对应 Demo 里的 mghio-mbp:service-provider:9999），一个应用可以有多个实例，主要调用流程如下图所示：
+
+![](res/eureka-server-register-sequence-chart.png)
+
+##### 服务续约（Renew）
+
+服务续约会由服务提供者（比如 Demo 中的 service-provider）定期调用，类似于心跳，用来告知注册中心 Eureka Server 自己的状态，避免被 Eureka Server 认为服务时效将其剔除下线。服务续约就是发送一个 PUT 请求带上当前实例信息到类 InstanceResource 的 renewLease 方法进行服务续约操作。
+
+![](res/eureka-server-instanceresource-renew.png)
+
+进入到 PeerAwareInstanceRegistryImpl 的 renew 方法可以看到，服务续约步骤大体上和服务注册一致，先更新当前 Eureka Server 节点的状态，服务续约成功后再用异步的方式同步状态到其它 Eureka Server 节上，主要调用流程如下图所示：
+
+![](res/eureka-server-renew-sequence-chart.png)
+
+##### 服务下线（Cancel）
+
+当服务提供者（比如 Demo 中的 service-provider）停止服务时，会发送请求告知注册中心 Eureka Server 进行服务剔除下线操作，防止服务消费者从注册中心调用到不存在的服务。服务下线就是发送一个 DELETE 请求带上当前实例信息到类 InstanceResource 的 cancelLease 方法进行服务剔除下线操作。
+
+![](res/eureka-server-instanceresource-cancellease.png)
+
+进入到 PeerAwareInstanceRegistryImpl 的 cancel 方法可以看到，服务续约步骤大体上和服务注册一致，先在当前 Eureka Server 节点剔除下线该服务，服务下线成功后再用异步的方式同步状态到其它 Eureka Server 节上，主要调用流程如下图所示：
+
+![](res/eureka-server-cancellease-sequence-chart.png)
+
+##### 服务剔除（Eviction）
+
+服务剔除是注册中心 Eureka Server 在启动时就启动一个守护线程 evictionTimer 来定期（默认为 60 秒）执行检测服务的，判断标准就是超过一定时间没有进行 Renew 的服务，默认的失效时间是 90 秒，也就是说当一个已注册的服务在 90 秒内没有向注册中心 Eureka Server 进行服务续约（Renew），就会被从注册中心剔除下线。失效时间可以通过配置 eureka.instance.leaseExpirationDurationInSeconds 进行修改，定期执行检测服务可以通过配置 eureka.server.evictionIntervalTimerInMs 进行修改，主要调用流程如下图所示：
+
+![](res/eureka-server-evict-sequence-chart.png)
+
+#### 服务提供者（Service Provider）
+
+对于服务提供方（比如 Demo 中的 service-provider 服务）来说，主要有三大类操作，分别为服务注册（Register）、服务续约（Renew）、服务下线（Cancel），接下来看看这三个操作是如何实现的。
+
+##### 服务注册（Register）
+
+一个服务要对外提供服务，首先要在注册中心 Eureka Server 进行服务相关信息注册，能进行这一步的前提是你要配置 eureka.client.register-with-eureka = true，这个默认值为 true，注册中心不需要把自己注册到注册中心去，把这个配置设为 false，这个调用比较简单，主要调用流程如下图所示：
+
+![](res/eureka-service-provider-register-sequence-chart.png)
+
+##### 服务续约（Renew）
+
+服务续约是由服务提供者方定期（默认为 30 秒）发起心跳的，主要是用来告知注册中心 Eureka Server 自己状态是正常的还活着，可以通过配置 eureka.instance.lease-renewal-interval-in-seconds 来修改，当然服务续约的前提是要配置 eureka.client.register-with-eureka = true ，将该服务注册到注册中心中去，主要调用流程如下图所示：
+
+![](res/eureka-service-provider-renew-sequence-chart.png)
+
+##### 服务下线（Cancel）
+
+当服务提供者方服务停止时，要发送 DELETE 请求告知注册中心 Eureka Server 自己已经下线，好让注册中心将自己剔除下线，防止服务消费方从注册中心获取到不可用的服务。这个过程实现比较简单，在类 DiscoveryClient 的 shutdown 方法加上注解 @PreDestroy，当服务停止时会自动触发服务剔除下线，执行服务下线逻辑，主要调用流程如下图所示：
+
+![](res/eureka-service-provider-cancel-sequence-chart.png)
+
+#### 服务消费者（Service Consumer）
+
+这里的服务消费者如果不需要被其它服务调用的话，其实只会涉及到两个操作，分别是从注册中心获取服务列表（Fetch）和更新服务列表（Update）。如果同时也需要注册到注册中心对外提供服务的话，那么剩下的过程和上文提到的服务提供者是一致的，这里不再阐述，接下来看看这两个操作是如何实现的。
+
+##### 获取服务列表（Fetch）
+
+服务消费者方启动之后首先肯定是要先从注册中心 Eureka Server 获取到可用的服务列表同时本地也会缓存一份。这个获取服务列表的操作是在服务启动后 DiscoverClient 类实例化的时候执行的。
+
+![](res/eureka-service-consumer-fetchregistry.png)
+
+可以看出，能发生这个获取服务列表的操作前提是要保证配置了 eureka.client.fetch-registry = true，该配置的默认值为 true，主要调用流程如下图所示：
+
+![](res/eureka-service-consumer-fetch-sequence-chart.png)
+
+##### 更新服务列表（Update）
+
+由上面的获取服务列表（Fetch）操作过程可知，本地也会缓存一份，所以这里需要定期的去到注册中心 Eureka Server 获取服务的最新配置，然后比较更新本地缓存，这个更新的间隔时间可以通过配置 eureka.client.registry-fetch-interval-seconds 修改，默认为 30 秒，能进行这一步更新服务列表的前提是你要配置 eureka.client.register-with-eureka = true，这个默认值为 true。主要调用流程如下图所示：
+
+![](res/eureka-service-consumer-update-sequence-chart.png)
+
+#### 总结
+
+工作中项目使用的是 Spring Cloud 技术栈，它有一套非常完善的开源代码来整合 Eureka，使用起来非常方便。之前都是直接加注解和修改几个配置属性一气呵成的，没有深入了解过源码实现，本文主要是阐述了服务注册、服务发现等相关过程和实现方式，对 Eureka 服务发现组件有了更近一步的了解。
 
 // TODO https://doocs.github.io/advanced-java/#/docs/high-concurrency/how-to-limit-current
