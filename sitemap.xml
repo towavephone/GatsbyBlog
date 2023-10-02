@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url> <loc>https://blog.towavephone.com/go-introduce-learn/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/system-design-deep-learn/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/distributed-services-practice-learn/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/writing-high-quality-python/</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -227,7 +228,8 @@
 <url> <loc>https://blog.towavephone.com/tag/后端/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/后端/page/3</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/后端/page/4</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
-<url> <loc>https://blog.towavephone.com/tag/系统设计</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://blog.towavephone.com/tag/后端/page/5</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://blog.towavephone.com/tag/go</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记/page/3</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -243,6 +245,7 @@
 <url> <loc>https://blog.towavephone.com/tag/读书笔记/page/13</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记/page/14</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/读书笔记/page/15</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://blog.towavephone.com/tag/系统设计</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/分布式</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/python</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://blog.towavephone.com/tag/前端</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
