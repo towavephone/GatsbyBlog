@@ -1181,10 +1181,46 @@ rspack.config.js
 
 ```js
 const path = require('path');
+const { defineConfig } = require('@rspack/cli');
+const fs = require('fs');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 // const NodePolyfill = require('@rspack/plugin-node-polyfill')
 
-module.exports = {
+const appDirectory = fs.realpathSync(process.cwd());
+const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
+
+const dotenv = resolveApp('.env');
+
+const NODE_ENV = process.env.NODE_ENV;
+// https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
+const dotenvFiles = [
+   `${dotenv}.${NODE_ENV}.local`,
+   // Don't include `.env.local` for `test` environment
+   // since normally you expect tests to produce the same
+   // results for everyone
+   NODE_ENV !== 'test' && `${dotenv}.local`,
+   `${dotenv}.${NODE_ENV}`,
+   dotenv
+].filter(Boolean);
+
+// Load environment variables from .env* files. Suppress warnings using silent
+// if this file is missing. dotenv will never modify any environment variables
+// that have already been set.  Variable expansion is supported in .env files.
+// https://github.com/motdotla/dotenv
+// https://github.com/motdotla/dotenv-expand
+dotenvFiles.forEach((dotenvFile) => {
+   if (fs.existsSync(dotenvFile)) {
+      require('dotenv-expand')(
+         require('dotenv').config({
+            path: dotenvFile
+         })
+      );
+   }
+});
+
+const { DISABLE_OVERLAY } = process.env;
+
+module.exports = defineConfig({
    mode: 'development',
    entry: {
       main: './src/index.js'
@@ -1216,18 +1252,6 @@ module.exports = {
             test: /\.js$/,
             include: /src/,
             type: 'jsx'
-         },
-         {
-            test: /(StreamDataWorker|MapDataWorker|FrameProcessWorker)\.js/,
-            // use: [
-            //   {
-            //     loader: 'worker-loader',
-            //     options: {
-            //       filename: '[name].[hash].worker.js'
-            //     }
-            //   }
-            // ]
-            type: 'asset/resource'
          },
          {
             test: /\.less$/,
@@ -1271,7 +1295,7 @@ module.exports = {
          'antd/es/theme': false // 修复因 @ant-design/pro-components 导致的编译报错问题
       },
       extensions: ['.js'],
-      mainFields: ['main']
+      mainFields: ['main', 'browser', 'module']
    },
    // plugins: [
    //   new MonacoWebpackPlugin({
@@ -1281,7 +1305,10 @@ module.exports = {
    // ],
    devServer: {
       port: 3000,
-      allowedHosts: 'all'
+      allowedHosts: 'all',
+      client: {
+         overlay: !DISABLE_OVERLAY
+      }
    },
    devtool: 'source-map',
    snapshot: {
@@ -1304,7 +1331,7 @@ module.exports = {
    experiments: {
       incrementalRebuild: true
    }
-};
+});
 ```
 
 #### 运行模板
@@ -1657,7 +1684,7 @@ const { get, pick } = require('lodash');
 const threadLoader = require('thread-loader');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const { LAZY_BUILD, DISABLE_CACHE, DEBUG_CACHE, BUNDLE_ANALYZER } = process.env;
+const { LAZY_BUILD, DISABLE_CACHE, DEBUG_CACHE, BUNDLE_ANALYZER, DISABLE_OVERLAY } = process.env;
 
 threadLoader.warmup(
    {
@@ -1908,6 +1935,10 @@ module.exports = {
       const config = configFunction(proxy, allowedHost);
 
       config.allowedHosts = 'all';
+
+      if (DISABLE_OVERLAY) {
+         config.client.overlay = false;
+      }
 
       fs.writeFileSync(path.join(craDir, 'webpack-dev-server.json'), formatConfig(config));
 
