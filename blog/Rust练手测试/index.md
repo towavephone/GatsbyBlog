@@ -3423,8 +3423,6 @@ fn main() {
 }
 ```
 
-// TODO 练习到这里
-
 # 流程控制
 
 ## 问题一
@@ -3449,7 +3447,7 @@ fn main() {
 ```rust
 // 填空
 fn main() {
-    let n = 0;
+    let n = 5;
 
     if n < 0 {
         println!("{} is negative", n);
@@ -3472,13 +3470,13 @@ fn main() {
 
     let big_n =
         if n < 10 && n > -10 {
-            println!(" 数字太小，先增加 10 倍再说");
+            println!("数字太小，先增加 10 倍再说");
 
             10 * n
         } else {
             println!("数字太大，我们得让它减半");
 
-            n / 2.0 ;
+            n / 2.0;
         }
 
     println!("{} -> {}", n, big_n);
@@ -3490,10 +3488,10 @@ fn main() {
 ```rust
 // 修复错误
 fn main() {
-    let n = 11;
+    let n = 5;
 
     let big_n = if n < 10 && n > -10 {
-        println!(" 数字太小，先增加 10 倍再说");
+        println!("数字太小，先增加 10 倍再说");
 
         10 * n
     } else {
@@ -3545,7 +3543,7 @@ fn main() {
     println!("{:?}", names);
 
     let numbers = [1, 2, 3];
-    // numbers中的元素实现了 Copy，因此无需转移所有权
+    // numbers 中的元素实现了 Copy，因此无需转移所有权
     for n in numbers {
         // do something with name...
     }
@@ -3557,7 +3555,6 @@ fn main() {
 ### 我的解答
 
 ```rust
-// 修复错误，不要新增或删除代码行
 fn main() {
     let names = [String::from("liming"), String::from("hanmeimei")];
     for name in &names {
@@ -3595,7 +3592,6 @@ fn main() {
 fn main() {
     let a = [4, 3, 2, 1];
 
-    // 通过索引和值的方式迭代数组 `a`
     for (i, v) in a.iter().enumerate() {
         println!("第{}个元素是{}", i + 1, v);
     }
@@ -3635,12 +3631,9 @@ fn main() {
 ### 我的解答
 
 ```rust
-// 填空，让最后一行的  println! 工作 !
 fn main() {
-    // 一个计数值
     let mut n = 1;
 
-    // 当条件为真时，不停的循环
     while n < 10 {
         if n % 15 == 0 {
             println!("fizzbuzz");
@@ -3652,7 +3645,7 @@ fn main() {
             println!("{}", n);
         }
 
-        n = n + 1;
+        n += 1;
     }
 
     println!("n 的值是 {}, 循环结束", n);
@@ -3681,7 +3674,6 @@ fn main() {
 ### 我的解答
 
 ```rust
-// 填空，不要修改其它代码
 fn main() {
     let mut n = 0;
     for i in 0..=100 {
@@ -3705,7 +3697,7 @@ fn main() {
     let mut n = 0;
     for i in 0..=100 {
        if n != 66 {
-           n+=1;
+           n + =1;
            __;
        }
 
@@ -3771,7 +3763,6 @@ fn main() {
 ### 我的解答
 
 ```rust
-// 填空，不要修改其它代码
 fn main() {
     let mut count = 0u32;
 
@@ -3784,7 +3775,7 @@ fn main() {
         if count == 3 {
             println!("three");
 
-            // 跳过当此循环的剩余代码
+            // 跳过当前此循环的剩余代码
             continue;
         }
 
@@ -3825,7 +3816,6 @@ fn main() {
 ### 我的解答
 
 ```rust
-// 填空
 fn main() {
     let mut counter = 0;
 
@@ -3843,7 +3833,7 @@ fn main() {
 
 ## 问题十一
 
-当有多层循环时，你可以使用 continue 或 break 来控制外层的循环。要实现这一点，外部的循环必须拥有一个标签 `'label`, 然后在 break 或 continue 时指定该标签
+当有多层循环时，你可以使用 continue 或 break 来控制外层的循环。要实现这一点，外部的循环必须拥有一个标签 `'label`，然后在 break 或 continue 时指定该标签
 
 ```rust
 // 填空
@@ -3876,14 +3866,12 @@ fn main() {
 ### 我的解答
 
 ```rust
-// 填空
 fn main() {
     let mut count = 0;
     'outer: loop {
         'inner1: loop {
             if count >= 20 {
-                // 这只会跳出 inner1 循环
-                break 'inner1; // 这里使用 `break` 也是一样的
+                break 'inner1;
             }
             count += 2;
         }
@@ -3902,6 +3890,8 @@ fn main() {
     assert!(count == 30)
 }
 ```
+
+// TODO 练习到这里
 
 # 模式匹配
 
@@ -10671,7 +10661,7 @@ mod front_of_house {
 
         fn take_payment() {}
 
-        fn complain() {} 
+        fn complain() {}
     }
 }
 ```
@@ -10719,7 +10709,7 @@ pub mod front_of_house {
 
         // Maybe you don't want the guest hearing the your complaining about them
         // So just make it private
-        fn complain() {} 
+        fn complain() {}
     }
 }
 
@@ -10922,7 +10912,7 @@ pub fn take_payment() {}
 
 // Maybe you don't want the guest hearing the your complaining about them
 // So just make it private
-fn complain() {} 
+fn complain() {}
 ```
 
 ### 问题五
@@ -11209,7 +11199,7 @@ fn main() {
 
 为 add_one 函数添加文档
 
-```rust
+````rust
 #![allow(unused)]
 fn main() {
    // in lib.rs
@@ -11228,7 +11218,7 @@ fn main() {
       x + 1
    }
 }
-```
+````
 
 我们可以使用 `cargo doc --open` 来生成 HTML 文件，并自动在浏览器中打开网页。
 
@@ -11320,7 +11310,7 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 ### 我的解答
 
-```rust
+````rust
 // in lib.rs
 
 /// Add one to the given value and return the value
@@ -11350,7 +11340,7 @@ assert_eq!(7, answer);
 pub fn add_two(x: i32) -> i32 {
     x + 2
 }
-```
+````
 
 ## 问题三
 
@@ -11358,7 +11348,7 @@ pub fn add_two(x: i32) -> i32 {
 
 > 你只能修改注释，不要修改 fn div
 
-```rust
+````rust
 // in src/compute.rs
 
 /// # Panics
@@ -11376,7 +11366,7 @@ pub fn div(a: i32, b: i32) -> i32 {
 
    a / b
 }
-```
+````
 
 ### 我的解答
 
@@ -11390,7 +11380,7 @@ pub fn div(a: i32, b: i32) -> i32 {
 
 将以下代码添加到 src/compute.rs
 
-```rust
+````rust
 // in src/compute.rs
 
 /// ```
@@ -11410,7 +11400,7 @@ pub fn try_div(a: i32, b: i32) -> Result<i32, String> {
         Ok(a / b)
     }
 }
-```
+````
 
 然后修改以上代码已实现两个目标:
 

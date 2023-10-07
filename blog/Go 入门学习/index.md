@@ -76,4 +76,71 @@ $ go get golang.org/x/tools/cmd/goimports
 
 对于大多数用户来说，下载、编译包、运行测试用例、察看 Go 语言的文档等等常用功能都可以用 go 的工具完成。10.7 节详细介绍这些知识。
 
+## 命令行参数
+
+```go
+// Echo1 prints its command-line arguments.
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    var s, sep string
+    for i := 1; i < len(os.Args); i++ {
+        s += sep + os.Args[i]
+        sep = " "
+    }
+    fmt.Println(s)
+}
+```
+
+```go
+// Echo2 prints its command-line arguments.
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    s, sep := "", ""
+    for _, arg := range os.Args[1:] {
+        s += sep + arg
+        sep = " "
+    }
+    fmt.Println(s)
+}
+```
+
+```go
+s := "" // 一条短变量声明，最简洁，但只能用在函数内部，而不能用于包变量
+var s string // 依赖于字符串的默认初始化零值机制，被初始化为 ""
+var s = "" // 用得很少，除非同时声明多个变量
+var s string = "" // 显式地标明变量的类型，当变量类型与初值类型相同时，类型冗余，但如果两者类型不同，变量类型就必须了
+```
+
+实践中一般使用前两种形式中的某个，初始值重要的话就显式地指定变量的类型，否则使用隐式初始化。
+
+每次循环迭代字符串 s 的内容都会更新。+= 连接原字符串、空格和下个参数，产生新字符串，并把它赋值给 s。s 原来的内容已经不再使用，将在适当时机对它进行垃圾回收。
+
+如果连接涉及的数据量很大，这种方式代价高昂。一种简单且高效的解决方案是使用 strings 包的 Join 函数：
+
+```go
+func main() {
+    fmt.Println(strings.Join(os.Args[1:], " "))
+}
+```
+
+最后，如果不关心输出格式，只想看看输出值，或许只是为了调试，可以用 Println 为我们格式化输出。
+
+```go
+fmt.Println(os.Args[1:])
+```
+
+这条语句的输出结果跟 strings.Join 得到的结果很像，只是被放到了一对方括号里。切片都会被打印成这种格式。
+
 // TODO https://golang-china.github.io/gopl-zh/preface-zh.html
