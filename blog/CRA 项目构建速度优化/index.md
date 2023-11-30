@@ -3,7 +3,7 @@ title: CRA 项目构建速度优化
 date: 2022-12-16 17:34:33
 categories:
    - 前端
-tags: 前端, webpack, Docker, 预研
+tags: 前端, webpack, Docker, 预研, rspack, 前端构建工具
 path: /cra-project-build-speed-optimize/
 ---
 

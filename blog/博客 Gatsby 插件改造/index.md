@@ -4,7 +4,7 @@ categories:
    - 前端
 path: /gatsby-plugin-transformation/
 tags: 前端, 源码优化, 预研
-date: 2021-11-15 11:52:04
+date: 2023-11-28 16:17:27
 ---
 
 # 需求背景
@@ -207,9 +207,21 @@ await Promise.all(nodes);
 
 [甘特图组件源码优化](/gantt-component-optimization/#实现效果)
 
+### 后续优化
+
+[代码地址](https://github.com/elboman/gatsby-remark-embedded-codesandbox/compare/master...towavephone:gatsby-remark-embedded-codesandbox:master)
+
+1. 增加上传文件忽略功能，支持 post 上传文件
+2. 修复 json 解析报错
+3. 限制请求并发防止 codesandbox 报错
+
 # 总结
 
 1. 复制功能需考虑兼容性、复制性能，可参考[JS 复制文字到剪切板的极简实现及扩展](https://www.zhangxinxu.com/wordpress/2021/10/js-copy-paste-clipboard/)
 2. 代码实时查看编辑借助于第三方服务不够稳定，可自行搭建第三方服务或者参照 [live-editor](https://github.com/gfxfundamentals/live-editor) 自建本地编辑器，必要时具有分享功能
 
-// TODO 博客 sanbox 插件忽略文件实现，支持 post 上传文件
+# 其他优化
+
+1. 把 gatsby-remark-graph 配置化，以支持最新的 mermaid 特性，[代码地址](https://github.com/konsumer/gatsby-remark-graph/compare/master...towavephone:gatsby-remark-graph-towavephone:master)
+2. gatsby-remark-design-system 支持文字转语音（利用百度翻译），[代码地址](https://github.com/LekoArts/gatsby-remark-design-system/compare/master...towavephone:gatsby-remark-design-system-towavephone:master)
+3. img、video、iframe 增加懒加载功能，[代码地址](https://github.com/1kohei1/gatsby-remark-lazy-load/compare/master...towavephone:gatsby-remark-lazy-load:master)
