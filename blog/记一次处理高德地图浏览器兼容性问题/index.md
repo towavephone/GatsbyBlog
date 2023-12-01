@@ -10,7 +10,7 @@ draft: true
 
 # 背景
 
-在 chrome 浏览器上，高德地图在 windows 系统上不能正常显示红点（左侧），在 ubuntu 系统下却正常显示（右侧），如下图所示
+在 chrome 浏览器上，用高德地图的 CircleMarker, PathSimplifier 分别画点和线时候，需要实现点在线的上面的效果，此时在 windows 系统上不能正常显示红点（左侧），在 ubuntu 系统下却正常显示（右侧），如下图所示
 
 ![](res/2023-11-28-17-00-49.png)
 
@@ -40,10 +40,10 @@ draft: true
 
 windows 下不能正常显示，ubuntu 正常
 
-[example-1](embedded-codesandbox://amap-browser-compatibility/example-1?module=/src/components/ReactAmap/hooks/useDrawLines.js&view=preview)
+[example-1](embedded-codesandbox://amap-browser-compatibility/example-1?module=/src/components/ReactAmap/hooks/useDrawPoints.js&view=preview)
 
 ## 修复后
 
 windows、ubuntu 都能正常显示
 
-[example-2](embedded-codesandbox://amap-browser-compatibility/example-2?module=/src/components/ReactAmap/hooks/useDrawLines.js&view=preview)
+[example-2](embedded-codesandbox://amap-browser-compatibility/example-2?module=/src/components/ReactAmap/hooks/useDrawPoints.js&view=preview)
