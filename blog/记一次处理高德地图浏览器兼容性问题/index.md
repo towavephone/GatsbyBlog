@@ -5,7 +5,6 @@ categories:
 path: /amap-browser-compatibility/
 tags: 前端, 地图, 预研
 date: 2023-11-28 16:55:48
-draft: true
 ---
 
 # 背景
