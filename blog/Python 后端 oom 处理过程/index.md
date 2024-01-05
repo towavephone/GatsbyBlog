@@ -29,7 +29,7 @@ python 的 django 后端在刚启动时内存占用上升很快，导致对应�
 1. 通过接口获取当前内存占用最大的排名前几的代码行数
 2. 通过接口获取当前占用内存最大的对象
 
-controllers/app_monitor_controller.py
+`controllers/app_monitor_controller.py`
 
 ```py
 import tracemalloc
@@ -131,7 +131,7 @@ class Config(AppConfig):
 
 主要用来统计函数执行过程中每行耗时及调用次数
 
-tools/performance_tool.py
+`tools/performance_tool.py`
 
 ```py
 from cProfile import Profile

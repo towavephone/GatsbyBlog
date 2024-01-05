@@ -27,7 +27,7 @@ Uncaught ChunkLoadError: Loading chunk <CHUNK_NAME> failed.
 3. 可以通过一个 websocket 链接或者轮询来主动告知浏览器更新版本，但此方案过于繁重且需要后端支持
 4. 对报错的文件重试，超过一定次数白屏，或者主动告知用户刷新页面
 
-综上，采用选项 4
+综上，采用方案 4
 
 # 技术选型
 
