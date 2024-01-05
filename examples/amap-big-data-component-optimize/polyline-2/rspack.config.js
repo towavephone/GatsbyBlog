@@ -42,5 +42,8 @@ module.exports = {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  devServer: {
+    allowedHosts: 'all'
   }
 };
