@@ -3,7 +3,6 @@ title: 深入理解 Python 虚拟机
 path: /python-vm-deep-learn/
 date: 2024-02-04 10:39:38
 tags: 后端, python, 读书笔记
-draft: true
 ---
 
 提供的源代码链接如无特殊说明均来自于 CPython repo 中的 Python3.7 分支。
