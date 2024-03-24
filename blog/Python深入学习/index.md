@@ -3,7 +3,6 @@ title: Python深入学习
 date: 2024-3-21 03:08:01
 path: /python-deep-learn/
 tags: 后端, python, 读书笔记
-draft: true
 ---
 
 # 字节码与虚拟机
@@ -15,7 +14,7 @@ import dis
 
 
 def add(a, b):
-    return a + b
+   return a + b
 
 
 dis.dis(add)
@@ -158,9 +157,9 @@ from objprint import op
 
 
 def f():
-    frame = inspect.currentframe()
-    # frame = sys._getframe()
-    op(frame, honor_existing=False, depth=1)
+   frame = inspect.currentframe()
+   # frame = sys._getframe()
+   op(frame, honor_existing=False, depth=1)
 
 
 f()
@@ -183,25 +182,24 @@ f()
 
 ```py
 import inspect
-# from objprint import op
 
 
 def f():
-    frame = inspect.currentframe()
+   frame = inspect.currentframe()
 
-    # 调用方函数的情况
-    print(frame.f_back.f_code.co_name)
-    print(frame.f_back.f_locals)
+   # 调用方函数的情况
+   print(frame.f_back.f_code.co_name)
+   print(frame.f_back.f_locals)
 
-    # 需要知道是调用了这个函数
-    print(frame.f_back.f_code.co_filename)
-    print(frame.f_back.f_lineno)
+   # 需要知道是调用了这个函数
+   print(frame.f_back.f_code.co_filename)
+   print(frame.f_back.f_lineno)
 
 
 def g():
-    a = 3
-    b = 4
-    f()
+   a = 3
+   b = 4
+   f()
 
 
 g()
@@ -250,212 +248,212 @@ case TARGET(BINARY_ADD): {
 PyObject *
 PyNumber_Add(PyObject *v, PyObject *w)
 {
-    PyObject *result = binary_op1(v, w, NB_SLOT(nb_add));
-    if (result == Py_NotImplemented) {
-        PySequenceMethods *m = v->ob_type->tp_as_sequence;
-        Py_DECREF(result);
-        if (m && m->sq_concat) {
-            return (*m->sq_concat)(v, w);
-        }
-        result = binop_type_error(v, w, "+");
-    }
-    return result;
+   PyObject *result = binary_op1(v, w, NB_SLOT(nb_add));
+   if (result == Py_NotImplemented) {
+      PySequenceMethods *m = v->ob_type->tp_as_sequence;
+      Py_DECREF(result);
+      if (m && m->sq_concat) {
+         return (*m->sq_concat)(v, w);
+      }
+      result = binop_type_error(v, w, "+");
+   }
+   return result;
 }
 
 // https://github.com/python/cpython/blob/95c340a86b828cac6c0a2e4f2fa8a96695388c73/Objects/abstract.c#L785
 static PyObject *
 binary_op1(PyObject *v, PyObject *w, const int op_slot)
 {
-    PyObject *x;
-    binaryfunc slotv = NULL;
-    binaryfunc slotw = NULL;
+   PyObject *x;
+   binaryfunc slotv = NULL;
+   binaryfunc slotw = NULL;
 
-    // 左边是数字，开始加
-    if (v->ob_type->tp_as_number != NULL)
-        slotv = NB_BINOP(v->ob_type->tp_as_number, op_slot);
-    // 左右两边类型不同且右边是数字
-    if (w->ob_type != v->ob_type &&
-        w->ob_type->tp_as_number != NULL) {
-        slotw = NB_BINOP(w->ob_type->tp_as_number, op_slot);
-        if (slotw == slotv)
-            slotw = NULL;
-    }
-    if (slotv) {
-        // v/w 是同一类型，且 v/w 都有 + 函数指针，比如 1 + 1
-        if (slotw && PyType_IsSubtype(w->ob_type, v->ob_type)) {
-            x = slotw(v, w);
-            if (x != Py_NotImplemented)
-                return x;
-            Py_DECREF(x); /* can't do it */
-            slotw = NULL;
-        }
-        // 调用 long_add
-        x = slotv(v, w);
-        if (x != Py_NotImplemented)
-            return x;
-        Py_DECREF(x); /* can't do it */
-    }
-    if (slotw) {
-        x = slotw(v, w);
-        if (x != Py_NotImplemented)
-            return x;
-        Py_DECREF(x); /* can't do it */
-    }
-    Py_RETURN_NOTIMPLEMENTED;
+   // 左边是数字，开始加
+   if (v->ob_type->tp_as_number != NULL)
+      slotv = NB_BINOP(v->ob_type->tp_as_number, op_slot);
+   // 左右两边类型不同且右边是数字
+   if (w->ob_type != v->ob_type &&
+      w->ob_type->tp_as_number != NULL) {
+      slotw = NB_BINOP(w->ob_type->tp_as_number, op_slot);
+      if (slotw == slotv)
+         slotw = NULL;
+   }
+   if (slotv) {
+      // v/w 是同一类型，且 v/w 都有 + 函数指针，比如 1 + 1
+      if (slotw && PyType_IsSubtype(w->ob_type, v->ob_type)) {
+         x = slotw(v, w);
+         if (x != Py_NotImplemented)
+               return x;
+         Py_DECREF(x); /* can't do it */
+         slotw = NULL;
+      }
+      // 调用 long_add
+      x = slotv(v, w);
+      if (x != Py_NotImplemented)
+         return x;
+      Py_DECREF(x); /* can't do it */
+   }
+   if (slotw) {
+      x = slotw(v, w);
+      if (x != Py_NotImplemented)
+         return x;
+      Py_DECREF(x); /* can't do it */
+   }
+   Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
 long_add(PyLongObject *a, PyLongObject *b)
 {
-    // a, b 能不能做加法
-    CHECK_BINOP(a, b);
-    return _PyLong_Add(a, b);
+   // a, b 能不能做加法
+   CHECK_BINOP(a, b);
+   return _PyLong_Add(a, b);
 }
 
 PyObject *
 _PyLong_Add(PyLongObject *a, PyLongObject *b)
 {
-    // a, b 都比较小的时候，可以加
-    if (_PyLong_BothAreCompact(a, b)) {
-        // 耗时部分
-        return _PyLong_FromSTwoDigits(medium_value(a) + medium_value(b));
-    }
+   // a, b 都比较小的时候，可以加
+   if (_PyLong_BothAreCompact(a, b)) {
+      // 耗时部分
+      return _PyLong_FromSTwoDigits(medium_value(a) + medium_value(b));
+   }
 
-    // 如果 a, b 很大的情况
-    PyLongObject *z;
-    if (_PyLong_IsNegative(a)) {
-        if (_PyLong_IsNegative(b)) {
-            z = x_add(a, b);
-            if (z != NULL) {
-                /* x_add received at least one multiple-digit int,
-                   and thus z must be a multiple-digit int.
-                   That also means z is not an element of
-                   small_ints, so negating it in-place is safe. */
-                assert(Py_REFCNT(z) == 1);
-                _PyLong_FlipSign(z);
-            }
-        }
-        else
-            z = x_sub(b, a);
-    }
-    else {
-        if (_PyLong_IsNegative(b))
-            z = x_sub(a, b);
-        else
-            z = x_add(a, b);
-    }
-    return (PyObject *)z;
+   // 如果 a, b 很大的情况
+   PyLongObject *z;
+   if (_PyLong_IsNegative(a)) {
+      if (_PyLong_IsNegative(b)) {
+         z = x_add(a, b);
+         if (z != NULL) {
+               /* x_add received at least one multiple-digit int,
+                  and thus z must be a multiple-digit int.
+                  That also means z is not an element of
+                  small_ints, so negating it in-place is safe. */
+               assert(Py_REFCNT(z) == 1);
+               _PyLong_FlipSign(z);
+         }
+      }
+      else
+         z = x_sub(b, a);
+   }
+   else {
+      if (_PyLong_IsNegative(b))
+         z = x_sub(a, b);
+      else
+         z = x_add(a, b);
+   }
+   return (PyObject *)z;
 }
 
 /* Create a new int object from a C word-sized int */
 static inline PyObject *
 _PyLong_FromSTwoDigits(stwodigits x)
 {
-    if (IS_SMALL_INT(x)) {
-        return get_small_int((sdigit)x);
-    }
-    assert(x != 0);
-    if (is_medium_int(x)) {
-        return _PyLong_FromMedium((sdigit)x);
-    }
-    return _PyLong_FromLarge(x);
+   if (IS_SMALL_INT(x)) {
+      return get_small_int((sdigit)x);
+   }
+   assert(x != 0);
+   if (is_medium_int(x)) {
+      return _PyLong_FromMedium((sdigit)x);
+   }
+   return _PyLong_FromLarge(x);
 }
 
 static PyObject *
 get_small_int(sdigit ival)
 {
-    assert(IS_SMALL_INT(ival));
-    return (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + ival];
+   assert(IS_SMALL_INT(ival));
+   return (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + ival];
 }
 
 static PyObject *
 _PyLong_FromMedium(sdigit x)
 {
-    assert(!IS_SMALL_INT(x));
-    assert(is_medium_int(x));
-    /* We could use a freelist here */
-    PyLongObject *v = PyObject_Malloc(sizeof(PyLongObject));
-    if (v == NULL) {
-        PyErr_NoMemory();
-        return NULL;
-    }
-    digit abs_x = x < 0 ? -x : x;
-    _PyLong_SetSignAndDigitCount(v, x<0?-1:1, 1);
-    _PyObject_Init((PyObject*)v, &PyLong_Type);
-    v->long_value.ob_digit[0] = abs_x;
-    return (PyObject*)v;
+   assert(!IS_SMALL_INT(x));
+   assert(is_medium_int(x));
+   /* We could use a freelist here */
+   PyLongObject *v = PyObject_Malloc(sizeof(PyLongObject));
+   if (v == NULL) {
+      PyErr_NoMemory();
+      return NULL;
+   }
+   digit abs_x = x < 0 ? -x : x;
+   _PyLong_SetSignAndDigitCount(v, x<0?-1:1, 1);
+   _PyObject_Init((PyObject*)v, &PyLong_Type);
+   v->long_value.ob_digit[0] = abs_x;
+   return (PyObject*)v;
 }
 
 static PyObject *
 _PyLong_FromLarge(stwodigits ival)
 {
-    twodigits abs_ival;
-    int sign;
-    assert(!is_medium_int(ival));
+   twodigits abs_ival;
+   int sign;
+   assert(!is_medium_int(ival));
 
-    if (ival < 0) {
-        /* negate: can't write this as abs_ival = -ival since that
-           invokes undefined behaviour when ival is LONG_MIN */
-        abs_ival = 0U-(twodigits)ival;
-        sign = -1;
-    }
-    else {
-        abs_ival = (twodigits)ival;
-        sign = 1;
-    }
-    /* Must be at least two digits */
-    assert(abs_ival >> PyLong_SHIFT != 0);
-    twodigits t = abs_ival >> (PyLong_SHIFT * 2);
-    Py_ssize_t ndigits = 2;
-    while (t) {
-        ++ndigits;
-        t >>= PyLong_SHIFT;
-    }
-    PyLongObject *v = _PyLong_New(ndigits);
-    if (v != NULL) {
-        digit *p = v->long_value.ob_digit;
-        _PyLong_SetSignAndDigitCount(v, sign, ndigits);
-        t = abs_ival;
-        while (t) {
-            *p++ = Py_SAFE_DOWNCAST(
-                t & PyLong_MASK, twodigits, digit);
-            t >>= PyLong_SHIFT;
-        }
-    }
-    return (PyObject *)v;
+   if (ival < 0) {
+      /* negate: can't write this as abs_ival = -ival since that
+         invokes undefined behaviour when ival is LONG_MIN */
+      abs_ival = 0U-(twodigits)ival;
+      sign = -1;
+   }
+   else {
+      abs_ival = (twodigits)ival;
+      sign = 1;
+   }
+   /* Must be at least two digits */
+   assert(abs_ival >> PyLong_SHIFT != 0);
+   twodigits t = abs_ival >> (PyLong_SHIFT * 2);
+   Py_ssize_t ndigits = 2;
+   while (t) {
+      ++ndigits;
+      t >>= PyLong_SHIFT;
+   }
+   PyLongObject *v = _PyLong_New(ndigits);
+   if (v != NULL) {
+      digit *p = v->long_value.ob_digit;
+      _PyLong_SetSignAndDigitCount(v, sign, ndigits);
+      t = abs_ival;
+      while (t) {
+         *p++ = Py_SAFE_DOWNCAST(
+               t & PyLong_MASK, twodigits, digit);
+         t >>= PyLong_SHIFT;
+      }
+   }
+   return (PyObject *)v;
 }
 
 PyLongObject *
 _PyLong_New(Py_ssize_t size)
 {
-    assert(size >= 0);
-    PyLongObject *result;
-    if (size > (Py_ssize_t)MAX_LONG_DIGITS) {
-        PyErr_SetString(PyExc_OverflowError,
-                        "too many digits in integer");
-        return NULL;
-    }
-    /* Fast operations for single digit integers (including zero)
-     * assume that there is always at least one digit present. */
-    Py_ssize_t ndigits = size ? size : 1;
-    /* Number of bytes needed is: offsetof(PyLongObject, ob_digit) +
-       sizeof(digit)*size.  Previous incarnations of this code used
-       sizeof() instead of the offsetof, but this risks being
-       incorrect in the presence of padding between the header
-       and the digits. */
-    // 申请新内存，耗时核心原因
-    result = PyObject_Malloc(offsetof(PyLongObject, long_value.ob_digit) +
-                             ndigits*sizeof(digit));
-    if (!result) {
-        PyErr_NoMemory();
-        return NULL;
-    }
-    _PyLong_SetSignAndDigitCount(result, size != 0, size);
-    _PyObject_Init((PyObject*)result, &PyLong_Type);
-    /* The digit has to be initialized explicitly to avoid
-     * use-of-uninitialized-value. */
-    result->long_value.ob_digit[0] = 0;
-    return result;
+   assert(size >= 0);
+   PyLongObject *result;
+   if (size > (Py_ssize_t)MAX_LONG_DIGITS) {
+      PyErr_SetString(PyExc_OverflowError,
+                     "too many digits in integer");
+      return NULL;
+   }
+   /* Fast operations for single digit integers (including zero)
+   * assume that there is always at least one digit present. */
+   Py_ssize_t ndigits = size ? size : 1;
+   /* Number of bytes needed is: offsetof(PyLongObject, ob_digit) +
+      sizeof(digit)*size.  Previous incarnations of this code used
+      sizeof() instead of the offsetof, but this risks being
+      incorrect in the presence of padding between the header
+      and the digits. */
+   // 申请新内存，耗时核心原因
+   result = PyObject_Malloc(offsetof(PyLongObject, long_value.ob_digit) +
+                           ndigits*sizeof(digit));
+   if (!result) {
+      PyErr_NoMemory();
+      return NULL;
+   }
+   _PyLong_SetSignAndDigitCount(result, size != 0, size);
+   _PyObject_Init((PyObject*)result, &PyLong_Type);
+   /* The digit has to be initialized explicitly to avoid
+   * use-of-uninitialized-value. */
+   result->long_value.ob_digit[0] = 0;
+   return result;
 }
 ```
 
@@ -465,3 +463,343 @@ _PyLong_New(Py_ssize_t size)
 2. 建立对象消耗性能
 
 # Gil
+
+```c
+// https://github.com/python/cpython/blob/e225bebc1409bcf68db74a35ed3c31222883bf8f/Python/ceval.c#L1234
+
+if (_Py_atomic_load_relaxed(&ceval->gil_drop_request)) {
+   /* Give another thread a chance */
+   if (_PyThreadState_Swap(&runtime->gilstate, NULL) != tstate) {
+      Py_FatalError("ceval: tstate mix-up");
+   }
+   drop_gil(ceval, tstate);
+
+   /* Other threads may run now */
+
+   take_gil(ceval, tstate);
+
+   /* Check if we should make a quick exit. */
+   exit_thread_if_finalizing(tstate);
+
+   if (_PyThreadState_Swap(&runtime->gilstate, tstate) != NULL) {
+      Py_FatalError("ceval: orphan tstate");
+   }
+}
+```
+
+以上代码保证了当前线程会拿到全局的 gil 锁，通过这种机制可以保证每个 bytecode 在运行时会拿到全局锁，不会被其他线程打断
+
+有了这个全局锁之后好处是：
+
+1. 简单的设计不会出错：比每个 object 都实现一个锁要简单
+2. 由于只有一个线程锁，避免了死锁问题
+3. 对于单线程或没法并行的多线程程序，全局锁性能优秀，如果每个 object 都实现一个锁，那么由于每一行 bytecode 要读写很多 object，需要加很多锁性能较低
+4. cpython 维护简单，不需要在修改 python object 的时候关心锁问题，让第三方开发者心智负担降低
+
+当然有做过拿掉 gil 的尝试，但是有以下问题：
+
+1. 不能保证单进程、单线程下运行速度
+2. 向后兼容问题，不能兼容之前的代码
+
+坏处是：
+
+1. python 多线程无法利用多核增加运行速度，但是可以用以下方式解决
+   1. 多进程
+   2. c 拓展在 c 里面做多线程
+   3. 无 gil 的 python 解释器
+
+# Descriptor
+
+```py
+# 情况 1
+class Name:
+    def __get__(self, obj, objtype):
+        return "Peter"
+
+
+class A:
+    name = Name()
+
+
+print(A.name) # Peter
+
+
+# 情况 2
+class Name:
+    def __get__(self, obj, objtype):
+        return "Peter"
+
+
+class A:
+    def __init__(self):
+        self.name = Name()
+
+
+o = A()
+print(o.name) # <__main__.Name object at 0x7fb1658443a0>
+
+
+# 情况 3
+class Name:
+    def __get__(self, obj, objtype):
+        return "Peter"
+
+
+class A:
+    name = Name()
+
+
+o = A()
+o.name = "Bob"
+print(o.name) # Bob
+
+
+# 情况 4
+class Name:
+    def __get__(self, obj, objtype):
+        return "Peter"
+
+
+class A:
+    name = Name()
+
+
+o = A()
+o.name = "Bob"
+Name.__set__ = lambda x, y, z: None
+print(o.name) # Peter
+```
+
+本质上和字节码 `LOAD_ATTR`、`STORE_ATTR` 有关，有着相似的逻辑，下面只说明 `LOAD_ATTR` 的情况
+
+```c
+// https://github.com/python/cpython/blob/95c340a86b828cac6c0a2e4f2fa8a96695388c73/Python/ceval.c#L2963
+case TARGET(LOAD_ATTR): {
+   PyObject *name = GETITEM(names, oparg);
+   PyObject *owner = TOP();
+   // 核心逻辑
+   PyObject *res = PyObject_GetAttr(owner, name);
+   Py_DECREF(owner);
+   SET_TOP(res);
+   if (res == NULL)
+         goto error;
+   DISPATCH();
+}
+
+// https://github.com/python/cpython/blob/95c340a86b828cac6c0a2e4f2fa8a96695388c73/Objects/object.c#L929
+PyObject *
+PyObject_GetAttr(PyObject *v, PyObject *name)
+{
+   PyTypeObject *tp = Py_TYPE(v);
+
+   if (!PyUnicode_Check(name)) {
+      PyErr_Format(PyExc_TypeError,
+                  "attribute name must be string, not '%.200s'",
+                  name->ob_type->tp_name);
+      return NULL;
+   }
+   if (tp->tp_getattro != NULL)
+      // 核心逻辑 getattro
+      return (*tp->tp_getattro)(v, name);
+   if (tp->tp_getattr != NULL) {
+      const char *name_str = PyUnicode_AsUTF8(name);
+      if (name_str == NULL)
+         return NULL;
+      return (*tp->tp_getattr)(v, (char *)name_str);
+   }
+   PyErr_Format(PyExc_AttributeError,
+               "'%.50s' object has no attribute '%U'",
+               tp->tp_name, name);
+   return NULL;
+}
+
+// https://github.com/python/cpython/blob/95c340a86b828cac6c0a2e4f2fa8a96695388c73/Objects/typeobject.c#L4796
+PyTypeObject PyBaseObject_Type = {
+   PyVarObject_HEAD_INIT(&PyType_Type, 0)
+   "object",                                   /* tp_name */
+   sizeof(PyObject),                           /* tp_basicsize */
+   0,                                          /* tp_itemsize */
+   object_dealloc,                             /* tp_dealloc */
+   0,                                          /* tp_vectorcall_offset */
+   0,                                          /* tp_getattr */
+   0,                                          /* tp_setattr */
+   0,                                          /* tp_as_async */
+   object_repr,                                /* tp_repr */
+   0,                                          /* tp_as_number */
+   0,                                          /* tp_as_sequence */
+   0,                                          /* tp_as_mapping */
+   (hashfunc)_Py_HashPointer,                  /* tp_hash */
+   0,                                          /* tp_call */
+   object_str,                                 /* tp_str */
+   // 没有重载的时候用的逻辑
+   PyObject_GenericGetAttr,                    /* tp_getattro */
+   PyObject_GenericSetAttr,                    /* tp_setattro */
+   0,                                          /* tp_as_buffer */
+   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
+   object_doc,                                 /* tp_doc */
+   0,                                          /* tp_traverse */
+   0,                                          /* tp_clear */
+   object_richcompare,                         /* tp_richcompare */
+   0,                                          /* tp_weaklistoffset */
+   0,                                          /* tp_iter */
+   0,                                          /* tp_iternext */
+   object_methods,                             /* tp_methods */
+   0,                                          /* tp_members */
+   object_getsets,                             /* tp_getset */
+   0,                                          /* tp_base */
+   0,                                          /* tp_dict */
+   0,                                          /* tp_descr_get */
+   0,                                          /* tp_descr_set */
+   0,                                          /* tp_dictoffset */
+   object_init,                                /* tp_init */
+   PyType_GenericAlloc,                        /* tp_alloc */
+   object_new,                                 /* tp_new */
+   PyObject_Del,                               /* tp_free */
+};
+
+// https://github.com/python/cpython/blob/95c340a86b828cac6c0a2e4f2fa8a96695388c73/Objects/object.c#L1332C1-L1336C2
+PyObject *
+PyObject_GenericGetAttr(PyObject *obj, PyObject *name)
+{
+    return _PyObject_GenericGetAttrWithDict(obj, name, NULL, 0);
+}
+
+// https://github.com/python/cpython/blob/95c340a86b828cac6c0a2e4f2fa8a96695388c73/Objects/object.c#L1217
+// obj: obj 本身，name: attr 值，字符串
+PyObject *
+_PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name,
+                                 PyObject *dict, int suppress)
+{
+   /* Make sure the logic of _PyObject_GetMethod is in sync with
+      this method.
+
+      When suppress=1, this function suppress AttributeError.
+   */
+   // obj 的 type 就是 class A
+   PyTypeObject *tp = Py_TYPE(obj);
+   PyObject *descr = NULL;
+   PyObject *res = NULL;
+   descrgetfunc f;
+   Py_ssize_t dictoffset;
+   PyObject **dictptr;
+
+   if (!PyUnicode_Check(name)){
+      PyErr_Format(PyExc_TypeError,
+                  "attribute name must be string, not '%.200s'",
+                  name->ob_type->tp_name);
+      return NULL;
+   }
+   Py_INCREF(name);
+
+   if (tp->tp_dict == NULL) {
+      if (PyType_Ready(tp) < 0)
+         goto done;
+   }
+
+   // 在这个 type 里找 name，也就是说 descriptor 必须定义在 type 上，即写到 class 的定义里面，解释了情况 2
+   descr = _PyType_Lookup(tp, name);
+
+   f = NULL;
+   if (descr != NULL) {
+      Py_INCREF(descr);
+      // 首先寻找了可能是 descriptor 的 object 有没有 tp_descr_get 函数，即有没有 __get__ 函数
+      f = descr->ob_type->tp_descr_get;
+      // 判断 IsData：实际上就是有没有 __set__ 函数
+      if (f != NULL && PyDescr_IsData(descr)) {
+         // 返回 __get__ 函数的返回值
+         res = f(descr, obj, (PyObject *)obj->ob_type);
+         if (res == NULL && suppress &&
+                  PyErr_ExceptionMatches(PyExc_AttributeError)) {
+               PyErr_Clear();
+         }
+         goto done;
+      }
+   }
+
+   // 找到 object 本身的 __dict__，里面保存了所有的成员变量
+   if (dict == NULL) {
+      /* Inline _PyObject_GetDictPtr */
+      dictoffset = tp->tp_dictoffset;
+      if (dictoffset != 0) {
+         if (dictoffset < 0) {
+               Py_ssize_t tsize;
+               size_t size;
+
+               tsize = ((PyVarObject *)obj)->ob_size;
+               if (tsize < 0)
+                  tsize = -tsize;
+               size = _PyObject_VAR_SIZE(tp, tsize);
+               _PyObject_ASSERT(obj, size <= PY_SSIZE_T_MAX);
+
+               dictoffset += (Py_ssize_t)size;
+               _PyObject_ASSERT(obj, dictoffset > 0);
+               _PyObject_ASSERT(obj, dictoffset % SIZEOF_VOID_P == 0);
+         }
+         dictptr = (PyObject **) ((char *)obj + dictoffset);
+         dict = *dictptr;
+      }
+   }
+   // object 的 key 里面找对应的值，和 object 绑定的变量
+   if (dict != NULL) {
+      Py_INCREF(dict);
+      res = PyDict_GetItemWithError(dict, name);
+      if (res != NULL) {
+         Py_INCREF(res);
+         Py_DECREF(dict);
+         goto done;
+      }
+      else {
+         Py_DECREF(dict);
+         if (PyErr_Occurred()) {
+               if (suppress && PyErr_ExceptionMatches(PyExc_AttributeError)) {
+                  PyErr_Clear();
+               }
+               else {
+                  goto done;
+               }
+         }
+      }
+   }
+
+   // 如果只有 __get__ 函数，没有 __set__ 函数
+   if (f != NULL) {
+      res = f(descr, obj, (PyObject *)Py_TYPE(obj));
+      if (res == NULL && suppress &&
+               PyErr_ExceptionMatches(PyExc_AttributeError)) {
+         PyErr_Clear();
+      }
+      goto done;
+   }
+
+   // 如果没有 __get__、__set__ 函数，原样返回
+   // 对应如下代码
+   // class A:
+   //    name = "Alice"
+   // a = A()
+   // print(a.__dict__) # {}，没有值
+   // print(a.name) # 没发现 name 有 __get__ 或 __set__ 函数，直接返回
+   // 实现的是实例成员变量没有找到，再到类的属性上找，甚至到父类
+   if (descr != NULL) {
+      res = descr;
+      descr = NULL;
+      goto done;
+   }
+
+   if (!suppress) {
+      PyErr_Format(PyExc_AttributeError,
+                  "'%.50s' object has no attribute '%U'",
+                  tp->tp_name, name);
+   }
+  done:
+    Py_XDECREF(descr);
+    Py_DECREF(name);
+    return res;
+}
+```
+
+总结，`LOAD_ATTR` 优先级如下，从大到小：
+
+1. 如果 `__get__`、`__set__` 都有，用 `__get__` 返回值
+2. 在 `__dict__` 找对应的值
+3. 用 `__get__` 返回值
+4. 类的属性
