@@ -803,3 +803,144 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name,
 2. 在 `__dict__` 找对应的值
 3. 用 `__get__` 返回值
 4. 类的属性
+
+# Decorator
+
+从字节码来看，是一个输入输出都是函数的语法糖
+
+```py
+def dec(f):
+    pass
+
+
+@dec
+def double(x):
+    return x * 2
+
+
+# 完全等价
+double = dec(double)
+```
+
+但是输出不一定是函数
+
+```py
+def dec(f):
+    return 1
+
+
+@dec
+def double(x):
+    return x * 2
+```
+
+当然，装饰器还可以带参数
+
+```py
+import time
+
+
+def timeit(iter):
+    def inner(f):
+        def wrapper(*args, **kwargs):
+            start = time.time()
+            for _ in range(iter):
+                ret = f(*args, **kwargs)
+            print(time.time() - start)
+            return ret
+
+        return wrapper
+
+    return inner
+
+
+@timeit(1000)
+def double(x):
+    return x * 2
+
+
+# double(3)
+# 等价于
+inner = timeit(1000)
+double = inner(double)
+```
+
+# 类装饰器
+
+```py
+import time
+
+
+class Timer:
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        start = time.time()
+        ret = self.func(*args, **kwargs)
+        print(f"Time: {time.time() - start}")
+        return ret
+
+
+@Timer
+def add(a, b):
+    return a + b
+
+# 等价于
+# add = Timer(add)
+
+print(add(2, 3))
+```
+
+```py
+import time
+
+
+class Timer:
+    def __init__(self, prefix):
+        self.prefix = prefix
+
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            start = time.time()
+            ret = func(*args, **kwargs)
+            print(f"{self.prefix}{time.time() - start}")
+            return ret
+
+        return wrapper
+
+
+@Timer(prefix="curr_time: ")
+def add(a, b):
+    return a + b
+
+
+# 等价于
+# add = Timer(prefix="curr_time: ")(add)
+
+print(add(2, 3))
+```
+
+上面的 2 种都是装饰器类，下面是真正的类装饰器
+
+```py
+def add_str(cls):
+    def __str__(self):
+        return str(self.__dict__)
+
+    cls.__str__ = __str__
+    return cls
+
+
+@add_str
+class MyObject:
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+# 等价于
+# MyObject = add_str(MyObject)
+
+o = MyObject(1, 2)
+print(o)
+```
