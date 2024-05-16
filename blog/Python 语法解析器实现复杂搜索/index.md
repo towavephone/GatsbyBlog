@@ -36,7 +36,7 @@ date: 2024-05-15 18:09:57
 
 ## 原生 postgres sql 查询
 
-utils/pg_sql_utils.py
+`utils/pg_sql_utils.py`
 
 ```py
 import re
@@ -174,7 +174,7 @@ NOT labels::TEXT[] @> ARRAY ['ego-turn-right'] AND labels::TEXT[] @> ARRAY ['ego
 
 ## django Q 对象查询
 
-utils/q_sql_utils.py
+`utils/q_sql_utils.py`
 
 ```py
 import re
