@@ -320,3 +320,5 @@ const localConfig = override(
 在主入口的 js 以及分包后的 chunk 报错后都会做重试 5 次的操作，超过 5 次弹窗提示用户在部署，点击确定后刷新页面再次重试
 
 ![](res/2023-12-05-11-29-43.png)
+
+和 [plugin-assets-retry](https://rsbuild.dev/plugins/list/plugin-assets-retry) 插件的效果异曲同工

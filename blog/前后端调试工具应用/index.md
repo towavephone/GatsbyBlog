@@ -290,15 +290,16 @@ date: 2024-05-15 18:52:15
    urls.py
 
    ```py
-   # https://github.com/jazzband/django-debug-toolbar/blob/3.1.1/docs/installation.rst
-   # https://github.com/jazzband/django-debug-toolbar/blob/3.1.1/docs/configuration.rst
    if settings.DEBUG:
+      # https://github.com/jazzband/django-debug-toolbar/blob/3.1.1/docs/installation.rst
+      # https://github.com/jazzband/django-debug-toolbar/blob/3.1.1/docs/configuration.rst
       if 'django-debug-toolbar' in settings.DEBUG_TOOLS:
          import debug_toolbar
          urlpatterns += [
                re_path(r'^__debug__/', include(debug_toolbar.urls)),
          ]
 
+      # https://github.com/jazzband/django-silk/tree/4.2.0
       if 'django-silk' in settings.DEBUG_TOOLS:
          urlpatterns += [
                re_path(r'^debug/', include('silk.urls', namespace='silk'))

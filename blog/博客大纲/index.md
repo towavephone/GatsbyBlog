@@ -311,138 +311,158 @@ draft: true
 12. python 时间转换过滤
 13. 汇总 sql 优化过程
 14. 深入浅出：如何正确使用 protobuf https://zhuanlan.zhihu.com/p/406832315
-15. python 动态修改并发量 https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio
+15. [python 动态修改并发量](https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio)
 
-```py
-import asyncio
-import time
-import httpx
-import random
-# import uvloop
+      ```py
+      import asyncio
+      import time
+      import httpx
+      import random
+      # import uvloop
 
-start = time.time()
-url = 'https://blog.towavephone.com'
+      start = time.time()
+      url = 'https://blog.towavephone.com'
 
-sem = asyncio.Semaphore(100)
+      sem = asyncio.Semaphore(100)
 
-count = 0
-is_success = True
+      count = 0
+      is_success = True
 
+      async def task(name, client):
+         async with sem:
+            global count
+            global is_success
 
-async def task(name, client):
-   async with sem:
-      global count
-      global is_success
+            if not is_success:
+                  return
+            for i in range(0, 3):
+                  try:
+                     result = await client.get(url)
+                     if result.status_code == 200:
+                        print(name + 'ping ' + url + result.text[0:20], count)
+                        break
 
-      if not is_success:
+                     if i == 2:
+                        print('------------' + name)
+                        is_success = False
+                        break
+                        # raise asyncio.CancelledError('请求' + name + '取消')
+                  except Exception as e:
+                     print('Exception:', name, e)
+
+            count = count + 1
+
+            return result.text[0:4]
+
+      async def main():
+         async with httpx.AsyncClient() as client:
+            # 获取 EventLoop:
+            tasks = []
+            for i in range(1, 100):
+                  tasks.append(task('请求 %s：' % i, client))
+            result = await asyncio.gather(*tasks)
+            print(result)
+      # uvloop.install()
+      loop = asyncio.get_event_loop()
+      loop.run_until_complete(main())
+      end = time.time()
+      print("主线程结束，花费时间为：", end - start)
+      ```
+
+      ```py
+      import asyncio
+      import time
+      import httpx
+      import random
+      # import uvloop
+
+      start = time.time()
+      url = 'https://blog.towavephone.com'
+
+      count = 0
+      is_success = True
+
+      async def task(name, client):
+         global count
+         global is_success
+
+         if not is_success:
             return
-      for i in range(0, 3):
+         for i in range(0, 3):
             try:
-               result = await client.get(url)
-               if result.status_code == 200:
-                  print(name + 'ping ' + url + result.text[0:20], count)
-                  break
+                  result = await client.get(url)
+                  if result.status_code == 200:
+                     print(name + 'ping ' + url + result.text[0:20], count)
+                     break
 
-               if i == 2:
-                  print('------------' + name)
-                  is_success = False
-                  break
-                  # raise asyncio.CancelledError('请求' + name + '取消')
+                  if i == 2:
+                     print('------------' + name)
+                     is_success = False
+                     break
+                     # raise asyncio.CancelledError('请求' + name + '取消')
             except Exception as e:
-               print('Exception:', name, e)
+                  print('Exception:', name, e)
 
-      count = count + 1
+         count = count + 1
 
-      return result.text[0:4]
+         return result.text[0:4]
 
+      # async def main():
+      #     async with httpx.AsyncClient() as client:
+      #         # 获取 EventLoop:
+      #         tasks = []
+      #         for i in range(1, 100):
+      #             tasks.append(task('请求 %s：' % i, client))
+      #         result = await asyncio.gather(*tasks)
+      #         print(result)
+      # uvloop.install()
 
-async def main():
-   async with httpx.AsyncClient() as client:
-      # 获取 EventLoop:
-      tasks = []
-      for i in range(1, 100):
-            tasks.append(task('请求 %s：' % i, client))
-      result = await asyncio.gather(*tasks)
-      print(result)
-# uvloop.install()
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
-end = time.time()
-print("主线程结束，花费时间为：", end - start)
-```
+      # download(code) is the same
 
-```py
-import asyncio
-import time
-import httpx
-import random
-# import uvloop
+      async def main():
+         async with httpx.AsyncClient() as client:
+            no_concurrent = 1
+            dltasks = set()
+            for i in range(100):
+                  if len(dltasks) >= no_concurrent:
+                     # Wait for some download to finish before adding a new one
+                     _done, dltasks = await asyncio.wait(dltasks, return_when=asyncio.FIRST_COMPLETED)
 
-start = time.time()
-url = 'https://blog.towavephone.com'
+                  dltasks.add(asyncio.create_task(task('请求 %s：' % i, client)))
+                  print('----323')
+            print('-4345')
+            # Wait for the remaining downloads to finish
+            await asyncio.wait(dltasks)
 
-count = 0
-is_success = True
-
-
-async def task(name, client):
-   global count
-   global is_success
-
-   if not is_success:
-      return
-   for i in range(0, 3):
-      try:
-            result = await client.get(url)
-            if result.status_code == 200:
-               print(name + 'ping ' + url + result.text[0:20], count)
-               break
-
-            if i == 2:
-               print('------------' + name)
-               is_success = False
-               break
-               # raise asyncio.CancelledError('请求' + name + '取消')
-      except Exception as e:
-            print('Exception:', name, e)
-
-   count = count + 1
-
-   return result.text[0:4]
-
-
-# async def main():
-#     async with httpx.AsyncClient() as client:
-#         # 获取 EventLoop:
-#         tasks = []
-#         for i in range(1, 100):
-#             tasks.append(task('请求 %s：' % i, client))
-#         result = await asyncio.gather(*tasks)
-#         print(result)
-# uvloop.install()
-
-# download(code) is the same
-
-async def main():
-   async with httpx.AsyncClient() as client:
-      no_concurrent = 1
-      dltasks = set()
-      for i in range(100):
-            if len(dltasks) >= no_concurrent:
-               # Wait for some download to finish before adding a new one
-               _done, dltasks = await asyncio.wait(dltasks, return_when=asyncio.FIRST_COMPLETED)
-
-            dltasks.add(asyncio.create_task(task('请求 %s：' % i, client)))
-            print('----323')
-      print('-4345')
-      # Wait for the remaining downloads to finish
-      await asyncio.wait(dltasks)
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
-end = time.time()
-print("主线程结束，花费时间为：", end - start)
-```
+      loop = asyncio.get_event_loop()
+      loop.run_until_complete(main())
+      end = time.time()
+      print("主线程结束，花费时间为：", end - start)
+      ```
 
 16. 线宽问题解决，需要使用 threejs 的 line2 组件以及对应的 [降级策略](https://registry.khronos.org/webgl/sdk/tests/conformance/limits/gl-line-width.html)，即识别 `gl.ALIASED_LINE_WIDTH_RANGE` 的 `MAX_LINE_WIDTH` 是否大于 1，大于 1 的情况下才需要使用 line2
-17. python schedule 任务并行执行：https://zhuanlan.zhihu.com/p/537722631
+17. python schedule 任务[并行执行](https://zhuanlan.zhihu.com/p/537722631)
+18. 解决一直打印 browerslist 相关提示，设置 `BROWSERSLIST_IGNORE_OLD_DATA=true` 环境变量
+19. list append 是原子性的，不需要加锁，可以通过 dis.dis(func) [链接 1](https://docs.python.org/3.6/faq/library.html#what-kinds-of-global-value-mutation-are-thread-safe) [链接 2](https://www.zoulei.net/2016/07/31/list_dict_threading_safe/#) 看出
+20. 多线程提交任务时候必须调用 result() 方法，否则不会抛出异常
+
+      ```py
+      from concurrent.futures import ThreadPoolExecutor, wait
+
+       def task(n):
+           print("Processing {}".format(n))
+
+       with ThreadPoolExecutor() as executor:
+           futures = [
+               executor.submit(task, 1),
+               executor.submit(task, 2),
+           ]
+
+           wait(futures)
+
+           for fut in futures:
+               # 这句话必须使用，否则不会抛出异常
+               fut.result()
+      ```
+
+21. 对于 border-radius: 50% 且分布范围较大的框，box-shadow 的形状应为圆形，对应[链接](https://github.com/w3c/csswg-drafts/issues/7103)
