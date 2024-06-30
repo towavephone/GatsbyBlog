@@ -944,3 +944,409 @@ class MyObject:
 o = MyObject(1, 2)
 print(o)
 ```
+
+# 装饰器在类里面的调用方法
+
+```py
+def log_function(func):
+    def wrapper(*args, **kwargs):
+        print(f"function start!")
+        print(f"args: {args}")
+        ret = func(*args, **kwargs)
+        print(f"function end!")
+        return ret
+
+    return wrapper
+
+
+@log_function
+def fib(n):
+    if n <= 1:
+        return 0
+    return fib(n - 1) + fib(n - 2)
+
+
+fib(3)
+```
+
+如何把全局的装饰器移到类里面？下面是一种可能的实现
+
+```py
+class Decorators:
+    def log_function(self, func):
+        def wrapper(*args, **kwargs):
+            print(f"function start!")
+            print(f"args: {args}")
+            ret = func(*args, **kwargs)
+            print(f"function end!")
+            return ret
+
+        return wrapper
+
+
+d = Decorators()
+
+
+@d.log_function
+def fib(n):
+    if n <= 1:
+        return 0
+    return fib(n - 1) + fib(n - 2)
+
+
+fib(3)
+```
+
+以上代码虽然可以，但是有以下缺点
+
+1. 为了使用这个装饰器，需要建立新对象（classmethod 解决，但还是会带有 self）
+2. 装饰器出现 self 参数（staticmethod 解决，不会带 self）
+
+```py
+class Decorators:
+    @staticmethod
+    def log_function(func):
+        def wrapper(*args, **kwargs):
+            print(f"function start!")
+            print(f"args: {args}")
+            ret = func(*args, **kwargs)
+            print(f"function end!")
+            return ret
+
+        return wrapper
+
+
+@Decorators.log_function
+def fib(n):
+    if n <= 1:
+        return 0
+    return fib(n - 1) + fib(n - 2)
+
+
+fib(3)
+```
+
+如果想用类里面的装饰器去装饰类里面的方法，可以直接去掉装饰器
+
+```py
+class Decorators:
+    def log_function(func):
+        def wrapper(*args, **kwargs):
+            print(f"function start!")
+            print(f"args: {args}")
+            ret = func(*args, **kwargs)
+            print(f"function end!")
+            return ret
+
+        return wrapper
+
+    @log_function
+    def fib(self, n):
+        if n <= 1:
+            return 0
+        return self.fib(n - 1) + self.fib(n - 2)
+
+
+d = Decorators()
+d.fib(3)
+```
+
+当然如果需要支持以下 3 种情况的调用，最好的方式如下
+
+1. 在类内部调用
+2. 在类外部以类调用
+3. 在类外部以对象调用
+
+```py
+class Decorators:
+    # 本身就支持在类外部以类调用
+    def log_function(func):
+        def wrapper(*args, **kwargs):
+            print(f"function start!")
+            print(f"args: {args}")
+            ret = func(*args, **kwargs)
+            print(f"function end!")
+            return ret
+
+        return wrapper
+
+    @log_function
+    def fib(self, n):
+        if n <= 1:
+            return 0
+        return self.fib(n - 1) + self.fib(n - 2)
+
+    # 在 fib 后声明，防止影响上面的 fib 装饰器调用
+    # 同时也提供给外面调用，即支持了在类外部以对象调用
+    log_function = staticmethod(log_function)
+
+
+d = Decorators()
+d.fib(3)
+
+
+@Decorators.log_function
+def f():
+    pass
+
+
+@d.log_function
+def g():
+    pass
+
+
+f()
+g()
+```
+
+# 迭代器
+
+```py
+lst = [1, 3, 5]
+for i in lst:
+    print(i)
+
+d = {"a": 1, "b": 2}
+for i in d:
+    print(i)
+
+with open("my.txt") as f:
+    for i in f:
+        print(i)
+```
+
+可迭代对象 + 迭代器，以上都可迭代
+
+```py
+class NodeIter:
+    def __init__(self, node):
+        self.curr_node = node
+
+    def __next__(self):
+        if self.curr_node is None:
+            raise StopIteration
+        node, self.curr_node = self.curr_node, self.curr_node.next
+        return node
+
+
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.next = None
+
+    def __iter__(self):
+        return NodeIter(self)
+
+
+node1 = Node("node1")
+node2 = Node("node2")
+node3 = Node("node3")
+node1.next = node2
+node2.next = node3
+
+for node in iter(node1):
+    print(node.name)
+```
+
+上面的代码运行到 `iter(node1)` 就报错，说明迭代器不一定是可迭代对象（Iterator 不一定 Iterable），所以修改如下
+
+```py{11-12}
+class NodeIter:
+    def __init__(self, node):
+        self.curr_node = node
+
+    def __next__(self): # 是迭代器，即 Iterator
+        if self.curr_node is None:
+            raise StopIteration
+        node, self.curr_node = self.curr_node, self.curr_node.next
+        return node
+
+    def __iter__(self): # 是可迭代对象，即 Iterable
+        return self
+
+
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.next = None
+
+    def __iter__(self):
+        return NodeIter(self)
+
+
+node1 = Node("node1")
+node2 = Node("node2")
+node3 = Node("node3")
+node1.next = node2
+node2.next = node3
+
+for node in iter(node1):
+    print(node.name)
+```
+
+# 生成器
+
+```py
+def gen(num):
+    while num > 0:
+        yield num
+        num -= 1
+    # 生成器函数里面 return 等价于 raise StopIteration
+    # 即使 return 有值也不会被 next() 返回，只有 yield 的值才会返回
+    # 如果一定要拿到 return 值，需要 catch StopIteration Exception
+    return
+
+
+g = gen(5)
+first = next(g)
+
+for i in g:
+    print(i)
+
+>>>
+4
+3
+2
+1
+```
+
+作用和迭代器一致，不同的点在于生成器函数 `def gen(num):` 和生成器对象 `g = gen(5)` 两种形式，而迭代器就是一个明确的 class
+
+对应的源码为
+
+```c
+case TARGET(YIELD_VALUE): {
+   retval = POP(); // 拿出栈顶值
+
+   if (co->co_flags & CO_ASYNC_GENERATOR) {
+         PyObject *w = _PyAsyncGenValueWrapperNew(retval);
+         Py_DECREF(retval);
+         if (w == NULL) {
+            retval = NULL;
+            goto error;
+         }
+         retval = w;
+   }
+
+   f->f_stacktop = stack_pointer;
+   goto exit_yielding;
+}
+```
+
+以下生成器的写法比迭代器简洁
+
+```py
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.next = None
+
+    def __iter__(self):
+        node = self
+        while node is not None:
+            yield node
+            node = node.next
+
+
+node1 = Node("node1")
+node2 = Node("node2")
+node3 = Node("node3")
+node1.next = node2
+node2.next = node3
+
+for node in iter(node1):
+    print(node.name)
+```
+
+生成器还有 send 的用法
+
+```py
+def gen(num):
+    while num > 0:
+        tmp = yield num
+        if tmp is not None:
+            num = tmp
+        num -= 1
+
+
+g = gen(5)
+first = next(g) # 等价于 first = g.send(None)
+print(f"first: {first}")
+
+print(f"send: {g.send(10)}")
+
+for i in g:
+    print(i)
+```
+
+# 闭包
+
+```py
+def f():
+    data = []
+
+    def inner(value):
+        data.append(value)
+        return data
+
+    return inner
+
+
+g = f()
+print(g(1))
+print(g(2))
+
+>>>
+[1]
+[1, 2]
+```
+
+可以判断闭包的执行顺序
+
+```py
+def f():
+    data = []
+
+    def inner(value):
+        data.append(value)
+        return data
+
+    data = [0]
+
+    return inner
+
+
+g = f()
+print(g(1))
+print(g(2))
+
+>>>
+[0, 1]
+[0, 1, 2]
+```
+
+cell 引用的闭包
+
+```py
+def f():
+    data = []
+
+    def inner(value):
+        data.append(value)
+        return data
+
+    return inner
+
+
+g = f() # 只要 g 存在就有对 data 的引用，即使 f 不存在了
+print(g.__closure__) # 和下面的 g(3) 的地址完全一致，即是同一个 list
+print(g(1))
+print(g(2))
+print(hex(id(g(3))))
+
+>>>
+(<cell at 0x7f7fbc6eafd0: list object at 0x7f7fbc7bcec0>,)
+[1]
+[1, 2]
+0x7f7fbc7bcec0
+```
