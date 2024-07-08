@@ -1996,3 +1996,58 @@ process.on('SIGINT', () => {
 ![](res/2023-07-04-15-08-47.png)
 
 ![](res/2023-07-04-15-09-21.png)
+
+# 四期优化
+
+## 解决镜像源不能访问
+
+由于国外 docker 源被屏蔽，上面的 dockerfile 在构建镜像过程中会 404，需要修改为国内镜像源，修改如下
+
+```dockerfile{4-6,37-39}
+# syntax = docker/dockerfile:experimental
+
+# 必须都指定
+ARG docker_registry=m.daocloud.io/docker.io
+
+FROM ${docker_registry}/node:14-alpine as builder
+
+ARG npm_registry=https://registry.npmmirror.com
+
+# 全局安装依赖，尽量写在一行防止加了新库之后还是使用原来的镜像
+RUN npm config set registry ${npm_registry} -g && npm i -g pnpm@7.32.1
+
+WORKDIR /home/
+
+# 缓存 pnpm-lock.yaml
+COPY pnpm-lock.yaml ./
+
+# 下载依赖到全局位置
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store/v3,id=pnpm_cache \
+    pnpm fetch --prod
+
+# 缓存依赖
+COPY package.json ./
+
+# 安装依赖
+RUN --mount=type=cache,target=node_modules,id=frontend_node_modules,sharing=locked \
+    --mount=type=cache,target=/root/.local/share/pnpm/store/v3,id=pnpm_cache \
+    pnpm i --ignore-scripts=true --prod --offline --registry=$npm_registry
+
+# 复制剩余文件
+COPY . .
+
+RUN --mount=type=cache,target=node_modules,id=frontend_node_modules,sharing=locked \
+    pnpm lint && pnpm build
+
+# 必须都指定
+ARG docker_registry=https://docker.m.daocloud.io
+
+FROM ${docker_registry}/nginx:alpine
+
+RUN --mount=type=bind,target=/tmp/build,from=builder,source=/home/build \
+    cp -r /tmp/build/* /usr/share/nginx/html/
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 3000
+```
