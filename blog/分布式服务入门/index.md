@@ -224,4 +224,313 @@ tags: 后端, 系统设计, 读书笔记, 分布式
 
 在掌握了构建分布式服务的技术组件之后，下一讲我们将介绍基于这些组件所构建的分布式服务框架。实际上在本讲内容中，我们已经提到了 Dubbo、Spring Cloud 等框架，目前这些框架都非常主流。那么，这些框架都具备什么样的功能特性呢？
 
-// TODO https://juejin.cn/book/7106442254533066787/section/7106757588175290383
+# 网络通信：如何完成客户端和服务端之间的高效通信？
+
+从本讲开始，我们将进入到远程过程调用类技术组件的讨论，首先要讨论的是网络通信。
+
+分布式系统的构建依赖网络通信。相比单块系统的函数式调用，分布式环境下的请求和响应过程涉及到客户端和服务器端之间跨网络的交互和协作。这个过程一方面要考虑到网络的三态性，另一方面也需要考虑资源的利用效率。
+
+那么，如何设计并实现高效的网络通信机制？这是分布式服务框架的核心功能之一，也是我们在面试过程中经常会碰到的一个面试题。本讲内容将围绕这一问题展开讨论。
+
+## 背景
+
+在日常开发过程中，每一次分布式请求都会涉及到网络通信。网络通信表现为一个复杂且不可控的过程。然而，因为像 Dubbo、Spring Cloud 等主流的分布式服务框架都已经帮我们封装了网络通信过程，使得远程过程调用就像是在使用本地方法调用一样，导致了开发人员对网络通信过程的底层设计思想和实现原理往往不甚了解。
+
+另一方面，对于分布式服务构建过程而言，网络通信是一个基础性、通用性的技术主题，涉及广泛的技术体系，既有深度又有广度，非常适合考查候选人的知识面。因此。网络通信在面试过程中出现的频率可以说非常高。作为面试官，我也经常会对候选人提出关于该主题的一些问题。
+
+从面试角度讲，关于网络通信有很多种具体的问法，有些侧重于具体某一个知识点，有些则关注整个通信流程。当然，因为日常开发中大家都是使用一些开源框架来开发分布式系统，因此关于开源框架中网络通信具体实现过程和底层原理也是常见的考查方式。
+
+这里我梳理了比较有代表性的一些面试话题，如下所示：
+
+- 网络的长连接和短连接分别指什么？它们分别有什么特点和优势？
+- 常见网络 IO 模型有哪些？各有什么功能特性？
+- 如果确保网络通信过程的可靠性？
+- 你认为网络通信包含的核心技术组件有哪些？
+- 如果让你来设计网络传输协议，你有什么样的一些思考？
+- 你能描述 Dubbo 框架中客户端和服务器端的网络通信实现过程吗？
+- Dubbo 框架对网络通信过程采用了什么样的分层设计思想？
+
+## 分析
+
+网络通信的实现方式实际上有很多种，但因为网络通信过程复杂且不可控，因此如何使这个过程的代价降到用户可以接受的层次是分布式系统设计的重要目标。
+
+我们知道客户端和服务器端之间需要完成跨网络的交互过程，也就意味着两者之间需要建立网络连接。网络连接的创建和维护方式决定了通信过程的效率。同时，我们知道任何网络请求的处理过程都涉及到 IO 操作，而不同类似的 IO 操作方式对性能的影响巨大。在网络通信过程中，我们需要选择合适的 IO 模型。
+
+关于网络通信，可靠性是一个不得不提的话题。网络状态是不稳定的，网络之间的通信过程必须在发生问题时能够快速感知并修复。
+
+我们把上述分析点整理成一张图，如下所示：
+
+![](res/2024-10-13-23-49-00.png)
+
+上图构成了我们回答这类面试题的基本思路。
+
+## 技术体系
+
+在本节内容中，让我们来对上图中所展示的各项技术体系展开讨论。
+
+### 网络连接
+
+关于网络连接，我们要讨论的主要是长连接和短连接的概念。当客户端在向服务端发送请求并获取响应结果之后，这两种连接方式的区别在于对连接本身的处理方式。
+
+所谓短连接，是指一旦请求响应过程结束，连接自动关闭。而长连接则不同，客户端可以利用这个连接持续地发送请求并获取响应结果。显然，采用何种连接方式没有统一的标准，而是要看具体的应用场景。有时候，考虑到性能和服务治理等因素，我们也会把短连接和长连接组合起来使用。
+
+### IO 模型
+
+任何网络请求处理过程都涉及到 IO 操作。
+
+最基本的 IO 操作模型就是阻塞式 IO（Blocking IO，BIO），该模型要求服务器端针对每次客户端请求都生成一个处理线程，因此对服务器端的资源消耗要求很高。
+
+非阻塞 IO（Non-Blocking IO，NIO）和 IO 复用（IO Multiplexing）技术实际上也会在 IO 上形成阻塞，真正在 IO 上没有形成阻塞的是异步 IO（Asynchronous，AIO）。
+
+各个 IO 模型效果如下图所示：
+
+![](res/2024-10-13-23-50-30.png)
+
+### 可靠性
+
+因为网络状态是不稳定的，所以业界诞生了一系列手段来确保网络通信的可靠性。
+
+首先，我们需要对网络的通信链路进行有效性的检测，这方面最常见的实现机制就是心跳检测。我们可以在网络协议的 TCP 层发送心跳包，也可以在应用层协议上传递包含一定业务数据的心跳信息。
+
+另一方面，一旦检测到网络通信出现问题，那么就需要采取一定措施来恢复网络状态。这方面主流的做法就是断线重连。针对不同场景，我们可以采用不同的重连次数和频率，直到网络重连成功或者超时。
+
+讲到这里，我们需要注意，上述关于网络通信相关技术体系的讨论都是相对抽象的内容。在具体面试过程中，如果只是简单给出这些概念性的描述，显然无法满足面试官的要求。要想充分展示候选人对网络通信的掌握程度，就需要依托一定的开源框架。只有通过这些开源框架，我们才能了解网络通信的底层原理。
+
+在接下来的内容中，我们将基于目前主流的分布式服务框架 Dubbo 来分析该框架针对网络通信采用了什么样的设计思想和实现过程。
+
+## 源码解析
+
+在 Dubbo 框架中，存在一个独立的 Remoting 模块，封装了对整个网络通信的实现过程，该模块的组成结构如下图所示：
+
+![](res/2024-10-13-23-51-30.png)
+
+从组成结构上讲，Remoting 模块主要包含三个组件。
+
+- Exchange 组件。信息交换层，用来封装请求-响应过程。
+- Transport 组件。网络传输层，基于 Netty 等框架抽象统一的网络通信接口。
+- Serialize 组件。序列化层，主要完成数据的序列化和反序列化过程。
+
+而从技术分层上讲，Remoting 模块处于整个 Dubbo 框架的底层，是我们后续要介绍的服务发布和服务消费的基础。显然，Remoting 模块的组件呈现的是一种对称结构，即 Dubbo 的生产者和消费者都依赖于底层的网络通信。所以，我们也将分别从服务器端和客户端两个角度出发分析 Dubbo 中具体的网络通信过程。
+
+然后，在 Dubbo 中，真正实现网络通信的过程委托给了第三方组件。Dubbo 通过 SPI 的方式提供了与 Netty、Mina 等多种通信框架的集成方式。这部分内容相当于是对上图中 Remoting 模块的补充，从层次上讲应该属于 Dubbo 框架的最底层。
+
+### Dubbo 服务器端通信原理
+
+我们首先介绍 Dubbo 服务器端的网络通信过程。请记住，Dubbo 中服务器端通信的目的就是集成并绑定 Netty 服务从而启动服务监听。我们关注 Exchange 信息交换层和 Transport 网络传输层这两个核心层之间的交互和协作过程，如下图所示：
+
+![](res/2024-10-13-23-52-48.png)
+
+上图中涉及了 ExchangeServer、HeaderExchange、NettyTransport 和 NettyServer 等一系列核心对象。显然，通过这些对象从命名上就可以很明确地将它们划分到 Exchange 和 Transport 这两个层。
+
+在 Dubbo 中存在一个 Protocol 接口，该接口是 Dubbo 中最基本的远程过程调用实现接口，完成了服务的发布和调用功能。而在 Protocol 接口中存在 export 和 refer 这两个核心方法，其中前者用于对外暴露服务，后者则用来对远程服务进行引用。针对 Protocol 接口，Dubbo 提供了一组实现类，其中最重要的就是 DubboProtocol。
+
+我们从 DubboProtocol 中的 export 方法进行切入，该方法会根据传入的 URL 对象创建一个 Exchange 服务器，如下所示：
+
+```java
+private void openServer(URL url) {
+        String key = url.getAddress();
+        boolean isServer = url.getParameter(Constants.IS_SERVER_KEY, true);
+        if (isServer) {
+            ExchangeServer server = serverMap.get(key);
+            if (server == null) {
+                serverMap.put(key, createServer(url));
+            } else {
+                server.reset(url);
+            }
+        }
+}
+```
+
+我们来看 Exchange 服务器的创建过程，对应的 createServer 方法如下所示：
+
+```java
+private ExchangeServer createServer(URL url) {
+        // 省略其他代码
+        ExchangeServer server;
+        try {
+            server = Exchangers.bind(url, requestHandler);
+        }
+        return server;
+}
+```
+
+可以看到这里的关键代码就是通过 Exchangers 的 bind 方法创建了 ExchangeServer，这个过程依赖于一个 Exchanger 接口。那么这个 Exchanger 接口是做什么用的呢？该接口定义如下所示：
+
+```java
+@SPI(HeaderExchanger.NAME)
+public interface Exchanger {
+    @Adaptive({Constants.EXCHANGER_KEY})
+    ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException;
+
+    @Adaptive({Constants.EXCHANGER_KEY})
+    ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException;
+}
+```
+
+Exchanger 接口只有两个方法，一个是面向服务器端的 bind 方法，一个是面向客户端的 connect 方法。在 Dubbo 中，Exchanger 的实现类只有一个，即 HeaderExchanger，如下所示：
+
+```java
+public class HeaderExchanger implements Exchanger {
+    public static final String NAME = "header";
+
+    public ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException {
+        return new HeaderExchangeClient(Transporters.connect(url, new DecodeHandler(new HeaderExchangeHandler(handler))), true);
+    }
+
+    public ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
+        return new HeaderExchangeServer(Transporters.bind(url, new DecodeHandler(new HeaderExchangeHandler(handler))));
+    }
+}
+```
+
+请注意，上述 HeaderExchanger 在创建 HeaderExchangeServer 的同时也加入心跳检测功能，如下所示：
+
+```java
+private void startHeatbeatTimer() {
+        stopHeartbeatTimer();
+        if (heartbeat > 0) {
+            heatbeatTimer = scheduled.scheduleWithFixedDelay(
+                    new HeartBeatTask(new HeartBeatTask.ChannelProvider() {
+                        public Collection<Channel> getChannels() {
+                            return Collections.unmodifiableCollection(
+                                    HeaderExchangeServer.this.getChannels());
+                        }
+                    }, heartbeat, heartbeatTimeout),
+                    heartbeat, heartbeat, TimeUnit.MILLISECONDS);
+        }
+}
+```
+
+在 HeartBeatTask 的 run 方法中，我们根据所配置的 heartbeat、heartbeatTimeout 等相关心跳属性，执行 channel.reconnect、channel.close 等方法。这也是心跳检测机制的一种常见实现方式。
+
+注意到，我们在 HeaderExchangeServer 中终于看到了属于 Transport 层的对象 Transporters，接下来我们来看服务器端 Transport 相关的组件。
+
+站在服务器的角度，网络通信过程的目的只有一个，就是装配服务并启动监听，从而接收来自服务消费者的访问。而对于服务消费者而言，通信过程的目的无非是对远程服务进行连接、发送请求并获取响应。因此，在 Dubbo 中存在一个 Transporter 接口，该接口提供了 bind 和 connect 方法分别对这两个基本操作进行封装，如下所示：
+
+```java
+@SPI("netty")
+public interface Transporter {
+    @Adaptive({Constants.SERVER_KEY, Constants.TRANSPORTER_KEY})
+    Server bind(URL url, ChannelHandler handler) throws RemotingException;
+
+    @Adaptive({Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY})
+    Client connect(URL url, ChannelHandler handler) throws RemotingException;
+}
+```
+
+我们发现 Transporter 接口的定义与 Exchanger 接口非常类似，两者同时提供了 bind 和 connect 这两个方法。区别在于 Exchanger 中用到的 ExchangeHandler，而 Transporter 中用到的是 ChannelHandler，显然 ChannelHandler 面向消息通信的通道，提供了比 ExchangeHandler 更底层的操作语义。
+
+与 HeaderExchanger 不同，Dubbo 中针对 Transporter 接口提供了一批实现类，包括 GrizzlyTransporter、MinaTransporter 以及两个 NettyTransporter。系统默认会加载 org.apache.dubbo.remoting.transport.netty 包下的 NettyTransporter，该类如下所示：
+
+```java
+public class NettyTransporter implements Transporter {
+    public static final String NAME = "netty4";
+
+    public Server bind(URL url, ChannelHandler listener) throws RemotingException {
+        return new NettyServer(url, listener);
+    }
+
+    public Client connect(URL url, ChannelHandler listener) throws RemotingException {
+        return new NettyClient(url, listener);
+    }
+}
+```
+
+这里看到了真正实现网络通信的 NettyServer 类，NettyServer 实现了 Server 接口并扩展了 AbstractServer 类。在 AbstractServer 中，Dubbo 提供了对网络服务端的通用抽象，即抽象出 open、close、send 等一组面向网络通信的通用方法。而 NettyServer 作为 AbstractServer 的子类，它的启动监听实现代码如下所示：
+
+```java
+protected void doOpen() throws Throwable {
+        ...
+        bootstrap = new ServerBootstrap(channelFactory);
+
+        final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
+        channels = nettyHandler.getChannels();
+        bootstrap.setOption("child.tcpNoDelay", true);
+        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+            public ChannelPipeline getPipeline() {
+                NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyServer.this);
+                ChannelPipeline pipeline = Channels.pipeline();
+                pipeline.addLast("decoder", adapter.getDecoder());
+                pipeline.addLast("encoder", adapter.getEncoder());
+                pipeline.addLast("handler", nettyHandler);
+                return pipeline;
+            }
+        });
+        channel = bootstrap.bind(getBindAddress());
+}
+```
+
+熟悉 Netty 框架的开发人员对上述代码一定不会陌生，这里使用 Netty 的 ServerBootstrap 完成服务启动监听，同时构建了 NettyHandler 作为其网络事件的处理器。然后 NettyServer 的 doClose 方法基于 Netty 的 boostrap 和 channel 对象完成了网络资源释放。
+
+这样我们对 Dubbo 中与网络通信相关的服务监听启动和关闭，以及发送消息的过程就有了整体的了解。
+
+### Dubbo 客户端通信原理
+
+有了对前面服务器端各个技术组件的介绍，理解 Dubbo 客户端通信原理就会容易很多。我们在介绍服务器端时所引入的 Transporter 接口同时包含了对客户端方法的定义，而 Transporter 的实现类 NettyTransporter 也同时提供了 NettyClient 类，如下所示：
+
+```java
+public class NettyTransporter implements Transporter {
+    public static final String NAME = "netty";
+
+    public Server bind(URL url, ChannelHandler listener) throws RemotingException {
+        return new NettyServer(url, listener);
+    }
+
+    public Client connect(URL url, ChannelHandler listener) throws RemotingException {
+        return new NettyClient(url, listener);
+    }
+}
+```
+
+与 NettyTransporter 相关的这些核心类之间的关系下图所示：
+
+![](res/2024-10-13-23-56-50.png)
+
+上图中的很多类我们都已经明确了，因此在介绍 Dubbo 的客户端通信原理时，不会像服务端那样做全面展开，而是更多关注于客户端本身的特性，所以我们的思路先从底层的 NettyClient 类进行切入。
+
+与 NettyServer 类类似，NettyClient 也存在一个抽象的父类 AbstractClient。作为网络客户端的通用抽象，AbstractClient 这个模板类一共提供了 doOpen、doConnect、doDisconnect、doClose、getChannel 这 5 个模板方法。与服务器端所提供的 3 个方法相比，客户端还需要实现与 Connect 这一操作相关的两个方法。
+
+NettyClient 中的 doOpen 方法如下所示，这里创建了 ClientBootstrap 并完成初始化参数设置。
+
+```java
+@Override
+protected void doOpen() throws Throwable {
+        ...
+        bootstrap = new ClientBootstrap(channelFactory);
+        final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
+        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+            public ChannelPipeline getPipeline() {
+                NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyClient.this);
+                ChannelPipeline pipeline = Channels.pipeline();
+                pipeline.addLast("decoder", adapter.getDecoder());
+                pipeline.addLast("encoder", adapter.getEncoder());
+                pipeline.addLast("handler", nettyHandler);
+                return pipeline;
+            }
+        });
+}
+```
+
+和 NettyServer 一样，NettyClient 同样完成了对 Netty 框架的封装。在 NettyClient 的 doConnect 方法中，同样使用 ClientBootstrap 完成与服务端的连接和事件监听。而 doDisconnect 方法则用于移除当前已经断开连接的 Channel。然后，和 HeaderExchangeServer 类类似，在 HeaderExchangeClient 类中也添加了定时心跳收发及心跳超时监测机制。
+
+## 解题要点
+
+对于远程过程调用而言，网络通信还是一个偏向于概念的技术考点。因此，在回答这类问题时，第一步需要针对网络通信这个话题本身给出一些说明和描述，这属于理论知识体系，是需要死记硬背的基础内容。基于对这一话题的了解，通常我们就可以引出一些自己比较熟悉的点，围绕这些点来进行展开和引导即可。例如，对于网络传输协议，如果你了解 ISO/OSI 模型，那就可以基于这个模型来对类似“消息头”这种自己比较熟悉的点进行发散。
+
+第二个解题要点是对网络通信实现过程进行抽象化、系统化的阐述。在目前主流的分布式服务框架中，对于网络通信模块都会有自己的一些抽象和提炼，其内部结构往往比较复杂。以本讲中介绍的 Dubbo 框架为例，就采用了明确的分层架构。每一层中都包含了一些核心的接口，这些接口之间的继承关系以及所处于的层次如下图所示：
+
+![](res/2024-10-13-23-58-54.png)
+
+针对网络通信，我们要明确 Dubbo 框架集成了很多第三方工具，这部分工具只关注于底层的具体网络通信过程。Dubbo 把这一过程抽象成一个 Transport 层，即网络传输层。而 Dubbo 又提供了一个 Exchange 层，用于封装请求和响应，称为信息交换层。从功能职责上讲，Exchange 偏向于 Dubbo 对自身通信过程的抽象和封装，跟具体的网络通信关系不大，具体的网络传输工作都是由 Transport 层负责完成。理解 Dubbo 框架的这种设计思想和实现方式，一方面有助于提升面试内容的丰富程度，另一方面对于更好地理解框架实现原理也很有帮助。
+
+在面试过程中，我们需要确保整个针对网络通信的分析过程是理论结合实践的，如果你能够把本讲内容结合起来进行讲解，相信这道面试题会成为你区别于其他候选人的一个亮点。
+
+## 小结与预告
+
+本讲介绍了分布式系统远程过程调用部分的第一个技术组件，即网络通信。可以说网络通信是一切分布式系统的基础，我们从网络连接、IO 模型等角度讨论了与网络通信相关的一些基本概念。
+
+本讲的核心内容是对 Dubbo 中网络通信具体实现过程的深入分析，我们从源码级别对框架中的核心类进行了展开，并明确了 Dubbo 框架在实现网络通信模块时所采用的分层架构。Dubbo 在这一维度上的分层架构为我们如何合理规划底层模块的职责和边界提供了很好的参考价值。Dubbo 中关于服务器端和客户端通信的实现过程还是比较复杂的，涉及到更底层的 Channel 等相关的操作，大家可以自己通过阅读源码进行理解。
+
+在本讲内容中，我们还留着一个伏笔，那就是序列化。任何一次网络请求过程都涉及到对数据的序列化操作。而序列化的具体实现工具很多，但这些工具背后实际上还是有一些通用的功能特性值得进行分析和总结，从而方便我们做出技术选型。下一讲我们将针对这个话题展开详细讨论。
+
+// TODO https://juejin.cn/book/7106442254533066787/section/7107146436541677581
