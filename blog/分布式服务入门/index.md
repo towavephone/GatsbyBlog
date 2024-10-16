@@ -533,4 +533,281 @@ protected void doOpen() throws Throwable {
 
 在本讲内容中，我们还留着一个伏笔，那就是序列化。任何一次网络请求过程都涉及到对数据的序列化操作。而序列化的具体实现工具很多，但这些工具背后实际上还是有一些通用的功能特性值得进行分析和总结，从而方便我们做出技术选型。下一讲我们将针对这个话题展开详细讨论。
 
+# 序列化：如何对序列化实现工具进行正确选型？
+
+在上一讲中，我们对远程过程调用中客户端与服务器端的网络通信过程进行了详细的讨论。借助于分布式服务框架，我们可以实现不同服务之间跨网络的交互和协作。网络通信涉及到数据的有效传输，这就需要引入另一个技术组件，即序列化。而目前关于如何实现序列化和反序列化，业界也诞生了一大批工具和框架。
+
+那么，序列化是一种什么样的技术组件？我们又应该如何对种类繁多的序列化实现工具进行正确选型呢？这是面试官经常会抛出的一个面试话题。本讲内容将围绕这一话题展开讨论。
+
+## 问题背景
+
+在现实中，我们通常会使用 Dubbo、Spring Cloud 等开源框架，以及 TCP、HTTP 等网络传输协议来发起远程调用。对于这些框架和协议而言，客户端发起请求的方式，以及服务端返回响应结果的处理过程都是不一样的。但是这里存在一个共同点，即无论采用何种开发框架和网络传输协议，都涉及到业务数据在网络中的传输，这就需要应用到序列化技术。和上一讲介绍到的网络通信不同，序列化技术是直接面向开发人员的，我们可以对具体的序列化工具和框架进行选择，而不像网络通信过程那样只能依靠框架底层所封装的能力。对于序列化技术而言，这种差异性导致了面试过程不仅仅只会考查对技术本身的了解程度，而是更多会讨论如何对序列化工具进行合理选择。
+
+目前，序列化工具很多，据统计已经不下 100 种。在面试过程中显然无法对具体的实现工具进行一一罗列。因此，关于序列化技术的考查方式是比较灵活的，需要候选人有足够的知识面，了解目前业界主流的序列化技术。更为重要的，候选人还需要具备综合的抽象思维，能够将不同的工具按照一定的维度进行分类，从不同的功能特性角度出发进行分析。
+
+从面试角度讲，关于序列化技术的常见考查方式包括：
+
+- 你知道哪些序列化工具，它们各自有什么特性？
+- 你在选择序列化工具时，重点会考虑哪些方面的要素？
+- 为什么像 Protobuf、Thrift 这些序列化工具会采用中间语言技术？
+- 如果只考虑性能，你会选择哪款序列化工具？
+- Google 的 Protobuf 为什么会那么快？
+
+可以看到，这些面试题既包括对序列化技术原理和实现方法的考查，也会涉及到具体某一个工具框架的细节。从我的面试经验而言，能够回答比较顺畅的候选人并不是很多，需要大家在平时的工作中不断积累。
+
+## 问题分析
+
+究竟什么是序列化？我们可以简单把它理解为是一种从内存对象到字节数据的转换过程。通过序列化，我们就可以把数据变成可以在网络上进行传输的一种媒介，如下图所示：
+
+![](res/2024-10-16-11-52-42.png)
+
+在上图中，我们注意到还有一个反序列化的概念。所谓反序列化，实际上就是序列化的逆向过程，把从网络上获取的字节数据再次转化为可以供内存使用的业务对象。
+
+序列化的方式有很多，实现工具也非常丰富，常见的如下表所示：
+
+| 序列化工具        | 序列化工具                |
+| :---------------- | :------------------------ |
+| Java Serializable | JDK 自带序列化工具        |
+| Hessian           | Dubbo 框架默认序列化工具  |
+| Protobuf          | gRPC 框架默认序列化工具   |
+| Thrift            | Facebook 跨语言序列化工具 |
+| Jackson           | Spring 框架默认序列化工具 |
+| FastJson          | 阿里巴巴高性能序列化工具  |
+
+上表罗列的也只是一些最主流的序列化工具，其他可供开发人员使用的工具和框架还有很多。虽然这些工具的定位和作用是类似的，但所具备的特性却不尽相同。这就涉及到日常开发过程中开发人员经常要面对的一个问题，即技术选型问题。
+
+关于技术选型，我们的思路首先是确定所需要考虑的技术维度。在序列化领域，我们可以抽象出三个技术维度。
+
+- 功能：包括支持的序列化数据表现形式、数据结构等。
+- 性能：包括空间复杂度和时间复杂度等。
+- 兼容性：包括版本号机制等。
+
+基于上述三个技术维度，我们回答这类面试题的思路就有了。而从这三个技术维度的描述出发，我们也不难看出每一个技术维度还可以继续进行细分，接下来，让我们来对具体的技术体系展开讨论。
+
+## 技术体系
+
+序列化工具和框架各有特色，但它们所采用的数据表现形式一般分成两大类，即具备可读性的文本类，以及不具备可读性的二进制类。对于前者，代表性的框架有 Jackson 和 FastJson，它们都采用了 JSON 作为数据表现形式。而后者则包括 Protobuf、Thrift 等。开发人员往往对序列化工具的数据表现形式比较在意，因为这直接决定了我们是否可以直接人为对数据的正确性进行判断。显然，数据的表现形式是序列化工具的一大功能特性，但并不是最重要的功能特性。接下来，就让我们先从序列化的核心功能开始展开讨论。
+
+### 序列化的功能
+
+在选择序列化工具时，功能完整度是我们首先要考虑的一个技术维度，具体的关注点包括：
+
+- 数据结构的丰富程度；
+- 开发的友好性；
+- 对异构平台的支持性。
+
+我们首先来看数据结构，这方面的功能差异性主要体现在是否对一些复杂数据结构的支持。常见的复杂数据结构包括泛型结构以及 Map/List 等集合结构。我们来看如下所示的一个具体的示例：
+
+```java
+public class User {
+    public int id;
+    public String username;
+    public List<Link> links;
+    public Map result;
+}
+
+public class Link {
+    public String name;
+    public String phone;
+}
+```
+
+可以看到，这里定义了一个 User 对象，而这个 User 对象中又分别包含了一个 List 结构和一个 Map 结构，其中 List 结构所指向的还是一组自定义对象 Link。针对这种复杂数据结构，如果我们使用 FastJson 来进行序列化，那么如下所示的代码是可以正常运作的。
+
+```java
+User user = new User();
+// 省略对 user 对象进行赋值
+// 将对象转化为 JSON 字符串
+String str = JSON.toJSONString(user);
+// 将 JSON 字符串转成对象
+User myuser = JSON.parseObject(str, User.class);
+```
+
+而如果我们使用 Protobuf，那么这种复杂数据结构是无法支持的。如果想要使用 Protobuf，需要对这个数据结构进行调整，将 List 换成更为通用的数据结构。另一方面，针对 Protobuf 框架，我们也可以引出下一个我们要讨论的功能点，即开发的友好性。
+
+开发友好性用来衡量工具本身对于开发人员实现序列化的开发难易程度。就像前面示例所展示的，我们在使用 FastJson 时，通过几行代码就能实现对象的序列化和反序列化。而有些工具则不一定，以 Protobuf 为例，在使用该工具时，我们首先要做的是定义一种中间语言，示例如下：
+
+```protobuf
+syntax = "proto3";
+
+message Student
+{
+    int32 id= 1;
+    string name = 2;
+    int32 sex = 3;
+    string hobby = 4;
+    string skill = 5;
+}
+```
+
+这里的 `syntax="proto3"` 表示运用 proto3 版本的语法，而 message 类似于 Java 中的 Class。在开发过程中，我们需要将这段中间语言保存为一个 student.proto 文件，然后再通过 Protobuf 的 protoc 命令将它转化为 Java 文件才能使用，如下所示：
+
+```bash
+protoc --java_out=. student.proto
+```
+
+可以看到，中间语言所带来的开发复杂度是显而易见的。使用中间语言的典型工具还包括 Thrift，它需要事先提供一个 .thrift 文件。
+
+讲到这里，你可能会问，为什么 Protobuf 和 Thrift 要使用中间语言呢？原因就在于它们基于中间语言提供了一项重要的技术特性，即跨语言的异构性。
+
+异构性的需求来自分布式系统中技术架构和实现方式的多样性。原则上，每个服务都可以基于不同的技术体系进行实现，这些技术体系所采用的开发语言可能都是不一样的，这时候就需要引入支持多语言的序列化工具，如下图所示：
+
+![](res/2024-10-16-11-57-19.png)
+
+实际上，很多场景下我们之所以不选择 JDK 自带的序列化机制，很重要的一个原因就在于它只能支持 Java 语言。而基于 Protobuf 等工具所提供的中间语言机制，我们可以生成面向不同语言的序列化数据，包括 C++、JAVA、Python、Objective C、C#、Ruby、PHP、JavaScript 等，我们也可以找到几乎涵盖所有其他语言的第三方拓展包。
+
+另一方面，无论是数据结构的丰富程度，还是开发友好性，这些功能特性与跨语言支持之间往往是存在一定矛盾的。举个例子，要想支持多语言，那么就必须采用那些非常通用的数据结构，确保所有语言都内置了对这些数据结构的支持。这样的话，诸如前面提到的 Map/List 等复杂数据结构显然就不合适了。
+
+### 序列化的性能
+
+在日常开发过程中，我们在选择序列化工具时往往会把性能作为一项重要的指标进行考虑。对于序列化的性能而言，我们关注两个指标，即：
+
+- 时间复杂度：表示序列化/反序列化执行过程的速度。
+- 空间复杂度：表示序列化数据所占有的字节大小。
+
+对于日常开发过程中经常使用的一些序列化工具，我们可以列举了它们在性能上的一些量化数据，如下表所示：
+
+|          | 时间复杂度（序列化） | 时间复杂度（反序列化） | 空间复杂度 |
+| :------- | :------------------- | :--------------------- | :--------- |
+| Java     | 8654                 | 43787                  | 889        |
+| Hessian  | 6725                 | 10460                  | 501        |
+| Protobuf | 2964                 | 1745                   | 239        |
+| Thrift   | 3177                 | 1949                   | 349        |
+| Jackson  | 3052                 | 4161                   | 503        |
+| Fastjson | 2595                 | 1472                   | 468        |
+
+通过对比，我们注意到在时间复杂度上可以优先选择阿里巴巴的 FastJson，而在空间复杂度上 Google 的 Protobuf 则具备较大的优势。
+
+### 序列化的兼容性
+
+关于序列化技术最后需要讨论的一个话题是兼容性。
+
+我们知道随着业务系统的不断演进，服务中所定义的接口以及数据结构也不可避免会发生变化。通常，在分布式服务开发过程中，我们会引入版本概念来应对接口和数据结构的调整。在序列化工具中，我们同样需要考虑版本。这方面比较典型的例子就是 JDK 自带的序列化版本 Id。一旦我们在类定义中实现了 Serializable 接口，JDK 就提示你需要指定一个序列化版本 Id，如下所示：
+
+```java
+public class MyObject implements Serializable {
+    // 唯一的序列化版本号
+    private static final long serialVersionUID = -1127800498182345096L;
+}
+```
+
+基于这种显式的版本号机制，在序列化时，如果对象之间的版本 Id 不一致，那么 JVM 就会抛出一个 InvalidCastException 的异常；反之则可以正常进行转换。
+
+有些序列化工具虽然没有明确指定版本号的概念，但也能实现前向兼容性，比较典型的就是 Protobuf。
+
+## 源码解析
+
+介绍完序列化的相关技术体系，让我们再次回到具体的分布式开源框架，来看看业界主流的框架是如何实现序列化过程的。这里还是以阿里巴巴的 Dubbo 框架为例展开讨论。
+
+在上一讲中，我们介绍了 Dubbo 框架中的 Remoting 模块。作为回顾，我们给出该模块的组成结构图，如下图所示：
+
+![](res/2024-10-16-14-34-22.png)
+
+可以看到，在 Remoting 模块中还剩下一个 Serialize 组件没有介绍，从命名上我们不难看出该组件与序列化相关。事实上，Dubbo 提供了 Serialization 接口（位于 dubbo-common 代码工程中）作为对序列化的抽象。而对应的序列化和反序列化操作的返回值分别是 ObjectOutput 和 ObjectInput，其中 ObjectInput 扩展自 DataInput，用于读取对象；而 ObjectOutput 扩展自 DataOutput，用于写入对象，这两个接口的定义如下所示：
+
+```java
+public interface ObjectInput extends DataInput {
+    Object readObject() throws IOException, ClassNotFoundException;
+    <T> T readObject(Class<T> cls) throws IOException, ClassNotFoundException;
+    <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException;
+}
+
+public interface ObjectOutput extends DataOutput {
+    void writeObject(Object obj) throws IOException;
+}
+```
+
+在 Serialization 接口的定义上，可以看到 Dubbo 中默认使用的序列化实现方案基于 hessian2。Hessian 是一款优秀的序列化工具。在功能上，它支持基于二级制的数据表示形式，从而能够提供跨语言支持；在性能上，无论时间复杂度还是空间复杂度也比 Java 序列化高效很多，如下图所示：
+
+![](res/2024-10-16-14-35-05.png)
+
+在 Dubbo 中，Hessian2Serialization 类实现了 Serialization 接口，我们就以该类为例介绍 Dubbo 中具体的序列化/反序列化实现方法。Hessian2Serialization 类定义如下所示：
+
+```java
+public class Hessian2Serialization implements Serialization {
+    public static final byte ID = 2;
+    public byte getContentTypeId() {
+        return ID;
+    }
+
+    public String getContentType() {
+        return "x-application/hessian2";
+    }
+
+    public ObjectOutput serialize(URL url, OutputStream out) throws IOException {
+        return new Hessian2ObjectOutput(out);
+    }
+
+    public ObjectInput deserialize(URL url, InputStream is) throws IOException {
+        return new Hessian2ObjectInput(is);
+    }
+}
+```
+
+Hessian2Serialization 中的 serialize 和 deserialize 方法分别创建了 Hessian2ObjectOutput 和 Hessian2ObjectInput 类。以 Hessian2ObjectInput 为例，该类使用 Hessian2Input 完成具体的反序列化操作，如下所示：
+
+```java
+public class Hessian2ObjectInput implements ObjectInput {
+    private final Hessian2Input mH2i;
+
+    public Hessian2ObjectInput(InputStream is) {
+        mH2i = new Hessian2Input(is);
+        mH2i.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);
+    }
+
+    // 省略各种读取具体数据类型的工具方法
+
+    public Object readObject() throws IOException {
+        return mH2i.readObject();
+    }
+
+    public <T> T readObject(Class<T> cls) throws IOException,
+            ClassNotFoundException {
+        return (T) mH2i.readObject(cls);
+    }
+
+    public <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException {
+        return readObject(cls);
+    }
+}
+```
+
+Hessian2Input 是 Hessian2 的实现库 com.caucho.hessian 中的工具类，初始化时需要设置一个 SerializerFactory，所以我们在这里还看到存在一个 Hessian2SerializerFactory 工厂类，专门用于设置 SerializerFactory。而在 Hessian2ObjectInput 中，各种以 read 为前缀的方法实际上都是对 Hessian2Input 中相应方法的封装。
+
+用于执行反序列化的 Hessian2ObjectOutput 与 Hessian2ObjectInput 类也比较简单，这里不再展开。
+
+关于 Dubbo 序列化的另一条代码支线是 Codec2 接口，该接口位于 dubbo-remoting-api 代码工程中，提供了对网络编解码的抽象，而编解码过程显然需要依赖 Serialization 接口作为其数据序列化的手段。我们可以通过如下所示的代码片段来回顾这一点，这段代码来自 DubboCodec 中的 decodeBody 方法。
+
+```java
+public class DubboCodec extends ExchangeCodec implements Codec2 {
+
+    protected Object decodeBody(Channel channel, InputStream is, byte[] header) throws IOException {
+        // 获取序列化对象
+        Serialization s = CodecSupport.getSerialization(channel.getUrl(), proto);
+    }
+}
+```
+
+那么，这里的 Codec 和 Serialization 如何与上一讲中介绍的 Exchange 和 Transport 结合起来构成一个完整的链路呢？我们可以明确一点，序列化和编解码过程在网络传输层和信息交换层中都应该存在。因此，我们快速来到 `dubbo-remoting-api` 代码工程的 `META-INF/dubbo/internal` 文件夹，发现存在一个 org.apache.dubbo.remoting.Codec2 配置文件，内容如下所示：
+
+```
+transport=org.apache.dubbo.remoting.transport.codec.TransportCodec
+telnet=org.apache.dubbo.remoting.telnet.codec.TelnetCodec
+exchange=org.apache.dubbo.remoting.exchange.codec.ExchangeCodec
+```
+
+org.apache.dubbo.remoting.Codec2 配置文件用来执行 SPI 机制，我们会在第 24 讲中对这个主题进行专项介绍，这里只需要明白 Dubbo 采用这种配置方式来动态加载运行时的类对象。在这里，可以看到 Dubbo 针对 exchange 和 transport 都提供了 Codec 支持。
+
+## 解题要点
+
+从解题思路上讲，序列化是一个相对比较容易把握的面试题。基于本讲关于序列化技术组件的讨论，我们发现有很多列表式的内容需要记忆。这部分内容需要大家平时多看一些资料，尽量扩展自己的知识面，这是针对这一主题的第一个解题要点。关于序列化相关工具之间的对比也有一个非常好的[汇总资料](https://github.com/eishay/jvm-serializers/wiki)
+
+但也正是因为序列化本身是一个内容比较固化的主题，所以在解题上就不能完全照本宣科。只讲概念，而不给出自己的一些思考和总结，往往体现不出你和其他候选人之间的差别，这也是日常面试过程中需要注意的一个点。因此，针对这类题的第二个解题要点在于要事先用自己的语言来梳理回答问题的内容体系，重点展示自己对于这一技术主题的抽象和分析能力。针对技术选型类面试题，更加需要明确给出自己的判断。
+
+## 小结与预告
+
+但凡开发分布式和微服务应用，就一定会使用到序列化技术。可以说，序列化技术是我们开发互联网应用程序的基础设施类技术之一。序列化的实现工具有很多，本讲内容并不是介绍具体的某一个工具，而是从功能、性能以及兼容性等维度出发对这些工具进行分析，从而帮助你更好的进行选择。
+
+具备了网络通信和序列化技术，接下来我们就可以实现一个简单的远程调用过程了。那么，如果让你自己设计一个简单的 RPC 架构，你会怎么做呢？这就是我们下一讲要探讨的内容。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107146436541677581
