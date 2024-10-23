@@ -1166,4 +1166,343 @@ RPC 架构的组成结构偏向理论描述，想要理解该架构中各个技�
 
 在掌握了 RPC 架构的基本结构并动手实现了一个简易版的示例之后，让我们回到主流的开源框架，看看这些框架是如何实现远程调用的。远程调用涉及到服务发布和服务引用这两个方面。我们将先对前者展开讨论，并回答这样一个问题：如何合理设计服务发布机制？我们下一讲再聊。
 
+# 远程调用：如何合理设计服务发布机制？
+
+在上一讲中，我们通过一个简单但又完整的示例演示了如何实现一套自定义的 RPC 架构。在现实开发场景中，我们当然不建议大家重复造轮子，而是应该采用主流的 Dubbo、Spring Cloud 等开源框架来构建分布式系统。对于这些开源框架而言，RPC 架构的实现过程显然不会像上一讲中的示例那样简单，而是内置了各种强大的功能，从而为开发人员提供更好的开发体验。
+
+本质上，一次远程调用涉及两个角色，即服务提供者和服务消费者，分别用来实现服务的发布和引用。在本讲内容中，我们将讨论服务的发布过程，并引出一个常见的面试题，即：如何合理设计服务发布机制？
+
+## 问题背景
+
+在分布式系统中，系统的能力来自于服务与服务之间的交互和集成。为了实现这一过程，就需要服务提供者对外暴露可以访问的入口。假设我们沿用上一讲中所介绍的业务服务 UserService，那么对该服务进行发布的一种实现方式如下所示：
+
+```java
+UserService service = new UserServiceImpl(...)；
+RpcServer server = new RpcServer(…);
+server.export(UserService.class, options);
+```
+
+上述代码看上去也很简单，和我们在上一讲中所实现的示例代码有点类似。但在这几行代码的背后，我们需要考虑的事情非常多，比方说：
+
+- 如果远程调用发生在同一个 JVM 中，服务发布应该如何实现？
+- 如果我们想要在服务发布过程中添加一些定制化的切面逻辑，应该怎么做？
+- 如果服务提供者具有多个服务实例，那么服务发布过程如何实现集群化？
+- 如果服务发布操作还没完成，服务消费者的请求就进来了应该怎么办？
+
+这些问题面向服务发布主流程中的特定场景，但正是这些特定场景才是面试过程中经常会出现的提问方式。同时，我们也应该注意到，远程调用是一个消耗大量资源的过程，资源的利用率也是框架必须要考虑的问题。如何合理地利用资源，避免远程通信所导致的性能消耗，也是服务发布机制设计上的一个重点。
+
+如果针对 Dubbo 等具体的实现框架，面试官也可以这样来进行提问：
+
+- Dubbo 中所采用的服务发布流程是怎么样的？
+- Dubbo 框架中提供了哪几种服务发布机制？
+- 为了提高资源利用的效率，Dubbo 在发布过程中做了哪些优化？
+
+这些问题看上去侧重点各有不同，但其实都是围绕着一套服务发布流程来展开的，让我们来对这些问题做进一步分析。
+
+## 问题分析
+
+和前面几讲介绍的网络通信、序列化等主题不同，服务的发布和引用更多关注的是应用层的设计方法，而不是面向底层网络的通信组件。因此，我们对服务发布的分析也需要从应用层的角度进行切入，梳理一套通用而又完整的服务发布流程。而为了实现这一目标，就需要对业界主流的一些开源框架做一定的提炼和抽象。这是我们在应对这类面试题要把握的第一个方向。
+
+然后，我们在这套流程中进一步提炼服务发布过程中所使用到的各个技术组件，这些技术组件能够与前面给出的特定场景下的面试问题相对应。这是我们要回答的第二个主要方向。
+
+最后，我们还是要回到具体的实现框架，从源码切入来详细分析开源框架中针对服务发布机制的实现原理。只有这样，才能做到理论联系实际，也有助于我们更好地掌握开源框架的使用方式和技巧。
+
+上述三个维度构成了我们回答这类问题的解答思路。接下来要讨论的就是具体的技术体系了，让我们给出对服务发布流程的统一描述。
+
+## 技术体系
+
+在现代的分布式架构中，服务的发布和引用过程往往与注册中心密切相关。服务注册中心是服务发布和引用的媒介，当我们把服务信息注册到注册中心，并能够从注册中心中获取服务调用地址时，需要考虑的问题就是如何进行有效的服务发布和引用。我们会在第 14 讲中详细介绍注册中心，而在本讲接下来的内容中，我们重点关注的是服务发布所具备的流程和特性。
+
+我们知道服务发布的目的是将该服务的访问入口暴露给分布式系统中的其他服务。抛开具体的技术和框架，我们先可以简单抽象出如下图所示的服务发布的整体流程：
+
+![](res/2024-10-23-11-11-30.png)
+
+上图包含了服务发布过程中的核心组件，我们来对这些核心组件做一一展开。
+
+1. 发布启动器
+
+   发布启动器的核心作用有两点，一个是确定服务的发布形式，一个是启动服务发布过程。在目前主流的开发框架中，常见的服务发布形式包括：
+
+   - 配置化：使用配置文件；
+   - 使用注解：使用 Java 中的注解机制；
+   - API 调用：使用底层的代码接口。
+
+   以上三种方式各有利弊。在日常开发过程中，配置和注解比较常用，而 API 调用则主要完成服务与服务之间的集成。
+
+   讲完发布形式，我们来讨论如何启动服务发布过程，常见的策略如下图所示：
+
+   ![](res/2024-10-23-11-12-57.png)
+
+   可以看到，我们可以使用 Spring 容器来完成基于配置化和注解形式下的服务启动过程。而对于 API 调用而言，由于不一定会借助于容器，所以也可以直接使用 main 函数来实现这一目标。
+
+2. 动态代理
+
+   动态代理是远程过程调用中非常核心的一个技术组件，在服务发布和服务引用过程中都会用到，其主要作用就是简化服务发布和引用的开发难度，以及确保能够对发布过程进行扩展和定制。
+
+   关于动态代理的具体实现方式值得专门进行讨论，我们将在后面重点关注这一话题。
+
+3. 发布管理器
+
+   服务发布过程需要使用专门的组件来进行统一管理，这个组件就是发布管理器。该组件需要判断本次发布是否成功，然后在服务发布成功之后，把服务的地址信息注册到注册中心。而这里的服务地址信息则来自于协议服务器。
+
+4. 协议服务器
+
+   在服务发布过程中，在物理上真正建立网络连接，并对网络端口进行绑定的组件是协议服务器。协议服务器还会执行心跳检测以及在连接失败之后进行重连操作。用于发布服务的常见协议包括 HTTP、RMI、Hessian 等。我们也可以自己定义这样的协议，例如 Dubbo 框架就实现了一套自定义的 Dubbo 协议。实际上，关于网络通信方面的讨论就是针对这里的协议服务器。
+
+5. 注册中心
+
+   注册中心的作用是存储和管理服务定义的各类元数据，并能感知到这些元数据的变化。
+
+以上所示的服务发布流程图有一定的共性，可以通过转化映射到具体的某个框架。事实上，基于 Dubbo 的服务发布流程与上述过程非常类似。让我们来一起看一下。
+
+## 源码解析
+
+在具体介绍 Dubbo 服务发布流程之前，我们先来讨论 Dubbo 暴露服务的两种时效，一种是延迟暴露，一种是正常暴露，如下图所示：
+
+![](res/2024-10-23-11-14-30.png)
+
+可以看到，如果这里的 delay 参数被设置成了 -1，代表不需要延迟暴露。反之，Dubbo 会根据该参数值的大小来执行对应的延迟策略。讲到这里，你可能会问，Dubbo 为什么要考虑发布时效这个问题呢？主要目的在于提供平滑发布机制。如果 Dubbo 服务本身还没有完全启动成功，那这时候对外暴露服务是没有意义的，我们可以通过设置延迟时间来确保服务在发布的时间点上就是可用的。
+
+在判断是否需要延迟暴露之后，ServiceBean 就会调用 export 方法执行服务暴露。而 export 方法又来自 ServiceBean 的父类 ServiceConfig，所以关于 Dubbo 服务发布的流程就从 ServiceConfig 类进行切入。
+
+那么，ServiceConfig 是如何实现延迟暴露的呢？实际上很简单，就是启动一个后台线程来延迟调用一个 doExport 方法，该方法负责执行具体的服务暴露逻辑。而如果没有采用延迟暴露策略，那么这个 doExport 方法就会被立即执行，具体的执行流程如下所示：
+
+```java
+// 将 Bean 属性转化为 URL
+URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
+
+String scope = url.getParameter(Constants.SCOPE_KEY);
+// 如果 scope 配置为 none 则不暴露
+if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
+            // 如果 scope 没有被配置为远程暴露，则采用本地暴露
+            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {
+                exportLocal(url);
+            }
+            // 如果 scope 没有被配置为本地暴露，则采用远程暴露
+            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {
+                if (registryURLs != null && registryURLs.size() > 0) {
+                    for (URL registryURL : registryURLs) {
+                        // 将具体服务转化为 Invoker
+                        Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+                        DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
+
+                        // 将 Invoker转化为 Exporter
+                        Exporter<?> exporter = protocol.export(wrapperInvoker);
+                        exporters.add(exporter);
+                    }
+                } else {
+                    Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
+                    DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
+
+                    Exporter<?> exporter = protocol.export(wrapperInvoker);
+                    exporters.add(exporter);
+                }
+            }
+}
+this.urls.add(url);
+```
+
+这段代码值得仔细分析。在这里，我们可以看到首先会构建一个 URL 对象，如下所示：
+
+```java
+URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
+```
+
+请注意，在 Dubbo 中，URL 对象代表了统一数据模型，会贯穿服务暴露和调用的整个流程，绝对是一等公民。URL 格式如下所示：
+
+```
+protocol://username:password@host:port/path?key=value&key=value
+```
+
+当不使用注册中心时，URL 表现形式比较简单，如下所示：
+
+```
+dubbo://service-host/com.foo.FooService?version=1.0.0
+```
+
+而当使用注册中心时，URL 中会带有注册中心信息，如下所示：
+
+```
+registry://registry-host/org.apache.dubbo.registry.RegistryService?export=URL.encode("dubbo://service-host/com.foo.FooService?version=1.0.0")
+```
+
+通过分析 Dubbo 源码，我们得到将配置信息通过一种统一的 URL 进行表示和传递的实现方法，这也是值得我们学习的一个设计技巧。
+
+接着，我们根据 scope 参数判断服务的发布范围，判断规则如下图所示：
+
+![](res/2024-10-23-11-16-33.png)
+
+关于本地服务的暴露我们后面再具体展开，这里先讨论远程服务暴露的场景。
+
+### 远程服务暴露
+
+在 Dubbo 中，远程服务暴露过程需要执行非常重要的一个步骤，即将具体服务对象转换到 Invoker，如下所示：
+
+```java
+Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+```
+
+这里看到了一个 proxyFactory 对象，从命名上不难看出它是一个代理工厂类，定义如下所示：
+
+```java
+@SPI("javassist")
+public interface ProxyFactory {
+   @Adaptive({Constants.PROXY_KEY})
+   <T> T getProxy(Invoker<T> invoker) throws RpcException;
+
+   @Adaptive({Constants.PROXY_KEY})
+   <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException;
+}
+```
+
+在 Dubbo 中，该接口有两个实现类，即 JdkProxyFactory 和 JavassistProxyFactory。我们来看 JdkProxyFactory 中的 getInvoker 方法实现，如下所示：
+
+```java
+public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
+        return new AbstractProxyInvoker<T>(proxy, type, url) {
+            @Override
+            protected Object doInvoke(T proxy, String methodName, Class<?>[] parameterTypes, Object[] arguments) throws Throwable {
+                Method method = proxy.getClass().getMethod(methodName, parameterTypes);
+                return method.invoke(proxy, arguments);
+            }
+        };
+}
+```
+
+可以看到这里返回了一个 AbstractProxyInvoker 对象，而 AbstractProxyInvoker 实现了 Invoker 接口。Invoker 接口定义如下所示：
+
+```java
+public interface Invoker<T> extends Node {
+   // 获取服务接口
+   Class<T> getInterface();
+   // 执行远程调用
+   Result invoke(Invocation invocation) throws RpcException;
+}
+```
+
+Dubbo 为我们提供了一组 Invoker 接口的实现类，其中包括前面看到的 AbstractProxyInvoker。
+
+我们已经在 JavaProxyFactory 中看到了构建一个 Invoker 对象的实现过程，背后使用的本质上就是反射机制。
+
+现在我们明白了，Invoker 就是 Dubbo 实现远程调用的实体类。对于服务发布和引用而言，这个 Invoker 贯穿始终，可以说也是一个一等公民。
+
+有了 Invoker 之后，我们再来关注 Exporter。我们看到 Exporter 是通过调用 Protocol 接口的 export 方法所生成的，这就需要我们对 Procotol 做一些回顾。Protocol 作为 Dubbo 中最基本的 RPC 组件，完成了服务的发布和调用功能，该接口定义如下所示：
+
+```java
+@SPI("dubbo")
+public interface Protocol {
+int getDefaultPort();
+   @Adaptive
+   <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
+
+   @Adaptive
+   <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException;
+
+   void destroy();
+}
+```
+
+从方法命名上不难看出，Protocol 接口中的核心方法就是 export 和 refer，前者用于对外暴露服务，而后者则用来对远程服务进行引用。当 Dubbo 获取 URL 之后会将 URL 传给 Protocol，Protocol 根据 URL 的协议头执行不同协议的服务暴露或引用。
+
+关于 URL 的格式我们在前面已经给出说明和示例。根据 URL 中是否包含注册中心信息，服务发布流程也会判断是否需要与注册中心进行交互。关于注册中心的讨论我们放在后面进行详细展开。这里给出不基于注册中心的服务暴露方式，即如下所示的 DubboProtocol 中 export 方法的实现过程。
+
+```java
+public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+   URL url = invoker.getUrl();
+
+   // 暴露服务
+   String key = serviceKey(url);
+   DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
+   exporterMap.put(key, exporter);
+
+   // 创建 Exchange 服务器
+   openServer(url);
+
+   return exporter;
+}
+```
+
+这里的 openServer 方法的目标是创建 Exchange 服务器，这是整个服务发布流程中的底层部分，我们已经在 `网络通信：如何完成客户端和服务端之间的高效通信` 中做了详细介绍，你可以做相应的回顾。
+
+作为总结，我们把整个远程服务暴露流程做一个梳理，得到如下图所示的核心对象交互图：
+
+![](res/2024-10-23-11-18-42.png)
+
+关于 Dubbo 中远程服务暴露的实现过程就介绍到这里，接下来我们讨论本地服务暴露过程。
+
+### 本地服务暴露
+
+我们回顾 ServiceConfig 中的服务暴露流程，存在如下所示的一个流程分支：
+
+```java
+if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {
+   exportLocal(url);
+}
+```
+
+可以看到，如果 scope 没有被设置为远程暴露，则采用本地暴露模式暴露服务。那么，什么样的场景适合这种服务暴露模式呢？我们知道远程调用只会发生在跨 JVM 的场景，如果在同一个 JVM 中同时存在某一个服务的提供者和消费者，那么就可以将服务发布和引用过程控制在同一个 JVM 之内，从而避免远程网络通信所导致的性能消耗。
+
+Dubbo 中提供的 exportLocal 方法实现了这一过程，如下所示：
+
+```java
+private void exportLocal(URL url) {
+   if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
+      URL local = URL.valueOf(url.toFullString())
+               .setProtocol(Constants.LOCAL_PROTOCOL)
+               .setHost(LOCALHOST)
+               .setPort(0);
+      Exporter<?> exporter = protocol.export(proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+      exporters.add(exporter);
+   }
+}
+```
+
+这里的特殊之处就在于当碰到场景为 local 的 URL 时，我们将它的协议设置为了 `Constants.LOCAL_PROTOCOL`，即 `injvm`。我们不难猜到 Protocol 接口应该存在一个名为 InjvmProtocol 的实现类。跟 DubboProtocol 相比，InjvmProtocol 的 export 方法就显得非常简单了，如下所示：
+
+```java
+public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+   return new InjvmExporter<T>(invoker, invoker.getUrl().getServiceKey(), exporterMap);
+}
+```
+
+可以看到，这里没有执行任何关于远程调用的操作，而是构建了一个 InjvmExporter 对象并直接返回，InjvmExporter 类的定义如下所示：
+
+```java
+class InjvmExporter<T> extends AbstractExporter<T> { 
+   private final String key; 
+   private final Map<String, Exporter<?>> exporterMap;
+    
+   InjvmExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap) {
+      super(invoker);
+      this.key = key;
+      this.exporterMap = exporterMap;
+      exporterMap.put(key, this);
+   }
+
+   public void unexport() {
+      super.unexport();
+      exporterMap.remove(key);
+   }
+
+}
+```
+
+看到这里，我们明白了所谓的本地暴露，Dubbo 只是将 InjvmExporter 对象放置到一个 Map 内存对象中。这样，我们就可以直接从 JVM 的内存中获取 InjvmExporter 对象来完成服务之间的调用。
+
+## 解题要点
+
+本讲介绍的服务发布机制以及下一讲要介绍的服务引用过程都是属于技术实现流程类的面试题，这种面试题想要回答得很到位是有难度的，需要具备高度的抽象能力。本讲对这些流程进行了梳理，面试者只要对有一个基本的认识，就能从动态代理、协议、注册中心等关键技术组件出发，并对这些组件的作用和运行机制做一些展开。这样，面试官的主要考察目标基本就能满足了。
+
+请注意，考查技术实现流程性的面试题还有一个特点，就是它会关联到多个技术组件，相信你从本讲中所引用的其他各讲的数量就能感受到这一点。服务的发布需要注册中心，也需要底层的网络通信。在面试过程中，我们需要点到这些关联性的技术组件，并挑选自己比较熟悉的方向进行展开。
+
+最后，我们同样建议基于具体的开源框架来展开对技术实现流程的讨论。对于 Dubbo 框架，我建议不用做过多展开，只需要点到最核心的几个概念即可，例如远程服务暴露和本地服务暴露这两种服务暴露类型。然后，我们也可以重点对 Dubbo 框架中的核心对象做一些分析，例如 URL 对象和 Invoker 对象。
+
+## 小结与预告
+
+在远程过程调用的实现流程上，主要包括服务发布和服务引用两大维度。
+
+本讲内容围绕远程调用的发布流程展开了详细的讨论，这部分内容是我们构建分布式系统的基本前提。同时，基于这套服务发布流程，我们对 Dubbo 这款主流的分布式服务框架的内部实现原理，即如何完成远程/本地服务暴露的过程进行分析。
+
+介绍完服务发布流程和实现原理之后，下一讲我们继续讨论远程过程调用，我们要回答的一个核心问题是：服务引用有哪些实现方式？同样，我们也会基于 Dubbo 框架给出这个问题的答案。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
