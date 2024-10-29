@@ -1211,7 +1211,7 @@ server.export(UserService.class, options);
 
 ## 技术体系
 
-在现代的分布式架构中，服务的发布和引用过程往往与注册中心密切相关。服务注册中心是服务发布和引用的媒介，当我们把服务信息注册到注册中心，并能够从注册中心中获取服务调用地址时，需要考虑的问题就是如何进行有效的服务发布和引用。我们会在第 14 讲中详细介绍注册中心，而在本讲接下来的内容中，我们重点关注的是服务发布所具备的流程和特性。
+在现代的分布式架构中，服务的发布和引用过程往往与注册中心密切相关。服务注册中心是服务发布和引用的媒介，当我们把服务信息注册到注册中心，并能够从注册中心中获取服务调用地址时，需要考虑的问题就是如何进行有效的服务发布和引用。我们会在后面介绍注册中心，而在本讲接下来的内容中，我们重点关注的是服务发布所具备的流程和特性。
 
 我们知道服务发布的目的是将该服务的访问入口暴露给分布式系统中的其他服务。抛开具体的技术和框架，我们先可以简单抽象出如下图所示的服务发布的整体流程：
 
@@ -1468,10 +1468,10 @@ public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
 可以看到，这里没有执行任何关于远程调用的操作，而是构建了一个 InjvmExporter 对象并直接返回，InjvmExporter 类的定义如下所示：
 
 ```java
-class InjvmExporter<T> extends AbstractExporter<T> { 
-   private final String key; 
+class InjvmExporter<T> extends AbstractExporter<T> {
+   private final String key;
    private final Map<String, Exporter<?>> exporterMap;
-    
+
    InjvmExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap) {
       super(invoker);
       this.key = key;
@@ -1495,7 +1495,7 @@ class InjvmExporter<T> extends AbstractExporter<T> {
 
 请注意，考查技术实现流程性的面试题还有一个特点，就是它会关联到多个技术组件，相信你从本讲中所引用的其他各讲的数量就能感受到这一点。服务的发布需要注册中心，也需要底层的网络通信。在面试过程中，我们需要点到这些关联性的技术组件，并挑选自己比较熟悉的方向进行展开。
 
-最后，我们同样建议基于具体的开源框架来展开对技术实现流程的讨论。对于 Dubbo 框架，我建议不用做过多展开，只需要点到最核心的几个概念即可，例如远程服务暴露和本地服务暴露这两种服务暴露类型。然后，我们也可以重点对 Dubbo 框架中的核心对象做一些分析，例如 URL 对象和 Invoker 对象。
+最后，我们同样建议基于具体的开源框架来展开对技术实现流程的讨论。对于 Dubbo 框架，建议不用做过多展开，只需要点到最核心的几个概念即可，例如远程服务暴露和本地服务暴露这两种服务暴露类型。然后，我们也可以重点对 Dubbo 框架中的核心对象做一些分析，例如 URL 对象和 Invoker 对象。
 
 ## 小结与预告
 
@@ -1504,5 +1504,370 @@ class InjvmExporter<T> extends AbstractExporter<T> {
 本讲内容围绕远程调用的发布流程展开了详细的讨论，这部分内容是我们构建分布式系统的基本前提。同时，基于这套服务发布流程，我们对 Dubbo 这款主流的分布式服务框架的内部实现原理，即如何完成远程/本地服务暴露的过程进行分析。
 
 介绍完服务发布流程和实现原理之后，下一讲我们继续讨论远程过程调用，我们要回答的一个核心问题是：服务引用有哪些实现方式？同样，我们也会基于 Dubbo 框架给出这个问题的答案。
+
+# 远程调用：服务引用有哪些实现方式？
+
+在上一讲中，我们介绍了远程过程调用中的服务发布流程。我们知道服务发布的过程就是服务提供者对外暴露可访问入口的过程。基于所暴露的访问入口，服务消费者就可以成功发起远程调用。我们把这个过程称为服务引用。
+
+和服务发布类似，服务引用也具备一套完整的执行流程。那么，服务引用有哪些具体的实现方式呢？这就是本讲要介绍的内容。
+
+## 问题背景
+
+在分布式系统中，系统的能力来自于服务与服务之间的交互和集成。为了实现这一过程，就需要服务消费者对服务提供者所暴露的入口进行访问。假设我们继续使用 UserService 作为业务接口，那么服务引用的一种表现形式可以采用如下所示的代码风格：
+
+```java
+RpcClient client = new RpcClient(…);
+UserService service = client.refer(UserService.class);
+service.getUserNameByCode("user1");
+```
+
+和服务发布的过程类似，服务引用看上去并不复杂，但背后要考虑的事情也非常多，包括：
+
+- 如何实现远程调用过程的透明化？
+- 如何使用缓存机制提高远程调用的效率？
+- 除了缓存机制，你还有什么办法可以提高远程调用的性能？
+- 如何实现异步调用、泛化调用等多种调用形式？
+
+实际上，相较服务发布，服务引用是一个更为复杂的话题，涉及的技术组件众多。后续几讲要介绍的负载均衡、服务容错等机制都发生在服务引用阶段，这些机制对于服务发布而言是不需要考虑的。
+
+当然，如果针对 Dubbo 等具体的实现框架，面试官也可以这样来进行提问：
+
+- Dubbo 中所采用的服务引用流程是怎么样的？
+- Dubbo 框架中提供了哪几种服务调用方式？
+
+同样，这些问题看上去侧重点各有不同，但其实都是围绕着一套服务引用流程来展开的，让我们来对这些问题做进一步分析。
+
+## 问题分析
+
+对于远程过程调用而言，服务引用和服务发布是两个对应的技术组件。因此，上一讲中所有关于服务发布的问题分析方法同样适用于服务引用过程，这部分内容这里就不一一展开，你可以参考上一讲内容做一些回顾。
+
+然而，对于服务引用而言，也存在与服务发布不一样的地方。首要一点在于服务引用的类型可以是多样的，我们可以使用同步调用、异步调用等多种方式来完成远程调用过程。
+
+在日常开发过程中，开发人员倾向于使用同步调用模式来完成远程调用，因为这一模式对于编码过程而言非常友好。而从性能上讲，异步调用模式显然更具优势，但实现复杂度较高。这就诞生了一种新的实现机制，即 `异步转同步`，诸如 Dubbo 等框架就内置了这种实现机制。
+
+在面试过程中，除了介绍通用的服务引用流程，候选人最好能够对服务的引用类型，以及异步转同步这一特定技术实现机制做一定的展开，这些都是提高面试成功率的加分项。
+
+## 技术体系
+
+### 通用服务引用流程
+
+相较服务发布，服务的调用是一个导入（Import）的过程，整体流程如下图所示：
+
+![](res/2024-10-28-18-24-26.png)
+
+在上图中，我们可以看到服务调用流程与服务发布流程呈对称结构，所包含的组件包括以下。
+
+1. 调用启动器。调用启动器和上一讲介绍的发布启动器是对应的，这里不再重复介绍。
+
+2. 动态代理。在服务引用过程中，动态代理的作用就是确保远程调用过程的透明化，即开发人员可以使用本地对象来完成对远程对象的处理，如下图所示：
+
+   ![](res/2024-10-28-18-26-12.png)
+
+3. 调用管理器。和发布管理器相比，调用管理器的核心功能是提供了一种缓存机制，从而根据保存在服务调用者本地的远程服务地址信息来发起调用。
+4. 协议客户端。和协议服务器相对应，协议客户端会创建与服务端的网络连接，发起请求并获取结果。
+5. 注册中心。注册中心在这里的作用是提供查询服务定义元数据的入口。
+
+以上所示的服务引用流程图同样有一定的共性，可以通过转化映射到具体的某个框架。事实上，基于 Dubbo 的服务引用流程与上述过程也比较类似。
+
+另一方面，与服务发布相比，Dubbo 等分布式服务框架中的服务引用整体过程会更加复杂一点。在服务调用过程中，因为面对的服务一般都会部署成集群模式，势必涉及到负载均衡。而如果调用超时或失败，还会采用集群容错机制。关于负载均衡和集群容错等内容不在这里讨论，我们在介绍完本讲内容之后马上就会有专门的主题进行详细阐述。
+
+### 服务调用的类型
+
+服务调用存在两种基本方式，即同步调用模式和异步调用模式。其中，同步调用的示意图如下图所示：
+
+![](res/2024-10-28-18-27-34.png)
+
+可以看到，同步调用的执行流程比较简单。在同步调用中，服务消费者在获取来自服务提供者的响应结果之前一直处于等待状态。
+
+而异步调用则不同，服务消费者一旦发送完请求之后就可以继续执行其他操作，直到服务提供者异步返回结果并通知服务消费者进行接收，如下图所示：
+
+![](res/2024-10-28-18-28-09.png)
+
+显然，使用异步调用的目的在于获取高性能。但是，异步调用的开发过程比较复杂，对开发人员的要求较高，所以很多 RPC 框架提供了专门的异步转同步机制，即面向开发人员提供的是同步调用的 API，而具体执行过程则使用的是异步机制。
+
+除了同步和异步调用之外，还存在并行（Parallel）调用和泛化（Generic）调用等调用方法，这些调用方式并不常见，我们不做具体展开。
+
+## 源码解析
+
+与 ServiceConfig 中的 export 方法相对应，ReferenceConfig 中也存在一个 init 方法，该方法就是 Dubbo 服务引用流程的入口。
+
+### 服务引用
+
+在 ReferenceConfig 的 init 方法中，Dubbo 做了非常多的准备和校验工作，最终来到了如下所示的这行代码中：
+
+```java
+ref = createProxy(map);
+```
+
+这个 createProxy 方法是理解服务引用的关键入口，我们梳理它的主体结构如下所示：
+
+```java
+private T createProxy(Map<String, String> map) {
+       if (isJvmRefer) {
+            // 生成本地引用 URL，使用 injvm 协议进行本地调用
+            URL url = new URL(Constants.LOCAL_PROTOCOL, NetUtils.LOCALHOST, 0, interfaceClass.getName()).addParameters(map);
+            invoker = refprotocol.refer(interfaceClass, url);
+        }else {
+            if (url != null && url.length() > 0) {
+                // URL 不为空，执行点对点调用
+            } else {
+                // 加载注册中心 URL
+            }
+
+            if (urls.size() == 1) {
+                // 单个服务提供者，直接调用
+                invoker = refprotocol.refer(interfaceClass, urls.get(0));
+            } else {
+                // 多个服务提供者
+                List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();
+                URL registryURL = null;
+                for (URL url: urls) {
+                    invokers.add(refprotocol.refer(interfaceClass, url));
+                    if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
+                        registryURL = url;
+                    }
+                }
+                if (registryURL != null) {
+                    // 如果注册中心链接不为空，则将使用 AvailableCluster
+                    URL u = registryURL.addParameter(Constants.CLUSTER_KEY, AvailableCluster.NAME);
+                    invoker = cluster.join(new StaticDirectory(u, invokers));
+                } else {
+                    invoker = cluster.join(new StaticDirectory(invokers));
+                }
+           }
+
+           // 生成服务代理类
+           return (T) proxyFactory.getProxy(invoker);
+}
+```
+
+虽然 createProxy 方法的代码比较长，但它的执行逻辑还是比较清晰的。首先我们根据配置检查是否为本地调用，如果是则调用 InjvmProtocol 的 refer 方法生成 InjvmInvoker 实例；如果不是，则读取 URL 配置项，包括用于直联的 URL 或基于注册中心的 URL。
+
+然后，我们对 URL 对象数量进行判断。如果 URL 数量为 1，则直接通过 Protocol 构建 Invoker 对象；如果 URL 数量大于 1，即存在多个服务地址，此时先根据每个 URL 构建 Invoker，然后再通过集群对象 Cluster 合并多个 Invoker，最后调用 ProxyFactory 生成代理类。
+
+这个过程实际上完成了两个步骤，首先是创建 Invoker 对象，然后才是生成服务代理类，如下图所示：
+
+![](res/2024-10-28-18-29-25.png)
+
+显然，上述流程中，我们需要重点关注服务引用过程中 Invoker 对象的构建过程。那么问题来了，这里的这个 Invoker 是从何而来呢？实际上，Invoker 的构建过程是在 Protocol 中。与服务暴露的讲解思路一样，我们将从 DubboProtocol 这个 Protocol 的 refer 方法入手，如下所示：
+
+```java
+public <T> Invoker<T> refer(Class<T> serviceType, URL url) throws RpcException {
+        DubboInvoker<T> invoker = new DubboInvoker<T>(serviceType, url, getClients(url), invokers);
+        invokers.add(invoker);
+        return invoker;
+}
+```
+
+这里出现了一个 getClients 方法，该方法用于获取客户端实例，实例类型为 ExchangeClient。我们已经在介绍 Dubbo 客户端通信原理时介绍过 ExchangeClient，可以参考前面做一些回顾。在理解了 getClients 方法之后，我们发现 DubboProtocol 的 refer 方法的作用就是返回一个新建的 DubboInvoker。
+
+DubboInvoker 继承了 AbstractInvoker，而 AbstractInvoker 实现了 Invoker 接口。AbstractInvoker 是一个抽象的模板方法类，提供了一个 doInvoke 模板方法。我们来看 DubboInvoker 中如何实现了这个模板方法，如下所示：
+
+```java
+@Override
+protected Result doInvoke(final Invocation invocation) throws Throwable {
+        RpcInvocation inv = (RpcInvocation) invocation;
+        final String methodName = RpcUtils.getMethodName(invocation);
+        inv.setAttachment(Constants.PATH_KEY, getUrl().getPath());
+        inv.setAttachment(Constants.VERSION_KEY, version);
+
+        ExchangeClient currentClient;
+        if (clients.length == 1) {
+            currentClient = clients[0];
+        } else {
+            currentClient = clients[index.getAndIncrement() % clients.length];
+        }
+        try {
+            boolean isAsync = RpcUtils.isAsync(getUrl(), invocation);
+            boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
+            int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
+            if (isOneway) { // 单向调用
+                boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
+                currentClient.send(inv, isSent);
+                RpcContext.getContext().setFuture(null);
+                return new RpcResult();
+            } else if (isAsync) { // 异步调用
+                ResponseFuture future = currentClient.request(inv, timeout);
+                RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));
+                return new RpcResult();
+            } else { // 同步调用
+                RpcContext.getContext().setFuture(null);
+                return (Result) currentClient.request(inv, timeout).get();
+            }
+        } catch (TimeoutException e) {
+}
+```
+
+可以看到，Dubbo 的远程调用存在三种调用方式，即单向调用、异步无返回以及异步转同步。上述方法就包含了这三种调用方式的实现过程，而这些远程调用最终都是通过 ExchangeClient 进行完成。
+
+在 Dubbo 提供的这三种远程调用方式中，异步转同步是默认的实现方式。接下来，我们重点对这一过程做具体展开。
+
+### 服务调用异步转同步过程
+
+在介绍 Dubbo 中异步转同步的服务调用方式之前，我们先围绕 JDK 中的 Future 模式讨论如何实现异步调用。
+
+Future 模式是对传统调用模式的一种改进，它们之间的对比可以参考下图：
+
+![](res/2024-10-28-18-30-33.png)
+
+本质上，Future 模式为我们提供了一种无需等待的服务调用机制。当我们发起一次服务调用时，Future 机制可以直接返回并继续执行其他任务，而不是像传统调用模式那样一直需要等到调用方法的返回。
+
+JDK 对 Future 模式提供了内置的实现，表现为如下所示的 Future 接口：
+
+```java
+public interface Future<V> {
+   // 去掉执行
+   boolean cancel(boolean mayInterruptIfRunning);
+   // 判断是否已取消
+   boolean isCancelled();
+   // 判断是否已完成
+   boolean isDone();
+   // 等待任务执行完毕并获取结果
+   V get() throws InterruptedException, ExecutionException;
+   // 基于一定的超时时间等待任务执行完毕并获取结果
+   V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException;
+}
+```
+
+Dubbo 中大量使用了基于 Future 机制的异步调用过程，同时也提供了异步转同步的实现机制，这是 Dubbo 提供的这三种远程调用方式中默认的实现方式。这部分内容实际上已经超出了服务引用的范围，而是更多偏向于讨论底层的网络通信，所以需要你对网络通信相关的内容先进行学习和掌握。
+
+在 DubboInvoker 中 doInvoke 方法中，异步转同步过程的实现如下所示：
+
+```java
+RpcContext.getContext().setFuture(null);
+return (Result) currentClient.request(inv, timeout).get();
+```
+
+我们先来看这里的 request 方法定义（位于 HeaderExchangeChannel 类中），如下所示：
+
+```java
+public ResponseFuture request(Object request, int timeout) throws RemotingException {
+   Request req = new Request();
+   req.setVersion("2.0.0");
+   req.setTwoWay(true);
+   req.setData(request);
+   DefaultFuture future = new DefaultFuture(channel, req, timeout);
+   try {
+      channel.send(req);
+   } catch (RemotingException e) {
+      future.cancel();
+      throw e;
+   }
+   return future;
+}
+```
+
+请注意，这里用于发送请求的 channel.send 方法是异步执行的，也就说该方法一旦调用就会直接返回。为了实现“异步转同步”，Dubbo 在这里使用了 DefaultFuture 这个辅助类。请记住这个类，我们在后续内容中还会再次提到该类。
+
+另一方面，我们在介绍网络通信时也提到，当请求到达服务器端时，在 NettyServer 中会使用一个 NettyHandler 作为网络事件的处理器，如下所示：
+
+```java
+pipeline.addLast("handler", nettyHandler);
+```
+
+NettyHandler 是一个接口，我们来看它的 messageReceived 方法实现，如下所示：
+
+```java
+private final ChannelHandler handler;
+
+@Override
+public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+        NettyChannel channel = NettyChannel.getOrAddChannel(ctx.getChannel(), url, handler);
+        try {
+            handler.received(channel, e.getMessage());
+        } finally {
+            NettyChannel.removeChannelIfDisconnected(ctx.getChannel());
+        }
+}
+```
+
+这里把具体的处理逻辑转移到了 Dubbo 中自定义的 ChannelHandler 接口，这个接口有很多实现类，也包括 ChannelHandlerDelegate 这个代理类，而真正处理事件接收逻辑的 HeaderExchangeHandler 正是实现了这个代理类。HeaderExchangeHandler 中处理响应的实现过程如下所示：
+
+```java
+static void handleResponse(Channel channel, Response response) throws RemotingException {
+        if (response != null && !response.isHeartbeat()) {
+            DefaultFuture.received(channel, response);
+        }
+}
+```
+
+我们在这里再次看到了 DefaultFuture，这里的 DefaultFuture 就是前面客户端发送请求时用到的 DefaultFuture。DefaultFuture 的 received 方法中有进一步调用了如下所示的 doReceived 方法：
+
+```java
+private void doReceived(Response res) {
+        lock.lock();
+        try {
+            // 设置响应 response 对象
+            response = res;
+            if (done != null) {
+               // 唤醒阻塞的线程
+               done.signal();
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        if (callback != null) {
+            invokeCallback(callback);
+        }
+}
+```
+
+注意到这里的 done.signal 方法的执行效果会唤醒阻塞的线程，那么这个阻塞的线程在哪里的？显然，这时候我们应该回到客户端组件看看同步获取调用结果的入口。
+
+我们再次回到在 DubboInvoker 中 doInvoke 方法中，看到了如下所示的核心代码：
+
+```java
+RpcContext.getContext().setFuture(null);
+return (Result) currentClient.request(inv, timeout).get();
+```
+
+我们来具体看一下这个获取调用结果的 get 方法执行逻辑，如下所示：
+
+```java
+public Object get(int timeout) throws RemotingException {
+        if (timeout <= 0) {
+            timeout = Constants.DEFAULT_TIMEOUT;
+        }
+        if (!isDone()) {
+            long start = System.currentTimeMillis();
+            lock.lock();
+            try {
+                while (!isDone()) { // 当响应 response 对象为空
+                    done.await(timeout, TimeUnit.MILLISECONDS);
+                    if (isDone() || System.currentTimeMillis() - start > timeout) {
+                        break;
+                    }
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                lock.unlock();
+            }
+            if (!isDone()) {
+                throw new TimeoutException(sent > 0, channel, getTimeoutMessage(false));
+            }
+        }
+        return returnFromResponse();
+}
+```
+
+可以看到，当响应 response 对象为空时，Condition 会执行 await 方法来阻塞当前线程，直到该线程被唤醒、被中断或超过阻塞时间。而在前面所述的 DefaultFuture 类的 doReceived 方法中，我们也看到会先为 response 赋上返回值，之后执行 Condition 的 signal 方法唤醒被阻塞的线程，这样 get 方法就会释放锁，进而执行 returnFromResponse 方法来返回值。
+
+这样，整个远程调用的异步转同步过程就介绍完毕。作为总结，我们明确 Dubbo 异步转同步的原理其实就是利用 Lock 和 Condition 实现了等待通知机制。当客户端发送请求时，将一个请求 Id 和一个 DefaultFuture 对象包装在请求对象中。而当客户端异步收到响应时，则根据这个请求 Id 从响应结果中获取对应的 DefaultFuture 对象，并调用该 DefaultFuture 对象的 get 方法获取最终的调用结果。
+
+## 解题要点
+
+在涉及到远程调用的应用场景，很多开源框架都会基于 Future 或它的一些变种，例如 JDK 自身提供的改进版 CompleteFuture，或是 Google 的 guava 框架中提供的 ListenableFuture 等。类似的问题主要还是关注 Future 机制本身的一些特性，可以发散出一系列的问题，但基本的考点是一致的，回答的思路也类似。
+
+Future 机制本身提供的几个接口也并不复杂，需要理解它们的含义和作用，但也要理解它们存在的不足。普通 Future 机制的最大问题在于没有提供通知的机制，也就是说我们不知道 Future 什么时候能够完成。前面提到的 CompleteFuture 和 ListenableFuture 实际上都是为了改进普通 Future 存在的这一问题而诞生的。本讲内容对 Future 的概念做了类比介绍，同时给出了 JDK 中 Future 接口的各个核心方法。通过掌握这些核心方法，针对这个问题我们就能拿到 60 分。如果我们还能够进一步分析基本 Future 机制的不足，然后引出 CompleteFuture 或 ListenableFuture 等改进版本的 Future，那么拿到 80 分就不成问题。
+
+另一方面，对于 Dubbo 框架中的服务引用过程，我们需要重点掌握的是它的三种调用方式，即单向、同步和异步。其中前面两种比较好理解，而针对异步，我们在使用 Dubbo 的过程中实际上最终也是转换为同步操作。针对这一问题，如果只是回答这个问题中所提出的实现方式的种类，那么只要简单列举即可。但要说明具体的实现细节，尤其是 Dubbo 中 `异步转同步` 的实现细节，那么需要对本讲内容做深入的理解，并尝试使用自己的语言来总结整个过程。
+
+## 小结与预告
+
+承接上一讲内容，本讲围绕远程过程调用的服务引用过程展开了讨论。同样的，基于这套服务引用流程，我们也对 Dubbo 中服务引用的底层设计思想和实现过程进行了分析，尤其对服务调用异步转同步过程做了详细的阐述。
+
+事实上，关于服务引用的完整介绍还没有结束。相较服务发布，服务引用还涉及到负载均衡、服务容错等技术组件，这些技术组件都是构建分布式服务所必不可少的。在接下来的几讲内容中，我们将一一对这些技术组件展开讨论。下一讲内容将先从负载均衡进行切入，在服务发布和引用的基础上回答这样一个问题：负载均衡如何与远程调用过程进行整合？我们下一讲详聊。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
