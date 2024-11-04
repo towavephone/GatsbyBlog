@@ -1607,7 +1607,7 @@ private T createProxy(Map<String, String> map) {
             // 生成本地引用 URL，使用 injvm 协议进行本地调用
             URL url = new URL(Constants.LOCAL_PROTOCOL, NetUtils.LOCALHOST, 0, interfaceClass.getName()).addParameters(map);
             invoker = refprotocol.refer(interfaceClass, url);
-        }else {
+        } else {
             if (url != null && url.length() > 0) {
                 // URL 不为空，执行点对点调用
             } else {
@@ -1716,7 +1716,7 @@ JDK 对 Future 模式提供了内置的实现，表现为如下所示的 Future 
 
 ```java
 public interface Future<V> {
-   // 去掉执行
+   // 取消执行
    boolean cancel(boolean mayInterruptIfRunning);
    // 判断是否已取消
    boolean isCancelled();
@@ -1869,5 +1869,274 @@ Future 机制本身提供的几个接口也并不复杂，需要理解它们的�
 承接上一讲内容，本讲围绕远程过程调用的服务引用过程展开了讨论。同样的，基于这套服务引用流程，我们也对 Dubbo 中服务引用的底层设计思想和实现过程进行了分析，尤其对服务调用异步转同步过程做了详细的阐述。
 
 事实上，关于服务引用的完整介绍还没有结束。相较服务发布，服务引用还涉及到负载均衡、服务容错等技术组件，这些技术组件都是构建分布式服务所必不可少的。在接下来的几讲内容中，我们将一一对这些技术组件展开讨论。下一讲内容将先从负载均衡进行切入，在服务发布和引用的基础上回答这样一个问题：负载均衡如何与远程调用过程进行整合？我们下一讲详聊。
+
+# 负载均衡：负载均衡如何与远程调用过程进行整合？
+
+在上一讲中，我们详细阐述了在远程调用过程中服务引用的流程和实现方式。请注意，在现实环境中，我们一般都会采用集群模式对服务进行多实例化的部署，以防止出现单点故障。
+
+那么，问题就来了，服务消费者的每一次远程调用就需要确定对这些服务实例中的具体哪一个发起请求，这就是负载均衡要解决的问题。
+
+负载均衡（Load Balance）是一个复杂的话题，要想在远程调用过程中引入负载均衡，我们首先需要回答一个基本的问题，即：负载均衡是如何与远程调用过程进行整合的呢？本讲内容将围绕这一问题展开讨论。
+
+## 问题背景
+
+相信你对集群这个概念并不陌生。在分布式系统开发过程中，集群的作用主要有两点，一方面通过服务的冗余为系统可用性提供了一种技术手段，另一方面也针对系统的性能问题提供了解决方案。通过集群，我们能够将业务请求分摊到多台单机性能不一定非常出众的服务器上。这部分内容作为负载均衡的基本概念，是每位面试候选人都应该掌握的。
+
+但是，如果问到“如何在远程调用中集成负载均衡机制”这个问题，就我的面试经验，相信很多候选人就不一定能回答出来了。从问题本身而言，你可能会觉得负载均衡和远程调用是天生整合在一起的，因为在日常开发过程中，开源框架以及运行时环境都已经帮你准备好了这部分工作，普通开发人员不需要参与，这也导致了我们对这部分内容不够重视。但是，就技术实现而言，两者之间的集成过程又非常重要。可以说，正是因为能够在远程调用过程中集成负载均衡机制，才会有我们后续要介绍的集群容错、服务熔断等一系列技术组件的应用。
+
+进一步，我们来梳理针对这一话题的常见面试提问方式，包括：
+
+- 负载均衡的基本结构是怎么样的，它有什么作用？
+- 如果想要在远程调用过程中嵌入负载均衡机制，你有什么设计思路？
+- 你能简要描述 Dubbo 框架的负载均衡组成结构吗？
+- 在 Spring Cloud 中，为什么在 RestTemplate 类上添加了 @LoadBalanced 注解，就能自动集成负载均衡功能？
+
+对于这类问题，我们注意到问题的要点并不在于负载均衡本身的概念和原理，而更多的是关于具体的实现过程和机制，所以是一种偏实战类的考查方式。
+
+## 问题分析
+
+在分布式系统构建过程中，势必需要引入负载均衡机制，而业界关于如何实现负载均衡存在一系列工具。在这些工具中，有些提供的是偏向于底层负载均衡算法实现的工具库，而有些则提供了整套负载均衡实现方案。无论是哪种类型，我们都需要获取想要访问的目标服务当前实例信息，这是实现远程调用和负载均衡进行整合的前提，也是我们在回答这类问题时的第一个要点。
+
+回答这类问题的第二个要点在于，我们以什么样的技术手段完成在远程调用链路中自动嵌入负载均衡机制。从系统架构设计角度，这个嵌入过程应该对开发人员透明，且应该是可扩展的。在这点上，不同的实现框架有不同的策略，常见的包括两大类。
+
+- 基于拦截机制：通过类似 AOP 的实现机制对请求进行拦截，再应用动态代理机制完成对负载均衡机制的嵌入。
+- 基于集群机制：在集群构建过程中完成对负载均衡机制的嵌入。
+
+最后，正如问题背景部分所阐述的，“如何在远程调用中集成负载均衡机制”这类话题考查的并不是概念，而是一种实践能力。我们通常不会自己去完成这个集成过程，但对于主流开源框架中的做法需要非常熟悉，否则很难从实现机制和过程上对这类问题进行解答。
+
+## 技术体系
+
+前面提到有两大类技术手段可以完成对远程调用和负载均衡的集成，事实上这也是 Spring Cloud 和 Dubbo 这两个主流分布式服务框架所采用的实现方式。本讲内容将讨论第一种，即拦截机制。关于集群机制的分析我们放在之后再展开。
+
+如果我们采用拦截机制，那么整体的设计思想可以用下图进行展示：
+
+![](res/2024-11-04-10-59-23.png)
+
+上图所展示的基本思想在于：当我们采用拦截机制对远程方法进行拦截时，并不是直接执行该方法中的业务逻辑，而是嵌入自定义的一套负载均衡机制。这套负载均衡机制能够获取当前所有可用的服务实例信息，并基于一定策略确定目标服务实例。这个过程对开发人员是透明的。
+
+现实中，采用这种实现机制的代表性框架就是 Spring Cloud。如果你使用过 Spring Cloud，那你应该知道想要在服务调用过程中嵌入负载均衡机制，要做的事情只有一件，就是在 RestTemplate 模板工具类上添加一个 @LoadBalanced 注解，如下所示：
+
+```java
+@LoadBalanced
+@Bean
+public RestTemplate getRestTemplate(){
+     return new RestTemplate();
+}
+```
+
+我们知道 RestTemplate 是 Spring 自带的一个 HTTP 请求工具类，本身并不具备负载均衡能力。讲到这里，你可能会觉得奇怪，为什么在这个工具类上添加了 @LoadBalanced 注解就能自动嵌入负载均衡机制呢？这个 @LoadBalanced 注解背后的工作原理又是怎么样的呢？为了回答这些问题，我们需要深入分析 Spring Cloud 的相关源码。
+
+## 源码解析
+
+让我们打开 Spring Cloud 源码，来到 spring-cloud-commons 这个代码工程，可以发现虽然这个工程的名称是 common，但内置了大量以 client 命名的代码包。这些代码包中就包含了与服务发现、负载均衡相关的所有基础类定义。我们要介绍的 @LoadBalanced 注解也位于这些代码包中。
+
+接下来，让我们先从这个注解开始讲起。
+
+### Spring Cloud 中的 @LoadBalanced
+
+事实上，在 Spring Cloud 中维护着一个 RestTemplate 模板工具类的列表，而在该列表上就嵌入了 @LoadBalanced 注解，如下所示：
+
+```java
+@LoadBalanced
+@Autowired(required = false)
+private List<RestTemplate> restTemplates = Collections.emptyList();
+```
+
+上述代码位于自动配置类 LoadBalancerAutoConfiguration 中。针对这些被 @LoadBalanced 注解修饰的 RestTemplate，在 LoadBalancerAutoConfiguration 初始化的过程中会调用 RestTemplateCustomizer 的 customize 方法进行定制化，这个定制化的过程就是对目标 RestTemplate 增加拦截器 LoadBalancerInterceptor，如下所示：
+
+```java
+@Bean
+@ConditionalOnMissingBean
+public RestTemplateCustomizer restTemplateCustomizer(final LoadBalancerInterceptor loadBalancerInterceptor) {
+       return restTemplate -> {
+                List<ClientHttpRequestInterceptor> list = new ArrayList<>(restTemplate.getInterceptors());
+                list.add(loadBalancerInterceptor);
+                // 为 RestTemplate 添加拦截器
+                restTemplate.setInterceptors(list);
+       };
+}
+```
+
+这里就用到了 RestTemplate 的拦截器扩展机制。通过这种机制，我们可以在 RestTemplate 发送请求的过程中添加定制化的功能。从命名上看，这里的 LoadBalancerInterceptor 就是添加了负载均衡的拦截器，我们在它的构造函数中发现传入了一个 LoadBalancerClient，而在它的拦截方法中本质上就是使用这个 LoadBalanceClient 来执行真正的负载均衡，如下所示：
+
+```java
+public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+   // ...
+   public LoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
+      this(loadBalancer, new LoadBalancerRequestFactory(loadBalancer));
+   }
+
+   @Override
+   public ClientHttpResponse intercept(final HttpRequest request, final byte[] body, final ClientHttpRequestExecution execution) throws IOException {
+      final URI originalUri = request.getURI();
+      String serviceName = originalUri.getHost();
+
+      // 通过 LoadBalancerClient 执行负载均衡
+      return this.loadBalancer.execute(serviceName, requestFactory.createRequest(request, body, execution));
+   }
+}
+```
+
+这里的拦截方法 intercept 直接调用了 LoadBalancerClient 接口的 execute 方法完成对请求的负载均衡执行。而该方法的输入参数有两个，一个是代表服务名称的 serviceName，另一个则是代表负载均衡请求对象的 LoadBalancerRequest。而具体的 LoadBalancerRequest 则是如下所示的一个 ServiceRequestWrapper 包装类，如下所示：
+
+```java
+public class ServiceRequestWrapper extends HttpRequestWrapper {
+   private final ServiceInstance instance;
+
+   private final LoadBalancerClient loadBalancer;
+
+   public ServiceRequestWrapper(HttpRequest request, ServiceInstance instance, LoadBalancerClient loadBalancer) {
+      super(request);
+      this.instance = instance;
+      this.loadBalancer = loadBalancer;
+   }
+
+   @Override
+   public URI getURI() {
+      URI uri = this.loadBalancer.reconstructURI(this.instance, getRequest().getURI());
+      return uri;
+   }
+}
+```
+
+可以看到，这里同样出现了 LoadBalanceClient，并用它来完成了请求地址 URI 的构建。显然，LoadBalanceClient 是我们分析负载均衡机制的核心入口。接下来，我们就对该接口及其实现类进行详细的展开。
+
+### LoadBalanceClient 接口与实现类
+
+LoadBalancerClient 是一个非常重要的接口，定义如下：
+
+```java
+public interface LoadBalancerClient extends ServiceInstanceChooser {
+   // 执行负载均衡调用
+   <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException;
+
+   // 执行负载均衡调用
+   <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException;
+
+   // 构建负载均衡调用 URI
+   URI reconstructURI(ServiceInstance instance, URI original);
+}
+```
+
+注意到这里有两个 execute 重载方法，用于根据负载均衡器所确定的服务实例来执行服务调用。而 reconstructURI 方法 则用于构建服务 URI，基于负载均衡所选择的 ServiceInstance 信息，并利用服务实例的 host、port 以及端点路径，我们就可以构造出一个真正可供访问的服务地址。
+
+同时，我们发现 LoadBalancerClient 有一个父接口 ServiceInstanceChooser，该接口定义如下：
+
+```java
+public interface ServiceInstanceChooser {
+   // 根据 serviceId 选择目标服务实例
+   ServiceInstance choose(String serviceId);
+
+   // 根据 serviceId 和请求选择目标服务实例
+   <T> ServiceInstance choose(String serviceId, Request<T> request);
+}
+```
+
+显然，从负载均衡角度讲，我们应该重点关注实际上是这两个 choose 方法的实现，因为它们完成了对目标服务实例的具体选择过程，而这个选择过程集成了各种负载均衡算法。
+
+在 Spring Cloud 中，LoadBalancerClient 接口有一组实现类。我们接下来要介绍的是 Spring Cloud Netflix 中的 RibbonLoadBalancerClient 类，该类基于 Netflix Ribbon 组件实现了负载均衡机制，是 Spring Cloud 中最早、也是最经典的一种负载均衡实现方式。
+
+这里有必要梳理一下 Netflix Ribbon 和 Spring Cloud 之间的关系。我们知道 Netflix Ribbon 是来自 Netflix 的一个外部组件，它提供的只是一个辅助工具，这个辅助工具的目的就是让你去集成它，而不是说它自己完成所有的工作。而 Spring Cloud 中的 Spring Cloud Netflix Ribbon 专门针对 Netflix Ribbon 提供了一个独立的集成实现。对于 Netflix Ribbon 而言，Spring Cloud Netflix Ribbon 相当于它的客户端，而对于 Spring Cloud Netflix Ribbon 而言，我们的应用服务相当于它的客户端。
+
+Netflix Ribbon、Spring Cloud Netflix Ribbon、应用服务这三者之间的关系以及核心入口如下图所示：
+
+![](res/2024-11-04-11-02-11.png)
+
+在 RibbonLoadBalancerClient 中，我们可以看到它的 choose 方法进一步调用了一个 getServer 方法来获取服务器信息，而这个 getServer 方法则是通过 ILoadBalancer 接口完成了对目标服务的选择，如下所示：
+
+```java
+public ServiceInstance choose(String serviceId, Object hint) {
+   Server server = getServer(getLoadBalancer(serviceId), hint);
+   // ...
+}
+
+protected Server getServer(ILoadBalancer loadBalancer, Object hint) {
+   // ...
+   return loadBalancer.chooseServer(hint != null ? hint : "default");
+}
+```
+
+这个 ILoadBalancer 就来自于 Netflix Ribbon，该接口位于 com.netflix.loadbalancer 包下，定义如下：
+
+```java
+public interface ILoadBalancer {
+   // 添加后端服务
+   public void addServers(List<Server> newServers);
+
+   // 选择一个后端服务
+   public Server chooseServer(Object key);
+
+   // 标记一个服务不可用
+   public void markServerDown(Server server);
+
+   // 获取当前可用的服务列表
+   public List<Server> getReachableServers();
+
+   // 获取所有后端服务列表
+   public List<Server> getAllServers();
+}
+```
+
+针对负载均衡，我们应该重点应该关注的是 ILoadBalancer 接口中 chooseServer 方法的实现，如下所示：
+
+```java
+public Server chooseServer(Object key) {
+        if (counter == null) {
+            counter = createCounter();
+        }
+        counter.increment();
+        if (rule == null) {
+            return null;
+        } else {
+            try {
+                return rule.choose(key);
+            } catch (Exception e) {
+                 return null;
+            }
+        }
+}
+```
+
+可以看到这里使用了一个 IRule 接口集成了具体负载均衡策略的实现。IRule 接口是对负载均衡策略的一种抽象，可以通过实现这个接口来提供各种负载均衡算法，该接口的类层结构如下图所示：
+
+![](res/2024-11-04-11-03-24.png)
+
+可以看到 Netflix Ribbon 中的负载均衡实现算法非常丰富，既提供了 RandomRule、RoundRobinRule 等无状态的静态算法，又实现了 AvailabilityFilteringRule、WeightedResponseTimeRule 等多种基于服务器运行状况进行实时路由的动态算法。关于这些负载均衡算法的讨论我们放在下一讲中。
+
+在上图中还看到了 RetryRule 这种重试策略，该策略会对选定的负载均衡策略执行重试机制。严格意义上讲，重试是一种服务容错而不是负载均衡机制，但 Ribbon 也内置了这方面的功能。
+
+事实上，我们也可以基于 IRule 接口实现任何定制化的负载均衡算法，然后通过配置的方式加载到 Spring Cloud 中，示例代码如下所示：
+
+```java
+@Configuration
+public class LoadBalanceConfig{
+
+    @Autowired
+    IClientConfig config;
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IRule customRule(IClientConfig config) {
+
+        return new RandomRule();
+    }
+}
+```
+
+显然该配置类的作用是使用 RandomRule 替换 Ribbon 中的默认负载均衡策略 RoundRobin。
+
+## 解题要点
+
+关于负载均衡和远程调用的整合过程是一道经典的面试题，理论知识和工程实践都有涉及，我经常拿这道题来考察候选人。就考查内容而言，这道题所涵盖的知识面要求很广，需要面试者对负载均衡、远程调用以及主流的分布式服务框架本身的功能特性都有一定的了解。
+
+而从提问方式上讲，这个面试主题往往会直接从具体的工具框架的特性进行切入，考查面试者对框架原理的理解，正如本讲中重点介绍的 Spring Cloud 和 @LoadBalanced 注解。乍一看，这类面试题感觉无从下手，因为 @LoadBalanced 注解在使用过程中并没有提供太多的配置项供开发人员进行设置，我们也就很难联想到其背后所具备的负载均衡机制。
+
+但事实上，在这个注解背后隐藏着一个很重要的技术组件，即拦截器。通过在某一个注解中添加拦截功能，然后把一些非功能性需求通过拦截器进行实现，这是 Spring 等优秀开源框架中所经常使用的一种开发技巧，也是面试官考查面试者对开源框架理解能力的一个常见维度。在回答这道面试题时，我们就需要从拦截器的角度出发，把 RestTemplate 和 Ribbon 组件结合起来进行分析。至于负载均衡算法本身，反而不是这道面试题考查的重点，我们只要点到即可。
+
+## 小结与预告
+
+通过今天内容的介绍，我们明确作为一款负载均衡工具，要做的事情无非是从服务列表中选择一个服务进行调用。为了实现这个过程，我们需要提供入口供客户端请求进行使用。而 Spring Cloud 为我们提供了一种非常友好的实现方式，开发人员只需要通过一个简单的 @LoadBalanced 注解就能自动在调用过程中集成负载均衡机制。今天的内容对 @LoadBalanced 注解以及背后的整个负载均衡实现流程做了原理分析。通过这种方式，我们也加深了对“如何在远程调用中集成负载均衡机制”这个问题的理解程度。
+
+在前面的内容中，我们已经看到 Spring Cloud 内置了一组丰富的负载均衡算法，而这些负载均衡算法能够根据需要帮助我们自动找到最佳的目标服务。事实上，任何一款分布式服务框架都提供了各种不同类型的负载均衡算法供开发人员进行选择。那么，如何实现这些常见的负载均衡算法？这就是下一讲要讨论的内容。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
