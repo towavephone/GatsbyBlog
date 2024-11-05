@@ -2139,4 +2139,295 @@ public class LoadBalanceConfig{
 
 在前面的内容中，我们已经看到 Spring Cloud 内置了一组丰富的负载均衡算法，而这些负载均衡算法能够根据需要帮助我们自动找到最佳的目标服务。事实上，任何一款分布式服务框架都提供了各种不同类型的负载均衡算法供开发人员进行选择。那么，如何实现这些常见的负载均衡算法？这就是下一讲要讨论的内容。
 
+# 负载均衡：如何实现常见的负载均衡算法？
+
+上一讲我们分析了在远程调用过程中整合负载均衡机制的实现过程。在这种场景下，我们将多个服务实例集中在一起，每一次请求都可以由集群中的某一个服务实例进行响应。
+
+那么，具体某一个请求到底应该是由哪个服务实例来响应最为合适呢？这个话题看上去很简单，实际上却有点复杂，涉及到服务请求的路由机制。
+
+而在分布式系统中，上一讲中引入的负载均衡就是最常见也是最具代表性的一种路由机制。为了对请求进行合理的分发，我们需要提供一组负载均衡算法，那么常见的负载均衡算法有哪些？它们又应该如何实现呢？这是一道非常典型的面试题，本讲内容将围绕这一主题展开讨论。
+
+## 问题背景
+
+我们先来看这个问题背后的示意图，如下图所示：
+
+![](res/2024-11-05-10-38-28.png)
+
+显然，我们需要明确从服务 B 发出的请求最终会由服务 A 所提供的具体哪一个实例来进行处理，这是负载均衡算法的作用。上图所示的基本架构虽然简单，但围绕该图，我们可以延伸出一系列的扩展性话题，包括：
+
+- 负载均衡算法应该位于上图中的哪个位置？是在服务 B 中，还是应该有专门存储这些算法的其他组件？
+- 服务 A 的某个实例如果出现了问题，服务 B 还能对它进行访问吗？
+- 服务 A 各个实例的当前负载肯定不一样，服务 B 基于什么原则选择最合适的目标实例呢？
+- 如何防止对服务 A 实例的访问过程是不均衡的，从而导致服务 A 的某个实例压力太大？
+
+这些扩展性话题才是面试官想要真正考查的知识点，而对于这些知识点的掌握程度也体现了你和其他候选人之间的水平差异。
+
+我们可以沿着面试官的考查思路，梳理一组与负载均衡算法相关的一组常见面试题，包括：
+
+- 从你自己所理解的角度出发，你认为负载均衡算法可以分成哪些类型？
+- 如果想要在常见的静态负载均衡算法中嵌入动态特性，你有什么思路？
+- 你能列举常见的负载均衡算法以及它们的特性吗？
+- Dubbo 包含了哪些负载均衡算法？
+- Spring Cloud 内置了哪些负载均衡算法？
+- Dubbo 框架在实现负载均衡机制时提供了哪些优化特性？
+- 一致性哈希算法的实现过程是怎么样的？
+
+可以看到，针对负载均衡算法的提问形式灵活多样。面试官既可以考查一些基本概念，也可以抛出一些发散性问题。同时，针对具体框架中负载均衡算法的实现方式也会经常出现在面试题中。
+
+## 问题分析
+
+对于上述问题而言，我认为回答的思路还是比较明确的，主要就是对主流负载均衡算法需要有全面的了解。这部分属于理论知识，考查方式比较固定，很难有创新和变化，应对策略上主要以记忆为主。相比到目前为止我们已经介绍的各讲内容，可以说，针对负载均衡算法的回答方式是最直接的。
+
+然后，无论你现在使用的是哪种分布式服务框架，都需要把它与常见的负载均衡算法结合起来进行掌握。在面试过程中，你可以基于自己擅长的框架来分析具体的算法实现过程。同时，很多时候我们也需要结合上一讲中讨论的话题，把负载均衡算法与远程调用过程结合起来一起讨论。
+
+## 技术体系
+
+在进行具体的工具介绍和源码分析之前，我们首先对负载均衡的类型以及相应的基本策略做简要介绍。
+
+### 负载均衡的类型
+
+负载均衡主要包括服务器端负载均衡和客户器端负载均衡两大类。我们先来看服务器端负载均衡，它的结构如下图所示：
+
+![](res/2024-11-05-10-40-18.png)
+
+可以看到，所谓的服务器端负载均衡指的就是在客户端和各个服务实例之间存在一个独立的负载均衡器，所有的请求都将通过这个负载均衡器进行转发并嵌入负载均衡算法。业界关于这种负载均衡器的实现工具也很多，最常见的就是 Nginx。
+
+我们换一种思路，把上图中负载均衡器所具备的功能放到客户端中，那么就诞生了另一种负载均衡机制，即客户端负载均衡。这时候，负载均衡算法的执行流程发生在客户端本地，如下图所示：
+
+![](res/2024-11-05-10-40-53.png)
+
+客户端负载均衡应用广泛，例如目前主流的微服务架构实现框架 Spring Cloud、Dubbo 等都内置了完整的客户端负载均衡模块。而像老牌的分布式缓存 Memcache 同样也是这一负载均衡策略的典型应用。
+
+我们来对上述这两种负载均衡机制做一个对比，会发现客户端负载均衡不需要架设专门的服务器组件，负载均衡算法的执行过程被分摊到了每个客户端内部，不会造成明显的单点瓶颈。当然，因为每个客户端自己都需要维护一套服务实例信息，所以需要确保服务实例的变更能够及时通知到各个客户端。
+
+### 负载均衡算法和策略
+
+无论使用哪种负载均衡机制，负载均衡算法决定了最终的请求分发效果。常见的负载均衡算法也可以分成两大类，即静态负载均衡算法和动态负载均衡算法。
+
+#### 静态负载均衡
+
+对于静态负载均衡而言，经典的算法包括各种随机（Random）和轮询（Round Robin）算法。
+
+1. 随机算法
+
+   随机算法是最简单也是最常用的负载均衡算法之一，该算法就是使用一个随机数来决定具体的目标服务实例。
+
+   假设我们持有一个保存所有服务的 serverList 列表，那么只用 JDK 中自带的 Random 工具类就可以实现一个基本的随机算法，如下所示：
+
+   ```java
+   java.util.Random random = new java.util.Random();
+   int randomPosition = random.nextInt(serverList.size());
+   return serverList.get(randomPosition);
+   ```
+
+   随机算法足够简单，但有时候并不能满足我们的需求。例如，如果在集群中存在一些性能有差异的服务器，为了充分利用那些高性能的服务器，可以提升这些服务器的访问权重，这时候就可以引入用加权随机（Weight Random）算法。
+
+   假设存在一个 serverWeightMap 保存着服务器地址与权重之间的对应关系，类似 `("192.168.10.100", 1)`、`("192.168.10.105", 3)` 这样的结构，那么实现加权随机的一种简单策略就是构建一个新的 serverList 列表，并根据服务权重的数量来添加重复数量的服务提供者地址（这样权重越高的服务被选中的概率就会越大），然后再使用随机算法进行选择，示例代码如下所示：
+
+   ```java
+   Set<String> keySet = serverWeightMap.keySet();
+   Iterator<String> iterator = keySet.iterator();
+   List<String> serverList = new ArrayList<String>();
+   while (iterator.hasNext()) {
+      String server = iterator.next();
+      int weight = serverWeightMap.get(server);
+      for (int i = 0; i < weight; i++) {
+         serverList.add(server);
+      }
+   }
+
+   java.util.Random random = new java.util.Random();
+   int randomPosition = random.nextInt(serverList.size());
+   return serverList.get(randomPosition);
+   ```
+
+2. 轮询算法
+
+   所谓轮询，就是一个循环访问所有服务器列表的过程。在循环过程中，如果发现某台服务器可用就把请求分发给它。如果一个循环下来还是没有找到合适的服务器，那么就继续进行新的一轮循环，直到找到目标服务器。
+
+   轮询算法的一种简单的实现方法如下所示：
+
+   ```java
+   String server = null;
+   synchronized(position) {
+      if (position > serverList.size()) {
+         position = 0;
+      }
+
+      server = serverList.get(position);
+      position++;
+   }
+
+   return server;
+   ```
+
+   类似加权随机算法，我们也可以实现加权轮循（Weighted Round Robin）算法。
+
+#### 动态负载均衡算法
+
+对于负载均衡算法而言，权重本质上也是一个可以动态变化的参数，所以也可以基于权重构建动态负载均衡算法。
+
+典型的动态负载均衡算法实现过程都没有那么简单，常见的包括最少连接数算法、源 IP 哈希算法、服务调用时延算法等。
+
+1. 最少连接数算法
+
+   所谓最少连接数（Least Connection）算法，就是根据当前服务器的连接数量来决定目标服务器。在系统运行过程中，连接数显然是一个不断在变化的参数，我们可以选择那些连接数较少的服务来接收新的请求。
+
+   因此，当执行分发策略时，我们会根据在某一个特定的时间点下服务实例的最新连接数来判断是否执行客户端请求。而在下一个时间点时，服务实例的连接数一般都会发生相应的变化，对应的请求处理也会做相应的调整。
+
+2. 源 IP 哈希算法
+
+   在日常开发过程中，有时候我们希望实现这样一种分发效果：来自同一个客户端的请求总是发送到某一个固定的服务器，这时候就可以引入源 IP 哈希（Source IP Hash）算法，该算法会根据请求的 IP 地址来决定目标服务器。只要源 IP 地址不变，那么负载均衡的结果也是固定的。
+
+   源 IP 哈希算法一种实现方案如下所示：
+
+   ```java
+   String remoteIp = getRemoteIp();
+   int hashCode = remoteIp.hashCode();
+   int serverListSize = serverList.size();
+   int serverPos = hashCode % serverListSize;
+   return serverList.get(serverPos);
+   ```
+
+3. 服务调用时延算法
+
+   服务调用时延（Service Invoke Delay）算法的动态性来自于服务的调用延迟。针对每一台服务器，我们都可以计算一段时间内所有请求的服务调用时延。有了这个参数之后，就可以执行各种计算策略进一步决定选择哪一台服务器来对请求做出响应。
+
+针对前面介绍的各个负载均衡算法，我们可以通过如下所示的一张思维导图来进行总结：
+
+![](res/2024-11-05-10-48-23.png)
+
+## 源码解析
+
+有了理论知识，我们接下来讨论负载均衡的实际应用。诸如最少连接数算法、服务调用时延算法等动态负载均衡算法在设计和实现上都比较复杂，我们重点来看一下主流开源框架中对它们的实现机制。在接下来的内容，我们以 Dubbo 框架为例展开讨论。
+
+### Dubbo 负载均衡整体结构
+
+在 Dubbo 中，专门提供了一个 LoadBalance 接口来提供负载均衡能力，如下所示：
+
+```java
+@SPI(RandomLoadBalance.NAME)
+public interface LoadBalance {
+    @Adaptive("loadbalance")
+    <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
+}
+```
+
+可以看到 LoadBalance 接口只有一个方法，即在一批 Invoker 列表中选择其中一个 Invoker 进行返回。这里，我们可以从该接口上的 `@SPI(RandomLoadBalance.NAME)` 注解中看到 Dubbo 默认加载的是 RandomLoadBalance 类，即随机负载均衡。除了 RandomLoadBalance 类之外，Dubbo 还提供了其他多种负载均衡策略，整体的类层结构如下图所示：
+
+![](res/2024-11-05-10-49-27.png)
+
+从上图中，我们看到存在一个 AbstractLoadBalance 抽象类，它实现了 LoadBalance 的 select 方法，如下所示：
+
+```java
+public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+   if (invokers == null || invokers.size() == 0)
+      return null;
+   if (invokers.size() == 1)
+      return invokers.get(0);
+   return doSelect(invokers, url, invocation);
+}
+```
+
+显然，从设计模式上讲，这里采用的是经典的模板方法。通过模板方法，具体负载均衡算法由 AbstractLoadBalance 子类中的 doSelect 方法进行实现。
+
+同时，我们在 AbstractLoadBalance 中还看到了如下所示的 getWeight 方法。从方法命名上看，该方法用来计算权重，如下所示：
+
+```java
+protected int getWeight(Invoker<?> invoker, Invocation invocation) {
+   // 从 URL 中获取权重
+   int weight = invoker.getUrl().getMethodParameter(invocation.getMethodName(), Constants.WEIGHT_KEY, Constants.DEFAULT_WEIGHT);
+   if (weight > 0) {
+      long timestamp = invoker.getUrl().getParameter(Constants.REMOTE_TIMESTAMP_KEY, 0L);
+      if (timestamp > 0L) {
+         int uptime = (int) (System.currentTimeMillis() - timestamp);
+         // 从 URL 中获取预热时间
+         int warmup = invoker.getUrl().getParameter(Constants.WARMUP_KEY, Constants.DEFAULT_WARMUP);
+         if (uptime > 0 && uptime < warmup) {
+            // 计算预热权重
+            weight = calculateWarmupWeight(uptime, warmup, weight);
+         }
+      }
+   }
+   return weight;
+}
+```
+
+可以看到代表权重的 weight 参数是从 URL 中传入的。而基于上述代码，我们发现这里的处理逻辑显然并没有那么简单，而是用到了所谓的预热（Warmup）机制。我们看到 Dubbo 首先会获取服务启动时间，然后再与预热时间进行比较。如果启动时间小于预热时间，则会调用 calculateWarmupWeight 方法来重新计算预热权重。
+
+从代码逻辑上看，预热权重最小为 1，并在预热时间内随启动时间逐渐增加。这样设计的原因在于：JVM 从启动成功到处于最佳状态需要一段时间，在这段时间内虽然服务可以接收请求，但显然不应该接收过多请求。所以，Dubbo 通过预热机制确保在预热时间内该服务受到一定的保护，直到其处于最佳运行状态。
+
+预热机制在 Dubbo 的多个负载均衡算法中都得到了应用，是一种实现上的技巧，为我们设计类似的应用场景提供了一定的参考价值。
+
+### Dubbo 负载均衡算法实现示例
+
+接下来，就让我们看看 Dubbo 中使用预热机制的场景和方式。我们重点介绍 LeastActiveLoadBalance 类，这是一种典型的动态负载均衡算法。
+
+LeastActiveLoadBalance 继承自 AbstractLoadBalance 类，并实现了如下所示的 doSelect 方法。该方法比较长，我们对代码进行了部分裁剪。
+
+```java
+@Override
+protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+   // 获取所有的 invoker 并执行计算
+   for (int i = 0; i < length; i++) {
+      Invoker<T> invoker = invokers.get(i);
+      // 通过 RpcStatus 获取当前这个 invoker 并发数
+      int active = RpcStatus.getStatus(invoker.getUrl(), invocation.getMethodName()).getActive();
+      // 通过预热机制计算权重值
+      int afterWarmup = getWeight(invoker, invocation);
+
+      // 发现最小的活跃数，重新开始计算
+      if (leastActive == -1 || active < leastActive) {
+         // 记录 leastActive 为当前的活跃数，并重置最小计数，基于当前最小计数重新计数
+         // …
+      } else if (active == leastActive) {
+         // 当前 invoker 的活跃数与最小活跃数相等,则记录权重
+         // …
+      }
+   }
+
+   // 如果我们恰好有一个调用程序具有最少的活动值，那么直接返回这个调用程序
+   if (leastCount == 1) {
+      return invokers.get(leastIndexs[0]);
+   }
+
+   // 如果每个 invoker 有不同的权重
+   if (!sameWeight && totalWeight > 0) {
+      // 在总权重范围内随机一个值
+      int offsetWeight = random.nextInt(totalWeight) + 1;
+      for (int i = 0; i < leastCount; i++) {
+            // 获取 i 位置的那个最小活跃在 invokers 里面的位置信息
+            int leastIndex = leastIndexs[i];
+            offsetWeight -= getWeight(invokers.get(leastIndex), invocation);
+            if (offsetWeight <= 0) {
+               // 返回这个位置
+               return invokers.get(leastIndex);
+            }
+
+      }
+   }
+
+   // 具有相同权重或者是总权重 = 0 的话就均匀返回
+   return invokers.get(leastIndexs[random.nextInt(leastCount)]);
+}
+```
+
+在上述代码中，我们对关键流程添加了注释。该算法首先会对所有的 Invoker 进行轮询，找出所有活跃数最小的集合。如果这个集合的数量只有 1，那么就可以直接返回当前的 Invoker。如果集合中所有 Invoker 的权重相同，那么随机返回一个。而如果这些条件都不满足，那么就获取一个具有最小活跃数的 Invoker。
+
+为了实现扩展性，Dubbo 提供了 SPI 机制，允许开发人员自定义负载均衡算法，我们会在后面介绍微内核架构和 SPI 机制时给出一个简单的案例。你也可以根据自己的需要尝试实现新的负载均衡算法。
+
+## 解题要点
+
+在分布式系统面试中，负载均衡是一道高频面试题。针对常见的负载均衡算法以及它们的特性，面试官考查的是候选人对分布式系统基本概念的理解。因为负载均衡的各种算法以及特性相对固定，所以这类题的考点是非常明确的。
+
+在回答这类面试题时，需要把握两点。首先，我们要介绍负载均衡算法的分类，即静态负载均衡和动态负载均衡。其次，我们需要列举常见负载均衡算法，并基于自己的理解分析这些算法的功能特性。针对随机、轮询等静态负载均衡算法，我们的回答思路是给出基本的设计策略和所能达到的效果，以及如何将这些静态负载均衡算法转换为动态负载均衡算法的实现方法。因为静态负载均衡算法相对都比较简单，所以这部分内容不是回答的重点。我们需要详细介绍的是一致性哈希、最少连接数等动态负载均衡的实现原理。
+
+另一方面，关于负载均衡算法的考查，基于具体开源框架内部的实现细节进行提问也是另一种比较常见的方式。例如，如果被问到类似 `Dubbo 框架在实现负载均衡机制时提供了哪些优化特性？` 这样的问题，回答起来是有难度的，因为它考查的并不仅仅是对 Dubbo 中所提供的负载均衡算法的描述，而更多的是问到了框架的底层设计思想和实现原理，需要面试者对 Dubbo 的源码有较深程度的理解，并能抓住细节。在回答上，就需要提到 Dubbo 中的“预热”机制，该机制的目的是确保服务在刚启动的一段时间内得到保护，避免因为负载均衡导致出现不可用的情况。在回答这道题时，这些内容背后的设计思想都应该被介绍到。
+
+## 小结与预告
+
+本讲内容梳理了分布式系统开发过程中所采用的负载均衡算法。在 Spring Cloud 中所实现的核心负载均衡算法包括随机、轮询、加权响应时间、并发量最小优先等，而 Dubbo 中则提供了随机、轮询、最少活跃调用数和一致性哈希等算法。可以看到，这两个框架在实现主流算法的同时，也根据框架自身的特点提供了一些比较有特色的策略。当然，这两个框架也都内置了扩展入口供开发人员实现自定义的负载均衡算法。
+
+在介绍完负载均衡之后，我们接下来要进入到“服务容错”这一技术组件的讨论。服务容错的实现方式有很多，其中集群的构建为容错机制提供了天然的基础。那么，什么是集群容错？现实中又有哪些常见的集群容错策略呢？下一讲将对这些问题展开详细的分析。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
