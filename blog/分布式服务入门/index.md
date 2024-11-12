@@ -3090,4 +3090,303 @@ public @interface SpringCloudApplication
 
 掌握了服务熔断机制之后，下一讲我们将讨论另一个确保服务高可用的技术组件，即服务降级。和服务熔断一样，我们也可以采用不同的技术手段来对服务进行降级。那么，服务降级的常见实现策略有哪些呢？我们下一讲再聊。
 
+# 服务降级：服务降级的常见实现策略有哪些？
+
+在上一讲中，我们介绍了基于熔断器的设计思想和实现方式。和集群容错一样，服务熔断也是一种常见的服务容错机制，也可以用来确保服务的可用性。而为了确保核心服务的可用性，有时候我们就会故意对那些不重要的服务执行下线操作，从而确保系统中有限的资源都应用到核心服务上。这就引出了在分布式系统构建过程中非常重要的一个技术组件，即服务降级。
+
+那么，什么是服务降级？又有那些常见的服务降级实现策略呢？这是面试过程中的一个常见考点，也是本讲内容的重点。
+
+## 问题背景
+
+我们先来看这个问题的背景。举个例子，在下图中存在服务 A 和服务 B 这两个服务。其中服务 B 是核心服务，而服务 A 是可以降级的非核心服务，服务 B 会依赖服务 A。
+
+![](res/2024-11-12-10-52-03.png)
+
+现在，当访问服务 B 的流量迎来高峰时，系统中的资源即将被耗尽，服务 B 的可用性即将出现问题。这时候，我们可以对服务 A 执行降级操作，也就说把服务 A 下线。通过这种方式，原本被服务 A 所占用的资源就可以用来处理面向服务 B 的请求。但是，问题就来了，服务 A 一旦下线，服务 B 在访问服务 A 时应该如何处理呢？基本的策略就是“快速失败”，即在服务 B 向服务 A 执行调用的链路中直接获取一个返回值，而不执行真正的远程调用。
+
+显然，想要实现上述效果并不容易，我们需要考虑如何在服务 A 已经下线的情况下，确保服务 B 能够得到一个快速失败的结果。由此，我们可以引出与服务降级相关的一系列问题，包括：
+
+- 系统中存在很多服务，你怎么判断哪些服务是可以降级的呢？
+- 快速失败的表现形式有哪些？
+- 想要实现服务降级，你有哪些设计思路？
+- 什么是服务回退？如何实现服务回退？
+- Dubbo 框架是如何实现服务降级的？
+- Spring Cloud 框架是如何实现服务降级的？
+
+上述问题都是面试官在面试过程中经常会提出的考查点，我们需要对这些考查点进行系统分析。
+
+## 问题分析
+
+所谓服务降级，是指在某些系统核心服务的访问压力剧增的情况下，根据当前业务情况及流量对一些服务进行有策略的快速失败处理，以此避免服务之间的调用依赖影响到其他核心服务。
+
+在面试过程中，首先需要用自己的语言对服务降级的基本概念和设计理念进行阐述，我们可以结合问题背景部分所举的例子进行展开。
+
+应对这类问题的第二点思路是对服务分级机制的讨论。既然服务可以降级，那么势必需要对服务进行分级。通常，等级越低的服务越应该被降级。我们可以结合日常的场景对服务等级进行分析。
+
+第三点，也是最重要的一点，是服务降级的实现策略。目前，在主流的开源框架中，关于如何实现服务降级有两大类策略，即：
+
+- 模拟（Mock）机制
+- 回退（Fallback）机制
+
+明确了服务降级的实现策略，最后的一点就是围绕具体的开源框架，给出这些实现策略的底层实现机制。
+
+通过上述分析，我们发现服务降级是一套独立而又完整的技术组件，既包含了分布式系统设计上的一些方法论，也和具体的工程实践紧密相关。
+
+接下来，让我们先从方法论开始讲起，梳理服务降级相关的技术体系。
+
+## 技术体系
+
+通过前面内容的介绍，我们已经理解了服务降级的基本概念和设计思想。从技术体系而言，关于服务降级我们要明确两个维度的内容。第一个维度是如何对服务进行分级管理，另一个维度就是具体的降级实现策略。
+
+我们先来讨论第一个维度。服务降级在实现上一般需要对业务的重要性进行区分，也就是需要明确服务分级，具体的服务分级方法因业务场景和需求而定。对每个服务进行等级管理之后，降级操作一般是从等级最低的的服务开始。
+
+关于服务分级，业界并没有统一的标准。在本讲中，我们介绍一种三级分类方法，如下图所示：
+
+![](res/2024-11-12-10-54-08.png)
+
+围绕服务分级，我们给出一个案例。下图展示了在移动医疗系统中基于服务分级思想所构建的无线网关业务，无线网关用于上传来自无线网络的数据并进行相应的处理。对于这样一个网关系统而言，网关的连接管理和数据上报是优先级最高的业务功能，因为缺少这些功能，网关也就不能正常工作。数据上报之后，对数据进行分析是收集网关数据的目的所在，但数据分析服务可以离线处理，并不一定需要保证服务 100% 的在线率。其他的诸如服务监控、反垃圾和后台配置则属于辅助性功能，相应的优先级也就最低。
+
+![](res/2024-11-12-10-54-44.png)
+
+显然，这里我们以对用户的影响程度为标准对服务等级进行了划分。
+
+介绍完服务等级的划分方式，我们来讨论第二个维度，即服务降级的实现策略。在问题分析部分，我们已经提到了两种主流的降级机制，即模拟和回退。
+
+Mock 并不是一个新概念，通常用于测试领域。首先，非常明确的一点，Mock 机制的作用就是完成对系统中组件与组件之间的有效隔离。在服务访问过程中，我们通常关注的是目标服务本身的功能和行为，对于该服务涉及到的一些依赖，我们仅仅关注它们在整个服务访问中的交互过程，比如是否调用、何时调用、调用的参数和返回值、调用过程中出现的各种异常等。至于调用过程中具体执行的业务逻辑，对于调用结果而言并不重要。
+
+基于这种设计思想，我们就可以通过 Mock 对象来模拟真实对象的调用结果，如下图所示：
+
+![](res/2024-11-12-10-55-25.png)
+
+服务降级的另一种主流实现策略是服务回退。为了实现对服务的降级，服务端会准备一个本地的 Fallback 函数，该函数会在每次调用时返回一个缺省值，如下图所示：
+
+![](res/2024-11-12-10-55-54.png)
+
+## 源码解析
+
+接下来，我们就将基于 Dubbo 和 Spring Cloud 这两款开源框架分别给出服务降级的实现方式。虽然这两种框架采用不同的实现方式，但其设计思想本质上是类似的。
+
+### Dubbo 中的服务降级
+
+#### Dubbo 中的 Mock 机制
+
+Dubbo 通过 Mock 来实现服务降级的过程和测试领域的 Mock 有异曲同工之处。在 Dubbo 中，可以在配置服务引用时提供 Mock 机制，存在几种配置方法，这里参考 Dubbo 官网中的示例。
+
+首先，我们可以在配置文件中添加如下所示的配置项：
+
+```xml
+<dubbo:reference interface="com.foo.BarService" mock="true" />
+```
+
+如果采用这种配置，那么该 Mock 类的命名必须是接口名 + Mock，在这个示例中，即 BarServiceMock。我们可以提供如下所示的实现：
+
+```java
+public class BarServiceMock implements BarService {
+   public String sayHello(String name) {
+      return "降级数据";
+   }
+}
+```
+
+同时，我们也可以提供如下所示的配置项，指定 Mock 的实现类。
+
+```xml
+<dubbo:reference interface="com.foo.BarService" mock="com.foo.BarServiceMock" />
+```
+
+当然，如果 Mock 方法的逻辑非常简单，我们也可以直接将实现写在配置项中。例如，如下所示的配置标明 Mock 方法直接返回 null。
+
+```xml
+<dubbo:reference interface="com.foo.BarService" mock="return null" />
+```
+
+通过上述配置方法，在服务调用过程中，返回的就是一个事先提供的 Mock 对象，而不会对服务提供者发起真实请求。
+
+Mock 还存在一些高级用法，如下图所示：
+
+![](res/2024-11-12-10-58-14.png)
+
+在执行 Mock 的过程中，如果我们希望抛出一个异常而不是返回正常的 Mock 值，那么可以使用 throw 配置项。而上图中的 fail 配置项用于指定当远程调用过程中发生错误时才会返回 Mock 对象。对应的，force 配置项用于指定在任何情况下都将返回 Mock 对象。
+
+现在，让我们回到 Dubbo 中的 Cluster 接口。我们知道该接口存在一批实现类。在这些实现类中，存在一个命名上比较特殊的 MockClusterWrapper 类，该类恰恰就是用于实现 Mock 机制，如下所示：
+
+```java
+public class MockClusterWrapper implements Cluster {
+   private Cluster cluster;
+
+   public MockClusterWrapper(Cluster cluster) {
+      this.cluster = cluster;
+   }
+
+   public <T> Invoker<T> join(Directory<T> directory) throws RpcException {
+      return new MockClusterInvoker<T>(directory, this.cluster.join(directory));
+   }
+}
+```
+
+与其他 Cluster 接口的实现类不同，MockClusterWrapper 内部同时持有一个 Cluster 接口，相当于是对 Cluster 接口的一种包装（Wrapper），所以该类取名为 MockClusterWrapper。而该类的 join 方法中即根据传入的 Directory 构建一个 MockClusterInvoker 类。显然，Mock 的核心逻辑应该位于 MockClusterInvoker 类中，让我们来一起看一下。
+
+#### MockInvoker 和 MockClusterInvoker
+
+同样，我们也知道在 Dubbo 中存在一批 ClusterInvoker 实现类。在这些实现类中，构造函数只传入一个 Directory 对象。而 MockClusterInvoker 的构造函数则包含两个参数，除了 Directory 对象还有一个 Invoker 对象。因此，MockClusterInvoker 天生就包含了 Invoker 对象。
+
+MockClusterInvoker 的 invoke 方法执行流程如下所示：
+
+```java
+public Result invoke(Invocation invocation) throws RpcException {
+   Result result = null;
+   // 获取输入参数
+   String value = directory.getUrl().getMethodParameter(invocation.getMethodName(), Constants.MOCK_KEY, Boolean.FALSE.toString()).trim();
+   if (value.length() == 0 || value.equalsIgnoreCase("false")) {
+      // 如果没有 Mock 键，则不执行 Mock
+      result = this.invoker.invoke(invocation);
+   } else if (value.startsWith("force")) {
+      // …
+      // 如果以 force 开头，直接 Mock，不发起远程调用请求
+      result = doMockInvoke(invocation, null);
+   } else {
+      // 如果以 fail 开头，进入失败 Mock，即正常发起远程调用请求，如果失败则抛出了非业务异常
+      try {
+         result = this.invoker.invoke(invocation);
+      } catch (RpcException e) {
+         if (e.isBiz()) {
+            // 如果是业务异常，直接抛出
+            throw e;
+         } else {
+            //…
+            // 如果捕获到非业务异常，则调用 doMockInvoke 方法返回结果
+            result = doMockInvoke(invocation, e);
+         }
+      }
+   }
+   return result;
+}
+```
+
+上述代码实际上就是三个分支流程，分别对应没有 Mock 配置、以 force 开头的配置和以 fail 开头的配置这三种场景。
+
+- 如果没有 Mock 配置，就不执行 Mock；
+- 如果是以 force 开头，那么就直接返回 Mock 对象而不发起远程调用请求；
+- 如果以 fail 开头，意味着进入失败 Mock 处理流程，即正常发起远程调用请求，如果失败则抛出了非业务异常。
+
+因为 MockClusterInvoker 中自身包含有一个 Invoker 对象，因此直接就可以通过该 Invoker 对象执行远程调用。如果这个异常是业务异常，就直接抛出交由上游代码进行处理。而如果捕获到非业务异常，则会调用 doMockInvoke 方法返回结果。
+
+接下来就需要看一下这个 doMockInvoke 方法的执行逻辑。该方法核心逻辑之一是获取 MockInvoker 并执行它的 invoke 方法，这部分实现如下所示：
+
+```java
+List<Invoker<T>> mockInvokers = selectMockInvoker(invocation);
+
+if (mockInvokers == null || mockInvokers.size() == 0) {
+   minvoker = (Invoker<T>) new MockInvoker(directory.getUrl());
+} else {
+   minvoker = mockInvokers.get(0);
+}
+
+result = minvoker.invoke(invocation);
+```
+
+我们看到，这里会通过 selectMockInvoker 方法获取 Mock 类型的 Invoker。而如果没有找到想要的 Invoker，则会自己创建一个 MockInvoker。
+
+MockInvoker 中最重要的就是 invoke 方法，该方法包含了一系列判断，核心逻辑如下所示：
+
+```java
+public Result invoke2(Invocation invocation) throws RpcException {
+   // 如果是空的 return 配置
+   if (Constants.RETURN_PREFIX.trim().equalsIgnoreCase(mock.trim())) {
+      // 直接返回空的 RpcResult
+   } else if (mock.startsWith(Constants.RETURN_PREFIX)) { // 如果是包含返回值的 return 配置
+      // 解析 Mock 对象，构建 RpcResult 并返回
+   } else if (mock.startsWith(Constants.THROW_PREFIX)) { // 如果是 throw 配置
+      if (condition) {
+         // 抛出 Mock 异常
+      } else {
+         // 抛出业务异常
+      }
+   } else { // 如果是自定义 Mock 类
+      // 调用 Mock 类的 invoke 方法并返回
+      Invoker<T> invoker = getInvoker(mock);
+      return invoker.invoke(invocation);
+   }
+}
+```
+
+这段方法针对 return 配置和 throw 配置的处理都比较简单，而如果是业务异常我们也是采用直接抛向上游代码。这里的关键是如何获取自定义 Mock 类的实例，这里用到了 getInvoker 方法，该方法的核心就是如下所示的这两行代码：
+
+```java
+T mockObject = (T) mockClass.newInstance();
+invoker = proxyFactory.getInvoker(mockObject, (Class<T>) serviceType, url);
+```
+
+这里看到了熟悉的 ProxyFactory 接口，这是 Dubbo 中实现动态代理的核心接口。现在我们明确了，上述代码基于反射机制获取自定义 Mock 类实例，然后通过动态代理创建 Invoker。
+
+### Spring Cloud 中的服务降级
+
+和 Dubbo 相比，Spring Cloud 采用了另一种完全不同的机制来实现服务降级，这就是回退机制。在接下里的内容中，我们将对回退机制的使用方式和设计理念做一定分析。
+
+#### Spring Cloud 中的回退机制
+
+在 Spring Cloud 中，我们可以基于 Spring Cloud Circuit Breaker 提供的回退机制来实现服务降级。在开发过程上，我们只需要提供一个回退方法实现并进行配置即可。这里同样也给出对应的实现方式。
+
+我们举个例子，假设系统中存在一个代表用户业务的用户服务，那么当访问这个服务时，我们就可以实现回退方法。在回退方法的实现过程中，唯一需要注意的就是该回退方法的参数和返回值必须与真实的方法完全一致。
+
+如下所示的就是回退方法的一个示例：
+
+```java
+private UserMapper getUserFallback(String userName) {
+   UserMapper fallbackUser = new UserMapper(0L,"no_user","not_existed_user");
+   return fallbackUser;
+}
+```
+
+我们可以基于 Spring Cloud Circuit Breaker 实现服务回退，开发流程也比较固化。首先，我们需要创建一个 CircuitBreaker 实例，然后实现具体的业务逻辑并提供一个回退方法，最后执行 CircuitBreaker 的 run 方法，示例代码如下所示：
+
+```java
+// 创建 CircuitBreaker
+CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user");
+
+// 封装业务逻辑
+Supplier<UserMapper> supplier = () -> {
+   return userClient.getUserByUserName(userName);
+};
+
+// 初始化回退函数
+Function<Throwable, UserMapper> fallback = t -> {
+   UserMapper fallbackUser = new UserMapper(0L,"no_user","not_existed_user");
+   return fallbackUser;
+};
+
+// 执行业务逻辑
+circuitBreaker.run(supplier, fallback);
+```
+
+上述示例代码可以根据具体需求进行调整并嵌入到各种业务场景中。
+
+#### 基于拦截器实现回退
+
+限于篇幅关系，我们在这里主要探讨如何实现一个降级体系的设计思路。服务降级的目标就是一旦出现异常确保能够正确回退，这让我们首先想到了可以通过引入 AOP 机制来对异常进行拦截。一旦拦截成功，那么就可以嵌入自定义的回退方法并执行该方法中的回退逻辑。整个设计思路下图所示：
+
+![](res/2024-11-12-11-01-32.png)
+
+事实上， Spring Cloud Circuit Breaker 中的 Fallback 概念和 Dubbo 中 Mock 的概念异曲同工。两者都是实现服务降级的常用技术手段。
+
+## 解题要点
+
+针对服务降级，在面试过程中，相比 Mock 机制，我认为回退机制被问题的频率会更高，是我们重点需要掌握的知识点。事实上，服务回退在分布式系统构建过程中并不能算是一个非常独立的知识点，而是属于服务降级体系下的一个具体实现策略。所以，需要面试者具有比较广的知识面，并能从概念到实现过程上对服务回退有一定的了解。
+
+事实上，服务回退的概念并不难理解。在传统开发模式下，我们在系统发生异常时通常都会返回一个默认的提示信息。服务回退与这种处理方式是类似的，本质上就是一个回调处理机制，能够针对某个方法提供缺省的返回值。在实施过程中，常见的做法是对业务方法提供一个对应的回退方法，回退方法的参数和返回值必须与真实的方法完全一致，这样确保系统获取到缺省的返回值之后还能够正常运行。
+
+关于服务降级的相关问题，还有一种开放式的提问方式，比方说 `如果让你来实现一个服务回退机制，你会怎么做？`。有时候，面试官很难从那些概念类的标准答案中看出不同面试者的水平差异，这时候就可以通过类似本题的方式进行考查。
+
+从考查难度而言，这种开放式的面试题对面试者而言有利有弊。一方面，这种面试题没有标准答案，面试者可以自由发挥，只要做到自圆其说就行。另一方面，这种面试题可以会让面试者感到无从下手，从而导致没有很好的回答思路。
+
+从设计思想上讲，我们可以基于拦截器来实现服务回退机制。在这套自定义的实现机制中，通过引入 AOP 对异常进行拦截。一旦拦截成功，那么就可以嵌入自定义的回退方法并执行该方法中的回退逻辑。事实上，在 Spring Cloud 等主流开源框架中，也正是基于类似的机制提供了服务回退功能。在回答这道面试题时，我们可以首先阐述自己的设计思想，然后结合开源框架给出具体的实现原理。
+
+## 小结与预告
+
+本讲是远程过程调用中所要介绍的最后一个技术组件，我们对服务降级展开了讨论。
+
+服务降级的常见实现模式包括模拟和回退两种。这两种实现模式体现的都是一种自动化的处理策略，当服务响应出现问题时能够返回一个处理结果，从而避免对目标服务执行真正的远程调用。
+
+从下一讲开始，我们将进入到与微服务架构相关技术组件的讨论。我们首先要讨论的是注册中心，而注册中心也有多种实现方式。下一讲的主题是：如何设计一款具备实时通知能力的注册中心模型？我们下一讲再聊。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
