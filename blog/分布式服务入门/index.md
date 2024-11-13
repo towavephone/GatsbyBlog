@@ -3389,4 +3389,340 @@ circuitBreaker.run(supplier, fallback);
 
 从下一讲开始，我们将进入到与微服务架构相关技术组件的讨论。我们首先要讨论的是注册中心，而注册中心也有多种实现方式。下一讲的主题是：如何设计一款具备实时通知能力的注册中心模型？我们下一讲再聊。
 
+# 注册中心：如何设计一款具备实时通知能力的注册中心模型？
+
+通过前面几讲内容的介绍，我们已经掌握了与远程过程调用相关的各个技术组件。在分布式系统中，远程过程调用解决的就是两个服务之间的点对点调用过程。显然，想要完成这个调用过程，服务消费者首先得知道目标服务提供者的地址信息。这个地址信息是服务实例信息中的一个元数据，其他的元数据还包括服务的上线时间、可用状态等。
+
+如何对这些元数据进行有效管理是分布式系统构建过程中不得不考虑的一个问题，特别是在服务实例数量非常庞大的场景下。这就引出了本讲将要介绍的一个新的技术组件，即注册中心。
+
+注册中心的实现模型有多种，今天我们介绍其中的一种，即：如何设计一款具备实时通知能力的注册中心模型？围绕这个问题的讨论也经常出现在面试过程中，让我们一起来看一下。
+
+## 问题背景
+
+在分布式系统中，通常会存在几十个甚至上百个服务，开发人员可能甚至都无法明确系统中到底有哪些服务正在运行。另一方面，我们很难同时确保所有服务都不出现问题，也很难保证当前的服务部署方式不做调整和优化。由于自动扩容、服务重启等因素，服务实例的运行时状态也会经常变化。通常，我们把这些服务实例的运行时状态信息统称为服务的元数据（Metadata）。关于元数据这个词，我们已经在第 7 讲中介绍服务发布流程时提到过，你可以做一些回顾。
+
+既然服务数量的增加以及服务实例的变化都不可避免，那么，有什么好的办法能够做到对这些服务实例进行有效的管理呢？这实际上就是一个服务治理的问题。
+
+我们需要管理系统中所有服务实例的运行时状态，并能够把这些状态的变化同步到各个服务中。就技术组件而言，我们可以通过引入注册中心轻松实现对大规模服务的高效治理。在日常开发过程中，注册中心的应用方式都是非常简单的。但从面试角度讲，这些应用方式显然不是考查的目标。面试官更多地会从设计原理和底层实现机制的角度来考查候选人对注册中心实现模型的理解程度。
+
+我们来梳理一下关于注册中心的一些常见问题：
+
+- 为什么我们需要在分布式系统中引入注册中心？它有什么好处？
+- 你能描述注册中心的基本组成结构吗？
+- 如果让你设计一个注册中心，你会选择什么框架来进行实现？
+- 一旦服务提供者的状态发生变化，我们希望这些状态信息能够在服务消费者中得到实时更新，你可以采用什么样的实现机制？
+
+上面这些问题都比较经典，我经常会拿这些问题来考查候选人。另一方面，你可能会觉得这些问题比较难以回答，但它们背后的知识体系却是每个开发人员都应该掌握的。
+
+让我们先对这些问题做一些分析和展开。
+
+## 问题分析
+
+注册中心是我们引入的第一个微服务架构技术组件。为什么我们需要专门提取微服务架构技术组件，就是为了应对大规模分布式系统的构建需求。
+
+如果一个分布式系统的服务数量达到一定的规模，就需要引入专门的组件来对这些服务的元数据进行管理。而这种管理过程显然应该具备一定的机制和策略，所以我们需要设计一个模型，这就是注册中心模型。关于注册中心模型的讨论是我们应对这类面试题的第一个要点。
+
+应对这类面试题的第二个要点是深入注册中心的实现原理，其中最核心的一个问题就是：如果服务提供者的元数据发生了变化，如何实时地通知到各个服务消费者呢？这是我们要回答的第二个要点。
+
+最后，我们明确注册中心本身是一种架构设计上的模型和机制，需要依托于具体的框架才能得以实现。因此，我们需要基于具体的开源框架来对前面提出的核心问题进行分析，并阐述底层的实现原理。
+
+业界可以用来实现注册中心的框架有很多，一方面我们可以选择自己比较擅长的框架展开讨论。另一方面，我也建议你直接从 Dubbo 等主流的开源框架入手，来看看它们具体是如何设计和实现的。
+
+## 技术体系
+
+在分布式系统中，我们引入注册中心的目的是实现服务的自动注册和发现机制。围绕这两个操作，我们可以先来探讨注册中心所应该具备的模型结构。
+
+### 注册中心模型
+
+注册中心保存着各个服务实例的元数据，涉及的角色包括如下三种。
+
+- 注册中心：提供服务注册和发现能力。
+- 服务提供者：将自身注册到注册中心，供服务消费者进行调用。
+- 服务消费者：从注册中心获取服务提供者的元数据，并发起远程调用。
+
+上述三个角色比较简单，但注册中心的具体组成结构还是有一些额外的特性。首先，注册中心本身可以认为是一种服务器，它也提供了对应的客户端组件。各个服务需要嵌入客户端组件才能完成与注册中心服务器之间的交互。然后，为了提高访问效率，服务的消费者一般都会构建一个本地缓存，用来保存那些已经访问过的服务实例元数据。
+
+下图展示了服务与注册中心的交互过程：
+
+![](res/2024-11-13-10-08-06.png)
+
+在上图中，基本的工作流程通过操作语义即可理解。但有一个问题需要解决，即一旦服务的运行时状态发生了变更，我们如何有效获取这些变更信息呢？这就需要在注册中心中进一步引入变更通知机制，如下图所示：
+
+![](res/2024-11-13-10-08-48.png)
+
+从设计理念上讲，我们希望这种来自注册中心的变更通知能够实时地同步到服务消费者，这时候就可以引入推送思想。那么，如何具体实现推送呢？我们可以采用监听机制。所谓监听机制，指的就是服务消费者对位于注册中心的元数据添加监听器，一旦元数据发生变化，就可以触发监听器中的回调函数。
+
+我们可以在回调函数中对已变更的元数据执行任何操作，如下所示：
+
+![](res/2024-11-13-10-09-24.png)
+
+可以看到，服务消费者可以对具体的服务实例节点添加监听器，当这些节点发生变化时，注册中心就能触发监听器中的回调函数确保更新通知到每一个服务消费者。显然，使用监听和通知机制具备实时的数据同步效果。
+
+### 注册中心实现工具
+
+以上关于注册中心的讨论为我们提供了理论基础。根据这些理论基础，业界也诞生了很多具体的实现工具，常见的包括 Consul 、Zookeeper、Eureka 和 Nacos 等。我们无意对这些工具做一一展开。在本讲中，我们将基于 Zookeeper 来具体分析注册中心的实现模型。Zookeeper 是基于监听和通知机制的典型框架。
+
+从物理结构上讲，Zookeeper 就是一个目录树，包含了一组被称为 ZNode 的节点，它的基本结构如下图所示：
+
+![](res/2024-11-13-10-10-11.png)
+
+在上图中，size 节点位于 `/business/product/size` 路径，节点 C 可以存储数据 350，而节点 `/D/order/1` 可能存储着类似 `{"id":"1","itemName":"Notebook","price":"4000",createTime="2022-06-16 22:39:15"}` 等复杂数据结构和信息。Zookeeper 中所有数据通过 ZNode 的路径被引用。
+
+Zookeeper 特性很多，我们可以从注册中心的基本实现需求出发，结合模型及其操作来把握用于构建注册中心的相关技术。
+
+首先，Zookeeper 专门设计并实现了一个监听器组件。我们可以在任何一个 ZNode 上添加监听器，并实现对应的回调函数，从而确保服务器端的变化能够通过回调机制通知到客户端。
+
+另一方面，Zookeeper 中也提供了临时节点的概念。所谓临时节点，指的是只要客户端与 Zookeeper 的连接发生中断，那么这个节点就会自动消失。显然，临时节点的这种特性可以用于控制该节点所包含的服务定义元数据的时效性。
+
+ZNode 是 Zookeeper 中可以用代码进行控制的主要实体。对 ZNode 的基本操作包括节点创建 create、删除 delete、获取子节点 getChildren 以及获取和设置节点数据的 getData/setData 方法。操作 Zookeeper 的客户端组件包括自带的 ZooKeeper API 和第三方 zkClient、Curator 等，这些客户端都对 Zookeeper 连接资源管理和对 ZNode 节点的各项操作做了不同程度的封装。
+
+Zookeeper 中涉及的主要操作如下表所示，在源码解读过程中，我们会发现对 Zookeeper 的控制基本都是对这些操作的封装和应用。
+
+| 操作        | 描述                                            |
+| :---------- | :---------------------------------------------- |
+| create      | 在 ZooKeeper 命名空间的指定路径中创建一个 ZNode |
+| delete      | 从 ZooKeeper 命名空间的指定路径中删除一个 ZNode |
+| exists      | 检查路径中是否存在 ZNode                        |
+| getChildren | 获取 ZNode 的子节点列表                         |
+| getData     | 获取与 ZNode 相关的数据                         |
+| setData     | 将数据设置/写入 ZNode 的数据字段                |
+| getACL      | 获取 ZNode 的访问控制列表（ACL）策略            |
+| setACL      | 在 ZNode 中设置访问控制列表（ACL）策略          |
+| sync        | 将客户端的 ZNode 视图与 ZooKeeper 同步          |
+
+介绍完注册中心模型以及 Zookeeper 框架，让我们回到 Dubbo。作为一款主流的分布式服务框架，Dubbo 也内置了一整完整的注册中心实现方案，默认采用的就是 Zookeeper。
+
+## 源码解析
+
+在 Dubbo 内部，提供了 Multicas、Zookeeper、Redis、Nacos、Consul、Etcd3 等一大批注册中心实现方式。我们先从它的注册中心模型开始讲起。
+
+### Dubbo 注册中心模型
+
+Dubbo 中的注册中心代码位于 dubbo-registry 工程中，其中包含了一个 dubbo-registry-api 工程，该工程包含了 Dubbo 注册中心的抽象 API，而剩下的 dubbo-registry-default、dubbo-registry-zookeeper、dubbo-registry-nacos 等工程则是这些 API 的具体实现，分别对应前面提到的各种注册中心实现方式。我们同样无意对所有这些注册中心实现方式做详细展开，而是重点关注抽象 API 以及基于 Zookeeper 的实现方式。
+
+我们首先来看一下 dubbo-registry-api 工程，这里面最核心的就是如下所示的 RegistryService 接口：
+
+```java
+public interface RegistryService {
+   // 注册
+   void register(URL url);
+   // 取消注册
+   void unregister(URL url);
+   // 订阅
+   void subscribe(URL url, NotifyListener listener);
+   // 取消订阅
+   void unsubscribe(URL url, NotifyListener listener);
+   // 根据 URL 查询对应的注册信息
+   List<URL> lookup(URL url);
+}
+```
+
+请注意，RegistryService 所有操作的对象都是 URL，而订阅相关的操作中还附加了监听器 NotifyListener，确保变更信息的推送。从命名上我们已经可以初步猜想 Dubbo 在注册信息变更时采用的就是监听和通知机制。通过确认 NotifyListener 接口的定义更加明确了我们的猜想，因为该接口中只有一个 notify 方法，用于将发生变更的注册信息以 URL 的形式进行通知，如下所示：
+
+```java
+public interface NotifyListener {
+   void notify(List<URL> urls);
+}
+```
+
+我们再来看 RegistryFactory 接口，如下所示。这里的 @SPI("dubbo") 注解我们会在第 25 讲介绍微内核模式时进行介绍，代表默认情况下使用 Dubbo 自身的注册中心。
+
+```java
+@SPI("dubbo")
+public interface RegistryFactory{
+   Registry getRegistry(URL url);
+}
+```
+
+从接口的命名上可以看出 RegistryFactory 是 Dubbo 中创建注册中心的工厂类，通过对 RegistryFactory 的实现，Dubbo 提供了 Zookeeper、Redis 等几种不同的注册中心实现方案。
+
+可以说 Dubbo 中关于注册中心 API 层的抽象简单而清晰，比较适合先用来做对全局代码结构的把握。在这层 API 抽象之下，我们重点介绍 ZookeeperRegistry 和 ZookeeperRegistryFactory。
+
+### Zookeeper 注册中心实现过程
+
+让我们来到 Dubbo 源码，来看一下 ZookeeperRegistry 的实现过程，而 ZookeeperRegistry 中最重要的就是它的构造函数，如下所示：
+
+```java
+public ZookeeperRegistry(URL url, ZookeeperTransporter, zookeeperTransporter) {
+   // ...
+   // 建立与 Zookeeper 的连接
+   zkClient = zookeeperTransporter.connect(url);
+   // 添加状态监听器
+   zkClient.addStateListener(new StateListener() {
+      public void stateChanged(int state) {
+         if (state == RECONNECTED) {
+            try {
+               recover();
+            } catch (Exception e) {
+               logger.error(e.getMessage(), e);
+            }
+         }
+      }
+   });
+}
+```
+
+可以看到，这里执行了两个操作，一个是与 Zookeeper 建立连接，另一个就是添加了用于断线重连的状态监听器。根据对 Zookeeper 基本操作的了解和掌握，上述实现过程都是使用 Zookeeper 时的常规步骤。
+
+为了理解这段代码，我们需要明确另外两个核心对象的创建过程，这两个核心对象分别是 ZookeeperTransporter 和 ZookeeperClient。我们发现 ZookeeperTransporter 是在 ZookeeperRegistryFactory 工厂类创建 ZookeeperRegistry 时带进来的，如下所示：
+
+```java
+public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
+   private ZookeeperTransporter zookeeperTransporter;
+
+   public void setZookeeperTransporter(ZookeeperTransporter zookeeperTransporter) {
+      this.zookeeperTransporter = zookeeperTransporter;
+   }
+
+   public Registry createRegistry(URL url) {
+      return new ZookeeperRegistry(url, zookeeperTransporter);
+   }
+}
+```
+
+ZookeeperTransporter 本身是一个接口，定义也比较简单，就是根据传入的 URL 创建与 Zookeeper 服务器的连接并获取一个 ZookeeperClient 对象，如下所示：
+
+```java
+@SPI("zkclient")
+public interface ZookeeperTransporter {
+   @Adaptive({Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY})
+   ZookeeperClient connect(URL url);
+}
+```
+
+另一方面，在 ZookeeperClient 接口的定义中包含了注册中心运行过程中所有的数据操作，如创建和删除路径、获取子节点、添加和删除 Listener、获取 URL 等实现发布-订阅模式的入口。这些方法名与 Zookeeper 原生操作基本一致，如下所示：
+
+```java
+public interface ZookeeperClient {
+   void create(String path, boolean ephemeral);
+   void delete(String path);
+   List<String> getChildren(String path);
+   List<String> addChildListener(String path, ChildListener  listener);
+   void removeChildListener(String path, ChildListener listener);
+   void addStateListener(StateListener listener);
+   void removeStateListener(StateListener listener);
+   boolean isConnected();
+   void close();
+   URL getUrl();
+}
+```
+
+目前可以与 Zookeeper 服务器进行交互的客户端有很多，Dubbo 中提供了对 Zkclient 和 Curator 这两个客户端工具的集成，对应的 Transporter 和 ZookeeperClient 实现类见下图。Dubbo 使用 Zkclient 作为其默认实现。
+
+![](res/2024-11-13-11-14-06.png)
+
+接下来终于到了分析注册中心具体操作的时候了，ZookeeperRegistry 提供了 doRegister、doUnregister、doSubscribe 和 doUnsubscribe 方法分别对应注册/取消注册、订阅/取消订阅这四个具体操作。
+
+我们首先来看一下注册方法 doRegister，如下所示：
+
+```java
+protected void doRegister(URL url) {
+   try {
+      zkClient.create(toUrlPath(url),
+      url.getParameter(Constants.DYNAMIC_KEY, true));
+   } catch (Throwable e) {
+      // ...
+   }
+}
+```
+
+不难看出，注册操作的实现方式就是在 Zookeeper 中创建一个节点。请注意，默认创建的节点都是临时节点，当连接断开之后会自动删除。对应的，我们也不难想象取消注册的实现方式就是删除这个临时节点，如下所示：
+
+```java
+protected void doUnregister(URL url) {
+   try {
+      zkClient.delete(toUrlPath(url));
+   } catch (Throwable e) {
+      // ...
+   }
+}
+```
+
+我们再来看订阅过程。在订阅 URL 过程中，Dubbo 将传入的回调接口 NotifyListener 转换成 Zookeeper 中的 ChildListener，并主动根据服务提供者 URL 调用 NotifyListener。
+
+doSubscribe 方法比较长，我们提取其中的核心代码，如下所示：
+
+```java
+ChildListener zkListener = listeners.get(listener);
+if (zkListener == null) {
+   // 添加子节点监听器
+   listeners.putIfAbsent(listener, new ChildListener() {
+      public void childChanged(String parentPath, List<String>  currentChilds) {
+         for (String child : currentChilds) {
+            child = URL.decode(child);
+            if (!anyServices.contains(child)) {
+               anyServices.add(child);
+               subscribe(url.setPath(child).addParameters(Constants.INTERFACE_KEY, child, Constants.CHECK_KEY, String.valueOf(false)), listener);
+            }
+         }
+      }
+   });
+   zkListener = listeners.get(listener);
+}
+```
+
+可以看到，Dubbo 会订阅父级目录, 而当有子节点发生变化时就会触发 ChildListener 中的回调函数，该回调函数会对该路径下的所有子节点执行 subscribe 操作。
+
+而取消订阅 URL 的过程实际上只是去掉 URL 上已经注册的监听器，doUnsubscribe 方法如下所示：
+
+```java
+protected void doUnsubscribe(URL url, NotifyListener listener) {
+   ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
+   if (listeners != null) {
+      ChildListener zkListener = listeners.get(listener);
+      if (zkListener != null) {
+         // 取消子节点监听器
+         zkClient.removeChildListener(toUrlPath(url), zkListener);
+      }
+   }
+}
+```
+
+到此为止，ZookeeperRegistry 类中的构造函数和核心方法已经分析完毕。你看到这里可能会好奇，doRegister、doUnregister、doSubscribe 和 doUnsubscribe 这四个方法是在哪里被调用的呢？毕竟 ZookeeperRegistry 本来应该实现的是 RegistryService 接口中的 register、unregister、subscribe 和 unsubscribe 方法才对。
+
+通过阅读代码，我们发现 ZookeeperRegistry 并不是 RegistryService 的直接实现类，从类层结构上，ZookeeperRegistry 扩展了 FailbackRegistry，而 FailbackRegistry 又扩展了 AbstractRegistry，注意 FailbackRegistry 和 AbstractRegistry 都是抽象类。而前面提到的这些方法在 RegistryService 不同层级的实现类中被调用，这里面涉及到的类层结构如下图所示：
+
+![](res/2024-11-13-11-18-20.png)
+
+我们继续往下看，发现真正调用 doRegister、doUnregister、doSubscribe 和 doUnsubscribe 这四个方法的地方分别是在 FailbackRegistry 对应的 register、unregister、subscribe 和 unsubscribe 方法中，这点自然比较好理解。但我们发现这四个方法还同时出现在 FailbackRegistry 的 retry 方法中。事实上，在 FailbackRegistry 构造函数中会创建一个定时任务，每隔一段时间执行该 retry 方法。
+
+在这个 retry 方法，以注册场景为例（其他场景也类似），我们从注册失败的集合中获取 URL，然后对每个 URL 执行 doRegister 操作从而实现重新注册，如下所示：
+
+```java
+if (!failedRegistered.isEmpty()) {
+   Set<URL> failed = new HashSet<URL>(failedRegistered);
+   if (failed.size() > 0) {
+      try {
+         for (URL url : failed) {
+            try {
+               // 重新注册
+               doRegister(url);
+               failedRegistered.remove(url);
+            } catch (Throwable t) {
+               // ...
+            }
+         }
+      } catch (Throwable t) {
+         // ...
+      }
+   }
+}
+```
+
+在 RegistryService 还有最后一个 lookup 方法，其作用是根据 URL 查询对应的注册信息。基于 Zookeeper，这个方法的实现也比较简单，我们只需要通过 Zookeeper 提供的 getChildren 方法获取某个 ZNode 的子节点即可，这里不做展开，你可以参加 Dubbo 源码进行学习。
+
+## 解题要点
+
+关于注册中心的基本模型是回答任何与这一主题相关面试题的基本要点。这部分内容属于理论知识，内容也比较固定。我们可以从注册中心的诞生背景、作用、组成结构等方面进行展开，并重点提及数据变更通知特性，这一特性体现了不同注册中心之间在设计理念和运行机制上的差别。
+
+然后，关于注册中心的实现，我们需要结合具体场景和诉求来讨论。本讲中我们讨论的是“具备实时通知能力的注册中心模型”，因此关注的是那些具有实时数据监听和推送功能的开源框架，例如 Zookeeper。Zookeeper 是一款非常经典的分布式协调框架，也是 Dubbo 框架的默认注册中心实现工具，所以在讨论过程中实际上也需要对 Dubbo 框架有足够的掌握。
+
+从注册中心的实现类型而言，Zookeeper 是基于推送机制完成注册信息变更通知的代表性框架。Zookeeper 能够做到这一点是因为它内置了功能强大的监听器。当 Zookeeper 客户端通过会话机制与服务器建立连接并维持心跳检测之后，任何对 Zookeeper 节点的新增、更新和删除操作都会触发监听器上的回调函数，从而完成服务定义的动态更新。这是基于 Zookeeper 实现一款注册中心的核心流程。当然，我们在回答这道题时，也可以从 Zookeeper 中对服务注册信息的定义、存储等方面做进一步展开。
+
+## 小结与预告
+
+作为总结，我们明确注册中心就是这样一种服务治理工具：管理系统中所有服务实例的运行时状态，并能够把这些状态的变化同步到各个服务中。注册中心的实现有不同的策略，业界也诞生了一批不同类型的注册中心实现工具。本讲所阐述的 Zookeeper 是其中的代表性框架之一，具备实时通知能力。
+
+请注意，并不是所有的注册中心都采用的是和 Zookeeper 一样的监听和推送机制，我们也可以采用定时更新策略来获取注册中心中最新的元数据。那么，如果采用定时更新策略来设计注册中心，这个过程有有哪些注意点呢？这就是下一讲要讨论的内容。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
