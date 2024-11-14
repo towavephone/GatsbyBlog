@@ -3399,7 +3399,7 @@ circuitBreaker.run(supplier, fallback);
 
 ## 问题背景
 
-在分布式系统中，通常会存在几十个甚至上百个服务，开发人员可能甚至都无法明确系统中到底有哪些服务正在运行。另一方面，我们很难同时确保所有服务都不出现问题，也很难保证当前的服务部署方式不做调整和优化。由于自动扩容、服务重启等因素，服务实例的运行时状态也会经常变化。通常，我们把这些服务实例的运行时状态信息统称为服务的元数据（Metadata）。关于元数据这个词，我们已经在第 7 讲中介绍服务发布流程时提到过，你可以做一些回顾。
+在分布式系统中，通常会存在几十个甚至上百个服务，开发人员可能甚至都无法明确系统中到底有哪些服务正在运行。另一方面，我们很难同时确保所有服务都不出现问题，也很难保证当前的服务部署方式不做调整和优化。由于自动扩容、服务重启等因素，服务实例的运行时状态也会经常变化。通常，我们把这些服务实例的运行时状态信息统称为服务的元数据（Metadata）。关于元数据这个词，我们已经在介绍服务发布流程时提到过，你可以做一些回顾。
 
 既然服务数量的增加以及服务实例的变化都不可避免，那么，有什么好的办法能够做到对这些服务实例进行有效的管理呢？这实际上就是一个服务治理的问题。
 
@@ -3525,11 +3525,11 @@ public interface NotifyListener {
 }
 ```
 
-我们再来看 RegistryFactory 接口，如下所示。这里的 @SPI("dubbo") 注解我们会在第 25 讲介绍微内核模式时进行介绍，代表默认情况下使用 Dubbo 自身的注册中心。
+我们再来看 RegistryFactory 接口，如下所示。这里的 `@SPI("dubbo")` 注解我们会在后面介绍微内核模式时进行介绍，代表默认情况下使用 Dubbo 自身的注册中心。
 
 ```java
 @SPI("dubbo")
-public interface RegistryFactory{
+public interface RegistryFactory {
    Registry getRegistry(URL url);
 }
 ```
@@ -3543,7 +3543,7 @@ public interface RegistryFactory{
 让我们来到 Dubbo 源码，来看一下 ZookeeperRegistry 的实现过程，而 ZookeeperRegistry 中最重要的就是它的构造函数，如下所示：
 
 ```java
-public ZookeeperRegistry(URL url, ZookeeperTransporter, zookeeperTransporter) {
+public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
    // ...
    // 建立与 Zookeeper 的连接
    zkClient = zookeeperTransporter.connect(url);
@@ -3585,19 +3585,19 @@ ZookeeperTransporter 本身是一个接口，定义也比较简单，就是根�
 ```java
 @SPI("zkclient")
 public interface ZookeeperTransporter {
-   @Adaptive({Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY})
+   @Adaptive({ Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY })
    ZookeeperClient connect(URL url);
 }
 ```
 
-另一方面，在 ZookeeperClient 接口的定义中包含了注册中心运行过程中所有的数据操作，如创建和删除路径、获取子节点、添加和删除 Listener、获取 URL 等实现发布-订阅模式的入口。这些方法名与 Zookeeper 原生操作基本一致，如下所示：
+另一方面，在 ZookeeperClient 接口的定义中包含了注册中心运行过程中所有的数据操作，如创建和删除路径、获取子节点、添加和删除 Listener、获取 URL 等实现发布订阅模式的入口。这些方法名与 Zookeeper 原生操作基本一致，如下所示：
 
 ```java
 public interface ZookeeperClient {
    void create(String path, boolean ephemeral);
    void delete(String path);
    List<String> getChildren(String path);
-   List<String> addChildListener(String path, ChildListener  listener);
+   List<String> addChildListener(String path, ChildListener listener);
    void removeChildListener(String path, ChildListener listener);
    void addStateListener(StateListener listener);
    void removeStateListener(StateListener listener);
@@ -3715,7 +3715,7 @@ if (!failedRegistered.isEmpty()) {
 
 关于注册中心的基本模型是回答任何与这一主题相关面试题的基本要点。这部分内容属于理论知识，内容也比较固定。我们可以从注册中心的诞生背景、作用、组成结构等方面进行展开，并重点提及数据变更通知特性，这一特性体现了不同注册中心之间在设计理念和运行机制上的差别。
 
-然后，关于注册中心的实现，我们需要结合具体场景和诉求来讨论。本讲中我们讨论的是“具备实时通知能力的注册中心模型”，因此关注的是那些具有实时数据监听和推送功能的开源框架，例如 Zookeeper。Zookeeper 是一款非常经典的分布式协调框架，也是 Dubbo 框架的默认注册中心实现工具，所以在讨论过程中实际上也需要对 Dubbo 框架有足够的掌握。
+然后，关于注册中心的实现，我们需要结合具体场景和诉求来讨论。本讲中我们讨论的是 `具备实时通知能力的注册中心模型`，因此关注的是那些具有实时数据监听和推送功能的开源框架，例如 Zookeeper。Zookeeper 是一款非常经典的分布式协调框架，也是 Dubbo 框架的默认注册中心实现工具，所以在讨论过程中实际上也需要对 Dubbo 框架有足够的掌握。
 
 从注册中心的实现类型而言，Zookeeper 是基于推送机制完成注册信息变更通知的代表性框架。Zookeeper 能够做到这一点是因为它内置了功能强大的监听器。当 Zookeeper 客户端通过会话机制与服务器建立连接并维持心跳检测之后，任何对 Zookeeper 节点的新增、更新和删除操作都会触发监听器上的回调函数，从而完成服务定义的动态更新。这是基于 Zookeeper 实现一款注册中心的核心流程。当然，我们在回答这道题时，也可以从 Zookeeper 中对服务注册信息的定义、存储等方面做进一步展开。
 
@@ -3724,5 +3724,341 @@ if (!failedRegistered.isEmpty()) {
 作为总结，我们明确注册中心就是这样一种服务治理工具：管理系统中所有服务实例的运行时状态，并能够把这些状态的变化同步到各个服务中。注册中心的实现有不同的策略，业界也诞生了一批不同类型的注册中心实现工具。本讲所阐述的 Zookeeper 是其中的代表性框架之一，具备实时通知能力。
 
 请注意，并不是所有的注册中心都采用的是和 Zookeeper 一样的监听和推送机制，我们也可以采用定时更新策略来获取注册中心中最新的元数据。那么，如果采用定时更新策略来设计注册中心，这个过程有有哪些注意点呢？这就是下一讲要讨论的内容。
+
+# 注册中心：如果采用定时更新策略来设计注册中心，有哪些注意点？
+
+上一讲我们进入到了注册中心这一技术组件的讨论，我们给出了注册中心的基本模型，并基于 Zookeeper 框架分析了“具备实时通知能力的注册中心”的实现方式。
+
+本讲继续讨论注册中心，并关注于另一种实现方式，即采用定时更新策略的注册中心。可以说，这两种注册中心的设计思想和实现方式完全不同。
+
+那么，如果我们采用的是定时更新策略，应该如何获取最新的服务实例元数据呢？本讲内容将围绕这个话题进行展开。在日常开发过程中，关于定时更新策略的应用场景实际上非常多，也是面试过程中经常会出现的考查点。因此，本讲内容中所介绍的实现过程中也有很多值得深入分析和学习的开发和面试技巧。
+
+## 问题背景
+
+与注册中心相关的问题背景，我们在上一讲中已经介绍了很多，这里不再重复展开。在本讲中，因为我们是围绕“如果采用定时更新策略来设计注册中心”这一话题进行展开，所以这里也列举在面试过程中与这个话题相关的一些常见面试题：
+
+- 如果采用轮询机制来获取注册中心中的数据，你会选择什么样的实现技术？
+- 在定时更新过程中，客户端如何判断位于注册中心中的数据已经发生了变化？
+- 注册中心中的服务实例信息怎么存储才合理？
+- 如果想要提高定时获取注册中心中数据的效率，你有什么策略？
+
+可以看到，虽然我们讨论的都是注册中心，但是从面试角度讲，不同的注册中心实现方式，对应的面试题也会采用不同的切入点。
+
+## 问题分析
+
+关于这类面试题的回答思路和上一讲中介绍的内容是类似的，你可以回顾上一讲中“问题分析”部分，这里不做重复展开。但是，因为本讲关注的是采用定时更新策略的注册中心实现方式，所以需要基于这点进行具体分析。和推送机制不同，定时策略在设计和实现上需要考虑以下几点。
+
+- 定时策略：基于什么样的时机触发轮询操作？
+- 同步数据：同步什么样的数据？同步多少数据？
+- 同步效率：如何降低轮询过程中不必要的性能损耗？
+
+请注意，在基于推送机制构建注册中心的实现过程中，上述问题都是不需要考虑的。根本原因在于推送是一种“被动式”的处理机制，注册中心的客户端不需要关注什么时候会推送，而只需要在合适的时机触发回调函数即可。而定制更新策略则不同，体现的一种“主动式”的处理机制，注册中心的客户端在与服务器进行交互的过程中不得不考虑上述问题。而这些问题的背后，也包含了对应的技术实现方式，让我们一起来看一下。
+
+## 技术体系
+
+如果我们采用定时更新策略，那么从架构设计上讲，比较容易想到的方式是采用轮询机制。轮询机制是一种主动拉取策略，即服务的消费者定期调用注册中心提供的元数据获取接口获取最新的服务实例列表并更新本地缓存，如下图所示：
+
+![](res/2024-11-14-11-49-11.png)
+
+在上图中，我们看到轮询机制实现上就是一个定时器，需要考虑定时的频率以确保数据同步的时效性。
+
+针对上图中的执行流程，我们要引出的一款注册中心实现工具是 Netflix 的 Eureka。Eureka 的基本架构由 Eureka 服务器、服务提供者和服务消费者这 3 个逻辑角色所组成，并与上一讲中介绍的服务注册中心模型具有高度一致性。虽然 Eureka 2.0 经历了诸多变故之后目前处于停止更新状态，但作为一款经典的基于轮询机制来实现服务实例状态同步的开源框架，其内部的设计思想和底层原理还是值得我们深入分析，尤其是在缓存设计和增量获取更新内容等方面的实现技巧对于日常开发过程而言也非常具有参考价值，我们可以基于这些技巧来应对类似场景下的实现需求。
+
+我们在对 Eureka 进行进一步展开，可以得到如下图所示的注册中心模型图：
+
+![](res/2024-11-14-11-49-56.png)
+
+在上图中，Eureka 有以下几个操作与服务治理直接相关。
+
+- 服务注册（Register）：将各种元数据注册到注册中心。
+- 服务续约（Renew）：发送定时心跳进行续约。
+- 服务下线（Cancel）：客户端主动下线。
+- 服务剔除（Eviction）：客户端在长时间没有续约的情况下被动下线。
+
+另外，遵循上一讲中给出的注册中心的基本模型，Eureka 客户端也具备本地缓存机制。Eureka 在实现这一过程中使用了非常巧妙的实现方法，我们在后续内容中会具体展开。
+
+在介绍 Eureka 时，我们采用的思路与上一节中介绍 Zookeeper 不同。在介绍 Zookeeper 时，我们更多的是从 Zookeeper 这一特定工具本身出发进行展开，而这里我们的切入点是注册中心各个角色本身的特点以及它们之间的交互流程。我们首先来看 Eureka 服务器端的工作原理。
+
+## 源码解析
+
+### Eureka 服务器端基本原理
+
+对于 Eureka 服务器端，我们关注两个方面，即服务实例元数据的存储和缓存。
+
+如同讨论 Zookeeper 一样，对于一个注册中心而言，我们首先需要关注它的数据存储方法。在 Eureka 中，用于保存服务实例信息的数据结构实际上是一个双层的 HashMap，采用的是 JDK 中线程安全的 ConcurrentHashMap，如果用图形化的表达方式来展示这种数据结构，可以参考下图：
+
+![](res/2024-11-14-11-50-55.png)
+
+可以看到，Eureka 按照应用名称（spring.application.name）和服务实例 Id（instanceId）来构建两层结构。然后，Eureka 使用了 Lease（租约）这个概念来对服务的元数据进行抽象。围绕 Lease，Eureka 提供了如下所示的 LeaseManager 接口来对其进行管理，该接口的方法与前面介绍的几个核心操作是一一对应的。
+
+```java
+public interface LeaseManager<T> {
+   // 服务注册
+   void register(T r, int leaseDuration, boolean isReplication);
+   // 服务下线
+   boolean cancel(String appName, String id, boolean isReplication);
+   // 服务续约
+   boolean renew(String appName, String id, boolean isReplication);
+   // 服务剔除
+   void evict();
+}
+```
+
+本质上，LeaseManager 中的各个方法的执行流程都只是围绕双层的存储结构展开操作而已，比较类似。我们这里选择用于执行服务注册操作的 register 方法进行展开，register 方法非常长，我们对源码进行裁剪，得出如下所示的重点处理流程：
+
+```java
+public void register(InstanceInfo registrant, int leaseDuration, boolean isReplication) {
+   try {
+      read.lock();
+
+      // 从已存储的 registry 获取一个服务定义
+      Map<String, Lease<InstanceInfo>> gMap = registry.get(registrant.getAppName());
+      REGISTER.increment(isReplication);
+      if (gMap == null) {
+         // 初始化一个 Map<String, Lease<InstanceInfo>>，并放入 registry 中
+      }
+
+      // 根据当前注册的 ID 能找到对应的 Lease
+      Lease<InstanceInfo> existingLease = gMap.get(registrant.getId());
+
+      if (existingLease != null && (existingLease.getHolder() != null)) {
+         // 如果能找到，根据时间确定以哪个实例为准
+      } else {
+         // 如果找不到，设置续约数量及其阈值参数
+      }
+
+      // 创建一个新 Lease 并放入 Map 中
+      Lease<InstanceInfo> lease = new Lease<InstanceInfo>(registrant, leaseDuration);
+      if (existingLease != null) {
+         lease.setServiceUpTimestamp(existingLease.getServiceUpTimestamp());
+      }
+      gMap.put(registrant.getId(), lease);
+
+      synchronized (recentRegisteredQueue) {
+         // 同步更新 recentRegisteredQueue
+      }
+
+      // 处理服务的 InstanceStatus
+      registrant.setActionType(ActionType.ADDED);
+
+      // 更新服务最新更新时间
+      registrant.setLastUpdatedTimestamp();
+
+      // 刷新缓存
+      invalidateCache(registrant.getAppName(), registrant.getVIPAddress(), registrant.getSecureVipAddress());
+   } finally {
+      read.unlock();
+   }
+}
+```
+
+可以看到，整个 register 方法完成的就是对 Map 中数据的更新过程，这里我们针对服务注册的各个核心操作添加了注释。需要注意的是，在更新完 Map 中数据之后，Eureka 还会通过 invalidateCache 执行刷新缓存操作，这就引出我们接下来要讨论的话题，即 Eureka 服务缓存机制。
+
+Eureka 服务器端组件的另一个核心功能是提供服务列表，为了提高性能，服务列表在 Eureka 服务器会缓存一份，并通过一定的定时机制进行更新。
+
+在 Eureka 中，ApplicationResource 类提供了根据应用获取注册信息的入口。我们来看该类的 getApplication 方法，核心代码如下所示：
+
+```java
+Key cacheKey = new Key(
+   Key.EntityType.Application,
+   appName,
+   keyType,
+   CurrentRequestVersion.get(),
+   EurekaAccept.fromString(eurekaAccept)
+);
+
+String payLoad = responseCache.get(cacheKey);
+// ....
+```
+
+可以看到这里是构建了一个 cacheKey，并直接调用了 responseCache.get(cacheKey) 方法来返回一个字符串并构建响应。从命名上看，不难想象这里使用了缓存机制。在 ResponseCache 的 get 方法中，我们发现它使用了如下所示的处理策略：
+
+```java
+Value getValue(final Key key, boolean useReadOnlyCache) {
+   Value payload = null;
+   try {
+      if (useReadOnlyCache) {
+         final Value currentPayload = readOnlyCacheMap.get(key);
+         if (currentPayload != null) {
+            payload = currentPayload;
+         } else {
+            payload = readWriteCacheMap.get(key);
+            readOnlyCacheMap.put(key, payload);
+         }
+      } else {
+         payload = readWriteCacheMap.get(key);
+      }
+   } catch (Throwable t) {
+      logger.error("Cannot get value for key : {}", key, t);
+   }
+   return payload;
+}
+```
+
+可以看到上述代码中有两个缓存，一个是 readOnlyCacheMap，一个是 readWriteCacheMap。其中 readOnlyCacheMap 就是一个 JDK 中的 ConcurrentMap，而 readWriteCacheMap 则是 Guava Cache 库中的 LoadingCache 类型。
+
+把缓存设计为一个只读的 readOnlyCacheMap 以及一个可读写的 readWriteCacheMap，这是一种设计上的技巧，可以更好地分离职责。但因为两个缓存中保存的实际上是同一份数据，所以，我们在不断更新 readWriteCacheMap 的同时，也需要确保 readOnlyCacheMap 中的数据得到同步。为此 ResponseCacheImpl 提供了一个定时任务 CacheUpdateTask，如下所示：
+
+```java
+private TimerTask getCacheUpdateTask() {
+   return new TimerTask() {
+      @Override
+      public void run() {
+         for (Key key : readOnlyCacheMap.keySet()) {
+            try {
+               CurrentRequestVersion.set(key.getVersion());
+               Value cacheValue = readWriteCacheMap.get(key);
+               Value currentCacheValue = readOnlyCacheMap.get(key);
+               if (cacheValue != currentCacheValue) {
+                  // 更新 readOnlyCacheMap
+                  readOnlyCacheMap.put(key, cacheValue);
+               }
+            } catch (Throwable th) {
+               // ...
+            }
+         }
+      }
+   };
+}
+```
+
+显然，这个定时任务主要是从 readWriteCacheMap 更新数据到 readOnlyCacheMap。
+
+### Eureka 客户端基本原理
+
+介绍完服务器端基本原理，我们来看 Eureka 客户端组件的实现方式。服务的提供者和消费者都是注册中心的客户端，其中服务的提供者主要完成服务注册等操作，这部分的内容主要依赖于前面介绍的服务端能力，我们不再具体展开。在接下来的内容中，我们重点关注的是服务的消费者如何定时获取位于服务器上的服务实例信息，以及如何构建属于它自身的本地缓存。
+
+对于 Eureka 而言，作为客户端核心组件的 DiscoveryClient 类具备缓存功能。DiscoveryClient 中的 initScheduledTasks 方法用于初始化各种调度任务，对于缓存刷新而言，调度器的初始化过程如下所示：
+
+```java
+if (clientConfig.shouldFetchRegistry()) {
+   int registryFetchIntervalSeconds = clientConfig.getRegistryFetchIntervalSeconds();
+   int expBackOffBound = clientConfig.getCacheRefreshExecutorExponentialBackOffBound();
+   scheduler.schedule(
+      new TimedSupervisorTask(
+         "cacheRefresh",
+         scheduler,
+         cacheRefreshExecutor,
+         registryFetchIntervalSeconds,
+         TimeUnit.SECONDS,
+         expBackOffBound,
+         new CacheRefreshThread()
+      ),
+      registryFetchIntervalSeconds,
+      TimeUnit.SECONDS
+   );
+}
+```
+
+显然，这里启动了一个调度任务并通过一个 CacheRefreshThread 线程完成具体操作，系统默认是每隔 30 秒刷新本地存储的服务实例数据。在这个线程中，我们发现在进行一系列的校验之后，最终调用了 DiscoveryClient 中的 fetchRegistry 方法完成对服务注册信息的获取。该方法如下所示（为了简单起见，对代码进行了部分裁剪，只保留主流程）：
+
+```java
+private boolean fetchRegistry(boolean forceFullRegistryFetch) {
+   try {
+      // 获取应用
+      Applications applications = getApplications();
+      if (condition) { // 如果满足全量拉取条件
+         // 全量拉取服务实例数据
+         getAndStoreFullRegistry();
+      } else {
+         // 增量拉取服务实例数据
+         getAndUpdateDelta(applications);
+      }
+
+      // 重新计算和设置一致性 hashcode
+      applications.setAppsHashCode(applications.getReconcileHashCode());
+   }
+
+   // 刷新本地缓存
+   onCacheRefreshed();
+   // 基于缓存中的实例数据更新远程实例状态
+   updateInstanceRemoteStatus();
+   // 注册表拉取成功后返回 true
+   return true;
+}
+```
+
+上述代码中带注释的几个方法都非常有用，因为 getAndStoreFullRegistry 方法的逻辑相对比较简单，我们将重点介绍 getAndUpdateDelta 方法，以便学习在 Eureka 中如何实现增量数据更新的设计技巧。裁剪之后的 getAndUpdateDelta 方法代码下所示：
+
+```java
+private void getAndUpdateDelta(Applications applications) throws Throwable {
+   long currentUpdateGeneration = fetchRegistryGeneration.get();
+
+   Applications delta = null;
+   // 通过 eurekaTransport.queryClient 获取增量信息
+   EurekaHttpResponse<Applications> httpResponse = eurekaTransport.queryClient.getDelta(remoteRegionsRef.get());
+   if (httpResponse.getStatusCode() == Status.OK.getStatusCode()) {
+      delta = httpResponse.getEntity();
+   }
+
+   if (delta == null) {
+      // 如果增量信息为空，就直接发起一次全量更新
+      getAndStoreFullRegistry();
+   } else if (fetchRegistryGeneration.compareAndSet(currentUpdateGeneration, currentUpdateGeneration + 1)) { // 通过 CAS 来确保请求的线程安全性
+      String reconcileHashCode = "";
+      if (fetchRegistryUpdateLock.tryLock()) {
+         try {
+            // 用 Eureka 返回的增量数据和本地数据做合并操作
+            updateDelta(delta);
+
+            // 用合并了增量数据之后的本地数据来生成一致性 hashcode
+            reconcileHashCode = getReconcileHashCode(applications);
+         } finally {
+            fetchRegistryUpdateLock.unlock();
+         }
+      } else {
+         // ...
+      }
+
+      // 比较本地数据中的 hashcode 和来自服务器端的 hashcode
+      if (!reconcileHashCode.equals(delta.getAppsHashCode()) || clientConfig.shouldLogDeltaDiff()) {
+         // 如果 hashcode 不一致，就触发远程调用进行全量更新
+         reconcileAndLogDifference(delta, reconcileHashCode);
+      }
+   } else {
+      // ...
+   }
+}
+```
+
+结合 Eureka 服务器端基本原理，我们知道 Eureka 服务器端会保存一个服务注册列表的缓存。在 Eureka 官方文档中提到 Eureka 服务器会把更新数据保留 3 分钟，而 Eureka 客户端通过前面介绍的定时机制会每隔 30 秒刷新本地缓存。原则上，只要 Eureka 客户端不停地获取服务器端的更新数据，就能保证自己的数据和 Eureka 服务器端的保持一致。但如果客户端在 3 分钟之内没有获取更新数据，就会导致自身与服务器端的数据不一致。
+
+为了解决这个问题，Eureka 采用了一种叫做一致性 HashCode（ReconcileHashCode） 的实现机制。Eureka 服务器端每次返回的增量更新数据中都会带有一个 HashCode，Eureka 客户端用本地服务实例信息算出的 HashCode 应该和 Eureka 服务器返回的一致，若不一致就证明增量更新出现了问题，导致客户端和服务器端上的服务实例信息不一致了，此时需要全量更新。
+
+在 Eureka 中，计算一致性 HashCode 的方法如下所示，可以看到这一方法基于服务实例信息完成一个 String 类型的 HashCode 计算过程。
+
+```java
+public static String getReconcileHashCode(Map<String, AtomicInteger> instanceCountMap) {
+   StringBuilder reconcileHashCode = new StringBuilder(75);
+   for (Map.Entry<String, AtomicInteger> mapEntry : instanceCountMap.entrySet()) {
+      reconcileHashCode.append(mapEntry.getKey()).append(STATUS_DELIMITER).append(mapEntry.getValue().get())append(STATUS_DELIMITER);
+   }
+   return reconcileHashCode.toString();
+}
+```
+
+作为总结，Eureka 客户端缓存定时更新的流程下所示，可以看到它与服务注册的流程基本一致。也就是说在 Eureka 中，服务提供者和服务消费者作为 Eureka 服务器的客户端采用了同一套体系完成与服务器端的交互。
+
+![](res/2024-11-14-11-51-36.png)
+
+Eureka 客户端和服务器端的差异化信息计算和获取过程，是这种更新机制所必须要考虑的问题，也是我们自己在设计类似场景时的注意点。我们可以从上述实现原理中掌握优秀开源框架底层的开发技巧。
+
+## 解题要点
+
+对于本讲中所讨论的话题，面试过程中第一个需要明确的要点就是基于定时更新机制的注册中心实现机制。相较上一讲介绍的推送机制，定时更新机制的概念容易理解，基本的实现策略也比较简单。通常，我们采用一些定时器实现工具和框架对位于服务器上的服务实例信息进行轮询即可。
+
+但是需要注意，定时更新机制有它自身的复杂度，我们需要综合考虑定时策略、同步数据、同步效率等问题，这些问题是这种机制所特有的，在面试过程中需要重点对这些机制展开讨论。这是面试官的考查重点，也能很好展现候选人的竞争力。对于这些机制的讨论，我们可以分成两个步骤，首先阐述这些机制背后的设计思想，然后再来结合具体框架给出底层的实现原理分析。
+
+至于具体的开源框架，和上一讲中所提到的 Zookeeper 相比，定时更新机制类框架采用的是另一套完全不同的实现策略。我们在回答过程中需要基于特定的技术要点来进行分析。
+
+举例来说，针对“Eureka 客户端从服务器端获取注册信息”这一特定的细节，回答难度实际上很大。而至于为什么要问这一特定细节，在于 Eureka 在实现这一细节上提供了一种处理增量数据的开发技巧和工程实践，值得我们深入学习和应用。我们知道，当执行轮询操作时，需要考虑的一大问题就是如何高效地从服务端获取最新的服务实例信息。为了提高效率、降低网络通信的开销，一般都会考虑引入 “增量”数据获取的设计思想，Eureka 也采用了这种机制。具体来讲，Eureka 采用了一种叫做一致性 HashCode 的实现机制。
+
+如果我们能够结合本讲中介绍的这种“增量”式数据获取方式，那么相信能够获得面试官的更多认同。这也是我在具体面试过程中的一条经验，即对于那些普通的知识点，建议不用过多展开，但我们可以多围绕框架本身所具备的一些特有的设计和开发技巧给出自己的分析和总结。
+
+## 小结与预告
+
+本讲介绍了实现注册中心的另一种常见的策略，即基于定时更新策略来实现客户端与服务端之间元数据的有效同步。这是很多注册中心所采用的实现策略，设计思想简单，应用也很广泛。我们结合老牌的注册中心开源框架 Eureka 对这一主题进行了详细展开，并分析了该框架在实现这一主题过程中所具备的开发技巧。一方面，这些开发技巧是面试过程中的回答要点，另一方面，我们也可以结合具体的场景把这些开发技巧应用到日常开发过程中。
+
+在分布式系统中，当服务的数量达到一定规模时，我们就不建议客户端对这些服务直接发起远程请求了。这时候，我们可以引入服务网关这一技术组件。那么，如何实现一款高性能服务网关？下一讲将围绕这个话题展开讨论。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
