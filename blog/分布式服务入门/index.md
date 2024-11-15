@@ -3723,19 +3723,19 @@ if (!failedRegistered.isEmpty()) {
 
 作为总结，我们明确注册中心就是这样一种服务治理工具：管理系统中所有服务实例的运行时状态，并能够把这些状态的变化同步到各个服务中。注册中心的实现有不同的策略，业界也诞生了一批不同类型的注册中心实现工具。本讲所阐述的 Zookeeper 是其中的代表性框架之一，具备实时通知能力。
 
-请注意，并不是所有的注册中心都采用的是和 Zookeeper 一样的监听和推送机制，我们也可以采用定时更新策略来获取注册中心中最新的元数据。那么，如果采用定时更新策略来设计注册中心，这个过程有有哪些注意点呢？这就是下一讲要讨论的内容。
+请注意，并不是所有的注册中心都采用的是和 Zookeeper 一样的监听和推送机制，我们也可以采用定时更新策略来获取注册中心中最新的元数据。那么，如果采用定时更新策略来设计注册中心，这个过程有哪些注意点呢？这就是下一讲要讨论的内容。
 
 # 注册中心：如果采用定时更新策略来设计注册中心，有哪些注意点？
 
-上一讲我们进入到了注册中心这一技术组件的讨论，我们给出了注册中心的基本模型，并基于 Zookeeper 框架分析了“具备实时通知能力的注册中心”的实现方式。
+上一讲我们进入到了注册中心这一技术组件的讨论，我们给出了注册中心的基本模型，并基于 Zookeeper 框架分析了 `具备实时通知能力的注册中心` 的实现方式。
 
-本讲继续讨论注册中心，并关注于另一种实现方式，即采用定时更新策略的注册中心。可以说，这两种注册中心的设计思想和实现方式完全不同。
+本讲继续讨论注册中心，并关注另一种实现方式，即采用定时更新策略的注册中心。可以说，这两种注册中心的设计思想和实现方式完全不同。
 
 那么，如果我们采用的是定时更新策略，应该如何获取最新的服务实例元数据呢？本讲内容将围绕这个话题进行展开。在日常开发过程中，关于定时更新策略的应用场景实际上非常多，也是面试过程中经常会出现的考查点。因此，本讲内容中所介绍的实现过程中也有很多值得深入分析和学习的开发和面试技巧。
 
 ## 问题背景
 
-与注册中心相关的问题背景，我们在上一讲中已经介绍了很多，这里不再重复展开。在本讲中，因为我们是围绕“如果采用定时更新策略来设计注册中心”这一话题进行展开，所以这里也列举在面试过程中与这个话题相关的一些常见面试题：
+与注册中心相关的问题背景，我们在上一讲中已经介绍了很多，这里不再重复展开。在本讲中，因为我们是围绕 `如果采用定时更新策略来设计注册中心` 这一话题进行展开，所以这里也列举在面试过程中与这个话题相关的一些常见面试题：
 
 - 如果采用轮询机制来获取注册中心中的数据，你会选择什么样的实现技术？
 - 在定时更新过程中，客户端如何判断位于注册中心中的数据已经发生了变化？
@@ -3746,13 +3746,13 @@ if (!failedRegistered.isEmpty()) {
 
 ## 问题分析
 
-关于这类面试题的回答思路和上一讲中介绍的内容是类似的，你可以回顾上一讲中“问题分析”部分，这里不做重复展开。但是，因为本讲关注的是采用定时更新策略的注册中心实现方式，所以需要基于这点进行具体分析。和推送机制不同，定时策略在设计和实现上需要考虑以下几点。
+关于这类面试题的回答思路和上一讲中介绍的内容是类似的，你可以回顾上一讲中问题分析部分，这里不做重复展开。但是，因为本讲关注的是采用定时更新策略的注册中心实现方式，所以需要基于这点进行具体分析。和推送机制不同，定时策略在设计和实现上需要考虑以下几点。
 
 - 定时策略：基于什么样的时机触发轮询操作？
 - 同步数据：同步什么样的数据？同步多少数据？
 - 同步效率：如何降低轮询过程中不必要的性能损耗？
 
-请注意，在基于推送机制构建注册中心的实现过程中，上述问题都是不需要考虑的。根本原因在于推送是一种“被动式”的处理机制，注册中心的客户端不需要关注什么时候会推送，而只需要在合适的时机触发回调函数即可。而定制更新策略则不同，体现的一种“主动式”的处理机制，注册中心的客户端在与服务器进行交互的过程中不得不考虑上述问题。而这些问题的背后，也包含了对应的技术实现方式，让我们一起来看一下。
+请注意，在基于推送机制构建注册中心的实现过程中，上述问题都是不需要考虑的。根本原因在于推送是一种被动式的处理机制，注册中心的客户端不需要关注什么时候会推送，而只需要在合适的时机触发回调函数即可。而定制更新策略则不同，体现的一种主动式的处理机制，注册中心的客户端在与服务器进行交互的过程中不得不考虑上述问题。而这些问题的背后，也包含了对应的技术实现方式，让我们一起来看一下。
 
 ## 技术体系
 
@@ -4060,5 +4060,332 @@ Eureka 客户端和服务器端的差异化信息计算和获取过程，是这�
 本讲介绍了实现注册中心的另一种常见的策略，即基于定时更新策略来实现客户端与服务端之间元数据的有效同步。这是很多注册中心所采用的实现策略，设计思想简单，应用也很广泛。我们结合老牌的注册中心开源框架 Eureka 对这一主题进行了详细展开，并分析了该框架在实现这一主题过程中所具备的开发技巧。一方面，这些开发技巧是面试过程中的回答要点，另一方面，我们也可以结合具体的场景把这些开发技巧应用到日常开发过程中。
 
 在分布式系统中，当服务的数量达到一定规模时，我们就不建议客户端对这些服务直接发起远程请求了。这时候，我们可以引入服务网关这一技术组件。那么，如何实现一款高性能服务网关？下一讲将围绕这个话题展开讨论。
+
+# 服务网关：如何实现一款高性能服务网关？
+
+在上一讲中，我们引入了注册中心这一技术组件来构建分布式系统。通过注册中心，我们可以对系统中存在的服务进行有效治理。一旦服务得到了治理，下一步就可以对这些服务发起访问了。
+
+这个过程并不复杂，但也没有我们想象的那么简单，因为客户端请求和服务端所提供的访问入口之间需要进行粒度匹配、路由、安全等一系列控制。为了实现这些控制，服务网关（Gateway） 也就应运而生了。
+
+那么，什么是服务网关？如何构建一款高性能服务网关？这是面试过程中的常见话题。本讲内容将给出这些问题的具体答案。
+
+## 问题背景
+
+在分布式架构中，如果客户端和各个服务直接进行交互，可能会出现很多问题。通常，每个服务的职责在于提供某一个业务领域的访问入口，而客户端则一般都需要整合多项业务数据。这就会导致客户端的请求和服务提供的访问入口在粒度上是不一致，导致客户端不得不发送多个请求才能获取所想要的数据。另一方面，在这种场景下，如果某个服务发生了调整，很可能会导致客户端需要做相应的调整，这显然是不合理的。
+
+下图展示了服务版本升级的一种演进结构：
+
+![](res/2024-11-15-11-49-42.png)
+
+在这样的背景下，我们可以根据需要在客户端和服务端之间架设一层服务网关，从而满足前面提到的各种需求。而在分布式系统的构建过程中，一个核心要点就是需要确保所有来自客户端的请求都通过服务网关再路由和转发到后端服务，这样我们就可以在网关层对请求本身进行统一的处理。
+
+从架构设计角度讲，服务网关的出现有其必然性。而围绕服务网关的构建过程，也存在一些我们不得不去思考的问题。这些问题是面试过程中考查的重点，常见的包括：
+
+- 服务网关存在的必要性和作用是什么？
+- 服务网关的基本结构是怎么样的？
+- 服务网关如何实现请求的路由和转发？
+- 你熟悉的服务网关工具有哪些？各自有什么功能上的特性？
+- 如果让你在服务网关中添加安全性控制机制，你会怎么做？
+- 如果想要在网关层对请求进行限流，可以采用怎么样的实现方式？
+
+上述问题都很经典，是面试过程中的常考题，需要你引起重视。接下来，我们从面试角度出发对这些问题做进一步分析。
+
+## 问题分析
+
+在当下的分布式系统开发过程中，服务网关已经成为必不可少的一个技术组件。关于服务网关的相关工具和框架也层出不穷。虽然，每个网关工具在部署和使用方式上各有不同，但它们的架构本质上是非常类似的。和前面介绍的注册中心相比，服务网关在定位上更偏向是一种底层的中间件，通用性很强，所以我们可以比较容易地对它的作用、组成结构以及功能特性进行抽象和提炼。这部分内容更多的是理论知识，需要候选人熟练掌握。
+
+掌握了概念之后，接下来就是具体的开源框架。
+
+对于服务网关而言，实际上它所具备的核心功能还是请求转发机制，所以，很多请求-响应类的框架所要面临的技术难点服务网关同样也需要面对。典型的就是性能问题，如何构建高性能的请求转发机制是我们在分析具体网关框架时的一个切入点，也是面试过程中的常见考点。
+
+最后，服务网关类的面试题经常会考查候选人对某一个特定功能特性的掌握程度，比方说网关的路由机制、安全性机制、限流机制等。候选人在回答这些问题时，需要结合自己擅长的框架做深入的研究，并能够从原理出发给出自己的总结和思考。
+
+在本讲中，我们将要深入分析的是 Spring Cloud 家族的 Spring Cloud Gateway 框架。而在此之前，让我们先从服务网关的基本概念开始讲起。
+
+## 技术体系
+
+服务网关的概念本质上不难理解，从设计模式上讲，我们也可以把服务网关看作是门面（Facade）模式的一种具体表现形式。门面模式的作用就是把复杂度屏蔽在系统内部，从而降低耦合度，如下图所示：
+
+![](res/2024-11-15-11-52-03.png)
+
+既然是一种门面，那么网关中显然不应该包含任何与业务相关的处理逻辑。那么，服务网关的核心作用究竟有哪些呢？主要包括三部分，即解耦、适配和数据聚合。
+
+从技术架构而言，任何组件之间的交互都应该具备较低的耦合度。正如我们在问题背景部分所讨论的，客户端请求和服务端访问入口之间的依赖关系需要确保独立，即服务端背后的功能演进和版本升级过程对于客户端而言应该是透明的。考虑到分布式系统中往往存在大量服务，解耦也是我们在服务体系过程中的一项核心目标。
+
+另一方面，在分布式系统中，客户端的类型也是多样的。当我们面对多个不同类型的客户端时，考虑到页面展示上的差异性，往往需要针对特定的客户端请求提供特定的响应结果，哪怕这些请求属于同一业务场景。
+
+举个例子，分页是一种常见的数据返回效果，但不同客户端对分页数量的要求可能就是不一样的，如下图所示：
+
+![](res/2024-11-15-11-53-01.png)
+
+最后，服务网关的一大作用就是可以对来自不同服务的数据进行聚合并统一返回给客户端。这种聚合过程视场景而定，可以在一次请求中返回一组业务数据，从而降低客户端访问服务端的次数，提升系统的性能。
+
+介绍完网关的作用，我们接下来看它所具备的基本结构和功能，如下图所示：
+
+![](res/2024-11-15-11-53-33.png)
+
+总体而言，服务网关为分布式环境下的请求处理过程提供了强大的定制化技术能力，常见的扩展性、伸缩性、安全性和可用性等架构设计上的技术点在网关中都能得到体现。
+
+从扩展性和伸缩性角度讲，网关提供了服务路由支持，我们可以在网关层添加各种路由规则，确保来自客户端的请求能够以合适的方式发送到目标服务。在这个过程中，我们可以很轻松地实现请求转发、系统扩容等操作。
+
+一般而言，对于来自客户端的任何请求都需要考虑安全性，而服务网关最适合来完成这部分操作。实现访问安全性的前提是用户认证，我们可以在网关层添加各种身份认证、黑白名单、Token 校验等常见的安全性控制手段。
+
+最后，我们需要强调一下服务网关所具备的访问控制功能。在高并发系统中，我们通常会采用限流和降级等手段来防止服务出现不可用。这时候，我们就可以在服务网关上设置对应阈值或规则，从而确保来自客户端的请求不会流转到后台服务。
+
+## 源码解析
+
+介绍完服务网关的作用和结构之后，我们接下来讨论具体的实现工具。这里，我们来到 Spring 家族中的 Spring Cloud Gateway 框架，这是目前最主流的服务网关之一。
+
+### Spring Cloud Gateway 架构
+
+Spring Cloud Gateway 的核心功能是对 Web 请求进行路由和过滤，其内部大量依赖于 Spring 中的响应式 Web 框架 WebFlux。
+
+在接下来的内容中，我们先来分析 Spring WebFlux 技术栈，然后在此基础上引出 Spring Cloud Gateway 的整体架构。针对 Spring Cloud Gateway 这款框架，我建议你把它和 WebFlux 对比起来一起分析，这是一种非常有效的学习方法。
+
+虽然 WebFlux 和 WebMVC 是两个时代的技术体系，但事实上，Spring 也为传统 WebMVC 中的 HandlerMapping、HandlerAdapter 等组件提供了对应的响应式版本。这也体现了 Spring 所采用的一种设计理念，即充分利用现有组件进行增强，而不是轻易地替换。
+
+我们知道传统的 Servlet API 是阻塞式的，所以我们需要引入 ServerHttpRequest 和 ServerHttpResponse 这两个对象。在 WebFlux 中，它们分别代表着请求和响应本身。类似的，作为请求处理的核心组件，我们也需要引入一个新的过滤器链 WebFilterChain，定义如下所示：
+
+```java
+public interface WebFilterChain {
+   Mono<Void> filter(ServerWebExchange exchange);
+}
+```
+
+请注意，我们在这里并没有看到 ServerHttpRequest 和 ServerHttpResponse 这两个对象。实际上，上述代码中的 ServerWebExchange 内置了这两个对象，相当于是一个请求上下文。另一方面，我们发现 filter 方法返回的是一个 Mono 对象，也就意味着整个调用链路使用了响应式编程的开发模式。
+
+前面提到，HandlerMapping、HandlerAdapter 等核心对象在 WebFlux 中都能找到对应的实现，我们接下来看一下它们的定义，如下所示：
+
+```java
+public interface HandlerMapping {
+   Mono<Object> getHandler(ServerWebExchange exchange);
+}
+
+public interface HandlerAdapter {
+   Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler);
+}
+```
+
+类似的，WebMVC 中的 RequestMappingHandlerMapping 和 RequestMappingHandlerAdapter 等对象也同样存在响应式版本。但是请注意，WebFlux 还专门提供了一套新的技术组件用来提供函数式编程的开发模式，这套组件就是 RouterFunctionMapping 和 HandlerFunctionAdapter。
+
+整个 WebFlux 的架构如下图所示：
+
+![](res/2024-11-15-14-23-43.png)
+
+对 WebFlux 有了基本认识之后，我们来讨论 Spring Cloud Gateway。就请求响应模式而言，可以说 Spring Cloud Gateway 和 WebFlux 采用的是完全一样的处理方式。但 Spring Cloud Gateway 内部也提出了两个核心概念，一个是过滤器（Filter），一个是谓词（Predicate），它的整体架构如下图所示：
+
+![](res/2024-11-15-14-24-14.png)
+
+Spring Cloud Gateway 中的过滤器和 WebFlux、WebMVC 中的过滤器是同一个概念，都可以用于在响应 HTTP 请求之前或之后修改请求本身及对应的响应结果，区别在于两者的类型和实现方式。
+
+而所谓谓词，本质上是一种判断条件，用于将 HTTP 请求与路由进行匹配。Spring Cloud Gateway 内置了大量的谓词组件，可以分别基于 HTTP 请求的消息头、请求路径等常见的路由媒介进行自动匹配以便决定路由结果。
+
+### Spring Cloud Gateway 工作流程
+
+Spring Cloud Gateway 中的核心概念就是路由和过滤，我们通过谓词判断获取 Web 请求的路由，然后基于一组过滤器执行过滤，并最终输出结果。在讨论具体的过滤器实现过程之前，我们先来关注整个请求处理流程。
+
+我们知道 Spring MVC 中有一个核心类 DispatcherServlet，而 WebFlux 中对应的核心类是 DispatcherHandler，该类充当着所有请求的入口，如下图所示：
+
+![](res/2024-11-15-14-24-47.png)
+
+上图中，DispatcherHander 的 handler 方法用来匹配不同的 HandlerMapping 并处理请求，如下所示：
+
+```java
+@Override
+public Mono<Void> handle(ServerWebExchange exchange) {
+   if (this.handlerMappings == null) {
+      return createNotFoundError();
+   }
+
+   return Flux.fromIterable(this.handlerMappings)
+      .concatMap(mapping -> mapping.getHandler(exchange))
+      .next()
+      .switchIfEmpty(createNotFoundError())
+      // 这里根据获取到的 handler 进行处理
+      .flatMap(handler -> invokeHandler(exchange, handler))
+      .flatMap(result -> handleResult(exchange, result));
+}
+```
+
+这时候，DispatcherHander 就能在一组 handlerMappings 找到 RoutePredicateHandlerMapping，而这个 RoutePredicateHandlerMapping 也是在自动配置类 GatewayAutoConfiguration 中进行装配的，如下所示：
+
+```java
+public class GatewayAutoConfiguration {
+   @Bean
+   public RoutePredicateHandlerMapping routePredicateHandlerMapping(FilteringWebHandler webHandler, RouteLocator routeLocator, GlobalCorsProperties globalCorsProperties, Environment environment) {
+      return new RoutePredicateHandlerMapping(webHandler, routeLocator, globalCorsProperties, environment);
+   }
+}
+```
+
+虽然在 DispatcherHander 的 handler 方法中，使用的是响应式编程的代码语法，但整个流程和 Spring MVC 中的处理机制非常类似。而在 RoutePredicateHandlerMapping 中，通过 getHandlerInternal 方法获取了当前请求的路由信息并放入了上下文中。注意到在这个方法中存在一个 lookupRoute 方法，该方法用来查找真正的路由信息，如下所示：
+
+```java
+protected Mono<Route> lookupRoute(ServerWebExchange exchange) {
+   return this.routeLocator.getRoutes()
+      .concatMap(
+         route -> Mono.just(route).filterWhen(r -> {
+            exchange.getAttributes().put(GATEWAY_PREDICATE_ROUTE_ATTR, r.getId());
+            // 根据断言获取到真正的 Route
+            return r.getPredicate().apply(exchange);
+         })
+         .doOnError()
+         .onErrorResume(e -> Mono.empty())
+      )
+      .next()
+      .map(route -> {
+         // ...
+         // 自定义的路由校验方法入口
+         validateRoute(route, exchange);
+         return route;
+      });
+}
+```
+
+显然，这里通过断言来获取路由信息。一旦获取路由信息之后，下一步就是加载各种过滤器了，这时候就来到了 FilteringWebHandler。该类实现了 WebHandler 接口，并在它的构造函数中通过一个 loadFilters 方法加载过滤器，如下所示：
+
+```java
+public class FilteringWebHandler implements WebHandler {
+   protected static final Log logger = LogFactory.getLog(FilteringWebHandler.class);
+   private final List<GatewayFilter> globalFilters;
+
+   public FilteringWebHandler(List<GlobalFilter> globalFilters) {
+      this.globalFilters = loadFilters(globalFilters);
+   }
+
+   // 将传入的 GlobalFilter 转化为 GatewayFilter
+   private static List<GatewayFilter> loadFilters(List<GlobalFilter> filters) {
+      return filters.stream().map(filter -> {
+         GatewayFilterAdapter gatewayFilter = new GatewayFilterAdapter(filter);
+         if (filter instanceof Ordered) {
+            int order = ((Ordered) filter).getOrder();
+            return new OrderedGatewayFilter(gatewayFilter, order);
+         }
+         return gatewayFilter;
+      }).collect(Collectors.toList());
+   }
+
+   // …
+}
+```
+
+可以看到，上述 loadFilters 方法的作用就是将传入的 GlobalFilter 转化为 GatewayFilter，关于这两类过滤器我们后面还会介绍。
+
+我们接着来看 FilteringWebHandler 的 handle 方法，如下所示：
+
+```java
+@Override
+public Mono<Void> handle(ServerWebExchange exchange) {
+   // 从 ServerWebExchange 获取 Route
+   Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);
+   // 从 Route 获取到 Filter
+   List<GatewayFilter> gatewayFilters = route.getFilters();
+
+   // 将 GlobalFilter 和路由的 Filter 合并
+   List<GatewayFilter> combined = new ArrayList<>(this.globalFilters);
+   combined.addAll(gatewayFilters);
+   // 对 Filter 排序
+   AnnotationAwareOrderComparator.sort(combined);
+
+   // 创建 FilterChain 并执行过滤
+   return new DefaultGatewayFilterChain(combined).filter(exchange);
+}
+```
+
+上述方法中的几个步骤都很明确，而这里出现的 DefaultGatewayFilterChain 就是一种过滤器链，用来基于该链中的各个过滤器执行过滤操作，具体如下所示：
+
+```java
+@Override
+public Mono<Void> filter(ServerWebExchange exchange) {
+   return Mono.defer(() -> {
+      if (this.index < filters.size()) {
+         GatewayFilter filter = filters.get(this.index);
+         DefaultGatewayFilterChain chain = new DefaultGatewayFilterChain(this, this.index + 1);
+         return filter.filter(exchange, chain);
+      } else {
+         return Mono.empty();
+      }
+   });
+}
+```
+
+显然，DefaultGatewayFilterChain 是一种典型的管道-过滤器架构模式的应用方式，关于这一架构模式我们在后面还会有详细的讨论。
+
+在 Spring Cloud Gateway 中内置了许多过滤器，这些过滤器可以分成两大类，即 GatewayFilter 和 GlobalFilter，正如我们在前面的 FilteringWebHandler 中所看到的。其中，GatewayFilter 通过配置作用于每次路由，而 GlobalFilter 则作用于所有的请求。当一个请求被匹配到对应路由时，会将 GlobalFilter 和已绑定路由的 GatewayFilter 合并到一起。所有的过滤器都实现了 `org.springframework.core.Ordered` 接口，因此会根据过滤器的 Order 值进行排序。
+
+在这里，我们无意对所有的过滤器做一一展开，而是挑选其中具有代表性的一个过滤器，并对它的实现过程进行分析，从而帮助你更好地理解过滤器的具体运行原理。
+
+这里我们以 RouteToRequestUrlFilter 为例来分析过滤器的实现机制，该过滤器用于根据 RouteUri 生成请求的真正 URL，并放入请求上下文中供后续 Filter 使用。RouteToRequestUrlFilter 的 filter 方法如下所示：
+
+```java
+@Override
+public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+   Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
+   if (route == null) {
+      return chain.filter(exchange);
+   }
+
+   // 获取请求的 URI
+   URI uri = exchange.getRequest().getURI();
+   // 判断是否包含诸如 % 等的编码部分内容
+   boolean encoded = containsEncodedParts(uri);
+   // 获取 Route 的 uri
+   URI routeUri = route.getUri();
+   // 判断是否为其他类型的协议，如果是则根据特定协议生成 URI
+   if (hasAnotherScheme(routeUri)) {
+      // 将当前请求的 schema 放入上下文中
+      exchange.getAttributes().put(GATEWAY_SCHEME_PREFIX_ATTR, routeUri.getScheme());
+      routeUri = URI.create(routeUri.getSchemeSpecificPart());
+   }
+
+   // 如果 RouteUri 以 lb 开头，则请求中必须带有 host，否则直接抛出异常
+   if ("lb".equalsIgnoreCase(routeUri.getScheme()) && routeUri.getHost() == null) {
+      throw new IllegalStateException("Invalid host: " + routeUri.toString());
+   }
+
+   // 生成请求 URL，并放入上下文中
+   URI mergedUrl = UriComponentsBuilder
+      .fromUri(uri)
+      .scheme(routeUri.getScheme())
+      .host(routeUri.getHost())
+      .port(routeUri.getPort())
+      .build(encoded)
+      .toUri();
+   exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, mergedUrl);
+   return chain.filter(exchange);
+}
+```
+
+我们在上述方法的关键代码语句中添加了注释。可以看到，一个典型的过滤器的实现过程基本就是从 ServerWebExchange 上下文中获取路由，然后根据路由中的详细信息来执行对应的操作。
+
+## 解题要点
+
+对于服务网关而言，面试过程中关于网关基本概念的考查相对比较简单，我们不做展开。
+
+在准备面试的过程中，建议你熟练掌握至少一种服务网关的具体实现工具，例如本讲中介绍的 Spring Cloud Gateway 就是 Spring 家族自研的网关，内置了 Spring 框架自带的功能特性，非常适合进行系统的学习。和其他服务网关的实现机制类似，Spring Cloud Gateway 也是管道-过滤器架构模式的一种典型应用，因此它的整体处理流程势必涉及到过滤器、过滤器链等组件。另一方面，因为 Spring Cloud Gateway 是 Spring 家族中的一员，其处理流程也依赖于 Spring 框架对 Web 请求和响应过程的抽象，这就需要引出 DispatcherHandler、RoutePredicateHandlerMapping 和 FilteringWebHandler 等一系列核心组件。
+
+从回答思路上讲，我们也可以基于这些组件从两个维度来阐述请求处理流程，一个是 Spring MVC 以及 WebFlux 中对 Web 请求的通用处理流程，另一个就是 Spring Cloud Gateway 内置的路由和过滤器维度。
+
+在本讲中，限于篇幅，我们没有对 Spring Cloud Gateway 所提供的限流等功能进行展开。但从面试点角度讲，对于这些具体功能特性的考查会比较综合，难度也比较大。
+
+一方面需要面试者对 Spring Cloud Gateway 作为服务网关的一些基本功能进行阐述，另一方面也需要面试者理解分布式环境下限流的概念和常见实现机制，以及 Spring Cloud Gateway 中的具体做法。以限流为例，因为考查的知识点比较多，所以我们重点把握几点。
+
+1. 我们明确 Spring Cloud Gateway 中实现限流的工具是过滤器，而且是一种 GatewayFilter。
+2. 我们明确这个过滤器实现限流时采用的是令牌桶算法。
+3. Spring Cloud Gateway 实现令牌桶算法借助的工具是 Redis。
+4. Redis 是通过一系列 Rua 脚本来完成令牌的申请和释放。
+5. 我们需要明确通过 Spring Cloud Gateway 实现限流的做法是使用配置项，可以把重点的配置项做展开。
+
+这样，面试过程中涉及到的知识点就都已经介绍到了。关于这些特定的功能特性，你需要在本讲内容的基础上自己做进一步的学习和提升。
+
+作为扩展类话题，我们也可以对响应式编程做一些展开。响应式编程虽然已经出来有几年了，但在业务系统开发过程中应用并不广泛，目前主要还是为了满足高性能等技术需求，像 Spring Cloud Gateway 这种网关类消息中间件就是其最好的应用场景之一。虽然是一种新技术，但响应式编程也不是一种完全颠覆式的技术体系，而是在现有的异步调用、观察者模式、发布-订阅模式等的基础上发展起来的一种编程模式，能够为系统带来即时响应性。
+
+虽然，在本讲内容中，我们没有对响应式编程进行过多的展开，但对于技术原理型面试而言，对核心的新技术进行阐述无疑也是面试过程中的一个亮点。
+
+## 小结与预告
+
+本章内容围绕服务网关展开讨论。在分布式架构中，服务网关的出现有其必然性。而以 Spring Cloud Gateway 为代表的实现技术在提供高性能的同时也丰富了作为服务网关的核心功能。我们重点对 Spring Cloud Gateway 中的基本架构、服务路由以及过滤器机制进行了详细的探讨。
+
+介绍完服务网关，我们下一个要引入的技术组件是配置中心。作为一个独立的服务端组件，配置中心需要完成与各个服务之间的交互，并统一管理这些服务中所有的配置信息。那么，配置中心和各个服务之间的这种交互过程是如何实现的呢？下一讲我们将围绕这个话题展开讨论。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
