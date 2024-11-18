@@ -4051,9 +4051,9 @@ Eureka 客户端和服务器端的差异化信息计算和获取过程，是这�
 
 至于具体的开源框架，和上一讲中所提到的 Zookeeper 相比，定时更新机制类框架采用的是另一套完全不同的实现策略。我们在回答过程中需要基于特定的技术要点来进行分析。
 
-举例来说，针对“Eureka 客户端从服务器端获取注册信息”这一特定的细节，回答难度实际上很大。而至于为什么要问这一特定细节，在于 Eureka 在实现这一细节上提供了一种处理增量数据的开发技巧和工程实践，值得我们深入学习和应用。我们知道，当执行轮询操作时，需要考虑的一大问题就是如何高效地从服务端获取最新的服务实例信息。为了提高效率、降低网络通信的开销，一般都会考虑引入 “增量”数据获取的设计思想，Eureka 也采用了这种机制。具体来讲，Eureka 采用了一种叫做一致性 HashCode 的实现机制。
+举例来说，针对 `Eureka 客户端从服务器端获取注册信息` 这一特定的细节，回答难度实际上很大。而至于为什么要问这一特定细节，在于 Eureka 在实现这一细节上提供了一种处理增量数据的开发技巧和工程实践，值得我们深入学习和应用。我们知道，当执行轮询操作时，需要考虑的一大问题就是如何高效地从服务端获取最新的服务实例信息。为了提高效率、降低网络通信的开销，一般都会考虑引入 `增量` 数据获取的设计思想，Eureka 也采用了这种机制。具体来讲，Eureka 采用了一种叫做一致性 HashCode 的实现机制。
 
-如果我们能够结合本讲中介绍的这种“增量”式数据获取方式，那么相信能够获得面试官的更多认同。这也是我在具体面试过程中的一条经验，即对于那些普通的知识点，建议不用过多展开，但我们可以多围绕框架本身所具备的一些特有的设计和开发技巧给出自己的分析和总结。
+如果我们能够结合本讲中介绍的这种增量式数据获取方式，那么相信能够获得面试官的更多认同。这也是我在具体面试过程中的一条经验，即对于那些普通的知识点，建议不用过多展开，但我们可以多围绕框架本身所具备的一些特有的设计和开发技巧给出自己的分析和总结。
 
 ## 小结与预告
 
@@ -4096,7 +4096,7 @@ Eureka 客户端和服务器端的差异化信息计算和获取过程，是这�
 
 掌握了概念之后，接下来就是具体的开源框架。
 
-对于服务网关而言，实际上它所具备的核心功能还是请求转发机制，所以，很多请求-响应类的框架所要面临的技术难点服务网关同样也需要面对。典型的就是性能问题，如何构建高性能的请求转发机制是我们在分析具体网关框架时的一个切入点，也是面试过程中的常见考点。
+对于服务网关而言，实际上它所具备的核心功能还是请求转发机制，所以，很多请求响应类的框架所要面临的技术难点服务网关同样也需要面对。典型的就是性能问题，如何构建高性能的请求转发机制是我们在分析具体网关框架时的一个切入点，也是面试过程中的常见考点。
 
 最后，服务网关类的面试题经常会考查候选人对某一个特定功能特性的掌握程度，比方说网关的路由机制、安全性机制、限流机制等。候选人在回答这些问题时，需要结合自己擅长的框架做深入的研究，并能够从原理出发给出自己的总结和思考。
 
@@ -4110,15 +4110,15 @@ Eureka 客户端和服务器端的差异化信息计算和获取过程，是这�
 
 既然是一种门面，那么网关中显然不应该包含任何与业务相关的处理逻辑。那么，服务网关的核心作用究竟有哪些呢？主要包括三部分，即解耦、适配和数据聚合。
 
-从技术架构而言，任何组件之间的交互都应该具备较低的耦合度。正如我们在问题背景部分所讨论的，客户端请求和服务端访问入口之间的依赖关系需要确保独立，即服务端背后的功能演进和版本升级过程对于客户端而言应该是透明的。考虑到分布式系统中往往存在大量服务，解耦也是我们在服务体系过程中的一项核心目标。
+1. 解耦：从技术架构而言，任何组件之间的交互都应该具备较低的耦合度。正如我们在问题背景部分所讨论的，客户端请求和服务端访问入口之间的依赖关系需要确保独立，即服务端背后的功能演进和版本升级过程对于客户端而言应该是透明的。考虑到分布式系统中往往存在大量服务，解耦也是我们在服务体系过程中的一项核心目标。
 
-另一方面，在分布式系统中，客户端的类型也是多样的。当我们面对多个不同类型的客户端时，考虑到页面展示上的差异性，往往需要针对特定的客户端请求提供特定的响应结果，哪怕这些请求属于同一业务场景。
+2. 适配：在分布式系统中，客户端的类型也是多样的。当我们面对多个不同类型的客户端时，考虑到页面展示上的差异性，往往需要针对特定的客户端请求提供特定的响应结果，哪怕这些请求属于同一业务场景。
 
-举个例子，分页是一种常见的数据返回效果，但不同客户端对分页数量的要求可能就是不一样的，如下图所示：
+   举个例子，分页是一种常见的数据返回效果，但不同客户端对分页数量的要求可能就是不一样的，如下图所示：
 
-![](res/2024-11-15-11-53-01.png)
+   ![](res/2024-11-15-11-53-01.png)
 
-最后，服务网关的一大作用就是可以对来自不同服务的数据进行聚合并统一返回给客户端。这种聚合过程视场景而定，可以在一次请求中返回一组业务数据，从而降低客户端访问服务端的次数，提升系统的性能。
+3. 数据聚合：对来自不同服务的数据进行聚合并统一返回给客户端，这种聚合过程视场景而定，可以在一次请求中返回一组业务数据，从而降低客户端访问服务端的次数，提升系统的性能。
 
 介绍完网关的作用，我们接下来看它所具备的基本结构和功能，如下图所示：
 
@@ -4387,5 +4387,352 @@ public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 本章内容围绕服务网关展开讨论。在分布式架构中，服务网关的出现有其必然性。而以 Spring Cloud Gateway 为代表的实现技术在提供高性能的同时也丰富了作为服务网关的核心功能。我们重点对 Spring Cloud Gateway 中的基本架构、服务路由以及过滤器机制进行了详细的探讨。
 
 介绍完服务网关，我们下一个要引入的技术组件是配置中心。作为一个独立的服务端组件，配置中心需要完成与各个服务之间的交互，并统一管理这些服务中所有的配置信息。那么，配置中心和各个服务之间的这种交互过程是如何实现的呢？下一讲我们将围绕这个话题展开讨论。
+
+# 配置中心：配置中心和各个服务之间是如何交互的？
+
+在上一讲中，我们详细讨论了服务网关这一分布式系统构建过程中必不可少的技术组件。我们知道随着服务数量的增多，在客户端和服务端之间应该架设一层网关来确保对请求进行路由和转发。事实上，针对配置信息的有效管理也是系统开发过程中的基本要求，这点对于分布式系统而言尤为明显。
+
+为了更好地管理系统中的各种配置信息，我们需要引入一个新的技术组件，即配置中心。和服务网关一样，配置中心同样也是一个独立的服务器组件。
+
+那么，问题就来了，原本分散在各个服务中的配置信息如何集中到配置中心进行统一管理呢？配置中心和各个服务之间又是如何交互的呢？在本讲内容中，我们将围绕这些问题展开讨论，并提供对应的面试题和开源框架原理分析。
+
+## 问题背景
+
+试想一下，在一个分布式系统中，势必存在多个服务，而这些服务一般都会构建开发、测试和生产等多套环境，每套环境都是一个集群。而针对不同的环境，我们都会采用一套不同的配置体系。那么如何保证多个环境中的这些配置信息都能在各个服务实例中进行实时的同步更新呢？
+
+显然，把配置信息分散在各个服务中交由它们自己管理是不合适的，我们需要引入一个集中式管理的工具。这个工具就是分布式系统中所必备的一个技术组件，即配置中心。有了配置中心之后，所有分散在各个服务、各个环境中的配置信息都将被收拢到配置中心进行统一管理，如下图所示：
+
+![](res/2024-11-18-10-25-59.png)
+
+针对上图，实际上我们已经可以梳理一组在日常面试过程中经常出现的话题，包括：
+
+- 配置中心如何区分来自不同环境的配置信息，并自动进行隔离？
+- 配置中心中采用什么样的存储方式来保存配置信息？
+- 配置中心的基本组成结构是怎么样的？
+- 各个服务如何从配置中心中获取最新的配置信息？
+- 如果让你来设计一款配置中心，你会怎么做？
+- 你知道 Spring Cloud Config 中客户端和服务端之前的交互流程是怎么样的吗？
+
+上述问题体现的都是与配置中心相关的、比较常见的一些考查方式。就考查内容上而言，也主要包括两个维度，一个是理论知识，一个是具体工具框架的应用实践。
+
+## 问题分析
+
+关于系统中配置信息的管理，常见的做法是把它们存放在配置文件中。在单块系统中，普通的配置文件能够满足需求，围绕配置文件展开的配置管理工作通常不会有太大挑战。但在分布式系统中，配置文件的管理就会暴露出一些问题。针对这类问题，我们首先需要梳理配置中心的概念、在分布式系统中的定位，以及配置信息的分类和配置管理的需求等。
+
+基于配置中心的实现需求，业界存在一批典型的分布式配置中心实现工具，常见的包括 Etcd、Consul、Disconf、Diamond、Nacos 以及 Spring Cloud Config。显然，不同的工具具有不同的设计原理和实现机制。在面试过程中，候选人可以挑选自己最擅长的一个工具展开具体的讨论。
+
+最后，也是最重要的，就是配置中心与服务之间的交互关系。以我的经验，但凡涉及到配置中心的考查，这个问题是大概率要碰到的。任何一款配置中心实现框架都提供了一整套完善的集成机制，确保分布式系统中的各个服务能够快速高效地访问配置中心中的配置信息。而且，这个过程对于开发者而言通常是透明的，这就导致我们对这部分工作机制缺乏必要的认知，面试结果上也往往回答得不理想。
+
+讲到这里，你可能会问，配置中心到底长得怎么样呢？在接下来的内容中，我们先来梳理配置中心的基本模型。
+
+## 技术体系
+
+每一个分布式系统都应该有一个配置中心，下图展示了配置中心的定位以及它所应具备的基本结构：
+
+![](res/2024-11-18-15-00-22.png)
+
+在上图中，我们看到配置中心由两个核心组件构成，分别是配置仓库和配置服务器。
+
+- 配置仓库
+
+   配置中心中的所有配置信息都存放在一个配置仓库（Repository）中。配置仓库的实现方式有很多，我们可以采用 SVN 和 Gitlab 等具备版本控制功能的第三方工具，也可以自建一个具有持久化或内存存储功能的存储媒介。通常，开发人员通过配置管理和持续交付的各项模式和实践，并借助于特定工具完成配置仓库中配置信息的更新。
+
+- 配置服务器
+
+   配置服务器封装对配置仓库的相关操作，充当配置仓库的管理者角色。和系统中的其他服务一样，它在物理上也是一个能够独立运行的服务，提供了对外的访问入口。当需要使用配置信息的服务启动时，这些服务就会使用这些访问入口获取存储在配置仓库中的各种配置信息。
+
+显然，配置服务器需要屏蔽不同配置仓库实现在技术上的差异；另一方面，配置服务器也需要提供一种通知机制，确保配置仓库中的配置信息变化之后能够告知各个服务。关于这个问题实现起来比较复杂，我们放在下一讲中做专题讲解。
+
+介绍完配置中心的基本结构之后，我们接下来讨论作为一个配置中心所应具备的核心功能，包括隔离性、一致性和安全性。
+
+针对配置信息的管理，做到隔离性是最基本的要求。所谓隔离性，指的就是特定配置项只能用于特定环境中，不同环境中的配置项不应该相互混淆，如下图所示：
+
+![](res/2024-11-18-15-01-18.png)
+
+一致性的讨论对象是集群环境，即在一个集群环境中的所有服务都应该使用同一份完全相同的配置信息，针对配置信息的操作结果对于这些服务而言应该是完全一致的，如下图所示：
+
+![](res/2024-11-18-15-01-44.png)
+
+最后的安全性比较容易理解，即只有在通过合法的授权之后，开发人员才能访问配置中心中的关键配置内容，从而避免敏感信息的泄露。我们需要讨论两个维度，一个维度是从配置服务器的角度出发确保位于服务器上的配置信息不被随意访问，另一个维度则是从数据传输的角度出发确保敏感配置信息得到应有的保护。
+
+在接下来的内容中，我们继续介绍 Spring Cloud 框架，并选择 Spring 家族自研的 Spring Cloud Config 配置中心展开讨论。Spring Cloud Config 使用起来非常简洁，也便于管理，对于所有的配置数据都开放了一套完整的 RESTful API，任何系统都可以基于 HTTP 协议来访问配置仓库中的配置数据，从而构建满足多样化需求的管理界面。
+
+## 源码解析
+
+在 Spring Cloud Config 中，整体结构分成非常清晰的两部分，即代表服务器端组件的 Spring Cloud Config Server 和代表客户端组件的 Spring Cloud Config Client，我们先从服务器端开始讲起。
+
+### Spring Cloud Config Server 工作机制
+
+对于 Spring Cloud Config 而言，它把所有的配置信息抽象为一种 Environment（环境），而存储这些配置信息的地方就称为 EnvironmentRepository。
+
+EnvironmentRepository 就是最常用的基于配置仓库的配置中心实现方案的具体体现。EnvironmentRepository 接口定义如下所示：
+
+```java
+public interface EnvironmentRepository {
+   Environment findOne(String application, String profile, String label);
+}
+```
+
+可以看到这个接口非常简单，基于上述 findOne 方法定义以及对配置中心基本模型的了解，我们发现 Spring Cloud Config 中把配置信息抽象为如下三个维度进行管理：
+
+- 应用（application）；
+- 环境（profile）；
+- 版本（label）。
+
+通过这三个维度，我们就可以确定一份唯一的配置数据。
+
+EnvironmentRepository 的实现类非常多，那么我们选择哪一个 EnvironmentRepository 来作为切入点呢？这个问题实际上不难回答，因为 Spring Cloud Config 为我们提供了一个默认的 EnvironmentRepositoryConfiguration，即 DefaultRepositoryConfiguration，如下所示：
+
+```java
+@Configuration
+@ConditionalOnMissingBean(value = EnvironmentRepository.class, search = SearchStrategy.CURRENT)
+class DefaultRepositoryConfiguration {
+   @Autowired
+   private ConfigurableEnvironment environment;
+
+   @Autowired
+   private ConfigServerProperties server;
+
+   @Autowired(required = false)
+   private TransportConfigCallback customTransportConfigCallback;
+
+   @Bean
+   public MultipleJGitEnvironmentRepository defaultEnvironmentRepository(MultipleJGitEnvironmentRepositoryFactory gitEnvironmentRepositoryFactory,  MultipleJGitEnvironmentProperties environmentProperties) throws Exception {
+      return gitEnvironmentRepositoryFactory.build(environmentProperties);
+   }
+}
+```
+
+可以看到，这里出现了一个 MultipleJGitEnvironmentRepository，而 MultipleJGitEnvironmentRepository 则继承了抽象类 JGitEnvironmentRepository。不难看出，Spring Cloud Config 底层默认使用的 EnvironmentRepository 就是我们所熟悉的 Git。
+
+在 JGitEnvironmentRepository 抽象类中，提供了大量针对第三方 Git 仓库的操作代码，这些都不是理解配置中心的重点内容，这里不做展开。我们只需要明白，无论采用 Git、SVN 等具体哪一种配置仓库的实现方式，最终我们处理的对象都是位于本地文件系统中的配置文件。为了理解这点，我们需要围绕 MultipleJGitEnvironmentRepository 类从底向上回顾整个类层结构，如下图所示：
+
+![](res/2024-11-18-15-03-26.png)
+
+从类的命名和职责上讲，AbstractScmEnvironmentRepository 是 JGitEnvironmentRepository 的父类，其主要目的是建立能够在本地进行配置信息管理所需要的文件环境，它的 findOne 方法如下所示：
+
+```java
+public synchronized Environment findOne(String application, String profile, String label) {
+   NativeEnvironmentRepository delegate = new NativeEnvironmentRepository(getEnvironment(), new NativeEnvironmentProperties());
+   Locations locations = getLocations(application, profile, label);
+   delegate.setSearchLocations(locations.getLocations());
+   Environment result = delegate.findOne(application, profile, "");
+   result.setVersion(locations.getVersion());
+   result.setLabel(label);
+   return this.cleaner.clean(result, getWorkingDirectory().toURI().toString(),getUri());
+}
+```
+
+这里出现了一个 NativeEnvironmentRepository，从命名上我们不难看出这个 EnvironmentRepository 操作的对象是本地文件。我们同样关注它的 findOne 方法，如下所示（简单起见做了裁剪）：
+
+```java
+@Override
+public Environment findOne(String config, String profile, String label) {
+   SpringApplicationBuilder builder = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class);
+   ConfigurableEnvironment environment = getEnvironment(profile);
+   builder.environment(environment);
+   builder.web(WebApplicationType.NONE).bannerMode(Mode.OFF);
+
+   // 获取配置信息的参数
+   String[] args = getArgs(config, profile, label);
+
+   // 设置监听器用于监听配置文件的变化
+   builder.application().setListeners(Arrays.asList(new ConfigFileApplicationListener()));
+   ConfigurableApplicationContext context = builder.run(args);
+   environment.getPropertySources().remove("profiles");
+
+   try {
+      return clean(new PassthruEnvironmentRepository(environment).findOne(config, profile, label));
+   } finally {
+      context.close();
+   }
+}
+```
+
+从代码结构上，我们看到 NativeEnvironmentRepository 最终委托 PassthruEnvironmentRepository 完成了配置文件的读取，然后通过 clean 方法完成本地文件地址与远程仓库之间地址的转换。同时，这里用到了 Spring Boot 自带的 ConfigFileApplicationListener 来监听配置文件的变化。
+
+讲到这里，我们已经明确了 EnvironmentRepository 的设计和实现过程，接下来我们要讨论如何将配置信息的访问入口暴露给各个服务。
+
+在 Spring Cloud Config 中，通过 EnvironmentRepository 获取的配置信息最终通过 EnvironmentController 暴露给客户端应用程序进行调用，如下所示：
+
+```java
+@RestController
+@RequestMapping(method = RequestMethod.GET, path = "${spring.cloud.config.server.prefix:}")
+public class EnvironmentController {
+   private EnvironmentRepository repository;
+   private ObjectMapper objectMapper;
+}
+```
+
+可以看到它的关键成员变量有两个，即 EnvironmentRepository 和 ObjectMapper。前者是具体某一个 EnvironmentRepository 的实例，而 ObjectMapper 则用于序列化。
+
+EnvironmentController 提供了多种获取配置信息的方法，这些方法主要就是前面介绍的 application、profile、label 这三个（或者更少）参数，其中最重要的方法就是如下所示的 defaultLabel 方法和 labelled 方法，这些方法暴露了获取配置的最常用的一组 HTTP 端点。
+
+```java
+@RequestMapping("/{name}/{profiles:.*[^-].*}")
+public Environment defaultLabel(@PathVariable String name, @PathVariable String profiles) {
+   return labelled(name, profiles, null);
+}
+
+@RequestMapping("/{name}/{profiles}/{label:.*}")
+public Environment labelled(@PathVariable String name, @PathVariable String profiles, @PathVariable String label) {
+   Environment environment = this.repository.findOne(name, profiles, label);
+   if (!acceptEmpty && (environment == null || environment.getPropertySources().isEmpty())) {
+      throw new EnvironmentNotFoundException("Profile Not found");
+   }
+   return environment;
+}
+```
+
+可以看到，在 labelled 方法中，会调用 EnvironmentRepository 的 findOne 方法来加载配置，然后返回给配置的消费者，即 Spring Cloud Config 的客户端服务。
+
+### Spring Cloud Config Client 工作机制
+
+使用过 Spring Cloud Config 的同学也都知道，想要在一个服务中集成配置中心，只需在 Spring Boot 的配置文件中添加对服务器地址的引用即可。当然，前提是在类路径中添加对 Spring Cloud Config 的引用。那么，为什么只要添加了引用，就会在服务启动时自动获取远程的配置信息呢？这就是我们接下来需要回答的问题。
+
+在介绍 Spring Cloud Config 时，我们将采用反推的方法，即从获取服务器端配置信息的入口开始，逐步引出这个问题的答案。
+
+我们首先找到的是 ConfigServicePropertySourceLocator 类，因为我们在这个类中发现了一个 getRemoteEnvironment 方法。显然，作为客户端组件，Spring Cloud Config Client 的主要职责就是获取服务器端提供的配置项信息。我们已经知道在 Spring Cloud Config Server 中提供了一个 EnvironmentController 来暴露配置信息，那么在客户端中势必存在一个入口来获取这些配置信息。
+
+这个入口就是 getRemoteEnvironment 方法，如下所示（简单起见做了裁剪）：
+
+```java
+private Environment getRemoteEnvironment(RestTemplate restTemplate, ConfigClientProperties properties, String label, String state) {
+   // 根据服务器端点的 URL 准备参数
+   String path = "/{name}/{profile}";
+   String name = properties.getName();
+   String profile = properties.getProfile();
+   String token = properties.getToken();
+   int noOfUrls = properties.getUri().length;
+
+   // 处理 URL 中的 label
+   Object[] args = new String[] { name, profile };
+   if (StringUtils.hasText(label)) {
+      if (label.contains("/")) {
+         label = label.replace("/", "(_)");
+      }
+      args = new String[] { name, profile, label };
+      path = path + "/{label}";
+   }
+   ResponseEntity<Environment> response = null;
+
+   for (int i = 0; i < noOfUrls; i++) {
+      // 准备用于安全访问的 Credentials 信息
+      Credentials credentials = properties.getCredentials(i);
+      String uri = credentials.getUri();
+      String username = credentials.getUsername();
+      String password = credentials.getPassword();
+      try {
+         HttpHeaders headers = new HttpHeaders();
+         addAuthorizationToken(properties, headers, username, password);
+         if (StringUtils.hasText(token)) {
+            headers.add(TOKEN_HEADER, token);
+         }
+         if (StringUtils.hasText(state) && properties.isSendState()) {
+            headers.add(STATE_HEADER, state);
+         }
+         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+         // 通过 RestTemplate 执行远程访问
+         final HttpEntity<Void> entity = new HttpEntity<>((Void) null, headers);
+         response = restTemplate.exchange(uri + path, HttpMethod.GET, entity, Environment.class, args);
+      }
+      // 省略 catch 处理和空值校验
+
+      Environment result = response.getBody();
+      return result;
+   }
+
+   return null;
+}
+```
+
+上述代码虽然有点长，但我们对照 EnvironmentController 端点的实现方法，很容易理解它的执行流程就是通过 RestTemplate 发起一个 HTTP 请求。请求对象的构建需要获取 application、profile、label 等参数，而请求结果则通过 JSON 反序列化为一个 Environment 对象。我们通过这个 Environment 对象就能获取所有相关的配置数据。
+
+明白了获取远程配置信息的处理方式，我们来反推 getRemoteEnvironment 方法的触发过程。我们通过代码的调用路径，发现在一个 locate 方法中使用到了这个方法。而讲到这个方法就必须介绍 Spring Cloud 中的一个重要的工具类 PropertySourceLocator。
+
+在 Spring Cloud 中，PropertySourceLocator 接口定义如下，只包含前面提到的一个 locate 方法，如下所示：
+
+```java
+public interface PropertySourceLocator {
+   PropertySource<?> locate(Environment environment);
+}
+```
+
+PropertySourceLocator 接口位于 spring-cloud-context 代码工程中的 org.springframework.cloud.bootstrap.config 包下。当我们看到类的命名以及结合服务启动时自动获取配置信息这一主题应该能够联想到，PropertySourceLocator 肯定被内嵌在一个配置类中，我们在 PropertySourceLocator 接口所在的包结构中找到了 PropertySourceBootstrapConfiguration。这个类实际上非常好找，因为在同一个包结构中一共也只有三个类。
+
+PropertySourceBootstrapConfiguration 中的实现过程如下所示（代码做了裁剪）：
+
+```java
+@Configuration
+@EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
+public class PropertySourceBootstrapConfiguration implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+   private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
+
+   public void setPropertySourceLocators(Collection<PropertySourceLocator> propertySourceLocators) {
+      this.propertySourceLocators = new ArrayList<>(propertySourceLocators);
+   }
+
+   @Override
+   public void initialize(ConfigurableApplicationContext applicationContext) {
+      // ...
+      ConfigurableEnvironment environment = applicationContext.getEnvironment();
+      for (PropertySourceLocator locator : this.propertySourceLocators) {
+         PropertySource<?> source = null;
+
+         // 调用各个 PropertySourceLocator 的 locate 方法
+         source = locator.locate(environment);
+         // ...
+      }
+      // ...
+   }
+   // 省略了其他变量和方法
+}
+```
+
+显然，PropertySourceBootstrapConfiguration 实现了 ApplicationContextInitializer 接口的 initialize 方法。请注意，在 Spring Boot 中，所有 ApplicationContextInitializer 接口的实现类都会在应用程序启动时自动加载。所以上述代码会随着应用启动而运行，通过遍历 propertySourceLocators 的 locate 方法来读取远程服务配置信息。
+
+在 PropertySourceBootstrapConfiguration 类中，注意到 propertySourceLocators 数组是通过 setPropertySourceLocators 方法直接进行注入的，显然我们需要找到注入 ConfigServicePropertySourceLocator 的入口。正如前文中我们通过 PropertySourceLocator 找到 PropertySourceBootstrapConfiguration 一样，在 ConfigServicePropertySourceLocator 类的同一个包结构中，我们也找到了 ConfigServiceBootstrapConfiguration 配置类，并在该类中发现了如下所示的 configServicePropertySource 方法：
+
+```java
+@Bean
+@ConditionalOnMissingBean(ConfigServicePropertySourceLocator.class)
+@ConditionalOnProperty(value = "spring.cloud.config.enabled", matchIfMissing = true)
+public ConfigServicePropertySourceLocator configServicePropertySource(ConfigClientProperties properties) {
+   ConfigServicePropertySourceLocator locator = new ConfigServicePropertySourceLocator(properties);
+   return locator;
+}
+```
+
+不难看出，上述方法创建了一个新的 ConfigServicePropertySourceLocator 实例。也就是说当类路径中包含 ConfigServiceBootstrapConfiguration 类时，就会自动实例化一个 ConfigServicePropertySourceLocator。这里就充分应用了 Spring Boot 的自动配置机制，可以通过查看 `META-INF/spring.factories` 中的配置类进行确认，如下所示：
+
+```
+# Bootstrap components
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+org.springframework.cloud.config.client.ConfigServiceBootstrapConfiguration,\
+org.springframework.cloud.config.client.DiscoveryClientConfigServiceBootstrapConfiguration
+```
+
+可以看到，这里的 BootstrapConfiguration 配置项中包含了 `org.springframework.cloud.config.client.ConfigServiceBootstrapConfiguration` 类的定义。
+
+至此，围绕 Spring Cloud Config Client 如何在启动时自动获取 Server 所提供的配置信息的整体流程已经介绍完毕，我们可以通过下图所示的全局蓝图进行梳理和总结：
+
+![](res/2024-11-18-15-04-05.png)
+
+## 解题要点
+
+关于配置中心相关的面试题，首要的一个解题要点就是要明确配置中心应该具备哪些核心的功能，或者说配置中心在设计上应该有哪些需求。表面上，这是一道开放式的面试题，让面试者自己来给出配置中心的需求。但事实上，这道题的考查点还是相对固化的，需要面试者把平时在使用过程中关于配置中心的几点核心述求说明清楚。面试者可以基于自己的理解做一些发挥，但发挥的点应该也是围绕这些核心述求进行展开。
+
+对于一个配置中心而言，考虑到它的定位和作用，我们势必需要保证各种配置信息在各个环境中是相互隔离的，而这种隔离性则会导致数据的不一致，所以配置信息的一致性也是基本需求。对于面向生产环境的配置信息而言，我们还需要考虑安全性。这样，我们就梳理出了隔离性、一致性和安全性这几个核心诉求。当然，对于分布式环境下的配置信息管理，易管理性也是一项可以提到的诉求。
+
+对配置中心常见实现工具的介绍是面试过程中的另一个要点。面试官不会要求候选人对所有的配置中心工具都了如指掌，但我们需要熟练掌握至少一款开源框架。如果你比较擅长 Spring，那么本讲所介绍的 Spring Cloud Config 就是一个不错的选择。无论你选择哪一款工具来进入深入学习，都需要围绕整个配置信息流转的工作流程来系统把握配置中心的客户端和服务端组件之间的交互过程，明确配置信息的存储媒介和方式，以及前面提到的各种需求的实现方式。
+
+本质上，不同配置中心工具的设计思想是基本一致的。只要掌握了一款工具的底层实现原理，针对其他工具的使用方式以及实现机制的学习过程也会变得比较容易。这也可以说是技术类内容在学习上的一条客观规律。
+
+## 小结与预告
+
+配置中心是分布式架构中的一个基础组件，而业界关于如何实现配置中心也有一些基本的模型和工具。在本讲内容中，我们针对配置中心实现需求梳理了配置中心所必须要考虑的组成结构和功能特性，并重点对 Spring 家族中的 Spring Cloud Config 展开了详细分析。
+
+在今天的内容中，我们也留下了一个伏笔：如果位于服务器端的配置信息发生了变更，如何确保这种变更能够实时的通知到客户端服务？这是一个比较复杂的话题，也是一个热门的面试题，让我们在下一讲中对它进行系统分析和讨论。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
