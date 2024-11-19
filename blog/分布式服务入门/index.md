@@ -206,7 +206,7 @@ tags: 后端, 系统设计, 读书笔记, 分布式
 2. 应用缓存：对于分布式服务而言，缓存应用非常广泛，开发人员可以使用位于应用程序内部的本地缓存，也可以使用位于独立服务器上的分布式缓存。在日常开发中，缓存的应用通常都是分层级的，我们会综合使用多级缓存来提高目标对象访问的效率和性能。
 3. 资源管理：相信你对线程池、数据库连接池等技术并不陌生。这里的池（Pool）是一种对资源的抽象方法，代表一组可以随时使用的资源，但这些资源的创建和释放过程则基于一定的管理策略。资源池的应用非常广泛，存在多种具体的池化组件。
 4. 框架集成：这里所说的框架集成，指的是 Dubbo、MyBatis、Spring Cloud 等主流的分布式开发框架与 Spring 框架之间的集成。我们可以基于命名空间以及自定义 starter 等机制完成与 Spring 之间的有效集成。理解框架集成的实现过程有利于掌握主流的分布式服务框架的运行原理。
-5. 架构模式：架构模式描述某一特定应用领域中系统组织和表现的惯用方式。对软件体系架构模式的研究和实践促进了对软件设计的重用。在分布式系统开发过程中，也大量应用了诸如微内核架构、管道-过滤器架构等架构模式，这些模式能够为开发人员提供具有高度扩展性的技术组件。
+5. 架构模式：架构模式描述某一特定应用领域中系统组织和表现的惯用方式。对软件体系架构模式的研究和实践促进了对软件设计的重用。在分布式系统开发过程中，也大量应用了诸如微内核架构、管道过滤器架构等架构模式，这些模式能够为开发人员提供具有高度扩展性的技术组件。
 
 ## 解题要点
 
@@ -4309,7 +4309,7 @@ public Mono<Void> filter(ServerWebExchange exchange) {
 }
 ```
 
-显然，DefaultGatewayFilterChain 是一种典型的管道-过滤器架构模式的应用方式，关于这一架构模式我们在后面还会有详细的讨论。
+显然，DefaultGatewayFilterChain 是一种典型的管道过滤器架构模式的应用方式，关于这一架构模式我们在后面还会有详细的讨论。
 
 在 Spring Cloud Gateway 中内置了许多过滤器，这些过滤器可以分成两大类，即 GatewayFilter 和 GlobalFilter，正如我们在前面的 FilteringWebHandler 中所看到的。其中，GatewayFilter 通过配置作用于每次路由，而 GlobalFilter 则作用于所有的请求。当一个请求被匹配到对应路由时，会将 GlobalFilter 和已绑定路由的 GatewayFilter 合并到一起。所有的过滤器都实现了 `org.springframework.core.Ordered` 接口，因此会根据过滤器的 Order 值进行排序。
 
@@ -4362,7 +4362,7 @@ public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
 对于服务网关而言，面试过程中关于网关基本概念的考查相对比较简单，我们不做展开。
 
-在准备面试的过程中，建议你熟练掌握至少一种服务网关的具体实现工具，例如本讲中介绍的 Spring Cloud Gateway 就是 Spring 家族自研的网关，内置了 Spring 框架自带的功能特性，非常适合进行系统的学习。和其他服务网关的实现机制类似，Spring Cloud Gateway 也是管道-过滤器架构模式的一种典型应用，因此它的整体处理流程势必涉及到过滤器、过滤器链等组件。另一方面，因为 Spring Cloud Gateway 是 Spring 家族中的一员，其处理流程也依赖于 Spring 框架对 Web 请求和响应过程的抽象，这就需要引出 DispatcherHandler、RoutePredicateHandlerMapping 和 FilteringWebHandler 等一系列核心组件。
+在准备面试的过程中，建议你熟练掌握至少一种服务网关的具体实现工具，例如本讲中介绍的 Spring Cloud Gateway 就是 Spring 家族自研的网关，内置了 Spring 框架自带的功能特性，非常适合进行系统的学习。和其他服务网关的实现机制类似，Spring Cloud Gateway 也是管道过滤器架构模式的一种典型应用，因此它的整体处理流程势必涉及到过滤器、过滤器链等组件。另一方面，因为 Spring Cloud Gateway 是 Spring 家族中的一员，其处理流程也依赖于 Spring 框架对 Web 请求和响应过程的抽象，这就需要引出 DispatcherHandler、RoutePredicateHandlerMapping 和 FilteringWebHandler 等一系列核心组件。
 
 从回答思路上讲，我们也可以基于这些组件从两个维度来阐述请求处理流程，一个是 Spring MVC 以及 WebFlux 中对 Web 请求的通用处理流程，另一个就是 Spring Cloud Gateway 内置的路由和过滤器维度。
 
@@ -4407,7 +4407,7 @@ public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 针对上图，实际上我们已经可以梳理一组在日常面试过程中经常出现的话题，包括：
 
 - 配置中心如何区分来自不同环境的配置信息，并自动进行隔离？
-- 配置中心中采用什么样的存储方式来保存配置信息？
+- 配置中心采用什么样的存储方式来保存配置信息？
 - 配置中心的基本组成结构是怎么样的？
 - 各个服务如何从配置中心中获取最新的配置信息？
 - 如果让你来设计一款配置中心，你会怎么做？
@@ -4473,11 +4473,11 @@ public interface EnvironmentRepository {
 }
 ```
 
-可以看到这个接口非常简单，基于上述 findOne 方法定义以及对配置中心基本模型的了解，我们发现 Spring Cloud Config 中把配置信息抽象为如下三个维度进行管理：
+可以看到这个接口非常简单，基于上述 findOne 方法定义以及对配置中心基本模型的了解，我们发现 Spring Cloud Config 中把配置信息抽象为如下三个维度进行管理
 
-- 应用（application）；
-- 环境（profile）；
-- 版本（label）。
+- 应用 (application)
+- 环境 (profile)
+- 版本 (label)
 
 通过这三个维度，我们就可以确定一份唯一的配置数据。
 
@@ -4734,5 +4734,233 @@ org.springframework.cloud.config.client.DiscoveryClientConfigServiceBootstrapCon
 配置中心是分布式架构中的一个基础组件，而业界关于如何实现配置中心也有一些基本的模型和工具。在本讲内容中，我们针对配置中心实现需求梳理了配置中心所必须要考虑的组成结构和功能特性，并重点对 Spring 家族中的 Spring Cloud Config 展开了详细分析。
 
 在今天的内容中，我们也留下了一个伏笔：如果位于服务器端的配置信息发生了变更，如何确保这种变更能够实时的通知到客户端服务？这是一个比较复杂的话题，也是一个热门的面试题，让我们在下一讲中对它进行系统分析和讨论。
+
+# 配置中心：配置信息有变更时，如何实现热更新？
+
+在上一讲中，我们详细介绍了配置中心的设计思想和组成结构，并基于 Spring 家族的 Spring Cloud Config 框架阐述了配置中心与各个服务之间的交互过程，理解了配置中心存储配置信息的方式，以及各个服务从配置中心中读取这些配置信息的工作原理。
+
+事实上，围绕配置中心，配置信息的传递有两个方向，一个是服务从配置中心进行拉取，另一个则是配置中心主动推送给各个服务，如下图所示：
+
+![](res/2024-11-19-16-04-45.png)
+
+上图中，数据推送主要发生在配置信息发生变更的场景，这也是面试过程中的一个高频问题，即位于配置中心的配置信息一旦有变更，应该如何确保各个服务实现热更新。本讲内容将围绕这一问题展开讨论。
+
+## 问题背景
+
+在日常开发过程中，配置信息的热更新是一个实战性很强的问题。对于任何一个分布式服务系统而言，避免不了需要对配置信息做一些调整，例如根据业务需要添加一些新的配置项等。如果配置信息一有更新，就需要重启服务器，这显然是不可取的。所以，如何确保在服务不重启的前提下实现配置信息的热更新是开发人员都需要掌握的基本技能，自然也是面试官重点会考查的一个话题。
+
+针对这一话题，常见的面试问题包括：
+
+- Spring Cloud Config 是如何实现配置信息热更新的？
+- 如果让你设计一款通用的配置信息动态更新机制，你有什么思路？
+- 什么是 WebHook 机制？你能描述它的常见应用场景吗？
+- 基于推模式和拉模式，你应该如何分别设计配置信息的更新机制？
+- 客户端想要知道服务器端的数据是否发生变化，有哪些实现方法？
+- 配置中心如何从注册中心中获取最新的服务实例信息？
+
+虽然提问方式有所不同，但上述这些面试题本质上都是围绕 `数据热更新` 这一技术主题所延伸出来的话题。然而，我在面试过程中发现，开发人员普遍对配置信息的热更新机制缺乏必要的了解，甚至不够重视。导致这一现象的部分原因是配置中心的构建和维护工作往往是由运维人员在负责，普通开发人员没有机会去深入理解配置中心的工作原理。另一方面，因为目前市面上主流的配置中心实现工具（例如 Spring Cloud Config、Nacos 等）都内置了完善的热更新机制，该机制对开发人员是透明的，也会导致我们对这部分功能缺乏对应的认知。
+
+如果你是一名中级开发人员，想要往高级开发甚至架构师方向发展，那么我认为不能只停留在使用工具的层次，而是应该深入框架的原理，做到触类旁通。而这一问题考查的正是开发人员对框架底层原理的掌握程度。回答好这一问题有助于拉开你和其他候选人之间的差距。
+
+## 问题分析
+
+通过上一讲内容的介绍，我们已经知道各个服务会在启动时从配置中心获取配置，然后缓存到本地。而一旦服务启动成功，无论配置中心中的配置信息如何变更，作为配置中心客户端的各个服务都不会再次主动获取配置信息，而是会利用位于本地的缓存配置。那么问题就来了，这些服务如何能够实时获取更改后的配置呢？
+
+在前面的讨论中，我们提到了一个词叫触类旁通。实际上，作为分布式服务系统的重要组成部分，配置中心的结构和原理与注册中心比较类似。像分布式协调框架 ZooKeeper 即可以构建注册中心，也可以用来实现配置中心。因此，我们在分析配置中心的热更新机制时，可以把它和注册中心做一些类比。
+
+在介绍注册中心的服务实例更新机制时，我们提到了有两种方案可以做到注册中心与各个服务之间的信息同步，分别是基于拉模式的定时更新策略，以及基于推模式的监听器机制。类似地，我们可以把这两种思路也应用到配置中心中，来具体分析它们的可行性。
+
+现在，针对这一问题我们已经具备基本的思路了。当然，不同的工具有不同的实现方式。针对配置中心，我们将继续基于 Spring Cloud Config 来讨论热更新机制。Spring Cloud Config 作为 Spring 家族的一员，很多功能特性与 Spring 框架息息相关，值得我们对它的技术体系做深入理解。
+
+## 技术体系
+
+基于以上分析，针对配置中心热更新问题，从技术体系上讲，我们有如下三种处理方法。
+
+1. 重启服务。 因为各个服务在启动时会重新获取服务器端配置，所以重启服务能实现配置信息的及时更新，但正如前面所提到的，这显然不是一种合理的方法。
+
+2. 使用 Spring Boot Actuato 组件。 这是 Spring Boot 提供的一个专门用来监测和管理系统运行时状态的组件。Actuator 是一种集成化组件，可以获取应用系统的运行时数据和配置信息并进行统计分析。
+
+   当在代码类路径中引入 spring-boot-starter-actuator 依赖并启动 Spring Boot 应用程序时，我们会在启动日志里发现自动添加了 info、health、refresh 等众多 HTTP 端点。通过调用 `/actuator/refresh` 端点就可以刷新服务的配置信息，从而实现不重启 Spring Boot 应用的配置热更新。
+
+   这种方案采用的就是典型的拉模式。这是一种简单有效的处理方式，但并不是最好的处理方式。因为针对每个微服务一般都会存在多个运行时实例，这样就需要把客户端的 `/actuator/refresh` 端点逐个进行调用，这点显然也不是很合理。而且，这种方案属于客户端自身行为，跟配置服务器端没有关系。
+
+3. 集成 Spring Cloud Bus 组件。 当我们在 Spring Cloud Config 服务器端代码工程的类路径中添加 Spring Cloud Bus 的引用并启动应用程序之后，Spring Boot Actuator 就为我们提供了 `/actuator/bus-refresh` 端点，通过访问该端点就可以达到对客户端所有服务实例的配置信息进行自动更新的效果。在这种方案中，服务端会主动通知所有客户端进行配置信息的更新，这样我们就无需关注各个客户端，而只对服务端进行操作即可。显然，这里用到的是基于推模式的动态监听机制。
+
+通过对上述实现方案的分析，我们可以明确第三种方案是我们需要回答的重点。在这种方案中，整个实现过程我们至少要搞清楚三大问题，即：
+
+- 如何自动调用服务器端所暴露的 `/actuator/bus-refresh` 端点？
+- 客户端如何得知服务器端的配置信息已经更新？
+- 客户端如何实时获取服务器端所更新的配置信息？
+
+## 源码解析
+
+针对以上这三个问题，接下来我们将结合 Spring Cloud Config 源码逐一展开讨论。
+
+### 如何自动调用服务器端所暴露的 `/actuator/bus-refresh` 端点？
+
+在现代软件开发过程中，开放式平台是一种常见的软件服务形态。我们可以把 Spring Cloud Config Server 所提供的 HTTP 端点视为一种开放式的接口，以供 Git 等第三方工具进行访问和集成。这样，我们把服务器端 `/actuator/bus-refresh` 端点对外进行暴露，然后第三方工具通过这个暴露的端点进行集成。
+
+例如，在 GitHub 中就设计了一种 Webhook 机制，并提供了用户界面供我们配置所需要集成的端点以及对应的操作，操作方法如下图所示（该图来自 GitHub 官方网站）：
+
+![](res/2024-11-19-16-05-43.png)
+
+我们可以在上图的 Payload URL 中设置 `/actuator/bus-refresh` 端点地址。所谓的 Webhook，实际上就是一种回调。通过 Webhook，当我们提交代码时，GitHub 就会自动调用所配置的 HTTP 端点。也就是说，可以根据配置项信息的更新情况自动实现对 `/actuator/bus-refresh` 端点的访问。基于 GitHub 的配置仓库实现方案，我们可以得到如下图所示的系统结构：
+
+![](res/2024-11-19-16-06-08.png)
+
+### 客户端如何得知服务器端的配置信息已经更新？
+
+接下来我们关注第二个问题，即客户端如何得知服务器端的配置信息已经更新？
+
+我们首先需要明确，在调用了 `/actuator/bus-refresh` 端点之后，系统内部发生了什么事情。这里我们需要快速浏览 Spring Cloud Bus 中的代码工程，发现在 `org.springframework.cloud.bus.endpoint` 包下存在一个 RefreshBusEndpoint 端点类，如下所示：
+
+```java
+@Endpoint(id = "bus-refresh")
+public class RefreshBusEndpoint extends AbstractBusEndpoint {
+   public RefreshBusEndpoint(ApplicationEventPublisher context, String id) {
+      super(context, id);
+   }
+
+   @WriteOperation
+   public void busRefreshWithDestination(@Selector String destination) {
+      publish(new RefreshRemoteApplicationEvent(this, getInstanceId(), destination));
+   }
+
+   @WriteOperation
+   public void busRefresh() {
+      publish(new RefreshRemoteApplicationEvent(this, getInstanceId(), null));
+   }
+}
+```
+
+显然，RefreshBusEndpoint 类对应于我们前面访问的 `/bus-refresh` 端点。可以看到，Spring Cloud Bus 在这里做的事情仅仅只是发布了一个新的 RefreshRemoteApplicationEvent 事件。
+
+既然发送了事件，我们就需要寻找该事件的监听者。我们在 Spring Cloud Bus 的 `org.springframework.cloud.bus.event` 包下找到了 RefreshRemoteApplicationEvent 事件的监听器 RefreshListener，如下所示：
+
+```java
+public class RefreshListener implements ApplicationListener<RefreshRemoteApplicationEvent> {
+   private static Log log = LogFactory.getLog(RefreshListener.class);
+
+   private ContextRefresher contextRefresher;
+
+   public RefreshListener(ContextRefresher contextRefresher) {
+      this.contextRefresher = contextRefresher;
+   }
+
+   @Override
+   public void onApplicationEvent(RefreshRemoteApplicationEvent event) {
+      Set<String> keys = contextRefresher.refresh();
+      log.info("Received remote refresh request. Keys refreshed " + keys);
+   }
+}
+```
+
+从类的定义中，我们可以看到该监听器就是用来处理 RefreshRemoteApplicationEvent 事件，其在 onApplicationEvent 方法中同样也是调用了 ContextRefresher 中的 refresh 方法进行配置属性的刷新。
+
+请注意，RefreshRemoteApplicationEvent 是一个远程事件，将通过消息中间件进行发送，并被 Spring Cloud Config 客户端所监听，处理流程如下图所示：
+
+![](res/2024-11-19-16-06-40.png)
+
+### 客户端如何实时获取服务器端所更新的配置信息？
+
+最后需要明确的第三个问题是，客户端如何获取服务器端所更新的配置信息？这就需要梳理 Spring Cloud Config Server 与注册中心之间的关系。
+
+我们在上一讲分析配置中心的基本模型时提到，配置中心作为整个微服务架构运行所需的基础服务，需要确保其可用性。因为配置服务本身也是一个独立的微服务，所以 Spring Cloud Config 实现高可用的方式很简单。跟其他微服务一样，也可以把自己注册到注册中心上，让其他服务提供者或消费者通过注册中心进行服务发现和获取。
+
+显然，在这种方式下，基于注册中心的服务治理机制同时提供了服务器端的负载均衡和客户端的配置功能，从而也就间接实现了高可用性。从另一个角度，我们也可以理解为可以通过注册中心获取所有 Spring Cloud Config 服务的实例，从而在分布式环境下为获取配置信息提供了一种简便的手段。
+
+Spring Cloud Config 提供了一个工具类 ConfigServerInstanceProvider 来完成与注册中心之间的交互，如下所示：
+
+```java
+public class ConfigServerInstanceProvider {
+   private static Log logger = LogFactory.getLog(ConfigServerInstanceProvider.class);
+   private final DiscoveryClient client;
+
+   public ConfigServerInstanceProvider(DiscoveryClient client) {
+      this.client = client;
+   }
+
+   @Retryable(interceptor = "configServerRetryInterceptor")
+   public List<ServiceInstance> getConfigServerInstances(String serviceId) {
+      logger.debug("Locating configserver (" + serviceId + ") via discovery");
+
+      // 根据 serviceId 获取服务实例列表
+      List<ServiceInstance> instances = this.client.getInstances(serviceId);
+      if (instances.isEmpty()) {
+         // 如果服务实例列表为空则抛出异常
+      }
+
+      return instances;
+   }
+}
+```
+
+在这里，我们看到了熟悉的 DiscoveryClient，DiscoveryClient 通过同样熟悉的 getInstances 方法从注册中心中获取 Spring Cloud Config 服务实例，如下所示：
+
+```java
+List<ServiceInstance> instances = this.client.getInstances(serviceId);
+```
+
+ConfigServerInstanceProvider 的调用者是 DiscoveryClientConfigServiceBootstrapConfiguration。如果系统中生成了 ContextRefreshedEvent 事件就会触发如下所示的 refresh 方法（部分代码做了裁剪）：
+
+```java
+private void refresh() {
+   try {
+      String serviceId = this.config.getDiscovery().getServiceId();
+      List<String> listOfUrls = new ArrayList<>();
+      // 根据 serviceId 获取配置服务实例列表
+      List<ServiceInstance> serviceInstances = this.instanceProvider.getConfigServerInstances(serviceId);
+
+      for (int i = 0; i < serviceInstances.size(); i++) {
+         ServiceInstance server = serviceInstances.get(i);
+         String url = getHomePage(server);
+         // 处理安全机制
+         if (server.getMetadata().containsKey("password")) {
+            String user = server.getMetadata().get("user");
+            user = user == null ? "user" : user;
+            this.config.setUsername(user);
+            String password = server.getMetadata().get("password");
+            this.config.setPassword(password);
+         }
+
+         // 构建配置文件的访问地址列表
+         if (server.getMetadata().containsKey("configPath")) {
+            String path = server.getMetadata().get("configPath");
+            if (url.endsWith("/") && path.startsWith("/")) {
+               url = url.substring(0, url.length() - 1);
+            }
+            url = url + path;
+         }
+
+         listOfUrls.add(url);
+      }
+
+      // 设置配置文件地址列表
+      String[] uri = new String[listOfUrls.size()];
+      uri = listOfUrls.toArray(uri);
+      this.config.setUri(uri);
+   }
+}
+```
+
+在上述 refresh 方法中可以看到，Spring Cloud Config 首先会获取配置文件中的 spring.cloud.config.discovery.serviceId 配置项所指定的服务实例 id，然后根据 serviceId 从 ConfigServerInstanceProvider 中获取注册服务的实例对象集合 serviceInstances，最后循环遍历 serviceInstances 来更新存储在内存中的配置属性值。通过上述流程，我们确保位于客户端中的配置信息得到了实时的更新。
+
+## 解题要点
+
+关于配置中心的热更新机制是一道比较典型的技术原理类面试题。同样，这道题之所以典型也是因为很多开发人员只停留在对具体工具的使用上，而并不清楚其背后的设计思想和原理。我在面试过程中，能够碰到让我满意的回答并不多。
+
+从解题思路上讲，如果你对配置中心本身并没有太多概念，那么这道题有一定的难度。没有一些基础知识，光靠凭空想象是很难梳理热更新背后的实现原理的。所以在日常开发过程中，对于那些构成分布式服务系统的基础技术组件，就算不需要自己动手进行开发或维护，还是需要专门做一些了解。这也是你和普通开发人员的一个重要区别。
+
+另一方面，配置中心的热更新是一个相对复杂的过程，考查的知识点也比较多。例如，以本讲介绍的 Spring Cloud Config 为例，就涉及到 Spring 内置的事件通知和上下文刷新机制、Spring Boot Actuator、Spring Cloud Bus 等工具框架。同时，Spring Cloud Config 还会基于注册中心获取各个配置服务实例并动态更新其位于内存中的配置信息。我们在回答过程中，对这些组件都应该有所提及，从而向面试官展示自己的知识广度。
+
+在本讲的问题分析部分，我们实际上也提到了可以类比注册中心来学习配置中心。对于配置中心而言，具体的实现工具和框架是比较丰富的，常见的就包括 Etcd、Consul、Disconf、Diamond、Nacos 以及 Spring 家族的 Spring Cloud Config。而这些工具在实现过程中可能各有差别，但在设计思想上基本都是一致的。技术体系之间的相通性也是我们回答技术原理类面试题的一个有效抓手。如果你掌握了某一种配置中心实现工具的基本原理，那么即使没有使用过其他工具，面对类似本讲中提出的问题也能够做到触类旁通。至于如何基于技术体系相通性来应对技术原理类面试，本课程后面还会有专题进行讨论。
+
+## 小结与预告
+
+作为一个典型的技术原理类问题，本讲内容基于 Spring Cloud Config 框架剖析了实现配置信息热更新的工作原理。我们抛出了三个与这个主题相关的核心问题，然后基于源码对这些问题都做了一一解答。
+
+事实上，Spring Cloud Config 作为 Spring 自研的配置中心框架，其内部大量使用了 Spring 框架现有的功能特性，这点与我们学习其他配置中心的实现工具不同。我们需要首先对 Spring 容器相关的知识体系有足够的了解，才能更好地理解 Spring Cloud Config 的设计和实现方式。
+
+讨论完配置中心之后，下一讲我们将面对一个新的问题，即链路跟踪。在分布式服务系统构建过程中，链路跟踪同样是一个基础技术组件。那么，如何对服务链路进行有效监控呢？我们下一讲再聊。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
