@@ -4963,4 +4963,372 @@ private void refresh() {
 
 讨论完配置中心之后，下一讲我们将面对一个新的问题，即链路跟踪。在分布式服务系统构建过程中，链路跟踪同样是一个基础技术组件。那么，如何对服务链路进行有效监控呢？我们下一讲再聊。
 
+# 链路跟踪：如何对服务链路进行有效监控？​
+
+通过前面几讲内容的介绍，我们已经掌握了注册中心、服务网关、配置中心等一系列技术组件。基于这些组件，我们可以构建完整而强大的分布式系统。
+
+在分布式系统中，一组独立的服务相互协作完成特定的业务功能。而服务之间的调用不可避免会出现各种问题，这时候就需要引入分布式链路跟踪机制来定位和解决这些问题。
+
+那么，如何对服务链路进行有效监控呢？业界关于分布式链路跟踪也有统一的规范以及代表性的实现框架。本讲内容将围绕这些规范和框架展开详细的讨论。
+
+## 问题背景
+
+在分布式系统中，我们基于业务划分服务，并对外暴露服务访问接口。试想这样一个场景，如果我们发现某一个业务接口在访问过程中发生了错误，一般的处理过程就是快速定位到问题所发生的服务并进行解决。但在现实的中大型系统中，一个业务接口背后可能会调用一批其他业务体系中的业务接口或基础设施类的底层接口，这时候我们如何能够做到快速定位问题呢？
+
+![](res/2024-11-20-11-50-41.png)
+
+传统的做法是通过查阅服务器的日志来定位问题，但在中大型系统中，这种做法可操作性并不强，主要原因在于我们很难找到包含错误日志的那台服务器。一方面，开发人员可能都不知道整个服务调用链路中具体有几个服务，也就无法找到是哪个服务发生了错误。就算找到了目标服务，在分布式集群的环境下，我们也不建议直接通过访问某台服务器来定位问题。服务监控的需求就应运而生。
+
+从上述描述中，我们不难看出服务监控是分布式系统的基础需求之一。可以说，链路跟踪是构建分布式系统过程中必不可少的一个技术组件。因此，在面试过程中，面试官也会经常对这一主题进行考查，常见的提问方式包括：
+
+- 在服务监控领域，Trace 和 Span 分别代表什么含义？
+- 你能描述分布式服务链路跟踪的基本原理吗？
+- 针对一个完整的远程调用请求和响应过程，应该如何计算所消耗的时间？
+- 如果想要获取可视化的链路跟踪数据，可以采用什么工具和框架？
+- 如果你想在服务调用链路中添加自定义的性能指标，有什么实现方案？
+
+服务监控相关的面试题提问方式实际上还是比较固定的，让我们对这类问题做进一步分析。
+
+## 问题分析
+
+对于服务监控类的面试题而言，我们的切入点主要在于两个方面，一方面是分布式服务跟踪的基本原理，另一方面则是目前主流的实现工具和框架。
+
+关于分布式服务跟踪和监控的运行原理，实际上并不是特别复杂，我们首先需要引入两个基本概念，即 Trace 和 Span。
+
+其中，Trace 代表一次请求和响应过程中的整个调用链路，而 Span 则代表这个链路中的一段跨度。显然，Trace 和 Span 是一对多的关系。通过将一个个具体的 Span 聚合起来，我们就可以构建出一条完整的链路并进行有效的跟踪。围绕这两个概念，我们可以进一步引出链路跟踪过程中的 4 种关键事件并开展性能分析。这是回答这类面试题的第一点思路。
+
+回答这类面试题的第二点思路是将这些原理应用到具体的框架中。这里可以选择一些主流的开源框架展开讨论，例如本讲中要介绍的 Spring Cloud Sleuth。对于这些工具，一方面我们需要对调用链路中所生成的监控数据进行收集和分析，另一方面也需要介绍一些可视化的工具来展示这些数据分析的结果。在面试过程中，面试官一般都会考查候选人对工具框架的具体掌握程度，需要我们对它们的功能特性有全面的了解。
+
+最后，我们再次回到实践。一旦掌握分布式服务跟踪原理和相关的工具，我们就可以按照自身的需要来定制化链路构建过程。这在我经历的面试过程中也是经常会被考查的一个问题点。面试官喜欢基于这种面试主题中对候选人的工程实践能力进行充分的考查，这就需要开发人员能够结合具体的场景给出工具应用的方式，最好能够总结一定的最佳实践。
+
+## 技术体系
+
+### 分布式服务跟踪基本原理
+
+我们先来分析一下分布式服务跟踪的基本原理，这里需要引入两个 Id，即 TraceId 和 SpanId，它们分别代表一个全局唯一的 Trace 和 Span。
+
+TraceId 即跟踪 Id。在分布式架构中，每个请求会生成一个全局的唯一性 Id，通过这个 Id 可以串联起整个调用链。也就是说，当请求在分布式系统内部流转时，系统需要始终保持传递该唯一性 Id，直到请求返回。这个唯一性 Id 就是 TraceId。
+
+除了 TraceId 外，我们还需要 SpanId，SpanId 一般被称为跨度 Id。所谓跨度，就是调用链路中的其中一段时间，具有明确的开始和结束这两个节点，这样通过计算开始时间和结束时间之间的时间差，我们就能明确调用过程在这个 Span 上所产生的时间延迟。
+
+通过前面的介绍，我们不难理解 TraceId 和 SpanId 之间是一对多的关系，即在一个调用链路中只会存在一个 TraceId，但会存在多个 SpanId。这样多个 SpanId 之间就会有父子关系，即链路中的前一个 SpanId 是后一个 SpanId 的父 SpanId，如下图所示：
+
+![](res/2024-11-20-11-54-41.png)
+
+理解了 TraceId 和 SpanId 的概念之后，我们就需要对整个分布式调用链路进行进一步拆分，从而细化控制的粒度。业界一般通过四种不同的注解（Annotation）记录每个服务的客户端请求和服务器响应过程。这里的注解实际上代表的就是链路中所发生的关键事件。
+
+- cs 注解。cs 代表 Client Send，即客户端发送请求，启动整个调用链路。
+- sr 注解。sr 代表 Server Receive，即服务端接收请求。显然，（sr - cs）值代表请求从客户端到服务器端所需要的网络传输时间。
+- ss 注解。ss 代表 Server Send，即服务端把请求处理结果返回给客户端。（ss - sr）值代表服务器端处理该请求所需要的时间。
+- cr 注解。cr 代表 Client Receive，即客户端接收到服务端响应，结束调用链路。（cr - sr）值代表响应结果从服务器端传输到客户端所需要的时间。
+
+下面结合一张示意图来进一步解释这四种注解之间的关联关系：
+
+![](res/2024-11-20-11-55-27.png)
+
+有了这四个注解之后，我们就可以使用它们来量化整个服务调用链路，从而找出潜在的问题。这里同样给出一个示意图：
+
+![](res/2024-11-20-14-05-46.png)
+
+在上图中，我们看到这次请求的 TraceId 是 trace1，而 SpanId 根据不同的服务会发生变化。这里的四种注解构成了客户端和服务器对一次请求处理的闭环。对于服务 A 而言，cs 是 11:10:44， cr 是 11:10:55，也就说该次服务请求经由服务 A 的整个调用链路时间是 11s（11:10:44 - 11:10:55），显然这个响应时间非常长。
+
+显然，通过这些注解我们就可以发现服务调用链路中存在的问题，目前主流的服务监控实现工具都对这些注解做了支持和封装。
+
+### Spring Cloud 中的服务监控
+
+通过前面所介绍的服务监控基本原理，我们明确了分布式环境下服务跟踪的载体，即 TraceId 和 SpanId。而在 Spring Cloud 中也存在一个组件能够帮忙我们自动生成 TraceId 和 SpanId，这个组件就是 Spring Cloud Sleuth。
+
+接下来，我们来看一下 Spring Cloud Sleuth 中链路跟踪的表现形式，如下所示的是一个具体的示例：
+
+```
+INFO [userservice,81d66b6e43e71faa,6df220755223fb6e,true] 18100 --- [nio-8082-exec-8] c.s.user.controller.UserController: Get user by UserName from userservice instance
+```
+
+我们关注于上述日志信息中的斜体部分内容，可以看到包括了四段内容，即服务名称、TraceId、SpanId 和 Zipkin 标志位，它是格式如下所示：
+
+```
+[服务名称, TraceId, SpanId, Zipkin 标志位]
+```
+
+显然，第一段中的 userservice 代表着该服务的名称，使用的就是在 Spring Boot 应用中 spring.application.name 配置项所指定的服务名称。考虑到服务跟踪的需求，为服务指定一个统一而友好的名称是一项最佳实践。
+
+第二段中的 TraceId 代表一次完整请求的唯一编号，上例中的 81d66b6e43e71faa 就是该次请求的唯一编号。在诸如 Zipkin 等可视化工具中，可以通过 TraceId 查看完整的服务调用链路。
+
+在一个完整的服务调用链路中，每一个服务之间的调用过程都可以通过 SpanId 进行唯一标识，例如上例中位于第三段的 6df220755223fb6e。所以 TraceId 和 SpanId 是一对多的关系，即一个 TraceId 一般都会包含多个 SpanId，每一个 SpanId 都从属于特定的 TraceId。当然，也可以通过 SpanId 查看某一个服务调用过程的详细信息。
+
+最后的第四段代表 Zipkin 标志位，该标志位用于识别是否将服务跟踪信息同步到 Zipkin。Zipkin 是一个可视化工具，可以将服务跟踪信息通过一定的图形化形式展示出来。
+
+## 源码解析
+
+在本讲的源码解析部分，我们一方面分析 Spring Cloud Sleuth 生成和传递 Span 的实现原理。另一方面，我们也将基于更为底层的 Brave 框架给出创建自定义 Span 的实现方法。
+
+### 基于 Spring Cloud Sleuth 生成和传递 Span
+
+在一次远程调用中，对于服务提供者而言，服务的消费者相当于是它的客户端。而对于调用过程中的其他服务，这个服务消费者也可能是它们的服务提供者。因此，取决于在链路中的具体位置，不同服务可能会扮演不同的角色，如下图所示：
+
+![](res/2024-11-20-14-07-48.png)
+
+针对上图，我们第一步需要讨论的是在服务调用过程中如何生成 Span。在 Spring Cloud Sleuth 中，生成 Span 的过程发生在对请求进行拦截的过程中，这个拦截器就是 LazyTracingFilter。
+
+我们来看位于该拦截器中与创建 Span 相关的实现方式，如下所示：
+
+```java
+@Override
+public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+   HttpServletRequest req = (HttpServletRequest) request;
+   HttpServletResponse res = servlet.httpServletResponse(response);
+
+   // 从请求中获取现有 Span 或创建新的 Span
+   Span span = handler.handleReceive(new HttpServletRequestWrapper(req));
+
+   // 为 Span 添加额外属性
+   request.setAttribute(SpanCustomizer.class.getName(), span);
+   request.setAttribute(TraceContext.class.getName(), span.context());
+
+   // 保存当前的 Span 信息，用于将这些信息通过过滤器链继续向下传递
+   CurrentTraceContext.Scope scope = currentTraceContext.newScope(span.context());
+   try {
+      chain.doFilter(req, res);
+   } catch (Throwable e) {
+      //...
+   } finally {
+      // ...
+      // scope.close();
+   }
+}
+```
+
+请注意，Spring Cloud Sleuth 在底层实际上是借助于 Brave 这个框架来实现 Span 的创建和传递，所以这里出现了很多与这个框架相关的代码。
+
+考虑到在一个服务调用链路中，当前的服务消费者对于其他服务而言也可能是服务的提供者。所以，我们会首先判断 Brave 框架中当前的跟踪上下文 TraceContext 是否为空，如果不为空就说明这个服务消费者是其他服务的提供者，我们可以通过 Tracer 的 joinSpan 方法把当前已经存在的 Span 加入到该上下文中。反之则说明这个服务消费者是整个调用链路的第一个服务，我们会通过 Tracer 的 nextSpan 方法创建一个新的 Span，如下所示：
+
+```java
+Span nextSpan(TraceContextOrSamplingFlags extracted, HttpServerRequest request) {
+   Boolean sampled = extracted.sampled();
+   if (sampled == null && (sampled = sampler.trySample(request)) != null) {
+      extracted = extracted.sampled(sampled.booleanValue());
+   }
+   // 判断是否新建一个 Span
+   return extracted.context() != null
+         ? tracer.joinSpan(extracted.context())
+         : tracer.nextSpan(extracted);
+}
+```
+
+这里的 Tracer 是 Brave 框架所提供的一个工具类，具备一组用于完成与 Span 相关的各种属性和操作的方法，我们在本讲后续内容中还会对该类做进一步展开讨论。
+
+当我们已经获取一个有效的 Span 对象之后，就可以对它做一些必要的赋值操作，然后保存这个 Span。这样，这个 Span 中的信息就可以通过过滤器链继续在调用链路中向下传递。这个过程也是通过一个拦截器来完成的，这个拦截器就是 TracingClientHttpRequestInterceptor，我们来看它的拦截实现方式，如下所示：
+
+```java
+@Override
+public ClientHttpResponse intercept(HttpRequest req, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+   HttpRequestWrapper request = new HttpRequestWrapper(req);
+   // 将 Span 信息注入到 HTTP 请求中
+   Span span = handler.handleSend(request);
+
+   ClientHttpResponse response = null;
+   Throwable error = null;
+   try (CurrentTraceContext.Scope ws = currentTraceContext.newScope(span.context())) {
+      // 发送请求、获取响应
+      response = execution.execute(req, body);
+      return response;
+   } catch (Throwable e) {
+      // ...
+   } finally {
+      // 创建事件
+      handler.handleReceive(new ClientHttpResponseWrapper(request, response, error), span);
+   }
+}
+```
+
+你可能会问，Span 信息是如何传递给下一个服务的呢？答案就在这个 `HttpClientHandler.handleSend` 方法中，该方法如下所示：
+
+```java
+public Span handleSend(HttpClientRequest request, Span span) {
+   // ...
+   // 将 Span 信息注入到 HTTP 消息头
+   defaultInjector.inject(span.context(), request);
+
+   // 创建事件
+   return handleStart(new HttpClientRequest.ToHttpAdapter(request), request.unwrap(), span);
+}
+```
+
+可以看到，这里出现了一个注入器组件 Injector，该组件会将一个 Span 中相关的 SpanId、TraceId、ParentId 等信息注入到 HTTP 请求的消息头中，从而确保这些信息能够随着 HTTP 请求的发送传递到下一个服务中。
+
+请注意，这里出现的 handleReceive 和 handleStart 方法分别用于记录 Span 的关键事件。从命名上，我们不难理解 handleReceive 用于处理 cr 事件，而 handleStart 则用来处理 cs 事件。通过这种方式，当请求在某一个服务中被处理完成，相应的事件也会被记录下来。
+
+### 使用 Brave 创建自定义 Span
+
+在前面的内容中，我们已经提到了通过 Brave 框架来生成 Span 的实现方法。同样的，如果想要在访问链路中创建自定义的 Span，需要对 Brave 框架所提供的功能有足够的了解。
+
+我们首先来关注 Brave 中的 Span 类，该类的方法列表如下所示：
+
+![](res/2024-11-20-14-25-04.png)
+
+注意到 Span 是一个抽象类，在上面的方法列表中，我们也看到该类的几乎所有方法都是抽象方法，需要子类进行实现。在 Brave 中，该抽象类的子类就是 RealSpan。RealSpan 中的 start 方法如下所示：
+
+```java
+@Override
+public Span start(long timestamp) {
+   synchronized (state) {
+      state.startTimestamp(timestamp);
+   }
+   return this;
+}
+```
+
+这里的 state 是一个可变的 MutableSpan，而上述 start 方法就是为这个 MutableSpan 设置了开始时间。可以想象，对应的 finish 方法也会为 MutableSpan 设置结束时间，如下所示：
+
+```java
+@Override
+public void finish(long timestamp) {
+   if (!pendingSpans.remove(context)) return;
+   synchronized (state) {
+      state.finishTimestamp(timestamp);
+   }
+   finishedSpanHandler.handle(context, state);
+}
+```
+
+对于关闭 Span 的操作而言，上述方法还添加了一个 Handler 以便执行回调逻辑，这也是非常常见的一种实现技巧。
+
+我们接着来看另一个非常有用的 annotate 方法，如下所示：
+
+```java
+@Override
+public Span annotate(long timestamp, String value) {
+   if ("cs".equals(value)) {
+      synchronized (state) {
+         state.kind(Span.Kind.CLIENT);
+         state.startTimestamp(timestamp);
+      }
+   } else if ("sr".equals(value)) {
+      synchronized (state) {
+         state.kind(Span.Kind.SERVER);
+         state.startTimestamp(timestamp);
+      }
+   } else if ("cr".equals(value)) {
+      synchronized (state) {
+         state.kind(Span.Kind.CLIENT);
+      }
+      finish(timestamp);
+   } else if ("ss".equals(value)) {
+      synchronized (state) {
+         state.kind(Span.Kind.SERVER);
+      }
+      finish(timestamp);
+   } else {
+      synchronized (state) {
+         state.annotate(timestamp, value);
+      }
+   }
+   return this;
+}
+```
+
+基于前面讨论的四种监控事件，我们不难理解上述代码的作用就是为这些事件指定类型以及时间，从而为构建监控链路提供基础。
+
+RealSpan 中最后一个值得介绍的方法是如下所示的 tag 方法：
+
+```java
+@Override
+public Span tag(String key, String value) {
+   synchronized (state) {
+      state.tag(key, value);
+   }
+   return this;
+}
+```
+
+该方法为 Span 打上一个标签，其中两个参数分别代表标签的 Key 和 Value，开发人员可以根据需要对任何一个 Span 添加自定义的标签体系。
+
+了解了 Span 的定义之后，我们就来讨论如何在业务代码中创建自定义 Span 的方法，这时候就需要引入前面已经给出的 Tracer 类，我们同样挑选几个常见的方法进行展开。
+
+首先，我们来看如何通过 Tracer 创建一个新的根 Span，可以通过如下所示的 newTrace 方法进行实现：
+
+```java
+public Span newTrace() {
+   return _toSpan(newRootContext());
+}
+```
+
+这里用到了一个用于保存跟踪信息的 TraceContext 上下文对象，对于根 Span 而言，这个 TraceContext 就是全新的上下文，没有父 Span。而这里的 \_toSpan 方法则最终构建了一个前面提到的 RealSpan 对象。
+
+```java
+Span _toSpan(TraceContext decorated) {
+   if (isNoop(decorated)) return new NoopSpan(decorated);
+   PendingSpan pendingSpan = pendingSpans.getOrCreate(decorated, false);
+   return new RealSpan(decorated, pendingSpans, pendingSpan.state(), pendingSpan.clock(), finishedSpanHandler);
+}
+```
+
+这里多了一个新建的对象叫 PendingSpan，该对象用于收集一条 Trace 上暂时被挂起的未完成的 Span。
+
+一旦创建了根 Span，我们就可以在这个 Span 上执行 nextSpan 方法来添加新的 Span，如下所示：
+
+```java
+public Span nextSpan() {
+   TraceContext parent = currentTraceContext.get();
+   return parent != null ? newChild(parent) : newTrace();
+}
+```
+
+这里获取当前 TraceContext，如果该上下文不存在，就通过 newTrace 方法来创建一个新的根 Span；如果存在，则基于这个上下文并调用 newChild 方法来创建一个子 Span。newChild 方法也比较简单，如下所示：
+
+```java
+public Span newChild(TraceContext parent) {
+   if (parent == null) throw new NullPointerException("parent == null");
+   return _toSpan(nextContext(parent));
+}
+```
+
+当然，在很多场景下，我们需要获取当前的 Span，这时候就可以使用 Tracer 类所提供的 currentSpan 方法，如下所示：
+
+```java
+public Span currentSpan() {
+   TraceContext currentContext = currentTraceContext.get();
+   return currentContext != null ? toSpan(currentContext) : null;
+}
+```
+
+基于 Tracer 提供的这些常见方法，我们可以梳理在业务代码中添加一个自定义 Span 的模版方法，如下所示：
+
+```java
+@Service
+public class MyService {
+   @Autowired
+   private Tracer tracer;
+
+   public void perform() {
+      Span newSpan = tracer.nextSpan().name("spanName").start();
+      try {
+         // 执行业务逻辑
+      } finally{
+         newSpan.tag("key", "value");
+         newSpan.annotate("myannotation");
+         newSpan.finish();
+      }
+   }
+}
+```
+
+在上述代码中，我们注入了一个 Tracer 对象，然后通过 nextSpan 方法创建并启动了一个名称为“spanName”的新 Span。这是在业务代码中嵌入自定义 Span 的一种常用实现方法。当我们执行完各种业务逻辑之后，可以分别通过 tag 方法和 annotate 方法添加标签和定义事件，最后通过 finish 方法关闭 Span。这段模板代码可以直接引入到日常的开发过程中。
+
+## 解题要点
+
+构建服务监控和链路跟踪在分布式系统开发过程中是一项基础设施类工作，而我们可以借助于类似 Spring Cloud Sleuth 这样的框架来轻松完成这项工作。Spring Cloud Sleuth 内置了日志采集和分析机制，能够帮忙我们自动建立 TraceId 和 SpanId 之间的关联关系。对于这些工具和框架的介绍是应对这类面试题的第一个要点，也是最基本的要求。在日常开发过程中，很多开发平台已经帮我们内置了对这些工具的支持，但我们还是需要多接触一下这方面的技术组件。
+
+就面试官的考查方式而言，先从框架应用开始聊起，然后再切入到框架基本原理的讨论是一种常见的提问方式。因此，我们需要对具体框架中所涉及的实现原理做进一步展开。
+
+这里有两个要点，一方面我们需要介绍分布式服务跟踪的设计思想和基本概念，这部分包括如何基于 Trace 和 Span 构建服务链路的整个过程。另一方面，我们需要结合具体的框架来分析这些概念如何在现实中进行落地，这部分可以重点对本讲中介绍的 Brave 框架进行讨论。
+
+最后，关于链路跟踪，我们还可以介绍与可视化相关的一些话题，例如 Zipkin 的基本架构、Spring Cloud Sleuth 如何与 Zipkin 进行集成等。作为加分项，这些内容可以展示候选人所具备的知识体系。
+
+## 小结与预告
+
+链路跟踪是一个理论和实践紧密结合的综合性话题，本讲内容对这个话题背后所涉及的核心概念和基本原理都做了详细的介绍。同时，我们基于 Spring Cloud 中的 Spring Cloud Sleuth 以及业界主流的 Brave 框架分析了对应的实现方式。
+
+讨论完服务监控之后，下一讲我们将讨论消息通信机制。在分布式系统中，消息通信也是一个基础的技术组件，业界也存在一批不同的消息中间件，这些中间件在使用方式上不尽相同。那么，作为基础设施类组件，我们如何设计跨消息中间件的统一消息通信平台？这是下一讲要展开的内容。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
