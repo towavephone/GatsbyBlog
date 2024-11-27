@@ -5591,8 +5591,7 @@ Spring Cloud Stream 团队提供了 spring-cloud-stream-binder-rabbit 作为与 
 首先我们找到 RabbitMessageChannelBinder 中的 createProducerMessageHandler 方法，我们知道该方法用于完成消息的发送。我们在 createProducerMessageHandler 中找到了以下核心代码：
 
 ```java
-final AmqpOutboundEndpoint endpoint = new AmqpOutboundEndpoint(
-    buildRabbitTemplate(producerProperties.getExtension(), errorChannel != null));
+final AmqpOutboundEndpoint endpoint = new AmqpOutboundEndpoint(buildRabbitTemplate(producerProperties.getExtension(), errorChannel != null));
 endpoint.setExchangeName(producerDestination.getName());
 ```
 
@@ -5674,5 +5673,288 @@ private org.springframework.messaging.Message<Object> createMessage(Message mess
 本讲讨论了分布式系统中与消息通信相关的话题，但我们的切入点并不是消息通信本身，而是关注如何构建一个跨消息中间件的统一消息通信平台。与前面几讲的行文思路不同，我们在引入 Spring Cloud Stream 时并不是直接介绍它的实现原理，而是从 Spring 家族中所具备的各种消息通信组件和框架开始，引出 Spring Cloud Stream 的基本架构。然后，作为一款平台型的开源框架，我们重点对 Spring Cloud Stream 如何与各个消息中间件之间实现整合的过程做了源码级的深入分析。
 
 从下一讲开始，我们将进入到一个新的模块的讲解，这个模块包含了一组通用型的技术组件。我们要引入的第一个通用型技术组件是动态代理。那么，动态代理在分布式服务中起到什么作用？这就是下一讲要展开的内容。
+
+# 动态代理：动态代理在分布式服务中起到什么作用？
+
+在上一讲中，我们介绍了消息通信这个在分布式系统构建过程中非常常用的技术组件，这也是我们针对分布式系统讨论的最后一个专用技术组件。
+
+从本讲开始，我们将进入到另一类技术组件的讲解，这类技术组件并不局限于只能用于分布式系统的构建过程，而是具有更大的通用性和灵活性。首先，我们要引入的是动态代理机制。
+
+在系统设计过程中，对象之间相互依赖会造成耦合度过高，我们需要引入一个中间类来消除或缓解在直接访问目标对象时所带来的问题。但是对于发起访问的对象而言，通常希望这个中间类的存在是无感知的，这时候我们就可以引入动态代理机制。
+
+那么，问题就来了，作为一种通用型的技术组件，动态代理在分布式系统构建过程中起到什么作用呢？本讲内容将和你一起探讨这个话题。
+
+## 问题背景
+
+在系统设计领域，代理（Proxy）是一种常见的技术组件，主要目的就是在访问目标对象之前添加一层代理对象，用于消除或缓解在直接访问目标对象时带来的问题。
+
+而在现实应用中，代理机制也非常常见，可以说处处是代理。举一个简单的场景，假设我们需要在服务层组件中调用数据访问层组件，并记录一个操作日志。通常，服务层组件有很多方法，而对所有方法操作都需要添加日志。显然，在每个方法中手工调用同一个日志方法不是一种很好的解决方案，会造成代码冗余，增加维护成本。这个时候，代理机制就可以派上用场了。
+
+我们可以构建一个代理对象，然后由这个代理对象统一实现日志记录操作，如下图所示：
+
+![](res/2024-11-27-11-45-02.png)
+
+可以看到，通过代理机制，一个对象就可以在承接另一个对象功能的基础之上，同时添加新的功能。相比直接在原有对象中嵌入代码，代理机制为我们提供了更为优雅的解决方案。
+
+可能你看了前面这段描述之后，会觉得代理机制很简单，但事实并非如此，你可以先来看一下下面这些现实中的面试题：
+
+- 静态代理和动态代理的本质区别是什么？
+- 你了解的动态代理实现技术有哪些？
+- 你知道哪些场景中用到了动态代理机制吗？
+- JDK 自带的动态代理机制组成结构是怎么样的？
+- Dubbo 中的远程调用本地化机制背后使用的是什么技术？
+- 为什么 MyBatis 中的 Mapper 接口没有实现类但却能提供 SQL 执行功能？
+- 如果让你实现类似动态代理的执行效果，你有什么思路？
+
+事实上，代理机制背后的应用场景以及实现原理是面试过程中非常高频的一类面试题，可以考查的范围非常广，对候选人的要求也很高。
+
+## 问题分析
+
+在分布式系统构建过程中，动态代理是一种非常通用的实现机制，被广泛应用于 Dubbo 和 MyBatis 等各种开源框架中。面试过程中，面试官也通常会基于这些框架来考查候选人对这一技术组件的掌握程度。
+
+那么，我们应该如何掌握与代理机制相关的解题思路呢？这里我总结了三点思路。
+
+首先，就理论知识而言，我们需要明确代理机制的概念和分类。关于代理机制的概念，你可以结合设计模式中的代理模式一起进行理解。而关于代理机制的分类，一般认为具体的表现形式有两种，一种是静态代理机制，一种是动态代理机制。面试过程中，关于静态代理机制只需要简单介绍即可，重点要做展开的是动态代理机制。
+
+然后，我们需要对动态代理机制的主流实现技术展开讨论。在 Java 的世界中，想要实现动态代理，主要有三种实现方式，即 JDK 自带的代理类以及第三方的 Cglib 和 Javassist。这些实现技术的使用方式大致相同，但背后的原理却各有特点。候选人至少需要对其中的一种实现方式有深入的理解，建议可以从 JDK 自带的代理类进行切入。
+
+最后，明确了概念和技术之后，接下来就是具体的应用场景了。可以说，动态代理机制在各个主流的开源框架中应用非常广泛。因为它是一种通用型的技术组件，所以可以根据不同的应用场景解决不同的问题。这里也需要候选人对主流开源框架中涉及到动态代理的常见应用场景和实现方式有足够的了解。
+
+## 技术体系
+
+通过问题背景部分所介绍的应用场景，实际上我们可以梳理代理机制中存在的三种不同的角色，即抽象角色、代理角色和真实角色，如下图所示：
+
+![](res/2024-11-27-11-45-56.png)
+
+可以看到，代理角色和真实角色一样实现了抽象角色，但是它是真实角色的一种代理。通过代理角色，开发人员可以在真实角色的基础上添加各种定制化的处理逻辑。
+
+上图展示代理机制中的三种角色及其对应的职责，转化为面向对象领域的表现形式，就是如下图所示的类层结构：
+
+![](res/2024-11-27-11-46-27.png)
+
+上图中，代理接口扮演的就是抽象角色，而代理类和委托类则分别充当了代理角色和真实角色，请注意它们都实现了代理接口。
+
+前面已经提到，代理机制在具体实现上一般有两种方式，一种是静态代理机制，一种是动态代理机制。在 Dubbo、MyBatis 等常见开源框架中，这两种实现方式都有应用。本讲内容重点对动态代理展开讨论，主要因为动态代理理解和实现起来相对比较复杂，而且在 Dubbo、MyBatis 等框架中的应用方式和实现过程也值得我们学习和模仿。
+
+在接下来的内容中，我们就以 JDK 自带的代理类为例给出具体的实现方式。
+
+现在假设存在一个 Account 接口，然后需要在调用其 open 方法的前后记录日志。显然，通过静态代理完全能做到这一点，而使用 JDK 自带的动态代理也并不复杂。在 JDK 自带的动态代理中存在一个 InvocationHandler 接口，我们首先要做的就是提供该接口的一个实现类，如下所示：
+
+```java
+public class AccountHandler implements InvocationHandler {
+   private Object obj;
+
+   public AccountHandler(Object obj) {
+      super();
+      this.obj = obj;
+   }
+
+   @Override
+   public Object invoke(Object proxy, Method method, Object[] arg) throws Throwable {
+      Object result = null;
+      doBefore();
+      result = method.invoke(obj, arg);
+      doAfter();
+      return result;
+   }
+
+   public void doBefore() {
+      System.out.println("开户前");
+   }
+
+   public void doAfter() {
+      System.out.println("开户后");
+   }
+}
+```
+
+可以看到 InvocationHandler 中包含一个 invoke 方法，我们必须实现这一方法。在这一方法中，我们通常需要调用 method.invoke 方法执行原有对象的代码逻辑，然后可以在该方法前后添加相应的代理实现。在上述代码中，我们只是简单打印了日志。
+
+然后，我们编写测试类来应用上述 AccountHandler 类，如下所示：
+
+```java
+public class AccountTest {
+   public static void main(String[] args) {
+      Account account = new RealAccount("tianyalan");
+      InvocationHandler handler = new AccountHandler(account);
+
+      Account proxy = (Account)Proxy.newProxyInstance(account.getClass().getClassLoader(), account.getClass().getInterfaces(), handler);
+      proxy.open();
+   }
+}
+```
+
+Proxy.newProxyInstance 方法的作用就是生成代理类，当该方法被调用时，RealAccount 类的实例被传入。然后执行到代理类的 open 方法时，AccountHandler 中的 invoke 方法就会被执行，从而触发代理逻辑。这里的类层结构如下图所示：
+
+![](res/2024-11-27-11-47-29.png)
+
+仔细分析上述代码结构，可以发现其遵循设计并实现业务接口 -> 实现 Handler -> 创建代理类这一实现流程，然后在 Handler 中构建具体的代理逻辑。
+
+上述流程展示了基本的代理机制实现过程。我们可以联想一下很多基于 AOP 机制的拦截器实际上就是类似的流程。
+
+## 源码解析
+
+在本讲的源码解析部分，我们将分别基于 Dubbo 框架和 MyBatis 框架来深入分析在主流开源框架中动态代理机制的应用场景和实现原理。
+
+### Dubbo 远程访问中的代理机制
+
+当使用 Dubbo 进行远程服务调用时，我们所做的事情就是在配置文件或代码中添加对某个服务的引用，整个过程让人感觉并没有执行任何与远程方法调用相关的网络连接、数据传输、序列化等操作，这就是所谓的远程调用本地化。远程调用本地化得以实现的背后用到的实际上就是动态代理机制。
+
+在 Dubbo 中，我们知道执行远程调用的是 Invoker 对象。因此，当该对象被创建出来之后，我们就需要为它生成对应的代理对象，完成这一操作的是 ProxyFactory 工厂类，该工厂类的 getProxy 方法如下所示：
+
+```java
+public interface ProxyFactory {
+   @Adaptive({Constants.PROXY_KEY})
+   <T> T getProxy(Invoker<T> invoker) throws RpcException;
+
+   @Adaptive({Constants.PROXY_KEY})
+   <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException;
+}
+```
+
+在 Dubbo 中，ProxyFactory 的直接实现类是 AbstractProxyFactory。该类是一个抽象类，除了为每个服务自动添加回声（Echo）功能之外，还预留了一个 getProxy 抽象方法供子类进行实现。
+
+在 Dubbo 中存在两个 ProxyFactory 的实现类，即 JavassistProxyFactory 和 JdkProxyFactory。其中的 JdkProxyFactory 的实现比较典型，接下来我们就对 JdkProxyFactory 进行展开，该类的 getProxy 方法如下所示：
+
+```java
+public <T> T getProxy(Invoker<T> invoker, Class<?>[] interfaces) {
+   return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, new InvokerInvocationHandler(invoker));
+}
+```
+
+这里看到了熟悉的 Proxy.newProxyInstance 方法，这是典型的 JDK 动态代理的用法。根据传入的接口获得动态代理类，当调用这些接口的方法时都会转而调用 InvokerInvocationHandler。基于 JDK 动态代理的实现机制，可以想象 InvokerInvocationHandler 类必定实现了 InvocationHandler 接口，如下所示：
+
+```java
+public class InvokerInvocationHandler implements InvocationHandler {
+   private final Invoker<?> invoker;
+
+   public InvokerInvocationHandler(Invoker<?> handler) {
+      this.invoker = handler;
+   }
+
+   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      String methodName = method.getName();
+      Class<?>[] parameterTypes = method.getParameterTypes();
+
+      if (method.getDeclaringClass() == Object.class) {
+         return method.invoke(invoker, args);
+      }
+
+      if ("toString".equals(methodName) && parameterTypes.length == 0) {
+         return invoker.toString();
+      }
+
+      if ("hashCode".equals(methodName) && parameterTypes.length == 0) {
+         return invoker.hashCode();
+      }
+
+      if ("equals".equals(methodName) && parameterTypes.length == 1) {
+         return invoker.equals(args[0]);
+      }
+
+      return invoker.invoke(new RpcInvocation(method, args)).recreate();
+   }
+}
+```
+
+可以看到，这里只是把方法的执行转向了 invoker.invoke 方法。关于 Invoker 的介绍不是本讲内容的重点，我们已经在前面介绍服务调用时对其进行了详细的展开，你可以做一些回顾。
+
+### MyBatis 数据访问中的代理机制
+
+在 MyBatis 中，应用动态代理的场景实际上非常多，我们无意对所有的场景都一一展开。这里列举一个最典型的应用场景，即 Mapper 层的动态代理，用于根据 Mapper 层接口获取 SQL 执行结果。
+
+在开始介绍 MyBatis 中的代理机制之前，我们先来回顾一下 MyBatis 的执行主流程，如下图所示。可以看到 MyBatis 是通过 MapperProxy 动态代理 Mapper。
+
+![](res/2024-11-27-11-49-05.png)
+
+使用过 MyBatis 的同学应该都接触过这样一种操作，我们只需要定义 Mapper 层的接口而不需要对其进行具体的实现，该接口却能够正常调用并完成 SQL 执行等一系列操作，听起来很神奇，这是怎么做到的呢？让我们梳理一下整个调用流程。
+
+在使用 MyBatis 时，业务层代码中调用各种 Mapper 的一般做法是通过 SqlSession 这个外观类，如下所示：
+
+```java
+TestMapper testMapper = sqlSession.getMapper(TestMapper.class);
+```
+
+作为外观类，DefaultSqlSession 把这一操作转移给了 Configuration 对象，该对象中的 getMapper 方法如下所示：
+
+```java
+@Override
+public <T> T getMapper(Class<T> type) {
+   return configuration.getMapper(type, this);
+}
+```
+
+让我们来到这里出现的 MapperRegistry 类，会发现真正负责创建 Mapper 实例对象的是 MapperProxyFactory 类。请注意，mapperProxyFactory.newInstance 方法的传入参数是一个 SqlSession，如下所示：
+
+```java
+public T newInstance(SqlSession sqlSession) {
+   final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
+   return newInstance(mapperProxy);
+}
+```
+
+这里引出了另一个核心类 MapperProxy，从命名上看，我们可以猜想该类就是一个代理类，因此势必使用了前面介绍的某种动态代理技术。可以先看一下 MapperProxy 类的签名，如下所示：
+
+```java
+public class MapperProxy<T> implements InvocationHandler, Serializable
+```
+
+显然，这里用到的是 JDK 自带的基于 InvocationHandler 的动态代理实现方案，因此，在 MapperProxy 类中同样肯定存在一个 invoke 方法，如下所示：
+
+```java
+@Override
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+   try {
+      if (Object.class.equals(method.getDeclaringClass())) {
+         return method.invoke(this, args);
+      } else if (method.isDefault()) {
+         return invokeDefaultMethod(proxy, method, args);
+      }
+   } catch (Throwable t) {
+      throw ExceptionUtil.unwrapThrowable(t);
+   }
+
+   final MapperMethod mapperMethod = cachedMapperMethod(method);
+   return mapperMethod.execute(sqlSession, args);
+}
+```
+
+对于执行 SQL 语句的方法而言，MapperProxy 会把这部分工作交给 MapperMethod 处理。而在 MapperMethod 的 execute 方法中，我们传入了 SqlSession 以及相关的参数。在这个 execute 方法内部，根据 SQL 命令的不同类型（insert、update、delete、select）分别调用 SqlSession 的不同方法。
+
+目前为止，我们看到了 MapperProxy 类实现 InvocationHandler 接口，但还没有看到 Proxy.newProxyInstance 方法的调用，该方法实际上也同样位于 MapperProxyFactory 类中，该类还存在一个 newInstance 重载方法，通过传入 mapperProxy 的代理对象最终完成代理方法的执行，如下所示：
+
+```java
+protected T newInstance(MapperProxy<T> mapperProxy) {
+   return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
+}
+```
+
+作为总结，我们梳理了 MyBatis 中 Mapper 层动态代理相关类的类层结构，如下图所示：
+
+![](res/2024-11-27-11-50-25.png)
+
+总体而言，基于代理机制，MyBatis 中 Mapper 层的接口调用过程还是比较简单明确的，这里采用的实现方案也比较经典，相关的类层结构设计也可以用作日常开发工作的参考。
+
+## 解题要点
+
+关于动态代理的实现技术是面试过程中的一个要点。动态代理是代理机制的主要实现方式，相比静态代理更为复杂也更为实用。常见的动态代理实现技术包括 JDK 自带的代理类、第三方的 Cglib 和 javassist。在回答该题时，这三个名词是一定要点到的，至于具体的细节，视面试的进展可以合理进行展开，包括给出一些自己开发过程中的实践体会，或者部分核心类的介绍。针对这道题而言，我们关注的是动态代理的技术本身，而不是应用的方式和场景。在准备这类面试题时，我们可以事先对动态代理的三种实现方式做一些示例代码，从而确保自己先有一个感性的认识。
+
+针对具体框架的应用场景和实现机制的考查，是与动态代理机制相关的另一个面试要点，我也经常拿这些问题来面试不同层级的候选人。例如，对 Dubbo 而言，存在两种动态代理的实现机制，即 JDK 和 Javassist。尽管默认采用的是后者，但由于 Javassist 的实现过程过于复杂，一般不大适合作为一个面试题进行考查，所以更多的时候我们还是会拿 JDK 中的动态代理机制来进行讨论。
+
+在回答这种问题上，第一步肯定是回答关于动态代理实现机制本身的内容，例如这里我们就需要对 JDK 中的 InvocationHandler 接口和 Proxy 静态类做详细的介绍。然后，针对 Dubbo 框架，我们也要明确所有的远程调用过程都是封装在一个个的 Invoker 对象中，所以动态代理的目的实际上就是把本地代码的调用过程转移到对 Invoker 对象的使用上，这是我们在回答类似问题上的基本思路。
+
+Dubbo 中动态代理的整个执行流程还是比较清晰和明确的，在理解上建议关注于各个接口方法的输入输出参数，尤其是 Invoker 对象的使用方式。
+
+再比如说，类似“在 MyBatis 中，为什么我们只需要定义 Mapper 层的接口而不需要对其进行具体的实现就能完成正常的 SQL 执行过程？”这样的问题也很经典，经典之处在于一般的开发人员很难通过题目中的描述明确问题的考点。
+
+实际上，该题考查的还是代理机制。而从问题的问法上是基于 Mybatis 这个框架，但问题本身是跟 MyBatis 没有关系的，关注的是“没有具体实现的接口如何完成方法调用”这个本质问题。我们要理理思路来慢慢解开这道题的回答内容。
+
+首先，我们明确通过 MyBatis 可以提供一系列的自定义 Mapper 接口，我们使用这些接口定义就可以执行数据库的查询、更新等操作。这是框架应用上的具体做法，相信所有用过 MyBatis 的同学都能明确这一点。然后，我们再次明确，通过接口定义就能提供方法调用的基本原理就是对这些接口进行了动态代理。只要明确了这一点，就可以把动态代理的相关内容嫁接到这个问题上，从而完成该问题的回答。
+
+## 小结与预告
+
+本章介绍动态代理的基本概念、应用场景、组成结构以及技术实现方式。这些内容在 Dubbo 和 MyBatis 框架中都得到了应用，其中 Dubbo 主要使用动态代理实现远程方法的调用，而 MyBatis 则基于它来完成数据访问。
+
+介绍完动态代理，下一讲我们要讨论的是缓存机制。在分布式系统构建过程中，缓存也是一个通用型的技术组件，其应用方式也比较多样化。那么，如何在数据访问过程中嵌入缓存机制？我们下一讲再聊。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
