@@ -5957,4 +5957,322 @@ Dubbo 中动态代理的整个执行流程还是比较清晰和明确的，在�
 
 介绍完动态代理，下一讲我们要讨论的是缓存机制。在分布式系统构建过程中，缓存也是一个通用型的技术组件，其应用方式也比较多样化。那么，如何在数据访问过程中嵌入缓存机制？我们下一讲再聊。
 
+# 应用缓存：如何在数据访问过程中嵌入缓存机制？
+
+在上一讲中，我们介绍了动态代理这一通用型的技术组件。本讲继续围绕通用型技术组件展开讨论，我们将要介绍的是缓存机制。
+
+想要理解缓存的设计策略，我们一般都会从应用层缓存的角度切入来具体探讨如何使用缓存的方法。缓存的作用在于减少数据的访问时间和计算时间，表现为将来自持久化或其他外部系统的数据转变为一系列可以直接从内存获取的数据结构的过程。
+
+那么，针对分布式系统，如何在数据访问过程中嵌入缓存机制？这是开发人员都需要面对的一种场景，也是面试过程中的高频话题。本讲内容将和你一起探讨应用缓存的实现机制和底层原理。
+
+## 问题背景
+
+缓存技术在分布式系统的开发过程中应用非常广泛，开发人员可以使用位于应用程序内部的本地缓存，也可以使用位于独立服务器上的分布式缓存。在日常开发中，缓存的应用通常都是分层级的，我们会综合使用多级缓存来提高目标对象访问的效率和性能。
+
+想要理解缓存的设计策略，我们一般都会基于一定的缓存架构体系展开讨论。在日常面试过程中，关于缓存的讨论也会涉及到一系列与设计思想和应用方式相关的话题，常见的包括：
+
+- 缓存的基本结构是怎么样的？
+- 你怎么理解多级缓存的概念和作用？
+- 如果让你设计一个基础的缓存，你会怎么做？
+- Mybatis 中包含哪些具体的缓存结构，各自有什么特点？
+- Mybatis 中的缓存数据是如何进行分级管理的？
+- Mybatis 的二级缓存与一级缓存有什么关联关系？
+
+事实上，缓存的基本原理都是类似的，都是一种空间换时间的实现方案。但是，在现实中，我们通常会引入多级缓存的技术手段来对缓存数据进行更为合理和有效的管理，这也是我们在学习主流开源框架时要特别注意的技术点。
+
+## 问题分析
+
+让我们对缓存相关的问题做一些分析和展开。缓存是一项实现技术丰富、表现形式也比较多样的技术组件。在本讲中，我们关注的是应用程序内部的本地缓存实现策略。针对这种场景，最简单的缓存实现策略就是基于 JDK 中的某种数据结构来提供 CRUD 入口。但正如前面所提到的，现实中的缓存实现策略往往没有那么简单，多级缓存的设计思想普遍存在。
+
+因此，在应对这类面试题时，我们需要从多级缓存的设计思想出发梳理对应的组成结构和实现策略。这是应对这类面试题的第一点思路。
+
+有了理论基础之后，我们就可以采用一定的数据结构或工具来实现多级缓存。而目前主流的开源框架中也不乏实现多级缓存的经典场景，尤其是那些与数据库访问相关的 ORM（Object Relational Mapping，对象关系映射）框架。以常见的 Mybatis 框架而言，就内置了由一级缓存和二级缓存所构成的一整套多级缓存机制。
+
+通过对框架源码的学习，我们就能掌握应对上述面试题的回答技巧。同时，这些多级缓存机制的实现原理也为我们应对类似的应用场景提供了很好的参考。
+
+## 技术体系
+
+关于缓存的设计策略是一个比较大的话题，而缓存的分层思想是其中的一个核心设计思想。本节内容先从经典的缓存分层架构出发，分析应用层缓存的分级管理模式。
+
+缓存的核心作用在于降低获取目标数据所需的时间，具体表现上，通常是把来自持久化或其他外部系统的数据转变为一系列可以直接从内存获取的数据结构的过程。
+
+在学习互联网系统中的主流架构时，我们经常会看到类似如下所示的架构图：
+
+![](res/2024-12-16-11-21-50.png)
+
+在上图中，在 Nginx、Redis 等组件中都可以存在缓存机制，我们无意对所有缓存机制进行展开，本讲关注的是上图中应用程序层的缓存。这里的应用程序泛指诸如 Tomcat、Undertow 等应用程序容器，也包括像 Spring、Dubbo、Mybatis 等的开源框架，以及我们自己开发的业务系统。
+
+如果我们分析应用层所具备的缓存实现技术，都可以抽象出通用的缓存结构，下图就是一种常见的缓存表现形式：
+
+![](res/2024-12-16-11-24-15.png)
+
+在上图中，数据表示为 Key-Value 对，然后我们对 Key 施加一定的算法获取其哈希值。有了这个哈希值，我们就可以找到目标 Value 所在的位置并获取值。
+
+各类缓存实现工具，尽管其支持的数据结构以及数据在内存中的分配和查找方式有所不同，但基本结构模型都与上图类似。从该图中，我们也认识到缓存本质上是一种空间换时间的做法。
+
+现在，我们已经明确了单级缓存的基本结构，让我们对上图进行扩展和延伸，把讨论范围扩大到多级缓存。如果对应用程序层的缓存进行进一步分析，我们发现同样存在分级模式，这种分级模式通常包括两级，即一级缓存和二级缓存，如下图所示：
+
+![](res/2024-12-16-11-25-21.png)
+
+简单来说，常见的一级缓存就是指一次请求（Request）级别或者说会话（Session）级别的缓存。针对第一次查询操作，我们会把从数据库中获取的数据放在会话中。针对后续的查询操作，我们就可以直接从会话中拿到目标数据并直接返回。
+
+而二级缓存的范围则更大一点，它是一种全局作用域的缓存。只要应用程序处于运行状态，那么所有请求和会话都可以使用。
+
+多级缓存代表着一种架构设计的方法论，在多款开源框架中都有对应的实现方案。接下来，我们将基于 Mybatis 框架来分析它的一级缓存和二级缓存。
+
+## 源码解析
+
+### Mybatis 一级缓存
+
+Mybatis 的一级缓存是二级缓存的基础，我们需要深入理解一组 Cache 对象，以及这些 Cache 对象与 SQL 执行器（Executor）之间的交互关系。
+
+在 Mybatis 中，存在如下所示的一个 Cache 接口，代表了对缓存操作最高层次抽象。
+
+```java
+public interface Cache {
+   String getId();
+   void putObject(Object key, Object value);
+   Object getObject(Object key);
+   Object removeObject(Object key);
+   void clear();
+   int getSize();
+
+   default ReadWriteLock getReadWriteLock() {
+      return null;
+   }
+}
+```
+
+Cache 接口中的方法都是自解释的，而围绕该接口的类层结构如下图所示。在该图中，Cache 接口代表一种抽象，而位于图中央的 PerpetualCache 代表该接口的具体实现类。
+
+![](res/2024-12-16-11-26-55.png)
+
+上图中的多数缓存实现类也都是自解释的，通过名称基本可以判断出它们的功能。而当我们想使用各种缓存类时，可以通过如下所示的装饰方法完成缓存对象的创建：
+
+```java
+Cache cache = new XXXCache(new PerpetualCache("cacheid"))
+```
+
+如果把这里的 XXXCache 替换成 FifoCache 就代表着这个新创建的 Cache 对象具备了 FIFO 功能。其他缓存类的使用方法也是一样。
+
+事实上，除了 PerpetualCache 类之外，Mybatis 其他的缓存实现类都是 Cache 的装饰器。而 PerpetualCache 是 Mybatis 中默认使用的缓存类型，如下所示：
+
+```java
+public class PerpetualCache implements Cache {
+   private final String id;
+   private Map<Object, Object> cache = new HashMap<>();
+
+   public PerpetualCache(String id) {
+      this.id = id;
+   }
+   // 省略 getter/setter
+   // ...
+}
+```
+
+可以看到，整个 PerpetualCache 类的代码结构非常简单，除了一个 id 属性之外，代表缓存的 cache 属性只是一个 HashMap，是一种典型的基于内存的缓存实现方案。这里的几个方法也比较简单，所有对缓存的操作实际上就是对 HashMap 的操作。
+
+我们知道在 Mybatis 中存在一个配置项，用于指定一级缓存默认开启的级别，如下所示：
+
+```xml
+<setting name="localCacheScope" value="SESSION"/>
+```
+
+在 Mybatis 中一级缓存又可以分为两个级别，即 SESSION 级和 STATEMENT 级，它们之间的区别在于缓存范围的大小。对于 STATEMENT 级别而言，缓存的作用范围就是当前 SQL；而如果是 SESSION 级，则查询结果一直会位于该会话中。但是，要注意由于一级缓存是独立存在于每个 Session 内部的，因此，如果我们创建了不同的 Session，那么它们之间会使用不同的缓存。
+
+例如，完全一样的一个操作，如果在两个不同的 Session 中执行，那就意味着存在两份一样的缓存数据，但分别位于两个 Session 中，彼此之间不会共享，如下图所示：
+
+![](res/2024-12-16-11-28-24.png)
+
+介绍完一级缓存的基本概念和组成结构，是时候回到 SqlSession 了，让我们回顾一下 DefaultSqlSession 中最具代表性的 selectList 方法，如下所示：
+
+```java
+@Override
+public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
+   try {
+      MappedStatement ms = configuration.getMappedStatement(statement);
+      return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
+   } catch (Exception e) {
+      // ...
+   } finally {
+      ErrorContext.instance().reset();
+   }
+}
+```
+
+SqlSession 使用了经典的外观模式，背后真正执行查询操作的是 Executor，而 Executor 又使用了模板方法模式，它的 query 方法如下所示：
+
+```java
+@Override
+public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
+   // ...
+   // 强制清空一级缓存
+   if (queryStack == 0 && ms.isFlushCacheRequired()) {
+      clearLocalCache();
+   }
+
+   List<E> list;
+
+   try {
+      queryStack++;
+      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
+      if (list != null) {
+         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
+      } else {
+         // 查询数据库
+         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
+      }
+   } finally {
+      queryStack--;
+   }
+
+   if (queryStack == 0) {
+      for (DeferredLoad deferredLoad : deferredLoads) {
+         deferredLoad.load();
+      }
+
+      deferredLoads.clear();
+      if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
+         // 如果是 STATEMENT 级，清空一级缓存
+         clearLocalCache();
+      }
+   }
+
+   return list;
+}
+```
+
+上述方法的实现逻辑有点复杂，首先我们来看最后一个 if 判断，可以看到如果一级缓存被设置为 STATEMENT 级，那么该方法会清空当前的本地缓存。这点跟前面的讨论一致。
+
+然后我们回到方法开头，这里会判断 queryStack 是否为 0，如果该值是 0 且当前的 SQL 语句中对 isFlushCacheRequired 参数进行了设置，那就会把 Session 中的 localCache 清空。请注意，Mybatis 一级缓存的启动过程不需要任何配置，它是强制开启的，我们无法关闭。但是通过动态 SQL 的 isFlushCacheRequired 参数可以强制清除所有一级缓存。
+
+通过查看定义，我们发现这个 localCache 就是一个 PerpetualCache 对象。如果这里没有从 localCache 获取到目标数据，就会调用 queryFromDatabase 方法查询数据库，如下所示：
+
+```java
+private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
+   List<E> list;
+   localCache.putObject(key, EXECUTION_PLACEHOLDER);
+   try {
+      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
+   } finally {
+      localCache.removeObject(key);
+   }
+   localCache.putObject(key, list);
+   if (ms.getStatementType() == StatementType.CALLABLE) {
+      localOutputParameterCache.putObject(key, parameter);
+   }
+   return list;
+}
+```
+
+显然，一旦完成数据库查询，我们会将从数据库中获取的数据保存在 localCache 中。而如果你查看 BaseExecutor 的 update、commit 和 close 方法，会发现这些方法在执行完毕之后都会清空一级缓存。
+
+### Mybatis 二级缓存
+
+通过前面的介绍，我们发现 Mybatis 的一级缓存本质上就是一个 HashMap。Mybatis 没有对 HashMap 的大小进行管理，也没有缓存更新和过期的概念。这是因为一级缓存只发生在一次请求或一次会话中，生命周期非常短，不需要添加复杂的控制逻辑。
+
+接下来让我们继续研究 Mybatis 中的另一种缓存表现形式，即二级缓存。相较一级缓存，Mybatis 的二级缓存使用方法有所不同，代码结构和类层关系也要更加复杂一些。
+
+与一级缓存不同，Mybatis 的二级缓存默认是不启用的，我们需要设置对应的配置项才能让它发挥作用。
+
+```xml
+<setting name="cacheEnabled" value="true"/>
+```
+
+下图展示了 Mybatis 中二级缓存的生效范围。请注意，二级缓存是与命名空间（Namespace）强关联的，即如果在不同的命名空间下存在相同的查询 SQL，这两者之间也是不共享缓存数据的。在 Mybatis 中，Configuration 管理着所有的配置信息，所以所有的二级缓存相当于全部位于 Configuration 之内，如下图所示：
+
+![](res/2024-12-16-11-30-21.png)
+
+回到代码，我们在 org.apache.ibatis.cache 包下试图寻找关于二级缓存的相关实现。但是，我们什么也没有找到。我们可以想象一下二级缓存实际上是跟 SQL Mapper 紧密相关的，因为命名空间位于 Mapper 中。所以，相关代码是否是与 Mapper 实现放在一起呢？答案是肯定的，我们在 org.apache.ibatis.mapping 包下找到了这么一个类：CacheBuilder。
+
+从命名上看，CacheBuilder 类的作用就是构建一个 Cache，这个过程通过它的 build 方法实现，该方法代码如下所示：
+
+```java
+public Cache build() {
+   // 设置缓存默认实现
+   setDefaultImplementations();
+   Cache cache = newBaseCacheInstance(implementation, id);
+   // 设置缓存属性
+   setCacheProperties(cache);
+   if (PerpetualCache.class.equals(cache.getClass())) {
+      for (Class<? extends Cache> decorator : decorators) {
+         cache = newCacheDecoratorInstance(decorator, cache);
+         setCacheProperties(cache);
+      }
+      // 对缓存执行装饰
+      cache = setStandardDecorators(cache);
+   } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) {
+      cache = new LoggingCache(cache);
+   }
+   return cache;
+}
+```
+
+我们先来看该方法的第一句，即调用 setDefaultImplementations 方法，该方法设置默认的缓存实现，这时候创建的实际上就是一个 PerpetualCache 类。然后，遍历装饰类接口，通过 setStandardDecorators 方法对 PerpetualCache 添加对各种装饰类的包装，从而构建出 PerpetualCache → LruCache → ScheduledCache → SerializedCache → LoggingCache → SynchronizedCache 这样一个装饰链，装饰器模式在这里得到了完美的应用，
+
+现在，各种缓存装饰类的创建方法有了，那么谁来用呢？让我们跟踪 CacheBuilder 类的使用者。在 Mybatis 中，只有一个地方调用了 CacheBuilder 类，这就是 MapperBuilderAssistant 类。
+
+在该类中存在一个 useNewCache 方法，如下所示：
+
+```java
+public Cache useNewCache(
+   Class<? extends Cache> typeClass,
+   Class<? extends Cache> evictionClass,
+   Long flushInterval,
+   Integer size,
+   boolean readWrite,
+   boolean blocking,
+   Properties props
+) {
+   Cache cache = new CacheBuilder(currentNamespace)
+      .implementation(valueOrDefault(typeClass, PerpetualCache.class))
+      .addDecorator(valueOrDefault(evictionClass, LruCache.class))
+      .clearInterval(flushInterval)
+      .size(size)
+      .readWrite(readWrite)
+      .blocking(blocking)
+      .properties(props)
+      .build();
+   configuration.addCache(cache);
+   currentCache = cache;
+   return cache;
+}
+```
+
+可以看到，二级缓存被成功创建并保存在 configuration 对象中，接下来讨论如在查询过程中使用二级缓存。
+
+首先明确一点，在 Mybatis 中，如果开启了二级缓存，那么所有的 SQL 执行过程都将由 CachingExecutor 负责。顾名思义，CachingExecutor 是带有缓存机制的 Executor，我们对 Executor 已经有了足够的了解，所以直接来看它的 query 方法，如下所示：
+
+```java
+@Override
+public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
+   // 获取缓存对象
+   Cache cache = ms.getCache();
+   if (cache != null) {
+      // ...
+   }
+   return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+}
+```
+
+在该方法体的第一行代码中，我们通过 MappedStatement 获取的 Cache 对象就是前面保存在 Configuration 中的 Cache 对象。
+
+## 解题要点
+
+关于 Mybatis 中缓存机制的面试题，一般都会考查所谓的一级缓存和二级缓存。从考点上，因为比较容易混淆，我们首先需要明确这两种缓存的区别，可以从缓存的作用范围进行记忆，作用范围小的是一级，反之是二级。同时，我们也要明确，这种面试题往往会考查实现原理而不仅是简单应用，因为在 Mybatis 中缓存的应用更多是被动触发的，而不是由开发人员主动进行控制的。
+
+Mybatis 中的一级缓存实际上就是一个 HashMap，并没有太多涉及到缓存管理方面的操作。同时，我们需要解释一下一级缓存与 BaseExecutor 之间的关系，在 Executor 执行具体的查询操作时，就会使用到一级缓存。如果缓存中找不到对应数据才会执行数据库查询。作为加分项，这里可以重点解释一下 Mybatis 中 CacheKey 的实现方法，这也是 Mybatis 框架本身在设计上的一大亮点。这些内容，确实需要结合源代码才能够理解的更加清晰明白，建议大家还是要阅读 PerpetualCache、BaseExecutor 等核心类中的代码执行主流程。
+
+相较一级缓存，二级缓存更为复杂，因为需要更多关注于缓存对象的生命周期以及具体的缓存策略。有时候，这个考点也可以和装饰器模式结合在一起进行考查。针对二级缓存，我们也是从应用方法上进行切入。二级缓存的启动需要我们通过配置项进行控制，而它的作用范围则取决于 Mybatis 的命名空间定义。
+
+在实现原理上，针对二级缓存的回答内容需要包含两个要点。第一个要点是通过装饰器模式来构建具体种类的缓存对象，这块我们可以结合设计模式相关内容进行展开；第二个要点是它与 CachingExecutor 之间的交互关系。
+
+## 小结与预告
+
+本讲内容关注于分布式系统构建过程中不可缺少的一个技术组件，即缓存。
+
+缓存是一个比较复杂的话题，也具有非常多的应用场景。针对应用层缓存，我们通常采用的是分级模式，从而更好地实现对缓存对象的存储和管理。同时，我们以 Mybatis 框架为例分析了它所具备的分级缓存模式。在 Mybatis 中，存在一级缓存和二级缓存。其中，一级缓存的作用范围较小，只能应用于请求级别或会话级别。而二级缓存具备更大作用范围，能够在应用程序级别确保目标对象得到缓存。我们对这两种缓存机制的底层实现原理都进行了详细的展开。
+
+从资源管理角度讲，缓存也是一种有效管理资源的技术手段。而除了缓存，业界也存在一些专门用来管理资源的技术组件，资源池就是其中的代表。那么，什么是池化操作？如何实现一个资源池？我们下一讲将对这些问题展开详细的讨论。
+
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
