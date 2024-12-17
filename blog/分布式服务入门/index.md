@@ -6065,6 +6065,7 @@ public class PerpetualCache implements Cache {
    public PerpetualCache(String id) {
       this.id = id;
    }
+
    // 省略 getter/setter
    // ...
 }
@@ -6274,5 +6275,305 @@ Mybatis 中的一级缓存实际上就是一个 HashMap，并没有太多涉及�
 缓存是一个比较复杂的话题，也具有非常多的应用场景。针对应用层缓存，我们通常采用的是分级模式，从而更好地实现对缓存对象的存储和管理。同时，我们以 Mybatis 框架为例分析了它所具备的分级缓存模式。在 Mybatis 中，存在一级缓存和二级缓存。其中，一级缓存的作用范围较小，只能应用于请求级别或会话级别。而二级缓存具备更大作用范围，能够在应用程序级别确保目标对象得到缓存。我们对这两种缓存机制的底层实现原理都进行了详细的展开。
 
 从资源管理角度讲，缓存也是一种有效管理资源的技术手段。而除了缓存，业界也存在一些专门用来管理资源的技术组件，资源池就是其中的代表。那么，什么是池化操作？如何实现一个资源池？我们下一讲将对这些问题展开详细的讨论。
+
+# 资源管理：什么是池化操作？如何实现一个资源池？
+
+在上一讲中，我们介绍了缓存这一技术组件，并重点对多级缓存的设计思想和实现策略进行了详细的展开。本质上，缓存体现的是一种对资源利用效率进行合理管理的技术手段。
+
+资源管理对于软件系统开发而言是一个很大的话题，同时也是一个很通用的话题。在本讲内容中，我们继续围绕资源管理这一话题进行展开，并聚焦于资源池这一技术组件。
+
+那么，什么是池化操作？如何实现一个资源池？让我们带着这些问题来学习本讲内容。
+
+## 问题背景
+
+对于任何类型的应用程序而言，开发人员所处理的对象本质上都是各种资源（Resource）。所谓资源，在软件架构设计和实现过程中有很多表现形式，例如数据库会话、网络连接、分布式服务和组件等都可以认为是系统的资源，都需要进行管理，而性能、可伸缩性、灵活性则是资源管理的基本需求。
+
+我们知道资源本质上代表着一种系统运行的成本，我们需要尽量减少这种成本。那么，如何有效管理资源呢？就分布式系统开发而言，我们通常都可以引入资源池的概念和实现机制。
+
+资源池是一个最常见、也是最通用的资源管理技术组件。围绕这个技术组件，面试官也会提出各种问题来考查候选人，常见的提问方式包括：
+
+- 你能列举你所知道的资源池应用场景吗？它们各自有什么需求特点？
+- 如果让你自己实现一个资源池，你会怎么做？
+- 如果资源池中已经没有资源了，资源池应该怎么做？
+- 数据库连接池有哪些核心参数？
+- 你知道 Mybatis 是如何有效管理数据库连接的吗？
+- 你能简要描述 Mybatis 中对数据库连接对象 Connection 的管理过程？
+
+虽然具体的资源池表现形式有多种，但基本的组成结构和实现原理大同小异。接下来，我们围绕这些问题来对资源池的概念和特性做进一步分析。
+
+## 问题分析
+
+在计算机编程领域中，池（Pool）是一种对资源的抽象方法，代表一组可以使用的资源，但这些资源不能随时被创建和释放。在架构模式中，也存在一种资源池（Resource Pool）模式。客户端向资源池请求资源，在获取到资源之后就可以用它来完成特定的任务。一旦任务完成，这个资源又可以被回收到资源池继续进行使用。
+
+一个典型的资源池的组成结构如下图所示：
+
+![](res/2024-12-17-11-35-43.png)
+
+基于资源池的基本结构，我们可以进一步分析它的应用场景。作为一种通用的技术组件，资源池的应用场景包括以下几类：
+
+- 管理那些初始化代价非常大的对象；
+- 面向请求资源的频率很高且使用资源总数较低的业务处理过程；
+- 当系统面临性能问题时用来降低访问时间的延迟。
+
+资源池的主要特点在于节省了创建资源实例的开销和时间，但存储空间会随着对象的增多而增大。当我们面对资源池相关的面试问题时，我们首先需要基于日常开发过程中最常见，或者是自己平时最擅长的一种具体的资源池进行展开。例如，任何一个应用程序都需要访问数据库，也就需要引入数据库连接池（Connection Pool）。连接池就是一项适合进行深入挖掘的资源池技术。我们需要明确它的基本工作流程以及核心功能特性。
+
+一旦明白了连接池等具体资源池的工作流程和功能特性，我们就可以基于具体某一款开源框架来深入分析底层的设计方法和实现原理。这部分内容同样需要候选人平时有足够的积累，并在面试过程中能够以自己的语言进行总结和提炼。
+
+## 技术体系
+
+在接下里的内容中，我们将基于 Mybatis 框架来对连接池这一代表性的资源池展开讨论。在介绍 Mybatis 数据库连接池之前，我们有必要对连接池的实现机制有个总体的把握。因此，我们先来全面梳理连接池的工作流程和核心要素，然后在此基础上详细阐述 Mybatis 中对数据库连接对象 Connection 的获取过程。
+
+一个连接池的基本工作流程包含三个环节，即连接池的创建、管理和关闭。但作为一项应用广泛的池化技术，连接池在每一个环节也有一些自身的特点。
+
+在连接池中，对连接的管理策略是重点，也在很大程度上决定了不同连接池之间在实现上的差别。
+
+常见的实现策略是这样：当客户端请求连接时，首先查看连接池中是否有空闲连接，如果存在空闲连接，则将连接分配给客户端使用；如果没有空闲连接，则查看当前所开的连接数是否已经达到最大连接数，如果没达到就重新创建一个连接给到请求的客户端；如果达到就按设定的最大等待时间进行等待，如果超出最大等待时间，则抛出异常给客户端。整个流程如下图所示：
+
+![](res/2024-12-17-11-36-44.png)
+
+围绕上述介绍的连接池的管理方式，我们可以抽象出一些控制参数，常见的参数包括最小空闲连接数（MinIdle）、最大空闲连接数（MaxIdle）、连接池最大活跃连接数（MaxActive）、最大超时时间（MaxTimeout）等。
+
+对于连接池而言，性能是我们选择不同实现工具的首要考虑因素。基于已知内容，我们可以进一步分析连接池内连接的分配和释放对系统性能的影响：
+
+- 如果将总连接数的上限设置得过大，可能因连接数过多而导致数据库僵死，系统整体性能下降；
+- 如果总连接数上限过小，则无法完全发挥数据库的性能，浪费数据库资源。
+
+另一方面：
+
+- 如果将空闲连接的上限设置得过大，则会浪费系统资源来维护这些空闲连接；
+- 如果空闲连接上限过小，当出现瞬间的峰值请求时，系统的快速响应能力就比较弱。
+
+所以在设置数据库连接池的这些参数时，需要进行测试和权衡，不同的实现方案会有不同的考虑。
+
+介绍完连接池的基本概念之后，接下来我们将花较大的篇幅来介绍 Mybatis 中的数据库连接池，以帮助你理解池化技术在开源框架中的实际应用。
+
+## 源码解析
+
+与上一讲介绍 Mybatis 缓存时采用的自下而上（即从底层实现类 PerpetualCache 出发向上游逐层分析直到系统的访问入口 SqlSession）的分析方法不同，我们将采用自上而下的策略来介绍数据库连接池，即从如何获取连接 Connection 对象开始逐步分析其背后的池化操作。
+
+我们在介绍 Mybatis 缓存时，已经明确了 DefaultSqlSession 会调用 CachingExecutor，然后 CachingExecutor 是 BaseExecutor 的实现类，而 BaseExecutor 实现了 Executor 接口，该接口提供了多种用于数据 CRUD 的方法。有了这层调用链，我们可以想象，为了获取与数据库访问相关的 Connection，入口应该位于 BaseExecutor 中的几个与数据库访问直接相关的方法中。
+
+我们直接来到 BaseExecutor 的子类 SimpleExecutor 中的 doQuery 方法。在该方法中我们看到了一个 prepareStatement 方法，进一步猜想获取 Connection 应该是在这一方法中。让我们来看一下这个方法的实现过程，如下所示：
+
+```java
+private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
+   Statement stmt;
+   Connection connection = getConnection(statementLog);
+   stmt = handler.prepare(connection, transaction.getTimeout());
+   handler.parameterize(stmt);
+   return stmt;
+}
+```
+
+果然，在这里我们看到了获取 Connection 对象的 getConnection 方法，该方法如下所示：
+
+```java
+protected Connection getConnection(Log statementLog) throws SQLException {
+   Connection connection = transaction.getConnection();
+   if (statementLog.isDebugEnabled()) {
+      return ConnectionLogger.newInstance(connection, statementLog, queryStack);
+   } else {
+      return connection;
+   }
+}
+```
+
+我们发现 getConnection 实际上是 Transaction 接口的一个方法。除了 getConnection 方法之外，Transaction 作为事务类还包含 commit 和 rollback 等事务处理相关方法。在 Mybatis 中，Transaction 接口有两个实现类，即 JdbcTransaction 和 ManagedTransaction。无论哪种方案，我们在各自的 getConnection 方法中都能看到如下所示的语句：
+
+```java
+this.connection = this.dataSource.getConnection();
+```
+
+显然，我们是通过 DataSource 来获取 Connection 对象。以执行查询操作的 query 方法为例，获取 Connection 对象的整体工作流程如下图所示：
+
+![](res/2024-12-17-11-38-25.png)
+
+### PooledDataSource
+
+DataSource 是 JDBC 中定义的接口，Mybatis 实现了该接口，并提供了三种实现方案，相关的工厂类和实例类类层关系如下图所示：
+
+![](res/2024-12-17-11-39-19.png)
+
+在上图中，我们重点要介绍的是 PooledDataSource，但也会涉及一部分 UnpooledDataSource 的内容，因为 PooledDataSource 也是构建在 UnpooledDataSource 的基础之上。
+
+在 PooledDataSource 类中，首先我们看到的是一组连接池的参数，如下所示：
+
+```java
+protected int poolMaximumActiveConnections = 10;
+protected int poolMaximumIdleConnections = 5;
+protected int poolMaximumCheckoutTime = 20000;
+protected int poolTimeToWait = 20000;
+protected int poolMaximumLocalBadConnectionTolerance = 3;
+protected String poolPingQuery = "NO PING QUERY SET";
+protected boolean poolPingEnabled;
+protected int poolPingConnectionsNotUsedFor;
+```
+
+这里出现了最大空闲连接数（poolMaximumIdleConnections）、连接池最大持有连接数（poolMaximumActiveConnections）、最大存在时间（poolMaximumCheckoutTime）等核心参数，我们在前面介绍连接池的工作流程时都提到过这些参数，然后我们来看 PooledDataSource 的 getConnection 方法，如下所示：
+
+```java
+@Override
+public Connection getConnection(String username, String password) throws SQLException {
+   return popConnection(username, password).getProxyConnection();
+}
+```
+
+我们继续跟进，来到这里的 popConnection 方法，该方法非常长，但结构比较清晰。如果我们对连接池的管理方法有一定了解的话，理解这段代码难度并不大。为了更好地把握代码结构，我们对该方法的代码进行裁剪，只关注于主要的分支和流程，如下所示：
+
+```java
+private PooledConnection popConnection(String username, String password) throws SQLException {
+   while (conn == null) {
+      synchronized (state) {
+         if (!state.idleConnections.isEmpty()) {
+            // 如果 idle 列表不为空，表示有可用连接，直接选取第一个元素
+            conn = state.idleConnections.remove(0);
+         } else {
+            // 连接池没有可用连接的场景
+            if (state.activeConnections.size() < poolMaximumActiveConnections) {
+               // 如果 active 列表没有满，直接创建新连接
+               conn = new PooledConnection(dataSource.getConnection(), this);
+            } else {
+               // active 已经满了
+               // 获得试用最久的连接，判断是否已经超时
+               PooledConnection oldestActiveConnection = state.activeConnections.get(0);
+               long longestCheckoutTime = oldestActiveConnection.getCheckoutTime();
+               if (longestCheckoutTime > poolMaximumCheckoutTime) {
+                  // 已经超时，将原连接废弃并建立新连接
+                  conn = new PooledConnection(oldestActiveConnection.getRealConnection(), this);
+               } else {
+                  // 如果没有超时，则进行等待，并计算时间累加
+                  state.wait(poolTimeToWait);
+               }
+            }
+         }
+         if (conn != null) {
+            // 如果获取到了连接，则验证该连接是否有效
+            if (conn.isValid()) {
+               // 如果连接有效，更新该链接相关参数和状态
+            } else {
+               // 如果连接无效，且无效连接数量超过上限则抛异常
+            }
+         }
+      }
+   }
+
+   if (conn == null) {
+      // 如果最终无法获取有效连接，则同样抛异常
+   }
+
+   return conn;
+}
+```
+
+在上述代码中，我们添加了很多注释来解释用于获取 Connection 的 popConnection 方法的整体流程，而不关心具体细节，整体流程如下图所示：
+
+![](res/2024-12-17-11-40-42.png)
+
+在整体流程上，当 Mybatis 执行查询时会首先从 idleConnections 列表中申请一个空闲的连接，只有当 idleConnections 列表为空时才会创建新连接。当然，PooledDataSource 并不允许无限创建新连接。当连接池中连接达到一定数量时，即使 idleConnections 列表为空，也不会再继续创建新连接，而是从 activeConnections 列表中找出使用最久的一个连接，判断其是否超时。如果超时，则将该连接废弃并创建新连接，否则线程会一直等待直到连接池中有新的可用连接。
+
+但是，我们还是注意到这里有一个 PooledConnection 类，通过 PooledDataSource 获取的连接就是这个类。该类是 Mybatis 自己设计的一个 Connection 类，让我们来看一下。
+
+在 PooledConnection 中我们首先应该注意到的是它的两个变量，即 realConnection 和 proxyConnection，它们的类型都是 Connection。从命名上看，其中的 realConnection 是真正通过 JDBC 驱动类建立的连接，而 proxyConnection 是一个代理连接，也是 PooledDataSource 返回的连接。
+
+PooledConnection 本身就实现了 JDK 的 InvocationHandler 接口，并提供了如下所示的 invoke 方法实现：
+
+```java
+@Override
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+   String methodName = method.getName();
+   if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
+      dataSource.pushConnection(this);
+      return null;
+   }
+
+   try {
+      if (!Object.class.equals(method.getDeclaringClass())) {
+         checkConnection();
+      }
+      return method.invoke(realConnection, args);
+   } catch (Throwable t) {
+      throw ExceptionUtil.unwrapThrowable(t);
+   }
+}
+```
+
+这里的逻辑主要是 DataSource 的 pushConnection 方法。我们采用与 popConnection 方法相同的方式来介绍 pushConnection 方法，如下所示：
+
+```java
+protected void pushConnection(PooledConnection conn) throws SQLException {
+   synchronized (state) {
+      // 从 active 列表中移除该连接
+      state.activeConnections.remove(conn);
+      // 如果是有效连接
+      if (conn.isValid()) {
+         // 如果满足 idle 列表没有填满且类型符合期望
+         if (state.idleConnections.size() < poolMaximumIdleConnections && conn.getConnectionTypeCode() == expectedConnectionTypeCode) {
+            state.accumulatedCheckoutTime += conn.getCheckoutTime();
+            // 则创建一个新的连接并放入 idle 列表中
+            PooledConnection newConn = new PooledConnection(conn.getRealConnection(), this);
+            // 唤醒线程
+            state.notifyAll();
+         } else {
+            // 如果不满足判断条件，则说明该连接已经不需要存储，直接关闭真正连接
+            conn.getRealConnection().close();
+         }
+      } else {
+         // 如果是无效连接，则记录
+      }
+   }
+}
+```
+
+结合 popConnection 方法，pushConnection 方法的整体执行流程也在意料之中。这里唯一需要注意一点在于 state.notifyAll 语句，该语句与 popConnection 方法中用于等待线程的 state.wait 语句相对应，从而唤醒了线程。这样，当 SQL 执行完成时，PooledDataSource 也不会直接关闭线程，而是将其加入到 idleConnections 中并唤醒所有等待线程。
+
+### UnpooledDataSource
+
+接下来我们来讨论 UnpooledDataSource。在 Mybatis 中，PooledDataSource 实际上也是依赖 UnpooledDataSource 来创建真正的连接，这点通过 PooledDataSource 类的构造函数可以得到印证，如下所示：
+
+```java
+public PooledDataSource(String driver, String url, String username, String password) {
+   dataSource = new UnpooledDataSource(driver, url, username, password);
+   expectedConnectionTypeCode = assembleConnectionTypeCode(dataSource.getUrl(), dataSource.getUsername(), dataSource.getPassword());
+}
+```
+
+所以，PooledDataSource 中的 dataSource 变量实际上就是一个 UnpooledDataSource 对象。在 PooledDataSource 中 的 popConnection 方法中，我们看到如下所示的语句：
+
+```java
+conn = new PooledConnection(dataSource.getConnection(), this);
+```
+
+这里通过 UnpooledDataSource 获取了 Connection 并构建 PooledConnection 对象，所以前面提到的 PooledConnection 中的 realConnection 对象实际就是来自 UnpooledDataSource。
+
+我们有必要进一步分析一下 UnpooledDataSource 中获取 Connection 的过程。我们跟踪 UnpooledDataSource 的 getConnection 方法，找到如下所示的 doGetConnection 方法：
+
+```java
+private Connection doGetConnection(Properties properties) throws SQLException {
+   initializeDriver();
+   Connection connection = DriverManager.getConnection(url, properties);
+   configureConnection(connection);
+   return connection;
+}
+```
+
+可以看到，这里回归到了熟悉的 JDBC，实际上就是基于 JDBC 中的 DriverManager 工具类来获取 Connection。
+
+## 解题要点
+
+以我的经历，有时候在面试时会出现类似“如果让你实现一个简单的资源池，你会怎么做？”这种开放式问题。这类问题对于面试者而言有利有弊，有利的点在于本身就没有标准答案，自由发挥的空间比较大，很多时候可以做到自圆其说。不利的点在于需要有比较好的反应能力，能够快速地针对某个具体问题给出灵活的解决方案，而不是像存粹考查知识体系的问题那样给出固定的回答即可。
+
+针对这道开放式问题，在回答上一般会有三个要点。我们首先需要简要阐述资源池的作用和基本结构，这块偏理论知识，点到就好。然后，我们明确对于池化操作而言，最终都需要有个存储容器来保存池化最新，所以需要在 JDK 容器中选择一种作为方案。最后，我们需要设计如何对资源池中对象进行操作的方法，这些方法需要考虑到线程的安全性。上述三个要点对于类似的问题都是可以直接套用的。
+
+针对具体的开发框架，面试官经常可能会抛出类似“简要描述 Mybatis 中对数据库连接对象 Connection 的管理过程？”这样的问题。这种问题问的是 Connection 的管理过程，本质上还是在考查大家对连接池的理解程度，因为 Connection 的管理就是通过连接池来完成的。对于普通的应用场景而言，Connection 的管理对于开发人员是透明的，所以该题的考点有一定难度，需要面试者对 Mybatis 内部实现原理有深入的理解。
+
+在解答思路上，我认为这道题的主要挑战是梳理 Connection 在使用上的整个流程，该流程涉及到两大方面，即获取 Connection 和释放 Connection。为此，Mybatis 中分别提供了 popConnection 和 pushConnection 方法。这两个方法是需要明确点到的，这是一个要点。另一方面，在连接池的管理上，获取和释放 Connection 的过程并不是很复杂，无非就是要做很多判断和异常处理，但如何确保并发访问下新连接的创建和访问是一个难题，需要指出 Mybatis 在多线程处理上的实现方式，这是该问题的第二个要点。
+
+本讲详细介绍了 Mybatis 中 PooledConnection 类的设计思想和实现方法，同时也给出了 popConnection 和 pushConnection 这两个核心方法的流程细节，方便你进行学习。
+
+## 小结与预告
+
+本讲主要关注于资源池模式本身的概念、模型和实现过程，并引出了数据库连接池这一典型的资源池应用方式。和上一讲一样，我们结合 Mybatis 框架具体分析了该框架中如何实现数据库连接池的设计理念和详细过程。
+
+从下一讲开始中，我们将转换视角，讨论与系统扩展性相关的话题。扩展性是一个很通用的话题，涉及面很广。下一讲，我们先来考虑开发框架本身的扩展性，我们将围绕“框架与框架之间的集成过程”来分析扩展性的表现形态和实现方式。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
