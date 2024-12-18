@@ -6434,7 +6434,7 @@ private PooledConnection popConnection(String username, String password) throws 
                conn = new PooledConnection(dataSource.getConnection(), this);
             } else {
                // active 已经满了
-               // 获得试用最久的连接，判断是否已经超时
+               // 获得使用最久的连接，判断是否已经超时
                PooledConnection oldestActiveConnection = state.activeConnections.get(0);
                long longestCheckoutTime = oldestActiveConnection.getCheckoutTime();
                if (longestCheckoutTime > poolMaximumCheckoutTime) {
@@ -6560,11 +6560,11 @@ private Connection doGetConnection(Properties properties) throws SQLException {
 
 ## 解题要点
 
-以我的经历，有时候在面试时会出现类似“如果让你实现一个简单的资源池，你会怎么做？”这种开放式问题。这类问题对于面试者而言有利有弊，有利的点在于本身就没有标准答案，自由发挥的空间比较大，很多时候可以做到自圆其说。不利的点在于需要有比较好的反应能力，能够快速地针对某个具体问题给出灵活的解决方案，而不是像存粹考查知识体系的问题那样给出固定的回答即可。
+以我的经历，有时候在面试时会出现类似 `如果让你实现一个简单的资源池，你会怎么做？` 这种开放式问题。这类问题对于面试者而言有利有弊，有利的点在于本身就没有标准答案，自由发挥的空间比较大，很多时候可以做到自圆其说。不利的点在于需要有比较好的反应能力，能够快速地针对某个具体问题给出灵活的解决方案，而不是像存粹考查知识体系的问题那样给出固定的回答即可。
 
 针对这道开放式问题，在回答上一般会有三个要点。我们首先需要简要阐述资源池的作用和基本结构，这块偏理论知识，点到就好。然后，我们明确对于池化操作而言，最终都需要有个存储容器来保存池化最新，所以需要在 JDK 容器中选择一种作为方案。最后，我们需要设计如何对资源池中对象进行操作的方法，这些方法需要考虑到线程的安全性。上述三个要点对于类似的问题都是可以直接套用的。
 
-针对具体的开发框架，面试官经常可能会抛出类似“简要描述 Mybatis 中对数据库连接对象 Connection 的管理过程？”这样的问题。这种问题问的是 Connection 的管理过程，本质上还是在考查大家对连接池的理解程度，因为 Connection 的管理就是通过连接池来完成的。对于普通的应用场景而言，Connection 的管理对于开发人员是透明的，所以该题的考点有一定难度，需要面试者对 Mybatis 内部实现原理有深入的理解。
+针对具体的开发框架，面试官经常可能会抛出类似 `简要描述 Mybatis 中对数据库连接对象 Connection 的管理过程？` 这样的问题。这种问题问的是 Connection 的管理过程，本质上还是在考查大家对连接池的理解程度，因为 Connection 的管理就是通过连接池来完成的。对于普通的应用场景而言，Connection 的管理对于开发人员是透明的，所以该题的考点有一定难度，需要面试者对 Mybatis 内部实现原理有深入的理解。
 
 在解答思路上，我认为这道题的主要挑战是梳理 Connection 在使用上的整个流程，该流程涉及到两大方面，即获取 Connection 和释放 Connection。为此，Mybatis 中分别提供了 popConnection 和 pushConnection 方法。这两个方法是需要明确点到的，这是一个要点。另一方面，在连接池的管理上，获取和释放 Connection 的过程并不是很复杂，无非就是要做很多判断和异常处理，但如何确保并发访问下新连接的创建和访问是一个难题，需要指出 Mybatis 在多线程处理上的实现方式，这是该问题的第二个要点。
 
@@ -6574,6 +6574,352 @@ private Connection doGetConnection(Properties properties) throws SQLException {
 
 本讲主要关注于资源池模式本身的概念、模型和实现过程，并引出了数据库连接池这一典型的资源池应用方式。和上一讲一样，我们结合 Mybatis 框架具体分析了该框架中如何实现数据库连接池的设计理念和详细过程。
 
-从下一讲开始中，我们将转换视角，讨论与系统扩展性相关的话题。扩展性是一个很通用的话题，涉及面很广。下一讲，我们先来考虑开发框架本身的扩展性，我们将围绕“框架与框架之间的集成过程”来分析扩展性的表现形态和实现方式。
+从下一讲开始中，我们将转换视角，讨论与系统扩展性相关的话题。扩展性是一个很通用的话题，涉及面很广。下一讲，我们先来考虑开发框架本身的扩展性，我们将围绕框架与框架之间的集成过程来分析扩展性的表现形态和实现方式。
+
+# 框架集成：如果需要实现两个框架之间的集成，有什么办法？
+
+在上一讲中，我们分析了以数据库连接池为代表的资源池的设计思想和实现方式。而在本讲内容中，我们将讨论一个非常常见但又不被开发人员所感知的技术组件，这就是框架集成组件。这里的框架集成，指的是第三方框架与 Spring 框架之间的集成。在现实开发环境中，无论使用的是 Dubbo 还是 Mybatis 框架，你会发现它们的使用方式和 Spring 框架是完全一致的。
+
+作为一个通用型的开发框架，Spring 为我们提供了非常强大的扩展功能。那么，这些扩展功能是如何运作的？如果需要实现两个框架之间的集成，我们又有什么办法呢？这是一个实战性非常强的话题，本讲内容将围绕这一话题展开讨论。
+
+## 问题背景
+
+在 Java 的世界中，我们知道 Spring 是当下最主流的开发框架，没有之一。而在使用 Dubbo、Mybatis 等开源框架时，我们发现可以采用和 Spring 完全一样的方式来使用它们，如下图所示：
+
+![](res/2024-12-18-10-39-02.png)
+
+可能你在平时的使用过程中并没有意识到这一点，但仔细想一想，你会觉得这是一件比较神奇的事情。本来就是不同的框架，怎么能够无缝地集成在一起呢？
+
+无论从面试角度，还是日常开发角度，这都是一个值得分析和探讨的话题。因为我们自己也可能需要开发类似 Dubbo、Mybatis 这样的第三方框架，然后完成与 Spring 框架的集成。显然，这是一类偏向于实践的话题，因此，面试官也会更多地从应用的角度出发来考查候选人，常见的提问方式包括：
+
+- 你能列举 Spring 框架所提供的常见启动扩展点，以及它们的使用方式吗？
+- Spring 中 Bean 中的 Constructor、@PostConstruct 以及 InitializingBean 这三者之间的执行顺序是怎么样的？
+- 如何基于 Spring Boot 的自动配置原理实现一个 starter 组件？
+- 你能描述 Dubbo 框架的启动过程吗？
+- Mybatis Spring Boot Starter 的运行机制是怎么样的？
+
+要想回答上述面试题，就需要我们掌握 Spring 框架中内置了一组功能非常强大的扩展机制。通过这些扩展机制，可以实现我们想要的集成效果。接下来，让我们对这些问题做进一步分析。
+
+## 问题分析
+
+目前，很多主流的开源框架都提供了自身针对 Spring 框架的系统集成模块，包括我们前面几讲介绍的 Dubbo 和 Mybatis 框架。同样的，如果我们自己实现一款开源框架，也可以利用 Spring 所提供的扩展性来完成与它的集成过程。这里，我们可以把 Spring 框架本身做一个细分，如下图所示：
+
+![](res/2024-12-18-10-40-01.png)
+
+从扩展性的角度讲，传统 Spring 提供了两大类扩展功能，一类是启动过程中的各种扩展点，另一类则是 Spring 内置的自定义标签体系，我们可以通过 XML Scheme 的命名空间机制来实现与 Spring 的集成。
+
+另一方面，Spring Boot 作为 Spring 框架的升级，也提供了功能强大的自动配置机制，我们也可以通过编写自定义的 starter 组件来完成与 Spring Boot 的集成。
+
+## 技术体系
+
+就目前的应用场景而言，Spring Boot 是 Java 世界中最主流的开发框架，开发自定义 starter 组件是主流的框架集成实现方案。因此，在接下来的内容中，我们重点对 Spring Boot 的自动配置机制做详细的展开。而针对传统 Spring 框架，只会简要介绍一些常见的启动扩展点机制。
+
+### Spring 启动扩展点
+
+就技术体系而言，让我们先从传统 Spring 框架的一组启动扩展点开始讲起。事实上，在 Spring 中，启动扩展点的数量非常多，这里只挑选一组最常用的进行介绍，包括 InitializingBean、FactoryBean 以及 ApplicationListener。
+
+在 Spring 中，InitializingBean 的作用是在 Bean 的初始化时，允许开发人员添加一些定制化处理逻辑，该接口定义如下所示：
+
+```java
+public interface InitializingBean {
+   void afterPropertiesSet() throws Exception;
+}
+```
+
+我们看到 InitializingBean 接口只有一个方法，即 afterPropertiesSet 方法。从命名上看，这个方法应该作用于属性被设置之后。也就是说，该方法的初始化会晚于属性的初始化。
+
+接下来要介绍的 FactoryBean 接口相信你不会陌生，它的定义如下所示：
+
+```java
+public interface FactoryBean<T> {
+   T getObject() throws Exception;
+   Class<?> getObjectType();
+   boolean isSingleton();
+}
+```
+
+实际上，FactoryBean 是 Spring 框架中非常核心的一个接口，负责从容器中获取具体的 Bean 对象。
+
+ApplicationEvent 和 ApplicationListener 是 Spring 框架中实现事件驱动编程的核心类。如果在一个 JavaBean 中实现了 ApplicationListener 接口，那么一旦有任何一种 ApplicationEvent 被发布，这个 Bean 将自动触发监听器处理程序。ApplicationListener 接口定义如下所示：
+
+```java
+public interface ApplicationListener<E extends ApplicationEvent> extends EventListener {
+   void onApplicationEvent(E event);
+}
+```
+
+我们知道在 Spring 上下文对象 ApplicationContext 的整个生命周期中，每一个阶段或操作的开始和结束都可以触发一种事件。基于 ApplicationListener 这个监听器接口，我们就可以处理各种自定义的 ApplicationEvent。
+
+### Spring Boot 自动配置
+
+Spring Boot 的自动配置功能强大，但也有一定的复杂度，让我们通过 @SpringBootApplication 注解来深入理解其背后的实现原理。
+
+通过查看 @SpringBootApplication 注解的定义，我们发现该注解实际上是一个复合注解，由 @SpringBootConfiguration、@ComponentScan 和 @EnableAutoConfiguration 所组成。我们知道 @ComponentScan 是传统 Spring 框架中就内置的注解，而 @SpringBootConfiguration 注解也很简单，实际上只是对 Spring 框架中另一个常用组件 @Configuration 的一种包装，本身没有定义任何内容。
+
+所以，我们接下来重点剖析 @EnableAutoConfiguration 注解，该注解定义如下所示。
+
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import(AutoConfigurationImportSelector.class)
+public @interface EnableAutoConfiguration {
+   String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
+   Class<?>[] exclude() default {};
+   String[] excludeName() default {};
+}
+```
+
+可以看到，这里出现了一个新的注解，即 @AutoConfigurationPackage。从命名上讲， @AutoConfigurationPackage 注解的作用就是自动对某一个代码包进行配置。
+
+另一方面，我们还看到通过 @Import 注解引入了一个 AutoConfigurationImportSelector 类。从命名上，我们也不难理解该类的作用是完成对导入的配置信息的自动选择。该类的核心方法 getCandidateConfigurations 实现了这一目标，如下所示：
+
+```java
+protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+   List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(), getBeanClassLoader());
+   // ...
+   return configurations;
+}
+```
+
+这里引出了在 Spring Boot 中真正负责加载配置信息的 SpringFactoriesLoader 类。这些类之间的交互关系如下图所示：
+
+![](res/2024-12-18-10-41-06.png)
+
+显然，想要完成配置信息的自动选择，我们首先需要执行配置文件的加载操作，这部分功能是由 SpringFactoriesLoader 来完成的。SpringFactoriesLoader 也是 Spring Boot 自动配置得以实现的关键组件。
+
+SpringFactoriesLoader 类似 JDK 中的 SPI 机制所使用的 ServiceLoader 类，区别只是在于配置文件的存放位置和配置项对应的键值定义。在 SpringFactoriesLoader 中，我们需要通过 `META-INF/spring.factories` 目录来获取服务定义文件，并通过 EnableAutoConfiguration 这个健值来获取具体的配置信息。
+
+下图展示了 SpringFactoriesLoader 和 ServiceLoader 之间的区别：
+
+![](res/2024-12-18-10-41-43.png)
+
+SpringFactoriesLoader 基于上图中指定的配置文件名和键值获取对应的配置信息，然后基于这些配置信息来实例化配置类，Spring Boot 通过反射机制实现了这一目标。SpringFactoriesLoader 类中的 loadSpringFactories 方法展示了这一过程，如下所示：
+
+```java
+private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+   // 从缓存中获取配置内容，如果存在则直接返回
+   try {
+      // 基于 ClassLoader 从 META-INF/spring.factories 获取配置文件资源地址 URL
+      while (urls.hasMoreElements()) {
+         // 获取配置文件资源
+         // 加载配置项
+
+         for (Map.Entry<?, ?> entry : properties.entrySet()) {
+            // 组装配置项 Key-Value
+         }
+
+         // 把配置信息放入缓存
+         // 返回结果
+      }
+   }
+}
+```
+
+我们在 spring-boot-autoconfigure 工程中所使用的 spring.factories 配置文件中知道了如下所示配置项：
+
+```
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration,\
+org.springframework.boot.autoconfigure.aop.AopAutoConfiguration,\
+org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration,\
+```
+
+可以看到在 org.springframework.boot.autoconfigure.EnableAutoConfiguration 配置项中定义了各种以 `-AutoConfiguration` 结尾的配置类。通过 SpringFactoriesLoader，Spring Boot 就能做到在服务启动的过程中把它们加载到容器中并实现自动化配置。
+
+## 源码解析
+
+在介绍完理论知识之后，让我们回到实践。我们将分别分析 Mybatis Spring 的启动过程以及 Mybatis Spring Boot Starter 的实现原理。
+
+### Mybatis Spring 启动过程
+
+mybatis-spring 框架完成了 Mybatis 与 Spring 之间的集成。打开 mybatis-spring 代码工程，我们快速寻找实现了 Spring 扩展点的类，这个类并不难找，它就是 SqlSessionFactoryBean 类。
+
+很典型的，SqlSessionFactoryBean 实现了 FactoryBean、InitializingBean 和 ApplicationListener 这三个扩展点接口，其定义如下所示（列举了部分重要的变量）：
+
+```java
+public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ApplicationEvent> {
+   // ...
+   private Configuration configuration;
+   private SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+   private SqlSessionFactory sqlSessionFactory;
+   private String environment = SqlSessionFactoryBean.class.getSimpleName();
+   // ...
+}
+```
+
+我们还是按照既有的思路，先来看看这些扩展点如何完成 Spring 与 Mybatis 框架之前的整合。首先，我们来看 InitializingBean 接口的实现，即如下所示的 afterPropertiesSet 方法（代码做了裁剪）：
+
+```java
+@Override
+public void afterPropertiesSet() throws Exception {
+   // ...
+   this.sqlSessionFactory = buildSqlSessionFactory();
+}
+```
+
+显然，对于 SqlSessionFactoryBean 而言，主要职责就是完成 SqlSessionFactory 的构建，这也是这个类的类名由来，而完成这个操作的最合适的阶段就是 Bean 生命周期中的 InitializingBean 阶段。我们来看一下这里的 buildSqlSessionFactory 方法的具体实现过程，这个方法非常长，但代码结构比较简单。我们抛开大量的代码细节，使用如下所示的代码来展示这个方法的结构：
+
+```java
+protected SqlSessionFactory buildSqlSessionFactory() throws IOException {
+   Configuration configuration;
+
+   XMLConfigBuilder xmlConfigBuilder = null;
+   if (this.configuration != null) {
+      // 如果当前的 configuration 不为空，这直接使用该对象
+      configuration = this.configuration;
+      // ...
+   } else if (this.configLocation != null) {
+      // 如果配置文件地址 configLocation 不为空，则通过 XMLConfigBuilder 进行解析并创建 configuration
+      xmlConfigBuilder = new XMLConfigBuilder(this.configLocation.getInputStream(), null, this.configurationProperties);
+      configuration = xmlConfigBuilder.getConfiguration();
+   } else {
+      // 如果以上两种情况都不满足，则创建一个新的 configuration 对象并进行参数赋值
+      configuration = new Configuration();
+      // ...
+   }
+
+   // 设置 objectFactory 等各种 Mybatis 运行时所需的配置信息
+   // ...
+
+   // 基于 configuration 通过 SqlSessionFactoryBuilder 构建 SqlSessionFactory
+   return this.sqlSessionFactoryBuilder.build(configuration);
+}
+```
+
+关于 SqlSessionFactoryBuilder，我们知道该类会创建一个 DefaultSqlSessionFactory，可以通过 DefaultSqlSessionFactory 进而获取 SqlSession 对象的实例。
+
+然后，我们来关注 SqlSessionFactoryBean 实现的 FactoryBean 接口，从接口的泛型定义上，我们明白它的 getObject 方法应该返回的是一个 SqlSessionFactory 对象，如下所示：
+
+```java
+@Override
+public SqlSessionFactory getObject() throws Exception {
+   if (this.sqlSessionFactory == null) {
+      afterPropertiesSet();
+   }
+
+   return this.sqlSessionFactory;
+}
+```
+
+可以看到，这里的实现过程非常简单，如果目标 sqlSessionFactory 还没有被创建，就直接调用了前面介绍的 afterPropertiesSet 方法完成该对象的创建并返回。
+
+最后，我们需要关注的是 onApplicationEvent 方法，这是 ApplicationListener 接口的具体实现，用来对 Spring 中所生成的 ApplicationEvent 进行响应，如下所示：
+
+```java
+@Override
+public void onApplicationEvent(ApplicationEvent event) {
+   if (failFast && event instanceof ContextRefreshedEvent) {
+      this.sqlSessionFactory.getConfiguration().getMappedStatementNames();
+   }
+}
+```
+
+就场景而言，这个方法的作用是在接收到代表容器刷新的 ContextRefreshedEvent 事件时，重新获取各种 MappedStatement。这里通过调用 Configuration 的 getMappedStatementNames 方法完成这一操作，如下所示：
+
+```java
+public Collection<MappedStatement> getMappedStatements() {
+   buildAllStatements();
+   return mappedStatements.values();
+}
+```
+
+再往下看，就到了 Mybatis 内部的实现细节了，我们不再展开。至此，SqlSessionFactoryBean 中与 Spring 框架集成的相关内容就介绍到这里。通过 SqlSessionFactoryBean，我们就可以获取 SqlSessionFactory 对象，这是 Mybatis 框架启动过程的主要目标。
+
+### Mybatis Spring Boot Starter
+
+基于前面介绍的 Spring Boot 中应用程序的自动配置机制，我们来做一些实践，通过剖析 Mybatis Spring Boot Starter 的启动过程来加深对所介绍内容的理解。
+
+在 mybatis-spring-boot-starter 中存在几个代码工程，我们重点关注 mybatis-spring-boot-autoconfigure 工程。而在这个代码工程中，最重要的显然就是 MybatisAutoConfiguration 类。对于 Spring Boot 中的 `-AutoConfiguration` 类，我们首先需要重点关注的是类定义上的注解，如下所示：
+
+```java
+@org.springframework.context.annotation.Configuration
+@ConditionalOnClass({ SqlSessionFactory.class, SqlSessionFactoryBean.class })
+@ConditionalOnSingleCandidate(DataSource.class)
+@EnableConfigurationProperties(MybatisProperties.class)
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+public class MybatisAutoConfiguration implements InitializingBean {
+   // ...
+}
+```
+
+我们看到这里用到了 @ConditionalOnClass 和 @ConditionalOnSingleCandidate 这两个注解，它们就是 Spring Boot 中的条件注解。在介绍 MybatisAutoConfiguration 之前，有必要对这些注解做一定展开。
+
+我们在前面的介绍中已经了解到以 `-AutoConfiguration` 结尾的自动配置类数量会很多，在一个应用程序的开发过程中，我们通常不会全部使用到。这时候就需要引入一种机制来对这些自动配置类进行过滤。为此，Spring Boot 提供了一组 @ConditionalOn 系列条件注解。通这些注解，我们就可以基于特定的条件来选择性地加载某些配置类。
+
+在 Spring Boot 中常见的条件注解可以参考下图：
+
+![](res/2024-12-18-10-43-05.png)
+
+在前面介绍的 MybatisAutoConfiguration 类上，我们发现了 @ConditionalOnClass 和 @ConditionalOnSingleCandidate 这两个条件注解。基于这两个条件注解，我们可以明确 MybatisAutoConfiguration 能够实例化的前提有两个，一个是类路径中存在 SqlSessionFactory 和 SqlSessionFactoryBean，另一个是容器中只存在一个 DataSource 实例。两者缺一不可，这是一种常用的自动配置控制技巧。
+
+然后，我们在 MybatisAutoConfiguration 类上看到了一个 @EnableConfigurationProperties 注解。通过这个注解，所有添加了 @ConfigurationProperties 注解的配置类就会自动生效。这里的 @EnableConfigurationProperties 注解中指定的是 MybatisProperties 类，该类定义了 Mybatis 运行时所需要的各种配置信息，而我们在 MybatisProperties 类上确实也发现了 @ConfigurationProperties 注解，并指定了 prefix 为 `mybatis`，如下所示：
+
+```java
+@ConfigurationProperties(
+   prefix = "mybatis"
+)
+public class MybatisProperties {
+   // ...
+}
+```
+
+最后，在 MybatisAutoConfiguration 类上还存在一个 @AutoConfigureAfter 注解，这个注解可以根据字面意思进行理解，即在完成某一个类的自动配置之后再执行当前类的自动配置，这个需要提前装配的类指的就是 DataSourceAutoConfiguration。
+
+理解了 @ConditionalOnClass、@EnableConfigurationProperties 和 @AutoConfigureAfter 等一系列注解之后，我们回过头来再看 MybatisAutoConfiguration 类的代码结构就显得比较简单明了。MybatisAutoConfiguration 类中核心方法之一就是如下所示的 sqlSessionFactory 方法：
+
+```java
+@Bean
+@ConditionalOnMissingBean
+public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
+   SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
+   factory.setDataSource(dataSource);
+   factory.setVfs(SpringBootVFS.class);
+   if (StringUtils.hasText(this.properties.getConfigLocation())) {
+      factory.setConfigLocation(this.resourceLoader.getResource(this.properties.getConfigLocation()));
+   }
+   applyConfiguration(factory);
+
+   // 省略一系列配置项设置方法
+   return factory.getObject();
+}
+```
+
+显然，这里基于前面介绍的 SqlSessionFactoryBean 构建了 SqlSessionFactory 实例。注意到在该方法上同样添加了一个 @ConditionalOnMissingBean 注解，标明只有在当前上下文中不存在 SqlSessionFactoryBean 对象时才会执行上述方法。
+
+接下来，我们需要在 `META-INF/spring.factories` 文件中明确指定自动配置类。根据 Spring Boot 自动配置机制的原理，对于 mybatis-spring-boot-autoconfigure 工程而言，这个配置项内容应该是这样：
+
+```
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration
+```
+
+至此，整个 Mybatis Spring Boot Starter 的介绍就告一段落。作为总结，我们可以把创建一个 Spring Boot Starter 的过程抽象三个步骤，如下图所示：
+
+![](res/2024-12-18-10-43-47.png)
+
+在日常开发过程中，基于上述三个步骤，我们就可以参考 Mybatis Spring Boot Starter 的实现方式来设计并开发自定义的 starter 组件。
+
+## 解题要点
+
+正如在问题背景部分中给出的常见面试题所示，面试官在面试过程中往往不会直接问 `Mybatis 与 Spring 框架是如何集成` 这样的问题，而是会考查具体的知识点，例如抛出 `Spring 中 Bean 中的 Constructor、@PostConstruct 以及 InitializingBean 这三者之间的执行顺序是怎么样的？` 类似的问题。这是一类比较好的面试题，我作为面试官也经常会用这种类型的题目考查面试者对于 Spring 中一些基本实现机制的理解程度。
+
+从考点上讲，一方面这道题的知识点比较丰富，涉及到对 Spring 框架中的一些核心概念；另一方面，这道题也具有一定的综合性，要求面试者在理解这些核心概念的基础上能够用自己的表达方式串接起来。
+
+针对这一问题，我们首先应该对 Spring 中 @PostConstruct 注解和 InitializingBean 接口的作用和应用场景有明确的认识，最好有一定的实践基础，在回答这个问题时先说明这一点。然后，在介绍了应用方式的基础上，我们需要深入这些注解和方法的背后，进一步介绍 BeanPostProcessor 等 Spring 内部的实现接口及其实现过程。整个回答过程中涉及的概念和对象可能有点多，注意侧重点和回答问题的节奏。有些地方不用说得过细，只需要围绕“执行顺序”这一核心考点进行展开即可，避免陷入细节而导致问题回答思路上的混乱。
+
+随着 Spring Boot 成为日常开发的主流框架，Spring Boot 的自动配置机制也变成了一个经典问题。但凡是使用过 Spring Boot 的候选人，我一般都会通过这个问题来考查对方的知识体系。自动配置是 Spring Boot 最核心的机制，该问题的考点明确，问题的答案也很明确，大家通过记忆以及加上自己的一些理解进行解答即可。
+
+从回答思路上，Spring Boot 的自动配置机制涉及的知识点包括两大部分内容。首先我们需要介绍 @SpringBootApplication 注解及其背后的三大注解 @SpringBootConfiguration、@EnableAutoConfiguration 和 @ComponentScan，这几个注解必须点到。然后，随着对这些注解的深入阐述，我们需要再引出具有与 SPI 实现机制类似功能的 SpringFactoriesLoader 类，该类包含了自动配置相关的一些配置项处理方式。本讲详细阐述了 Spring Boot 自动配置机制的实现原理，从源码角度分析了为什么 Spring Boot 能够做到自动配置。文中所述的知识体系都可以用来回答这个问题。由于内容比较多，回答过程中还是建议需要把握节奏，避免过多嵌入细节。
+
+## 小结与预告
+
+在本讲内容中，我们首先介绍的是 Spring 框架中的几个核心扩展点，这些扩展点是 Dubbo 和 Mybatis 等开源框架与 Spring 进行集成的主要入口。然后，Spring Boot 的自动配置原理也是我们需要掌握的内容，因为它们被广泛地应用到与 Spring Boot 框架的集成过程中。围绕前面介绍的这些内容，我们基于 Mybatis 框架讲解了 Mybatis Spring、Mybatis Spring Boot Starter 等专用于两者之间集成的框架实现原理。
+
+很多时候我们需要对框架的功能进行完善和升级，这时候就需要框架本身具备高度的可扩展性。针对这一点，业界也存在一些主流的架构模式可以用来实现这一目标，其中最具代表性的就是微内核架构。下一讲我们就将结合 Dubbo 等具体框架围绕“为什么很多开源框架都会内置一套微内核架构？”这一话题展开详细的分析。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
