@@ -6769,7 +6769,7 @@ protected SqlSessionFactory buildSqlSessionFactory() throws IOException {
 
    XMLConfigBuilder xmlConfigBuilder = null;
    if (this.configuration != null) {
-      // 如果当前的 configuration 不为空，这直接使用该对象
+      // 如果当前的 configuration 不为空，则直接使用该对象
       configuration = this.configuration;
       // ...
    } else if (this.configLocation != null) {
@@ -6921,5 +6921,283 @@ org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration
 在本讲内容中，我们首先介绍的是 Spring 框架中的几个核心扩展点，这些扩展点是 Dubbo 和 Mybatis 等开源框架与 Spring 进行集成的主要入口。然后，Spring Boot 的自动配置原理也是我们需要掌握的内容，因为它们被广泛地应用到与 Spring Boot 框架的集成过程中。围绕前面介绍的这些内容，我们基于 Mybatis 框架讲解了 Mybatis Spring、Mybatis Spring Boot Starter 等专用于两者之间集成的框架实现原理。
 
 很多时候我们需要对框架的功能进行完善和升级，这时候就需要框架本身具备高度的可扩展性。针对这一点，业界也存在一些主流的架构模式可以用来实现这一目标，其中最具代表性的就是微内核架构。下一讲我们就将结合 Dubbo 等具体框架围绕“为什么很多开源框架都会内置一套微内核架构？”这一话题展开详细的分析。
+
+# 组件扩展：为什么很多开源框架都会内置一套微内核架构？
+
+在上一讲中，我们讨论了框架与框架之间如何进行集成的实现过程，也引出了框架扩展性这一话题。
+
+对于软件开发而言，扩展性是一个永恒的话题，实现系统可扩展的方法有很多。而本讲要介绍的微内核架构模式就是其中一种非常具有代表性的架构模式，除了我们熟悉的 Dubbo，还有 SkyWalking、ShardingSphere 等一系列主流的开源框架都应用了这一架构模式。
+
+那么，什么是微内核架构？为什么很多开源框架都会内置一套微内核架构？作为非常经典的一类面试题，本讲内容将和你一起分析和探讨这一组件背后的设计理念以及在开源框架中的具体实现方式。
+
+## 问题背景
+
+在日常开发过程中，你应该经常会遇到这样的需求：针对某个业务场景，我们希望在系统中添加一种新的处理逻辑，但又不想对现有的系统造成影响。从架构设计上讲，这是一种典型的系统扩展性需求。
+
+从扩展性的实现策略上讲，插件式系统是我们追求的一个目标。我们希望打造如下图所示的效果，调用者能够通过基于配置的插件机制动态获取它想要的任何插件。
+
+![](res/2024-12-31-10-49-20.png)
+
+上图看似简单，但想要打造功能完备的插件式系统并不容易。我们知道很多编程语言具有动态加载机制。基于编程语言的动态加载机制，我们就可以实现插件化系统，在配置时而非编译时连接类。同时，通过引入工厂模式和配置化思想，我们也可以在动态加载机制上实现更为完善的自定义封装。
+
+这些都是系统设计上的理念，但在面试过程中，面试官会考查得更加直接、更为细节，常见的提问方式包括：
+
+- 为了实现系统扩展性，你有哪些思路？
+- 微内核架构的基本组成架构是怎么样的？
+- Dubbo 框架采用了什么技术实现方式来确保它具有高度的可扩展性？
+- Dubbo 框架为开发人员提供了哪些扩展点？
+- 如果想要在 Dubbo 中实现一个自定义的扩展点，你有什么办法？
+- SPI 是什么概念？我们如何使用 SPI 机制？
+- Dubbo 中的 SPI 机制与 JDK 中的 SPI 机制有什么区别？
+
+基于上述问题，我们需要引出本讲要讨论的主题，即微内核架构。这是一种应用非常广泛的架构模式，也是面试过程中出现频率非常高的一个技术组件。
+
+接下来，我们来对这类问题做一些分析和展开。
+
+## 问题分析
+
+微内核架构有时候就直接被称为插件架构，它在组成结构上包含两部分组件，即内核系统和插件。
+
+这里的内核系统用来定义插件的实现规范，并管理着插件的生命周期；而各个插件是相互独立的组件，各自根据实现规范完成某项业务功能，并嵌入到内核系统中，如下图所示：
+
+![](res/2024-12-31-10-54-09.png)
+
+基于微内核架构，当系统中的某个组件需要进行修改时，要做的只是创建一个新的组件并替换旧组件，而不需要改变原有组件的实现方式，更加不需要调整整个系统架构。
+
+那么这里的插件具体指的是什么呢？这就需要我们引入一个新的概念，即 SPI，英文全称叫 Service Provider Interface，也就是服务提供接口。可以认为 SPI 就是应对系统扩展性的一个个扩展点，也是我们对系统中所应具备的扩展性的抽象。
+
+插件化实现机制说起来简单，做起来却不容易，我们需要考虑两方面内容。一方面，我们需要梳理系统的变化并把它们抽象成一个个 SPI 扩展点。另一方面，当我们实现了这些 SPI 扩展点之后，就需要构建一个能够支持这种可插拔机制的具体实现，从而提供一种 SPI 运行时环境。如下图所示：
+
+![](res/2024-12-31-10-54-58.png)
+
+接下来，我们就来一起讨论与微内核架构相关的具体技术体系。
+
+## 技术体系
+
+微内核架构在 Dubbo 等主流开源框架中应用非常广泛。这些框架采用的实现方式也都比较类似，基本思路就是引入前面提到的 SPI 机制。
+
+那么，怎么实现 SPI 机制呢？事实上，JDK 已经内置了一套实现 SPI 机制的开发组件。基于这套组件，想要实现 SPI，具体来说要完成三个步骤，如下图所示：
+
+![](res/2024-12-31-10-55-36.png)
+
+对于 SPI 而言，我们需要设计一个服务接口，并根据业务场景提供不同的实现类。然后，我们在 Java 代码工程的 META-INF/services 目录中创建一个以服务接口命名的文件，并配置对应的想要使用的实现类。在代码工程中执行这些步骤，最终我们可以得到一个包含 SPI 类和配置的 JAR 包。
+
+而对于 SPI 的使用者，就可以通过 JAR 包中 META-INF/services/ 目录下的配置文件找到具体的实现类名并进行实例化。
+
+上图中的后面两个步骤实际上都是为了遵循 JDK 中 SPI 的实现机制而进行的配置工作。
+
+接下来，我们可以通过简单的代码示例来演示这些步骤。
+
+让我们来模拟这样一个应用场景，一般业务系统中都会涉及日志组件，我们希望对业界主流的日志工具做一层包装，以便支持日志组件的灵活应用。那么，基于 SPI 的约定，我们将创建一个单独的工程 log-spi 来存放服务接口，并给出接口定义，请注意这个服务接口的完整类路径为 com.spi.LogProvider，接口中只包含一个以 Info 级别记录日志信息的简单方法，如下所示：
+
+```java
+package com.spi;
+
+public interface LogProvider {
+   // 记录 Info 日志
+   public void info(String info);
+}
+```
+
+假设系统在设计之初使用的是 log4j 日志库。然后我们需要实现这个服务接口，这里创建另一个代码工程 log-log4j 用来提供基于 log4j 日志库的实现，请注意，这个实现类的名称是 Log4jProvider，如下所示：
+
+```java
+public class Log4jProvider implements LogProvider {
+   @Override
+   public void info(String info) {
+      System.out.println("Log4j:" + info);
+   }
+}
+```
+
+接下来的这个步骤很关键，我们需要创建一个以 LogProvider 这个接口对应的完整类路径命名的文件，并放在 META-INF/services/ 目录下。在这个文件中，我们指定该接口的实现类为前面已经创建的 Log4jProvider，如下图所示：
+
+![](res/2024-12-31-10-56-47.png)
+
+最后，我们创建一个外部工程来调用服务接口，首先需要将 log-log4j 所生成的 JAR 包添加到这个外部工程中的类路径中。然后，我们使用 JDK 中 ServiceLoader 工具类来完成对 LogProvider 实例的加载。在这里，我们通过该工具类的 load 方法获取所有的 LogProvider 实例，然后遍历这些实例并调用服务接口方法，如下所示：
+
+```java
+import java.util.ServiceLoader;
+import com.spi.LogProvider;
+
+public class Main {
+   public static void main(String[] args) {
+      ServiceLoader<LogProvider> loader = ServiceLoader.load(LogProvider.class);
+
+      for (LogProvider provider: loader) {
+         System.out.println(provider.getClass());
+         provider.info("testInfo");
+      }
+   }
+}
+```
+
+运行这段代码，我们会得到系统的输出。可以看到这里获取的是针对 log4j 的 Log4jProvider 类中的具体方法实现，表示整个 SPI 实例的加载过程是正常的，如下所示：
+
+```
+class com.spi.Log4jProvider
+Log4j:testInfo
+```
+
+请注意，在上面这个 main 函数中，我们并没有引入任何与 Log4jProvider 相关的包结构，但在运行过程中，却实现了对 Log4jProvider 类的动态调用，这是微内核架构的核心特征，对组件之间的依赖关系进行了解耦，从而确保了系统的扩展性。
+
+现在，让我们来考虑这样一种场景。随着工具的更新或者架构的调整，我们需要提供一套基于 logback 日志库的日志实现来替换现有的基于 log4j 的方案。基于扩展性考虑，最好的办法是提供另一个 SPI 实例。这样，我们创建新的一个代码工程 log-logback，并完成与 log-log4j 代码工程一样的开发工作。然后，我们把 log-logback 所生成的 JAR 包添加到外部工程的类路径中并去除原有 log-log4j 的 JAR 包，完成这些操作之后，我们再来执行前面的 main 函数，得到的就是来自 LogbackProvider 类中的输出结果，如下所示：
+
+```
+class com.spi.LogbackProvider
+Logback:testInfo
+```
+
+当然，你可以根据需要提供任何 LogProvider 接口的实现类并动态集成到系统的执行流程中。请注意，无论是添加、替换或者移除具体的 SPI 实现，对于原有的外部工程而言，我们并没有做任何的代码调整。这就满足了我们在本讲开头提到的扩展性的设计理念，即在现有系统中添加新的组件时，不会对现有的系统造成影响。
+
+至此，完整的 SPI 提供者和使用者的实现过程演示完毕。这个示例非常简单，但却是 Dubbo 中实现微内核架构的基础。接下来，就让我们把话题转换到 Dubbo，看看 Dubbo 中应用 SPI 机制的具体方法。
+
+## 源码解析
+
+### 微内核模式在 Dubbo 中的应用
+
+Dubbo 中应用微内核模式的方法也是基于 SPI，但 Dubbo 对 JDK 中的 SPI 机制做了优化，并添加了一些扩展功能。
+
+首先，Dubbo 提供了一个 @SPI 扩展点注解，该注解是理解 Dubbo SPI 机制的基础。在 Dubbo 中，只有添加了 @SPI 注解的接口类才会去查找扩展点实现。
+
+我们随处可以看到 @SPI 注解的应用场景。例如，以常见的 Protocol 接口为例，在该接口上使用的就是 @SPI("dubbo") 注解，代表该接口是一个扩展点，同时该扩展点的默认实现是 DubboProtocol，如下所示：
+
+```java
+@SPI("dubbo")
+public interface Protocol
+```
+
+我们已经知道 JDK 只会把 SPI 配置存放在 META-INF/services/ 这个目录下，而 Dubbo 则提供了三个类似这样的目录，如下图所示：
+
+![](res/2024-12-31-10-58-18.png)
+
+作为示例，我们继续围绕 Dubbo 中的 Protocol 接口展开讨论。针对 Protocol 接口，Dubbo 提供了包括 GrpcProtocol、DubboProtocol 在内的多个实现类，并通过 SPI 机制完成对具体某种实现方案的加载过程。让我们分别来到提供这些实现类的代码工程 dubbo-rpc-grpc 和 dubbo-rpc-dubbo，会发现在 META-INF/dubbo/internal/ 目录下都包含了一个 com.apache.dubbo.rpc.Protocol 配置文件。
+
+其中，dubbo-rpc-grpc 工程的代码结构如下图所示：
+
+![](res/2024-12-31-10-58-59.png)
+
+类似的，dubbo-rpc-dubbo 工程的代码结构如下图所示：
+
+![](res/2024-12-31-10-59-29.png)
+
+我们分别打开这两个工程的 com.apache.dubbo.rpc.Protocol 配置文件，可以发现它们分别指向了 org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol 和 org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol 类，如下所示：
+
+```
+//dubbo-rpc-grpc 工程
+grpc=org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol
+
+//dubbo-rpc-dubbo 工程
+dubbo=org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
+```
+
+当 Dubbo 在引用具体某一个代码工程时，就可以通过该工程中的配置项找到 Dubbo 接口对应的扩展点实现。
+
+接下来，就让我们深入探讨 Dubbo 中扩展点的加载机制，为了加载扩展点，Dubbo 专门提供了一个 ExtensionLoader 类，如果我们想要获取 DubboProtocol 的实现类，可以使用如下代码：
+
+```java
+DubboProtocol dubboProtocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(DubboProtocol.NAME);
+```
+
+我们来看一下 getExtension 方法的细节，该方法的具体实现过程如下所示：
+
+```java
+public T getExtension(String name) {
+   if (name == null || name.length() == 0) {
+      throw new IllegalArgumentException("Extension name == null");
+   }
+
+   if ("true".equals(name)) {
+      return getDefaultExtension();
+   }
+
+   Holder<Object> holder = cachedInstances.get(name);
+   if (holder == null) {
+      cachedInstances.putIfAbsent(name, new Holder<Object>());
+      holder = cachedInstances.get(name);
+   }
+
+   Object instance = holder.get();
+   if (instance == null) {
+      synchronized (holder) {
+         instance = holder.get();
+         if (instance == null) {
+            instance = createExtension(name);
+            holder.set(instance);
+         }
+      }
+   }
+   return (T) instance;
+}
+```
+
+我们看到这里用到了缓存，该方法会首先检查缓存中是否已经存在扩展点实例，如果没有则通过 createExtension 方法进行创建。我们一路跟踪 createExtension 方法，发现它又调用了 getExtensionClasses 方法，而 getExtensionClasses 方法内部又使用了 loadExtensionClasses 方法。在 loadExtensionClasses 方法中，我们终于看到了熟悉的 SPI，该方法如下所示：
+
+```java
+private Map<String, Class<?>> loadExtensionClasses() {
+   final SPI defaultAnnotation = type.getAnnotation(SPI.class);
+   if (defaultAnnotation != null) {
+      // 确定缓存名称
+   }
+
+   Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
+   loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
+   loadFile(extensionClasses, DUBBO_DIRECTORY);
+   loadFile(extensionClasses, SERVICES_DIRECTORY);
+   return extensionClasses;
+}
+```
+
+在这里，我们注意到调用了三次 loadFile 方法，分别对应 META-INF/ 目录下的三个子目录。在 loadFile 方法中，可以看到 Dubbo 是直接通过 Class.forName 的反射机制加载这些 SPI 的扩展类，并进行缓存。
+
+### Dubbo 中的扩展点
+
+在 Dubbo 中存在一大批扩展点，这些扩展点对应与 RPC 架构中的不同组件。事实上，很多 Dubbo 内置的功能组件也都被设计成了扩展点，从而可以被框架的开发人员按需进行替换。
+
+要想知道 Dubbo 中到底包含了的所有扩展点，我们可以整合所有工程中 META-INF/dubbo/internal/ 目录下的配置文件来进行获取。下图展示了 Dubbo 扩展点分层图：
+
+![](res/2024-12-31-11-00-05.png)
+
+我们无意对上图中所有的扩展点都做详细展开，在这里，我们选择 LoadBalance 作为我们的扩展点示例，以此介绍 Dubbo 中扩展点的具体实现方法。
+
+首先，让我们来看看 LoadBalance 接口的定义，如下所示：
+
+```java
+@SPI(RandomLoadBalance.NAME)
+public interface LoadBalance {
+   <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
+}
+```
+
+如果我们在 dubbo-cluster 工程中找到 META-INF/dubbo/internal/org.apache.dubbo.rpc.cluster.LoadBalance 配置文件，不难想象该文件中定义了我们已知的四个 LoadBalance 扩展实现，如下所示：
+
+```
+random=org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance
+roundrobin=org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
+leastactive=org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance
+consistenthash=org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance
+```
+
+可以看到，在 LoadBalance 接口上存在 @SPI 注解，代表它是一个扩展点。而该解中的参数 RandomLoadBalance.NAME- 表示该扩展点的默认实现是随机（random）算法，关于 Dubbo 中负载均衡算法，你可以结合第 10 讲做一些回顾。
+
+## 解题要点
+
+对于微内核架构而言，我们首先需要明确它的组成作用。面试官会考查候选人对微内核架构基本概念的理解程度，该架构的作用还是提供了一个可以高度扩展的实现机制，是很多开源框架中实现系统扩展性的首选架构模式。从知识体系上讲，关于微内核架构的基本概念本讲都做了详细的介绍，回答时只要有条理地进行说明即可。
+
+回答这类问题时的一个建议是，可以把设计思想拔高到架构层次，从扩展性角度进行切入。同时，微内核架构确实应用非常广泛，像 Dubbo 框架以及主流的分库分表中间件 ShardingSphere 等开源框架都用到了这个架构模式。如果能够有所发散，展示一些自己的知识面，是一种加分策略。
+
+关于 SPI 机制也是常见的考查点。我们首先要明白 API 和 SPI 的区别，API 面向的是框架的用户，而 SPI 面向的是框架的开发人员。SPI 在本质上是提供给服务提供商与扩展框架功能的开发者使用的接口。
+
+回答这个问题时，我们可以先围绕 SPI 的定义，即服务提供接口 Service Provider Interface 来进行展开。然后，结合微内核架构的设计思想给出进一步的说明。本讲介绍了 SPI 机制的一种具体实现，即基于 JDK 的 ServiceLoader 类完成 SPI 实现的加载和管理，并给出了基于 ServiceLoader 类的具体使用案例。这也是理论联系实践的一种介绍方法，即先阐述理论知识，然后再给出案例的说明即可。当然，如果你对 JDK 的 ServiceLoader 类的实现原理有兴趣，也可以进行进一步的深入学习，我们在本讲内容中也基于 Dubbo 框架再次对微内核模式以及 ServiceLoader 类进行讨论。
+
+结合 SPI 和 Dubbo 框架，面试官会考查 Dubbo 中实现的 SPI 机制与 JDK 中默认的方式的不同点。这个问题也比较典型，在实际面试过程中经常被问到。针对这个问题，我们也需要明确，所谓的 SPI 机制只是一种设计理念，而具体的实现策略视框架的不同会有所差别。虽然 Dubbo 也采用了 SPI 机制，也是从 JAR 中加载对应的扩展类，但它的实现方式与 JDK 中基于 ServiceLoader 是不一样的。我们需要从这两方面的差异点出发来梳理这个问题的解答思路。
+
+基于本讲中给出的内容，就加载 SPI 实例的配置文件位置而言，Dubbo 支持更多的加载路径。同时，Dubbo 采用的是直接通过名称对应的 Key 值来定位具体的实现类，而 ServiceLoader 内部使用的是一个迭代器，在获取目标接口的实现类时只能通过遍历的方式把配置文件中的类全部加载并实例化，显然效率比较低下。Dubbo 中专门采用了与 JDK 不同的 SPI 实现机制，主要目的就是克服这种效率低下的情况，并提供更多的灵活性。
+
+## 小结与预告
+
+本讲内容我们剖析分布式主流开源框架中所采用的一种常见架构模式，即微内核架构模式。对于微内核架构模式，我们关注它的基本概念以及 JDK 中所提供的 SPI 实现方式。而结合具体的开源框架，我们发现 Dubbo 中实现微内核架构采用了与 JDK 所提供的这套机制类似的设计思路，但并没有直接照搬而是重新提供了一套自己的实现机制。
+
+下一讲，我们继续讨论分布式系统构建过程中另一种具体代表性的架构模式，即管道-过滤器模式。可以说，管道-过滤器是所有请求-响应类框架中的标准组件。那么，为什么它会应用如此广泛？这个机构模式到底能用来解决什么问题呢？我们下一讲中再聊。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
