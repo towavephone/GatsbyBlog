@@ -7060,7 +7060,7 @@ Dubbo 中应用微内核模式的方法也是基于 SPI，但 Dubbo 对 JDK 中�
 
 首先，Dubbo 提供了一个 @SPI 扩展点注解，该注解是理解 Dubbo SPI 机制的基础。在 Dubbo 中，只有添加了 @SPI 注解的接口类才会去查找扩展点实现。
 
-我们随处可以看到 @SPI 注解的应用场景。例如，以常见的 Protocol 接口为例，在该接口上使用的就是 @SPI("dubbo") 注解，代表该接口是一个扩展点，同时该扩展点的默认实现是 DubboProtocol，如下所示：
+我们随处可以看到 @SPI 注解的应用场景。例如，以常见的 Protocol 接口为例，在该接口上使用的就是 `@SPI("dubbo")` 注解，代表该接口是一个扩展点，同时该扩展点的默认实现是 DubboProtocol，如下所示：
 
 ```java
 @SPI("dubbo")
@@ -7084,10 +7084,10 @@ public interface Protocol
 我们分别打开这两个工程的 com.apache.dubbo.rpc.Protocol 配置文件，可以发现它们分别指向了 org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol 和 org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol 类，如下所示：
 
 ```
-//dubbo-rpc-grpc 工程
+// dubbo-rpc-grpc 工程
 grpc=org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol
 
-//dubbo-rpc-dubbo 工程
+// dubbo-rpc-dubbo 工程
 dubbo=org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
 ```
 
@@ -7152,7 +7152,7 @@ private Map<String, Class<?>> loadExtensionClasses() {
 
 ### Dubbo 中的扩展点
 
-在 Dubbo 中存在一大批扩展点，这些扩展点对应与 RPC 架构中的不同组件。事实上，很多 Dubbo 内置的功能组件也都被设计成了扩展点，从而可以被框架的开发人员按需进行替换。
+在 Dubbo 中存在一大批扩展点，这些扩展点对应于 RPC 架构中的不同组件。事实上，很多 Dubbo 内置的功能组件也都被设计成了扩展点，从而可以被框架的开发人员按需进行替换。
 
 要想知道 Dubbo 中到底包含了的所有扩展点，我们可以整合所有工程中 META-INF/dubbo/internal/ 目录下的配置文件来进行获取。下图展示了 Dubbo 扩展点分层图：
 
@@ -7178,7 +7178,7 @@ leastactive=org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance
 consistenthash=org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance
 ```
 
-可以看到，在 LoadBalance 接口上存在 @SPI 注解，代表它是一个扩展点。而该解中的参数 RandomLoadBalance.NAME- 表示该扩展点的默认实现是随机（random）算法，关于 Dubbo 中负载均衡算法，你可以结合第 10 讲做一些回顾。
+可以看到，在 LoadBalance 接口上存在 @SPI 注解，代表它是一个扩展点。而该解中的参数 RandomLoadBalance.NAME 表示该扩展点的默认实现是随机（random）算法，关于 Dubbo 中负载均衡算法，你可以结合之前做一些回顾。
 
 ## 解题要点
 
@@ -7198,6 +7198,304 @@ consistenthash=org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalanc
 
 本讲内容我们剖析分布式主流开源框架中所采用的一种常见架构模式，即微内核架构模式。对于微内核架构模式，我们关注它的基本概念以及 JDK 中所提供的 SPI 实现方式。而结合具体的开源框架，我们发现 Dubbo 中实现微内核架构采用了与 JDK 所提供的这套机制类似的设计思路，但并没有直接照搬而是重新提供了一套自己的实现机制。
 
-下一讲，我们继续讨论分布式系统构建过程中另一种具体代表性的架构模式，即管道-过滤器模式。可以说，管道-过滤器是所有请求-响应类框架中的标准组件。那么，为什么它会应用如此广泛？这个机构模式到底能用来解决什么问题呢？我们下一讲中再聊。
+下一讲，我们继续讨论分布式系统构建过程中另一种具体代表性的架构模式，即管道-过滤器模式。可以说，管道-过滤器是所有请求-响应类框架中的标准组件。那么，为什么它会应用如此广泛？这个架构模式到底能用来解决什么问题呢？我们下一讲中再聊。
+
+# 流程定制：管道-过滤器架构能用来解决什么问题？
+
+在上一讲中，我们基于微内核架构模式讨论了系统扩展性的实现方式。掌握架构模式的难度在于每个模式看上去都能够理解但就是不知道如何应用，固然在日常开发过程中多尝试应用这些模式有助于提高自身的设计能力，但通过阅读源代码来加深对架构模式的理解和掌握是一条捷径。
+
+在本讲内容中，我们将继续引出另一种可以用来实现系统扩展性的架构模式，这就是管道-过滤器模式。和微内核架构相比，管道-过滤器模式更加通用，几乎所有请求-响应式的系统中都可以用到这种架构模式。也正是因为这一点，管道-过滤器模式也经常出现在各大公司的面试环节。
+
+那么，什么是管道-过滤器架构？它究竟能用来解决什么问题？本讲内容将给出答案。
+
+## 问题背景
+
+很多系统都存在固定的主流程，执行该主流程就能完成系统的核心功能。但在现实开发过程中，我们往往希望在主流程中添加一些附加流程，一方面确保主流程的执行不受影响，另一方面又可以通过这些额外流程来完成一些定制化需求。通常，这里的主流程面向业务核心功能，而附加流程则更多关注非功能性需求或扩展性需求。管道-过滤器模式就是用来应对这类场景。
+
+下图展示了这一层抽象概念：
+
+![](res/2025-01-08-11-34-07.png)
+
+可以看到，我们在请求和响应的前后添加一组定制化组件。上图看上去比较简单，但实现过程其实是很有难度的，我们需要考虑的点有很多，包括：
+
+- 如何在主流程中找到合适的切入点来添加定制化组件？
+- 这些定制化组件如何不影响到主流程的执行过程？
+- 有多个定制化组件时，我们如何管理它们的执行顺序？
+- 如何确保上一个定制化组件的输出能够成为下一个定制化组件的输入？
+- 这些定制化组件之间如何确保足够的解耦？
+
+围绕这些问题，我们可以采用很多不同的实现策略。而管道-过滤器架构天生就为我们管理上图中的各种定制化组件提供了解决方案。围绕管道-过滤器架构，我们也可以引出一些常见的面试题，如下所示：
+
+- 你所知道的管道-过滤器架构的应用场景有哪些？
+- 管道-过滤器架构的基本组成结构是怎么样的？
+- 如何管理多个过滤器之间的协作关系？
+- 如何高效构建一个过滤器链？
+- Dubbo 中是如何实现管道-过滤器架构的？
+- 如果想要在 Dubbo 中实现一个自定义的过滤器，你会怎么做？
+- Mybatis 中是如何实现管道-过滤器架构的？
+- 如果想要在 Mybatis 中实现一个自定义的过滤器，你会怎么做？
+
+针对不同的框架，类似上面所示的这些面试题还可以罗列很多。这些面试题既有概念，又有实践，有些还和日常开发过程中的一些需求息息相关，需要我们对这些问题背后的考点做细化分析。
+
+## 问题分析
+
+我们先来把管道-过滤器架构与上一讲中介绍的微内核架构做一个对比。
+
+本质上，微内核架构使用了一种插件化机制来对系统中组件与组件之间的调用关系进行扩展，从而增强系统构建的灵活性。而在请求-响应式的系统中，管道-过滤器实现扩展性采用的是类似切面（Aspect）的设计理念。基于这一架构模式，我们可以在请求流程中嵌入那些非功能的处理逻辑，这些处理逻辑的添加和删除过程相互独立，而且对于请求流程而言是无感知的。这是我们回答这类问题的第一个要点，即管道-过滤器模式能够解决的问题以及适用的具体场景。
+
+第二个需要考虑的要点是，如何动态把握请求的处理流程？我们首先想到的是诸如适配器模式等常见的设计模式，但设计模式主要关注细粒度的微观设计，并不适合高层次的体系结构设计。从结构上讲，管道-过滤器是一种组合行为，主功能是以切面的方式实现。管道-过滤器具有高度抽象化的通用结构和功能特性。
+
+最后，不可否认，在分布式系统构建过程中，管道-过滤器可以说是不可缺少的一种技术组件。当我们在阅读一些开源框架的源码时，看到 Filter（过滤器）或 Interceptor（拦截器）等名词时（如 Dubbo 用的是 Filter，而 Mybatis 用的是 Interceptor），往往就是碰上了管道-过滤器模式。因此，应对这类问题的第三个要点就是掌握管道-过滤器模式在主流开源框架中的应用方式和实现原理。
+
+## 技术体系
+
+管道-过滤器架构模式是用于解决适配和扩展性问题的代表性架构模式，结构上主要包括过滤器和管道两种元素，如下图所示：
+
+![](res/2025-01-08-11-35-37.png)
+
+在管道-过滤器结构中，执行定制化功能的组件被称为过滤器，负责执行具体的业务逻辑。每个过滤器都会接收来自主流程的请求，并返回一个响应结果到主流程中。而另一方面，管道用来获取来自过滤器的请求和响应，并把它们传递到后续的过滤器中，相当于是一种通道。同时，在管道-过滤器模式中，一般都会存在一个过滤器链（Filter Chain） 的概念。过滤器链带有多个过滤器，并按照链中的顺序执行过滤器。
+
+管道-过滤器风格的一个典型应用是 Web 容器的过滤器机制。例如，下图所示的就是 Nginx 中对 HTTP 请求的响应过程，可以看到在生成最终的 HTTP 响应之前，可以通过添加多个 Filter 对由处理器所产生的输出内容进行处理。
+
+![](res/2025-01-08-11-36-55.png)
+
+从上图中，我们可以看到管道-过滤器模式的特点在于把一系列的定制化需求转换成一种类似数据流的处理方式，数据通过管道流经一系列的过滤器，在每个过滤器中完成特定的业务逻辑。显然，每个过滤器能够独立完成自身的职责而不需要依赖于其他过滤器。这种特性使得系统的扩展性得到了巨大的提升，因为过滤器之间没有耦合度，所以我们可以很容易对现有的过滤器进行替换，而动态添加和删除过滤器也不会对整个处理流程产生任何影响。
+
+在 Dubbo 和 Mybaits 框架中都应用了管道-过滤器模式，而且也都提供了基于过滤器链的实现方式，让我们先来看看它在 Dubbo 中的应用。
+
+## 源码解析
+
+### 管道-过滤器模式在 Dubbo 中的应用
+
+Dubbo 中的过滤器概念基本上符合我们对管道-过滤器模式的理解。在接下来的内容中，我们先来看一下 Dubbo 中过滤器链的构建过程，然后介绍 Dubbo 中现有过滤器的实现方法。
+
+Dubbo 的过滤器实现入口是在 ProtocolFilterWrapper 类中，在服务暴露和服务引用时都会使用到过滤器链。所谓的 Wrapper，顾名思义，是对扩展类的一种包装，如下图所示：
+
+![](res/2025-01-08-11-37-36.png)
+
+Dubbo 中的包装类同样实现扩展点接口，具有与扩展点一样的方法。目前，纵观整个 Dubbo 框架，只存在一个 Wrapper，即 ProtocolFilterWrapper。ProtocolFilterWrapper 类实现了 Protocol 接口，并具有如下所示的 export 和 refer 方法实现。
+
+```java
+public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+   if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
+      return protocol.export(invoker);
+   }
+
+   return protocol.export(buildInvokerChain(invoker, Constants.SERVICE_FILTER_KEY, Constants.PROVIDER));
+ }
+
+public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+   if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
+      return protocol.refer(type, url);
+   }
+
+   return buildInvokerChain(protocol.refer(type, url), Constants.REFERENCE_FILTER_KEY, Constants.CONSUMER);
+}
+```
+
+可以看到这两个方法都使用了一个名为 buildInvokerChain 的方法，从命名上看，该方法就是用来构建调用链，如下所示：
+
+```java
+private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
+   Invoker<T> last = invoker;
+   List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
+   if (filters.size() > 0) {
+      for (int i = filters.size() - 1; i >= 0; i--) {
+         final Filter filter = filters.get(i);
+         final Invoker<T> next = last;
+         last = new Invoker<T>() {
+            // 这里构造一个最简化的 Invoker 作为调用链的载体 Invoker
+         };
+      }
+   }
+   return last;
+}
+```
+
+我们在这里看到了用于获取扩展点的 ExtensionLoader。注意，这里对通过扩展点加载的过滤器进行了排序，从而确保过滤器链按设想的顺序进行执行。
+
+看完过滤器链，我们反过来看一下过滤器。Dubbo 中的 Filter 接口定义如下所示：
+
+```java
+@SPI
+public interface Filter {
+   Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException;
+}
+```
+
+可以看到 Filter 接口能够获取传入的 Invoker，从而对其进行拦截和处理。针对 Filter 接口，Dubbo 中一共存在 21 个实现类，我们无意对所有这些过滤器组件做详细展开，而是挑选一个代表性的 Filter 进行介绍，这里我们选择 TokenFilter。
+
+TokenFilter 的作用很明确，即通过 Token 进行访问鉴权，通过比对 Invoker 中的 Token 和输入参数中的 Token 来判断请求是否合法，其代码实现如下所示：
+
+```java
+public class TokenFilter implements Filter {
+   public Result invoke(Invoker<?> invoker, Invocation inv) throws RpcException {
+      String token = invoker.getUrl().getParameter(Constants.TOKEN_KEY);
+      if (ConfigUtils.isNotEmpty(token)) {
+         Class<?> serviceType = invoker.getInterface();
+         Map<String, String> attachments = inv.getAttachments();
+         String remoteToken = attachments == null ? null : attachments.get(Constants.TOKEN_KEY);
+         // 比对 Token
+         if (!token.equals(remoteToken)) {
+            // ...
+         }
+      }
+      return invoker.invoke(inv);
+   }
+}
+```
+
+上述代码中，我们关注两点。首先我们看到可以通过 invoker.getUrl 方法获取 Invoker 中的 URL 对象，而我们知道 Dubbo 中的 URL 作为统一数据模型，以 Key-Value 对的形式包含了所有服务调用过程中的参数。同时，我们看到了 Invocation 对象，该对象可以理解为是一种 DTO（Data Transfer Object，数据传输对象），用来封装所需要传递的数据。这样，一方面我们通过 URL 对象获取本地 token 参数，另一方面，我们通过 Invocation 也获取了 remoteToken，从而可以执行对比和校验操作。这也是 Dubbo 中处理调用信息传递的非常常见的一种做法，我们可以在很多地方看到类似的代码。
+
+最后，让我们基于对 Dubbo 中过滤器机制的理解来实现一个自定义的过滤器组件。这个过滤器非常简单，就是记录一下 invoke 调用所使用的时间，如下所示：
+
+```java
+public class TimeLogFilter implements Filter {
+   private static Logger log = LoggerFactory.getLogger(TimeLogFilter.class);
+
+   @Override
+   public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+      long start = System.currentTimeMillis();
+      Result result = invoker.invoke(invocation);
+      long elapsed = System.currentTimeMillis() - start;
+      if (invoker.getUrl() != null) {
+         log.info("[{}], [{}], {}, [{}], [{}], [{}]", invoker.getInterface(), invocation.getMethodName(), Arrays.toString(invocation.getArguments()), result.getValue(), result.getException(), elapsed);
+      }
+      return result;
+   }
+}
+```
+
+可以看到，在 Dubbo 中，我们通过实现 Filter 接口并传入 Invoker 和 Invocation 对象就可以完成一个自定义过滤器的开发工作。
+
+### 管道-过滤器模式在 Mybatis 中的应用
+
+在 Mybatis 中，管道-过滤器模式通过拦截器的概念进行体现。而对外进行暴露时，则用到了 Plugin 配置项。想要在 Mybatis 中使用管道-过滤器模式，那就需要在配置文件中添加类似如下所示的配置项，可以看到在 `<plugin>` 配置段中可以添加一个自定义的 interceptor 配置项。
+
+```xml
+<configuration>
+   <plugins>
+      <plugin interceptor="com.tianyalan.mybatis.interceptor.MyInterceptor">
+         <property name="prop1" value="prop1"/>
+         <property name="prop2" value="prop2"/>
+      </plugin>
+   </plugins>
+</configuration>
+```
+
+然后，在解析 XML 配置文件的 XMLConfigBuilder 类中，我们找到了解析 `<plugin>` 配置段的代码，如下所示：
+
+```java
+private void pluginElement(XNode parent) throws Exception {
+   if (parent != null) {
+      for (XNode child : parent.getChildren()) {
+         String interceptor = child.getStringAttribute("interceptor");
+         Properties properties = child.getChildrenAsProperties();
+         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).newInstance();
+         interceptorInstance.setProperties(properties);
+         configuration.addInterceptor(interceptorInstance);
+      }
+   }
+}
+```
+
+在上述代码中，我们看到了 Mybatis 中代表过滤器的 Interceptor 接口。我们根据配置的 interceptor 属性实例化 Interceptor 对象，然后通过 configuration.addInterceptor 方法添加新的 Interceptor 实例。我们跟踪代码，发现 Configuration 中定义了一个如下所示的 InterceptorChain 对象，该方法就是将 Interceptor 实例添加到了 InterceptorChain 中。
+
+```java
+protected final InterceptorChain interceptorChain = new InterceptorChain();
+```
+
+这样，管道-过滤器模式中代表过滤器（Interceptor）和过滤器链（InterceptorChain）的相关对象都出现了，让我们首先从这些对象的定义和实现入手探究 Mybatis 的内部原理。
+
+在 Mybatis 中，Interceptor 和 InterceptorChain 都位于 org.apache.ibatis.plugin 包中，其中 Interceptor 是个接口，InterceptorChain 是个实体类，它们的代码看上去都不多。让我们先来看一下 InterceptorChain 类，如下所示：
+
+```java
+public class InterceptorChain {
+   private final List<Interceptor> interceptors = new ArrayList<>();
+
+   public Object pluginAll(Object target) {
+      for (Interceptor interceptor : interceptors) {
+         target = interceptor.plugin(target);
+      }
+      return target;
+   }
+
+   public void addInterceptor(Interceptor interceptor) {
+      interceptors.add(interceptor);
+   }
+
+   public List<Interceptor> getInterceptors() {
+      return Collections.unmodifiableList(interceptors);
+   }
+}
+```
+
+可以看到，这个 InterceptorChain 同样提供了 addInterceptor 方法用于将拦截器添加到链中。不同之处在于，它在这里持有一个 interceptors 数组用于把新加入的 Interceptor 添加到这个数组中。通过这种方式，在 pluginAll 方法中就可以直接遍历 interceptors 数组并基于每个 interceptor 执行拦截逻辑。
+
+在 InterceptorChain 中，我们尚不明确的就是 interceptor.plugin(target) 方法的逻辑，让我们把思路跳转到 Interceptor 接口，该接口定义如下所示：
+
+```java
+public interface Interceptor {
+   Object intercept(Invocation invocation) throws Throwable;
+
+   default Object plugin(Object target) {
+      return Plugin.wrap(target, this);
+   }
+
+   default void setProperties(Properties properties) {
+      // NOP
+   }
+}
+```
+
+可以看到，Interceptor 接口中的 plugin 方法实际上存在一个默认实现，这里它通过 Plugin.wrap 方法完成对目标对象的拦截。Plugin.wrap 是一个静态方法，位于 Plugin 类中，Plugin 类的核心代码如下所示：
+
+```java
+public class Plugin implements InvocationHandler {
+   // 省略变量定义和构造函数
+   public static Object wrap(Object target, Interceptor interceptor) {
+      Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
+      Class<?> type = target.getClass();
+      Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
+      if (interfaces.length > 0) {
+         return Proxy.newProxyInstance(type.getClassLoader(), interfaces, new Plugin(target, interceptor, signatureMap));
+      }
+      return target;
+   }
+
+   @Override
+   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      try {
+         Set<Method> methods = signatureMap.get(method.getDeclaringClass());
+         if (methods != null && methods.contains(method)) {
+            return interceptor.intercept(new Invocation(target, method, args));
+         }
+         return method.invoke(target, args);
+      } catch (Exception e) {
+         throw ExceptionUtil.unwrapThrowable(e);
+      }
+   }
+
+   // 省略 getSignatureMap 方法和 getAllInterfaces 辅助方法
+}
+```
+
+显然，我们看到了熟悉的 InvocationHandler 接口和 Proxy.newProxyInstance 方法，从而明白原来用到了 JDK 的动态代理机制。
+
+这里我们分别通过 getSignatureMap 和 getAllInterfaces 方法获取接口和方法定义的元数据，并通过动态代理机制产生代理。另一方面，我们实现了 InvocationHandler 接口的 invoke 方法，并判断是否需要对目标方法进行拦截。如果是，则调用 Interceptor.intercept 方法，在该方法中我们就可以加入任何想要加入的业务逻辑；如果不是，则调用 method.invoke 方法执行原来逻辑。
+
+这里有一点要注意，在 Mybatis 中，拦截器只能拦截 ParameterHandler、StatementHandler、ResultSetHandler 和 Executor 这四种类型的接口，这点在 Configuration 类中是通过代码预先定义好的。如果我们想要自定义拦截器，也只能围绕上述四种接口添加逻辑。
+
+## 解题要点
+
+在回答与管道-过滤器模式相关的面试题是，常见会碰到一些概念类问题，例如“管道-过滤器模式的应用场景有哪些？列举你知道的用到管道过滤器模式的开源框架？”这种，这些问题看上去有点复杂，实际上就是考查你对管道过滤器模式相关基本概念的理解，从考点上讲是比较明确的。我们明确，管道过滤器模式的主要应用场景在于请求-响应型的处理过程，尤其适用于处理 Web 请求。只要具备这一思路，这道题的答案也是自然而然就能得出的。在日常能够接触到的开源框架中，处理 Web 请求的框架基本上都会或多或少采用了管道过滤器模式，包括但不限于我们将要介绍的 Dubbo，以及诸如 Netty、Spring MVC、Tomcat 等常见框架。
+
+另一方面，针对具体的开源框架，面试官的提问方式可以围绕 Mybatis 等框架中的某一个功能特性展开讨论，例如“Mybatis 中的拦截器如何对执行过程进行拦截？”。针对这类问题，我们首先需要明确背后的考点实际上就是代理机制。在主流的开源框架中，涉及到过滤、拦截等常见下的实现原理往往都有代理模式相关。只要掌握动态代理机制，不同的问法都是类似的解答思路。事实上，Mybatis 中实现拦截的基本原理还是基于动态代理机制，通过获取对应方法的签名信息以及输入的接口和参数来生成代理。Mybatis 中的代理机制实现方式就是采用的 JDK 动态代理，你可以结合第 21 讲内容做一些回顾。掌握了该类的实现过程，都可以结合自己的理解对代理机制进行展开。
+
+## 小结与预告
+
+在本讲中，对于管道-过滤器架构模式，我们详细给出了该模式的基本概念和组成结构。现实中，管道-过滤器在实现上也有很多变种，我们分别基于 Dubbo 和 Mybatis 这两款主流开源框架来分析这一架构模式的具体实现方式和技巧。
+
+管道-过滤器是我们通用技术组件部分的最后一个技术组件。介绍完通用技术组件之后，我们将进入到一个扩展模块，专门讨论剖析开源框架代码结构的系统方法。在下一讲中，我们将讨论“如何基于组件设计原则剖析开源框架代码结构？”这一话题。
 
 // TODO https://juejin.cn/book/7106442254533066787/section/7107604658914328588
