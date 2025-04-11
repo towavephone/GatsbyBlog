@@ -22,7 +22,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Install libpng12
-      run: sudo apt-get update && sudo apt-get install -y libpng12-0
+      run: sudo add-apt-repository ppa:linuxuprising/libpng12 && sudo apt-get update && sudo apt-get install -y libpng12-0
     # 切代码
     - name: Checkout
       uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
       run: echo "::set-output name=dir::$(yarn cache dir)"
     # 缓存 yarn
     - name: Yarn cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: yarn-cache
       with:
         path: ${{ steps.yarn-cache-dir.outputs.dir }}
@@ -42,7 +42,7 @@ jobs:
     # 缓存项目
     - name: Caching Gatsby
       id: gatsby-cache-build
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           public
