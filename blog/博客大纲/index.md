@@ -467,3 +467,211 @@ draft: true
 
 21. 对于 border-radius: 50% 且分布范围较大的框，box-shadow 的形状应为圆形，对应[链接](https://github.com/w3c/csswg-drafts/issues/7103)
 22. 封装飞书项目 sdk
+
+local.json
+
+```json
+{
+   "mr_lark_project_info": {
+      "user_key": "",
+      "project_key": "",
+      "work_item_type_key": ""
+   }
+}
+```
+
+lark_project_utils.py
+
+```py
+import logging
+import time
+
+import requests
+from entry.settings import (
+    LARK_PROJECT_INFO_BASE_URL,
+    LARK_PROJECT_INFO_PLUGIN_ID,
+    LARK_PROJECT_INFO_PLUGIN_SECRET,
+    MR_LARK_PROJECT_INFO_PROJECT_KEY,
+    MR_LARK_PROJECT_INFO_USER_KEY,
+    MR_LARK_PROJECT_INFO_WORK_ITEM_TYPE_KEY,
+)
+from pydash import py_
+
+
+class LarkProjectPlugin:
+    """飞书项目插件."""
+
+    instance_count = 0
+
+    def __init__(
+        self,
+        user_key=None,
+        project_key=None,
+        work_item_type_key=None,
+    ):
+        # 基础飞书项目配置
+        self.plugin_id = LARK_PROJECT_INFO_PLUGIN_ID
+        self.plugin_secret = LARK_PROJECT_INFO_PLUGIN_SECRET
+        self.base_url = LARK_PROJECT_INFO_BASE_URL
+
+        # 要操作的飞书项目空间
+        self.user_key = user_key
+        self.project_key = project_key
+        self.work_item_type_key = work_item_type_key
+
+        self.session = requests.Session()
+        self.access_token = None
+        self.expires_at = 0
+
+        LarkProjectPlugin.instance_count += 1
+        logging.debug(
+            "LarkProjectPlugin instance count: %s", LarkProjectPlugin.instance_count
+        )
+
+    def _get_access_token(self):
+        """获取访问令牌和过期时间."""
+        url = f"{self.base_url}/open_api/authen/plugin_token"
+        data = {"plugin_id": self.plugin_id, "plugin_secret": self.plugin_secret}
+        result = self.session.post(url, json=data)
+        res = result.json().get("data")
+        return res.get("token"), res.get("expire_time")
+
+    def _refresh_access_token(self):
+        """检查访问令牌是否过期，如果过期则重新获取."""
+        now = time.time()
+        if self.expires_at > now:
+            logging.debug(
+                "LarkProjectPlugin time %s, expires_at %s, not expired",
+                now,
+                self.expires_at,
+            )
+            return
+
+        self.access_token, ttl = self._get_access_token()
+        self.expires_at = time.time() + ttl - 10
+        logging.debug(
+            "LarkProjectPlugin access_token %s, expires_at %s",
+            self.access_token,
+            self.expires_at,
+        )
+
+    def _call_api(self, path, ignore_project_key=False, method="post", **kwargs):
+        self._refresh_access_token()
+
+        url = f"{self.base_url}/open_api/{self.project_key}/{path}"
+
+        if ignore_project_key:
+            url = f"{self.base_url}/open_api/{path}"
+
+        headers = {"X-PLUGIN-TOKEN": self.access_token, "X-USER-KEY": self.user_key}
+        res = self.session.request(method=method, url=url, headers=headers, **kwargs)
+        result = res.json()
+
+        # {'err_code': 30009, 'err_msg': 'Field Not Found', 'err': {'code': 30009, 'msg': ':can not find field', 'log_id': ''}}
+        err_code = py_.get(result, "err_code")
+
+        if err_code:
+            err_msg = py_.get(result, "err.msg")
+            raise Exception(f"url: {url}, err msg: {err_msg}")
+
+        return result
+
+    # 获取空间下工作项类型
+    def get_work_item_all_types(self):
+        path = "work_item/all-types"
+        res = self._call_api(
+            path,
+            method="get",
+        )
+        return res
+
+    # # 获取工作项详情
+    # def get_work_item_detail(self, json):
+    #     path = f"work_item/{self.work_item_type_key}/query"
+    #     res = self._call_api(
+    #         path,
+    #         json=json,
+    #     )
+    #     return res
+
+    # 获取用户详情
+    def get_user_keys(self, json):
+        path = "user/query"
+        res = self._call_api(path, json=json, ignore_project_key=True)
+        return res
+
+    # 获取指定的工作项列表（单空间-复杂传参）
+    def search_single_workspace_complex(self, json):
+        path = f"work_item/{self.work_item_type_key}/search/params"
+        res = self._call_api(
+            path,
+            json=json,
+        )
+        return res
+
+    # 通过 dt 号获取工作项详情
+    def get_work_item_detail_by_dt(self, dt, **kwargs):
+        res = self.search_single_workspace_complex(
+            json={
+                "search_group": {
+                    "conjunction": "AND",
+                    "search_params": [
+                        {
+                            # dt 号对应 field key 为 auto_number，通过获取字段详情接口可以拿到
+                            "param_key": "auto_number",
+                            "value": dt,
+                            "operator": "=",
+                        }
+                    ],
+                },
+                "page_size": 1,
+                **kwargs,
+            }
+        )
+
+        return py_.get(res, "data.0")
+
+    # 获取创建工作项元数据
+    def get_work_item_meta(self):
+        path = f"work_item/{self.work_item_type_key}/meta"
+        res = self._call_api(path, method="get")
+        return res
+
+    # 更新工作项
+    def update_work_item_detail(self, work_item_id, json):
+        path = f"work_item/{self.work_item_type_key}/{work_item_id}"
+        res = self._call_api(
+            path,
+            method="put",
+            json=json,
+        )
+        return res
+
+    # 获取字段详情
+    def get_all_field(self):
+        path = "field/all"
+        res = self._call_api(path, json={"work_item_type_key": self.work_item_type_key})
+        return res
+
+
+mr_lark_project = LarkProjectPlugin(
+    user_key=MR_LARK_PROJECT_INFO_USER_KEY,
+    project_key=MR_LARK_PROJECT_INFO_PROJECT_KEY,
+    work_item_type_key=MR_LARK_PROJECT_INFO_WORK_ITEM_TYPE_KEY,
+)
+```
+
+使用
+
+```py
+from lark_project_utils import mr_lark_project
+
+mr_lark_project.get_work_item_detail_by_dt(
+   dt=lark_project_dt, fields=["id"]
+)
+
+mr_lark_project.update_work_item_detail(
+   work_item_id,
+   json={"update_fields": update_fields},
+)
+```

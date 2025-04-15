@@ -154,7 +154,9 @@ date: 2024-05-15 18:52:15
 
 ### 实现
 
-1. 安装对应依赖库
+#### django-debug-toolbar + django-silk
+
+1. 安装依赖库
 
    Dockerfile-local
 
@@ -310,6 +312,58 @@ date: 2024-05-15 18:52:15
       ]
    ```
 
+#### vscode debugger
+
+1. 安装依赖库
+
+   Dockerfile-local
+
+   ```dockerfile
+   RUN python3.6 -m pip install debugpy==1.5.1
+   ```
+
+2. 首次启动时打开调试端口，local.json 及 setting.py 部分省略，不设置 `DEBUG_PORT` 默认为 9999
+
+   manage.py
+
+   ```py
+   from django.conf import settings
+
+   if settings.DEBUG:
+      # 这里只在第一次启动，防止热重载中断 debug
+      if os.environ.get("RUN_MAIN") != "true":
+         import debugpy
+
+         debugpy.listen(("0.0.0.0", settings.DEBUG_PORT))
+         # debugpy.wait_for_client()
+         print(f"Django debug started, port is {settings.DEBUG_PORT}")
+   ```
+
+3. 配置 vscode 调试面板
+
+   .vscode/launch.json
+
+   ```json
+   {
+      "version": "0.2.0",
+      "configurations": [
+         {
+            "name": "Run Django (Docker)",
+            "type": "python",
+            "request": "attach",
+            "pathMappings": [
+               {
+                  "localRoot": "${workspaceFolder}/后端代码位置/entry",
+                  "remoteRoot": "/root/entry"
+               }
+            ],
+            "port": 9999,
+            "host": "127.0.0.1"
+         }
+      ]
+   }
+   ```
+
 ### 疑难点
 
 #### django-debug-toolbar
@@ -351,6 +405,16 @@ date: 2024-05-15 18:52:15
 ![](res/2024-05-17-15-03-00.png)
 
 ![](res/2024-05-17-15-04-41.png)
+
+#### vscode debugger
+
+启动 vscode 调试，鼠标设置断点后，访问某个接口即可触发调试过程
+
+![](res/2025-04-15-14-05-01.png)
+
+![](res/2025-04-15-14-10-27.png)
+
+![](res/2025-04-15-14-13-23.png)
 
 ## flask
 
