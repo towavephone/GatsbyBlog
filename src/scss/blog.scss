@@ -75,7 +75,10 @@
     }
   }
   article.main-post {
-    ul ul, ul ol, ol ul, ol ol {
+    ul ul,
+    ul ol,
+    ol ul,
+    ol ol {
       margin-bottom: 10px;
     }
 
@@ -138,6 +141,19 @@
         position: sticky;
         top: 0;
         background: #fff;
+        z-index: 1;
+      }
+
+      .gatsby-resp-image-wrapper,
+      .gatsby-resp-image-background-image,
+      img {
+        max-width: 100px !important;
+        max-height: 100px !important;
+      }
+
+      .gatsby-resp-image-background-image {
+        aspect-ratio: 1 auto;
+        padding-bottom: 0 !important;
       }
 
       thead,
