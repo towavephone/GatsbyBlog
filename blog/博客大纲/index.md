@@ -673,3 +673,77 @@ draft: true
          json={"update_fields": update_fields},
       )
       ```
+
+23. eslint import order
+
+      .eslintrc.js
+
+      ```js
+      const restrictedGlobals = require('confusing-browser-globals');
+
+      const excludeRestrictedGlobals = restrictedGlobals.filter((item) => !['self'].includes(item));
+
+      // console.log('excludeRestrictedGlobals', excludeRestrictedGlobals)
+
+      module.exports = {
+         extends: ['react-app', 'prettier', 'plugin:eslint-comments/recommended'],
+         // plugins: ['prettier'],
+         rules: {
+            // 'prettier/prettier': 2,
+            'no-unused-vars': 2,
+            'no-restricted-globals': ['error'].concat(excludeRestrictedGlobals),
+            'no-debugger': 2,
+            'eslint-comments/no-use': ['error', { allow: ['eslint-disable-next-line'] }],
+            'import/order': [
+               'error',
+               {
+                  groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+                  'newlines-between': 'always',
+                  pathGroups: [
+                     {
+                        pattern: '@/**',
+                        group: 'internal'
+                     }
+                  ]
+               }
+            ],
+            'no-multiple-empty-lines': ['error', { max: 1 }],
+            'import/newline-after-import': 2,
+            'import/no-duplicates': 2,
+            'import/no-anonymous-default-export': 0
+         },
+         parserOptions: {
+            babelOptions: {
+               plugins: [
+                  require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
+                  require.resolve('@babel/plugin-syntax-optional-chaining'),
+                  [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }]
+               ]
+            }
+         }
+      };
+      ```
+
+24. 解决 redis 过大导致的模糊匹配删除多个 key 时间很长的问题，需要转换思路通过递增数据版本号来使缓存失效，避免性能问题
+
+      ```py
+      # redis 扫描不完整问题
+      @retry_on_redis_error()
+      def scan(pattern, count=100000):
+          itcl = IntervalTimeCostLogging(func_name="scan", enable_call=True)
+          cursor = 0
+          result = []
+          index = 0
+          while True:
+              cursor, keys = _get_client().scan(cursor, pattern, count=count)
+              itcl.mark(f"scan_from_{index}_to_{index + count}_keys_count_{len(keys)}")
+              index += count
+              result += keys
+              if cursor == 0:
+                  break
+
+          itcl.logging_cost()
+
+          logging.debug(f"Scan keys: {result}")
+          return cursor, result
+      ```
