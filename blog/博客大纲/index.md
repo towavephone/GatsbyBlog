@@ -723,27 +723,3 @@ draft: true
          }
       };
       ```
-
-24. 解决 redis 过大导致的模糊匹配删除多个 key 时间很长的问题，需要转换思路通过递增数据版本号来使缓存失效，避免性能问题
-
-      ```py
-      # redis 扫描不完整问题
-      @retry_on_redis_error()
-      def scan(pattern, count=100000):
-          itcl = IntervalTimeCostLogging(func_name="scan", enable_call=True)
-          cursor = 0
-          result = []
-          index = 0
-          while True:
-              cursor, keys = _get_client().scan(cursor, pattern, count=count)
-              itcl.mark(f"scan_from_{index}_to_{index + count}_keys_count_{len(keys)}")
-              index += count
-              result += keys
-              if cursor == 0:
-                  break
-
-          itcl.logging_cost()
-
-          logging.debug(f"Scan keys: {result}")
-          return cursor, result
-      ```
